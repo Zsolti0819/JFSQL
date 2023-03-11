@@ -1,3 +1,5 @@
 /JFSQL-driver/target
+/JFSQL-driver/JFSQL-driver.iml
 /JFSQL-parser/target
+/JFSQL-parser/JFSQL-parser.iml
 /.idea/
