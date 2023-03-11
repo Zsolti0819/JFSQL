@@ -1,4 +1,4 @@
-# JFSQL-driver
+# JFSQL
 
 ## Current state
 
@@ -26,5 +26,3 @@
 
 ## TODO:
 - Improve overall test coverage# JFSQL
-# JFSQL
-# JFSQL

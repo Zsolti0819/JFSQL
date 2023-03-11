@@ -1,0 +1,202 @@
+package com.github.jfsql.driver.persistence;
+
+import com.github.jfsql.driver.dto.Database;
+import com.github.jfsql.driver.dto.Entry;
+import com.github.jfsql.driver.dto.Table;
+import com.github.jfsql.driver.util.DatatypeConverter;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.sql.SQLException;
+import java.util.*;
+
+public class ReaderXmlImpl implements Reader {
+
+    private static final Logger logger = LogManager.getLogger(ReaderXmlImpl.class);
+
+    @Override
+    public List<Entry> readTable(final Table table) throws SQLException {
+        final String tableFile = table.getTableFile();
+        final List<Entry> entries = new ArrayList<>();
+
+        if (!Path.of(tableFile).toFile().exists()) {
+            logger.debug("The table file '{}' doesn't exist, returning an empty list.", tableFile);
+            return entries;
+        }
+
+        try {
+            final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            documentBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            final DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+            final Document document = documentBuilder.parse(tableFile);
+            document.getDocumentElement().normalize();
+            final NodeList entryList = document.getElementsByTagName("Entry");
+
+            final String[] columns = table.getColumns();
+            final String[] values = new String[columns.length];
+
+            for (int i = 0; i < entryList.getLength(); i++) {
+                final Element entry = (Element) entryList.item(i);
+                for (int j = 0; j < columns.length; j++) {
+                    values[j] = getValue(table, columns, entry, j);
+                }
+
+                final LinkedHashMap<String, String> columnsAndValues = new LinkedHashMap<>();
+                for (int j = 0; j < columns.length; j++) {
+                    columnsAndValues.put(columns[j], values[j]);
+                }
+
+                entries.add(new Entry(columnsAndValues));
+            }
+        } catch (final ParserConfigurationException | SAXException | IOException e) {
+            throw new SQLException("Failed to read the table.\n" + e.getMessage());
+        }
+        return entries;
+    }
+
+    private String getValue(final Table table, final String[] columns, final Element entry, final int index) throws SQLException {
+        if (entry.getElementsByTagName(columns[index]).item(0) == null) {
+            return null;
+        }
+        if (Objects.equals(table.getTypes()[index], "BLOB")) {
+            return readBlob(entry.getElementsByTagName(columns[index]).item(0).getTextContent());
+        } else {
+            return entry.getElementsByTagName(columns[index]).item(0).getTextContent();
+        }
+    }
+
+    @Override
+    public Table readSchema(final String pathToSchema) throws SQLException {
+        final Map<String, String> columnsAndTypes = new LinkedHashMap<>();
+        final Map<String, Boolean> notNullColumns = new LinkedHashMap<>();
+        try {
+            final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            documentBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            final DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+            final Document document = documentBuilder.parse(pathToSchema);
+
+            final NodeList nodeList1 = document.getElementsByTagName("xs:element");
+            final NodeList nodeList2 = ((Element) nodeList1.item(0)).getElementsByTagName("xs:complexType");
+            final NodeList nodeList3 = ((Element) nodeList2.item(0)).getElementsByTagName("xs:sequence");
+            final NodeList nodeList4 = ((Element) nodeList3.item(0)).getElementsByTagName("xs:element");
+            final NodeList nodeList5 = ((Element) nodeList4.item(0)).getElementsByTagName("xs:complexType");
+            final NodeList nodeList6 = ((Element) nodeList5.item(0)).getElementsByTagName("xs:sequence");
+            final NodeList nodeList7 = ((Element) nodeList6.item(0)).getElementsByTagName("xs:element");
+
+            final int variableLengths = nodeList7.getLength();
+            final String[] columnNames = new String[variableLengths];
+            final String[] columnTypes = new String[variableLengths];
+
+            for (int i = 0; i < variableLengths; i++) {
+                final Node node2 = nodeList7.item(i);
+                final Element element = (Element) node2;
+                columnNames[i] = element.getAttribute("name");
+                columnTypes[i] = DatatypeConverter.convertFromXsToSql(element.getAttribute("type"));
+                columnsAndTypes.put(columnNames[i], columnTypes[i]);
+                if (StringUtils.EMPTY.equals(element.getAttribute("minOccurs"))) {
+                    notNullColumns.put(columnNames[i], true);
+                } else if ("0".equals(element.getAttribute("minOccurs"))) {
+                    notNullColumns.put(columnNames[i], false);
+                }
+            }
+            return new Table(null, null, null, columnsAndTypes, notNullColumns);
+
+        } catch (final ParserConfigurationException | IOException | SAXException e) {
+            throw new SQLException("Failed to read the schema for the table.\n" + e.getMessage());
+        }
+    }
+
+    @Override
+    public List<Table> readDatabaseFile(final Database database) throws SQLException {
+        final List<Table> tables = new ArrayList<>();
+        try {
+            final String url = String.valueOf(database.getUrl());
+            final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            documentBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            final DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+            final Document document = documentBuilder.parse(url);
+            final XPath xpath = XPathFactory.newInstance().newXPath();
+            final NodeList nodeList = (NodeList) xpath.evaluate("//Table", document, XPathConstants.NODESET);
+            final int tableLengths = nodeList.getLength();
+            final String[] tableNames = new String[tableLengths];
+
+            for (int i = 0; i < tableLengths; i++) {
+                tableNames[i] = (String) xpath.evaluate("@name", nodeList.item(i), XPathConstants.STRING);
+                final String tableName = tableNames[i];
+                final String xmlPath = (String) xpath.evaluate("pathToTable/text()", nodeList.item(i),
+                        XPathConstants.STRING);
+                final String xsdPath = (String) xpath.evaluate("pathToSchema/text()", nodeList.item(i),
+                        XPathConstants.STRING);
+                final Table schema = readSchema(xsdPath);
+                if (database.getTables() == null) {
+                    database.setTables(new ArrayList<>());
+                }
+                final Table table = new Table(tableName, xmlPath, xsdPath, schema.getColumnsAndTypes(), schema.getNotNullColumns());
+                tables.add(table);
+            }
+        } catch (final ParserConfigurationException | SAXException | IOException | XPathExpressionException |
+                       SQLException e) {
+            throw new SQLException("Failed to read the database file.\n" + e.getMessage());
+        }
+        return tables;
+    }
+
+    @Override
+    public String readBlob(final String pathToBlob) throws SQLException {
+        try {
+            final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            final DocumentBuilder builder = factory.newDocumentBuilder();
+            final Document document = builder.parse(pathToBlob);
+            return document.getElementsByTagName("blob").item(0).getTextContent();
+
+        } catch (final ParserConfigurationException | IOException | SAXException e) {
+            throw new SQLException("Failed to read blob.\n" + e.getMessage());
+        }
+    }
+
+    @Override
+    public boolean pathIsPresentInDatabaseFile(final Database database, final String pathToCheck) throws SQLException {
+        final String xmlFilePath = String.valueOf(database.getUrl());
+        try {
+            final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            final DocumentBuilder builder = factory.newDocumentBuilder();
+            final Document doc = builder.parse(xmlFilePath);
+
+            NodeList pathList = doc.getElementsByTagName("pathToTable");
+            for (int i = 0; i < pathList.getLength(); i++) {
+                final String path = pathList.item(i).getTextContent();
+                if (path.equals(pathToCheck)) {
+                    return true;
+                }
+            }
+
+            pathList = doc.getElementsByTagName("pathToSchema");
+            for (int i = 0; i < pathList.getLength(); i++) {
+                final String path = pathList.item(i).getTextContent();
+                if (path.equals(pathToCheck)) {
+                    return true;
+                }
+            }
+            return false;
+        } catch (final ParserConfigurationException | IOException | SAXException e) {
+            throw new SQLException("Failed to verify the presence of the files in the folder.\n" + e.getMessage());
+        }
+    }
+}
