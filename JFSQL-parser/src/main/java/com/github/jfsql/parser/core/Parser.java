@@ -10,11 +10,15 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.*;
 
 public class Parser extends JFSQLBaseVisitor<BaseStatement> implements JFSQLVisitor<BaseStatement> {
+
+    private static final Logger logger = LogManager.getLogger(Parser.class);
 
     private AlterTableStatement getAlterTableStatement(final JFSQLParser.AlterTableContext alterTableContext) {
         final String tableName = alterTableContext.tableName().getText();
@@ -41,8 +45,10 @@ public class Parser extends JFSQLBaseVisitor<BaseStatement> implements JFSQLVisi
         } else if (alterTableContext.dropColumn() != null) {
             columnToDrop = alterTableContext.dropColumn().columnName().getText();
         }
-        return new AlterTableStatement(tableName, newTableName, oldColumnName, newColumnName, columnNameToAdd,
+        final AlterTableStatement alterTableStatement = new AlterTableStatement(tableName, newTableName, oldColumnName, newColumnName, columnNameToAdd,
                 columnTypeToAdd, columnToAddCannotBeNull, columnToDrop);
+        logger.debug(alterTableStatement);
+        return alterTableStatement;
     }
 
     private CreateTableStatement getCreateTableStatement(final JFSQLParser.CreateTableContext createTableContext) {
@@ -62,8 +68,10 @@ public class Parser extends JFSQLBaseVisitor<BaseStatement> implements JFSQLVisi
             }
         }
         final boolean ifNotExistsPresent = createTableContext.ifNotExists() != null;
-        return new CreateTableStatement(tableName, Collections.unmodifiableList(columns),
+        final CreateTableStatement createTableStatement = new CreateTableStatement(tableName, Collections.unmodifiableList(columns),
                 Collections.unmodifiableList(types), notNullColumns, ifNotExistsPresent);
+        logger.debug(createTableStatement);
+        return createTableStatement;
     }
 
     private CreateDatabaseStatement getCreateDatabaseStatement(
@@ -73,14 +81,18 @@ public class Parser extends JFSQLBaseVisitor<BaseStatement> implements JFSQLVisi
         if (!modifiedUrl.endsWith(File.pathSeparator)) {
             modifiedUrl += File.separator;
         }
-        return new CreateDatabaseStatement(modifiedUrl);
+        final CreateDatabaseStatement createDatabaseStatement = new CreateDatabaseStatement(modifiedUrl);
+        logger.debug(createDatabaseStatement);
+        return createDatabaseStatement;
     }
 
     private DeleteStatement getDeleteStatement(final JFSQLParser.DeleteContext deleteContext) {
         final String tableName = deleteContext.tableName().getText();
         final Map<String, List<String>> whereClause = extractWhereClause(deleteContext.expr());
-        return new DeleteStatement(tableName, whereClause.get("whereColumns"), whereClause.get("whereValues"),
+        final DeleteStatement deleteStatement = new DeleteStatement(tableName, whereClause.get("whereColumns"), whereClause.get("whereValues"),
                 whereClause.get("symbols"), whereClause.get("binaryOperators"));
+        logger.debug(deleteStatement);
+        return deleteStatement;
     }
 
     private DropDatabaseStatement getDropDatabaseStatement(final JFSQLParser.DropDatabaseContext dropDatabaseContext) {
@@ -89,13 +101,17 @@ public class Parser extends JFSQLBaseVisitor<BaseStatement> implements JFSQLVisi
         if (!modifiedUrl.endsWith(File.pathSeparator)) {
             modifiedUrl += File.separator;
         }
-        return new DropDatabaseStatement(modifiedUrl);
+        final DropDatabaseStatement dropDatabaseStatement = new DropDatabaseStatement(modifiedUrl);
+        logger.debug(dropDatabaseStatement);
+        return dropDatabaseStatement;
     }
 
     private DropTableStatement getDropTableStatement(final JFSQLParser.DropTableContext dropTableContext) {
         final String tableName = dropTableContext.tableName().getText();
         final boolean ifExistsPresent = dropTableContext.ifExists() != null;
-        return new DropTableStatement(tableName, ifExistsPresent);
+        final DropTableStatement dropTableStatement = new DropTableStatement(tableName, ifExistsPresent);
+        logger.debug(dropTableStatement);
+        return dropTableStatement;
     }
 
     private InsertStatement getInsertStatement(final JFSQLParser.InsertContext insertContext) {
@@ -118,9 +134,10 @@ public class Parser extends JFSQLBaseVisitor<BaseStatement> implements JFSQLVisi
             }
             listOfValueLists.add(Collections.unmodifiableList(valueList));
         }
-
-        return new InsertStatement(tableName, Collections.unmodifiableList(columns),
+        final InsertStatement insertStatement = new InsertStatement(tableName, Collections.unmodifiableList(columns),
                 Collections.unmodifiableList(listOfValueLists));
+        logger.debug(insertStatement);
+        return insertStatement;
     }
 
     private SelectStatement getSelectStatement(final JFSQLParser.SelectContext selectContext) {
@@ -153,9 +170,11 @@ public class Parser extends JFSQLBaseVisitor<BaseStatement> implements JFSQLVisi
         }
 
         final Map<String, List<String>> whereClause = extractWhereClause(selectContext.expr());
-        return new SelectStatement(selectTable, joinTables, joinTypes, Collections.unmodifiableList(selectColumns),
+        final SelectStatement selectStatement = new SelectStatement(selectTable, joinTables, joinTypes, Collections.unmodifiableList(selectColumns),
                 Collections.unmodifiableList(listOfJoinColumnsWithPrefixes), whereClause.get("whereColumns"), whereClause.get("whereValues"),
                 whereClause.get("symbols"), whereClause.get("binaryOperators"));
+        logger.debug(selectStatement);
+        return selectStatement;
     }
 
     private UpdateStatement getUpdateStatement(final JFSQLParser.UpdateContext updateContext) {
@@ -172,9 +191,11 @@ public class Parser extends JFSQLBaseVisitor<BaseStatement> implements JFSQLVisi
         }
 
         final Map<String, List<String>> whereClause = extractWhereClause(updateContext.expr());
-        return new UpdateStatement(tableName, Collections.unmodifiableList(columns),
+        final UpdateStatement updateStatement = new UpdateStatement(tableName, Collections.unmodifiableList(columns),
                 Collections.unmodifiableList(values), whereClause.get("whereColumns"), whereClause.get("whereValues"),
                 whereClause.get("symbols"), whereClause.get("binaryOperators"));
+        logger.debug(updateStatement);
+        return updateStatement;
     }
 
     private Map<String, List<String>> extractWhereClause(final JFSQLParser.ExprContext expr) {
