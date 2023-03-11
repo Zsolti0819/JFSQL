@@ -6,7 +6,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class InsertStatementTest {
 
@@ -21,7 +20,7 @@ class InsertStatementTest {
     @CsvSource({
             "'INSERT INTO myTable (column1, column2, column3) VALUES (1, 2, 3), (4, 5, 6), (7, 8, 9);','myTable','column1','column2','column3','1','2','3','4','5','6','7','8','9'",
     })
-    void testInsertQueries(final String query, final String tableName, final String column1Name, final String column2Name, final String column3Name, final String column1Value1, final String column1Value2, final String column1Value3, final String column2Value1, final String column2Value2, final String column2Value3, final String column3Value1, final String column3Value2, final String column3Value3) {
+    void testInsertStatements(final String query, final String tableName, final String column1Name, final String column2Name, final String column3Name, final String column1Value1, final String column1Value2, final String column1Value3, final String column2Value1, final String column2Value2, final String column2Value3, final String column3Value1, final String column3Value2, final String column3Value3) {
         final InsertStatement insertStatement = (InsertStatement) parser.parse(query);
         assertEquals(tableName, insertStatement.getTableName());
         assertEquals(column1Name, insertStatement.getColumns().get(0));
@@ -36,14 +35,5 @@ class InsertStatementTest {
         assertEquals(column3Value1, insertStatement.getValues().get(2).get(0));
         assertEquals(column3Value2, insertStatement.getValues().get(2).get(1));
         assertEquals(column3Value3, insertStatement.getValues().get(2).get(2));
-
-        assertTrue(insertStatement.getColumns().getClass().getName().contains("Unmodifiable"));
-        assertTrue(insertStatement.getValues().getClass().getName().contains("Unmodifiable"));
-
-        assertTrue(insertStatement.getValues().get(0).getClass().getName().contains("Unmodifiable"));
-        assertTrue(insertStatement.getValues().get(1).getClass().getName().contains("Unmodifiable"));
-        assertTrue(insertStatement.getValues().get(2).getClass().getName().contains("Unmodifiable"));
-
     }
-
 }

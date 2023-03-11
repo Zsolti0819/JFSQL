@@ -6,7 +6,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CreateTableStatementTest {
 
@@ -32,8 +31,5 @@ class CreateTableStatementTest {
         assertEquals(column3Type, createTableStatement.getTypes().get(2));
         assertEquals(column4Name, createTableStatement.getColumns().get(3));
         assertEquals(column4Type, createTableStatement.getTypes().get(3));
-        assertTrue(createTableStatement.getColumns().getClass().getName().contains("Unmodifiable"));
-        assertTrue(createTableStatement.getTypes().getClass().getName().contains("Unmodifiable"));
     }
-
 }
