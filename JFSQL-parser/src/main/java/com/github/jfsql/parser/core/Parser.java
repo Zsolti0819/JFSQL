@@ -47,7 +47,7 @@ public class Parser extends JFSQLBaseVisitor<BaseStatement> implements JFSQLVisi
         }
         final AlterTableStatement alterTableStatement = new AlterTableStatement(tableName, newTableName, oldColumnName, newColumnName, columnNameToAdd,
                 columnTypeToAdd, columnToAddCannotBeNull, columnToDrop);
-        logger.debug(alterTableStatement);
+        logger.trace(alterTableStatement);
         return alterTableStatement;
     }
 
@@ -70,7 +70,7 @@ public class Parser extends JFSQLBaseVisitor<BaseStatement> implements JFSQLVisi
         final boolean ifNotExistsPresent = createTableContext.ifNotExists() != null;
         final CreateTableStatement createTableStatement = new CreateTableStatement(tableName, Collections.unmodifiableList(columns),
                 Collections.unmodifiableList(types), notNullColumns, ifNotExistsPresent);
-        logger.debug(createTableStatement);
+        logger.trace(createTableStatement);
         return createTableStatement;
     }
 
@@ -82,7 +82,7 @@ public class Parser extends JFSQLBaseVisitor<BaseStatement> implements JFSQLVisi
             modifiedUrl += File.separator;
         }
         final CreateDatabaseStatement createDatabaseStatement = new CreateDatabaseStatement(modifiedUrl);
-        logger.debug(createDatabaseStatement);
+        logger.trace(createDatabaseStatement);
         return createDatabaseStatement;
     }
 
@@ -91,7 +91,7 @@ public class Parser extends JFSQLBaseVisitor<BaseStatement> implements JFSQLVisi
         final Map<String, List<String>> whereClause = extractWhereClause(deleteContext.expr());
         final DeleteStatement deleteStatement = new DeleteStatement(tableName, whereClause.get("whereColumns"), whereClause.get("whereValues"),
                 whereClause.get("symbols"), whereClause.get("binaryOperators"));
-        logger.debug(deleteStatement);
+        logger.trace(deleteStatement);
         return deleteStatement;
     }
 
@@ -102,7 +102,7 @@ public class Parser extends JFSQLBaseVisitor<BaseStatement> implements JFSQLVisi
             modifiedUrl += File.separator;
         }
         final DropDatabaseStatement dropDatabaseStatement = new DropDatabaseStatement(modifiedUrl);
-        logger.debug(dropDatabaseStatement);
+        logger.trace(dropDatabaseStatement);
         return dropDatabaseStatement;
     }
 
@@ -110,7 +110,7 @@ public class Parser extends JFSQLBaseVisitor<BaseStatement> implements JFSQLVisi
         final String tableName = dropTableContext.tableName().getText();
         final boolean ifExistsPresent = dropTableContext.ifExists() != null;
         final DropTableStatement dropTableStatement = new DropTableStatement(tableName, ifExistsPresent);
-        logger.debug(dropTableStatement);
+        logger.trace(dropTableStatement);
         return dropTableStatement;
     }
 
@@ -136,7 +136,7 @@ public class Parser extends JFSQLBaseVisitor<BaseStatement> implements JFSQLVisi
         }
         final InsertStatement insertStatement = new InsertStatement(tableName, Collections.unmodifiableList(columns),
                 Collections.unmodifiableList(listOfValueLists));
-        logger.debug(insertStatement);
+        logger.trace(insertStatement);
         return insertStatement;
     }
 
@@ -173,7 +173,7 @@ public class Parser extends JFSQLBaseVisitor<BaseStatement> implements JFSQLVisi
         final SelectStatement selectStatement = new SelectStatement(selectTable, joinTables, joinTypes, Collections.unmodifiableList(selectColumns),
                 Collections.unmodifiableList(listOfJoinColumnsWithPrefixes), whereClause.get("whereColumns"), whereClause.get("whereValues"),
                 whereClause.get("symbols"), whereClause.get("binaryOperators"));
-        logger.debug(selectStatement);
+        logger.trace(selectStatement);
         return selectStatement;
     }
 
@@ -194,7 +194,7 @@ public class Parser extends JFSQLBaseVisitor<BaseStatement> implements JFSQLVisi
         final UpdateStatement updateStatement = new UpdateStatement(tableName, Collections.unmodifiableList(columns),
                 Collections.unmodifiableList(values), whereClause.get("whereColumns"), whereClause.get("whereValues"),
                 whereClause.get("symbols"), whereClause.get("binaryOperators"));
-        logger.debug(updateStatement);
+        logger.trace(updateStatement);
         return updateStatement;
     }
 
