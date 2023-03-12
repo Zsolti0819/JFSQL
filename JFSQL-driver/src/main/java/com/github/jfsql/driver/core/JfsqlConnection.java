@@ -82,7 +82,7 @@ public class JfsqlConnection implements Connection {
             final List<Table> tables = new ArrayList<>();
             database.setTables(tables);
             writer.writeDatabaseFile(database);
-            git.add().addFilepattern(database.getUrl().toFile().getName()).call();
+            git.add().addFilepattern(".").call();
             git.commit().setMessage("Initial commit").call();
         } catch (final GitAPIException e) {
             throw new SQLException("Couldn't init git repository.\n" + e.getMessage());
