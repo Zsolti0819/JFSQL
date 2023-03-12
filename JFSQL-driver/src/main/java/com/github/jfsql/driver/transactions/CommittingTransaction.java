@@ -32,6 +32,7 @@ public class CommittingTransaction extends Transaction {
             for (final File file : filesToDelete) {
                 git.rm().addFilepattern(file.getName()).call();
             }
+            git.add().addFilepattern(".").call();
             git.commit().setMessage("Commit").call();
         } catch (final IOException | GitAPIException e) {
             e.printStackTrace();

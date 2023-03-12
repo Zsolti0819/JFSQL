@@ -10,8 +10,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonWriter;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -80,11 +78,6 @@ public class WriterJsonImpl extends Writer {
             if (!isValid) {
                 throw new SQLException("\"" + tableFile + "\" is not valid against \"" + schemaFile + "\"");
             }
-        }
-        try (final Git git = Git.open(Path.of(table.getTableFile()).getParent().toFile())) {
-            git.add().addFilepattern(String.valueOf(Path.of(tableFile).getFileName())).call();
-        } catch (final IOException | GitAPIException e) {
-            throw new SQLException("Git operation failed.\n" + e.getMessage());
         }
     }
 
@@ -168,11 +161,6 @@ public class WriterJsonImpl extends Writer {
         } catch (final IOException e) {
             throw new SQLException("Failed to write the schema.\n" + e.getMessage());
         }
-        try (final Git git = Git.open(Path.of(table.getTableFile()).getParent().toFile())) {
-            git.add().addFilepattern(String.valueOf(Path.of(schemaFile).getFileName())).call();
-        } catch (final IOException | GitAPIException e) {
-            throw new SQLException("Git operation failed.\n" + e.getMessage());
-        }
     }
 
     @Override
@@ -205,11 +193,6 @@ public class WriterJsonImpl extends Writer {
         } catch (final IOException e) {
             throw new SQLException("Failed to write the database file." + e.getMessage());
         }
-        try (final Git git = Git.open(databaseFolderName.toFile())) {
-            git.add().addFilepattern(String.valueOf(databaseFilePath.getFileName())).call();
-        } catch (final IOException | GitAPIException e) {
-            throw new SQLException("Git operation failed.\n" + e.getMessage());
-        }
     }
 
     @Override
@@ -236,11 +219,6 @@ public class WriterJsonImpl extends Writer {
 
         } catch (final IOException e) {
             throw new SQLException("Failed to write the blob\n" + e.getMessage());
-        }
-        try (final Git git = Git.open(Path.of(table.getTableFile()).getParent().toFile())) {
-            git.add().addFilepattern(String.valueOf(blobPath.getFileName())).call();
-        } catch (final IOException | GitAPIException e) {
-            throw new SQLException("Git operation failed.\n" + e.getMessage());
         }
         return blobPath;
     }

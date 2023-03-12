@@ -5,8 +5,6 @@ import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.util.DatatypeConverter;
 import com.github.jfsql.driver.validation.XmlSchemaValidator;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -92,11 +90,6 @@ public class WriterXmlImpl extends Writer {
                 throw new SQLException("\"" + tableFile + "\" is not valid against \"" + schemaFile + "\"");
             }
         }
-        try (final Git git = Git.open(Path.of(table.getTableFile()).getParent().toFile())) {
-            git.add().addFilepattern(String.valueOf(Path.of(tableFile).getFileName())).call();
-        } catch (final IOException | GitAPIException e) {
-            throw new SQLException("Git operation failed.\n" + e.getMessage());
-        }
     }
 
     private void checkTypeAndValueThenAddProperty(final Table table, final Document document, final String[] columns, final String[] values, final Element element, final int index) throws SQLException {
@@ -174,11 +167,6 @@ public class WriterXmlImpl extends Writer {
         } catch (final IOException | ParserConfigurationException e) {
             throw new SQLException("Failed to write the schema.\n" + e.getMessage());
         }
-        try (final Git git = Git.open(Path.of(table.getTableFile()).getParent().toFile())) {
-            git.add().addFilepattern(String.valueOf(Path.of(schemaFile).getFileName())).call();
-        } catch (final IOException | GitAPIException e) {
-            throw new SQLException("Git operation failed.\n" + e.getMessage());
-        }
     }
 
     @Override
@@ -217,11 +205,6 @@ public class WriterXmlImpl extends Writer {
         } catch (final IOException | ParserConfigurationException e) {
             throw new SQLException("Failed to write the database file.\n" + e.getMessage());
         }
-        try (final Git git = Git.open(databaseFolderName.toFile())) {
-            git.add().addFilepattern(String.valueOf(databaseFilePath.getFileName())).call();
-        } catch (final IOException | GitAPIException e) {
-            throw new SQLException("Git operation failed.\n" + e.getMessage());
-        }
     }
 
     @Override
@@ -249,11 +232,6 @@ public class WriterXmlImpl extends Writer {
             beautifyAndWrite(fileOutputStream, document);
         } catch (final IOException | ParserConfigurationException e) {
             throw new SQLException("Failed to write the blob\n" + e.getMessage());
-        }
-        try (final Git git = Git.open(Path.of(table.getTableFile()).getParent().toFile())) {
-            git.add().addFilepattern(String.valueOf(blobPath.getFileName())).call();
-        } catch (final IOException | GitAPIException e) {
-            throw new SQLException("Git operation failed.\n" + e.getMessage());
         }
         return blobPath;
     }
