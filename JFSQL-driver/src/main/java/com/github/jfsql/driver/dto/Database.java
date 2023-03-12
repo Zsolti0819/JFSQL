@@ -9,7 +9,6 @@ public class Database {
 
     private final Path url;
     private List<Table> tables;
-    private Table activeTable;
 
     public Database(final Path url) {
         this.url = url;

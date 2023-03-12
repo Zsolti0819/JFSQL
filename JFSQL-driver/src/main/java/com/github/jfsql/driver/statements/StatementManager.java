@@ -92,7 +92,6 @@ public class StatementManager {
                 connection.commit();
             } catch (final SQLException e) {
                 e.printStackTrace();
-                database.setActiveTable(null);
                 connection.rollback();
             }
         }
@@ -112,7 +111,6 @@ public class StatementManager {
             } catch (final SQLException e) {
                 e.printStackTrace();
                 database.getTables().remove(table);
-                database.setActiveTable(null);
                 connection.rollback();
             }
         }
