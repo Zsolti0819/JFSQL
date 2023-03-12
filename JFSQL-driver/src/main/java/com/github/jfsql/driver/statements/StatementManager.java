@@ -45,7 +45,7 @@ public class StatementManager {
     }
 
     public int dropDatabase(final DropDatabaseWrapper statement) throws SQLException {
-        return new DropDatabaseService(this, writer, semanticValidator).dropDatabase(statement);
+        return new DropDatabaseService(transaction, semanticValidator, writer).dropDatabase(statement);
     }
 
     public void createTable(final CreateTableWrapper statement) throws SQLException {

@@ -4,7 +4,7 @@ import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
-import lombok.Getter;
+import lombok.Data;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 
@@ -15,10 +15,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter
+@Data
 public abstract class Transaction {
 
-    protected final Database database;
+    protected Database database;
     protected final Reader reader;
     protected final Writer writer;
     boolean autoCommit;
