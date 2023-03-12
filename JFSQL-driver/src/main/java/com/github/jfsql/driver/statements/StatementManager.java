@@ -85,7 +85,7 @@ public class StatementManager {
     public void executeDMLOperation(final Table table) throws SQLException {
         if (!transaction.getAutoCommit()) {
             writer.addTableToUncommittedObjects(table);
-        } else if (transaction.getAutoCommit()) {
+        } else {
             try {
                 writer.writeTable(table);
                 transaction.commit();
@@ -101,7 +101,7 @@ public class StatementManager {
             writer.addSchemaToUncommittedObjects(table);
             writer.addTableToUncommittedObjects(table);
             writer.addDatabaseToUncommittedObjects(database);
-        } else if (transaction.getAutoCommit()) {
+        } else {
             try {
                 writer.writeSchema(table);
                 writer.writeTable(table);
@@ -117,7 +117,7 @@ public class StatementManager {
     public void executeDropTableOperation() throws SQLException {
         if (!transaction.getAutoCommit()) {
             writer.addDatabaseToUncommittedObjects(database);
-        } else if (transaction.getAutoCommit()) {
+        } else {
             try {
                 writer.writeDatabaseFile(database);
                 transaction.commit();
