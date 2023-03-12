@@ -1,15 +1,12 @@
 package com.github.jfsql.driver.dto;
 
+import lombok.Data;
+import lombok.Generated;
+
 import java.util.List;
 import java.util.Map;
-import lombok.EqualsAndHashCode;
-import lombok.Generated;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
-@EqualsAndHashCode
+@Data
 public class Table {
 
     private String name;
@@ -20,7 +17,7 @@ public class Table {
     private List<Entry> entries;
 
     public Table(final String name, final String tableFile, final String schemaFile,
-        final Map<String, String> columnsAndTypes, final Map<String, Boolean> notNullColumns) {
+                 final Map<String, String> columnsAndTypes, final Map<String, Boolean> notNullColumns) {
         this.name = name;
         this.tableFile = tableFile;
         this.schemaFile = schemaFile;
@@ -40,10 +37,10 @@ public class Table {
     @Generated
     public String toString() {
         return "\n"
-            + "Table name=" + getName() + "\n"
-            + "tableFile=" + getTableFile() + "\n"
-            + "schemaFile=" + getSchemaFile() + "\n"
-            + "columnsAndTypes=" + getColumnsAndTypes() + "\n"
-            + "notNullColumns=" + getNotNullColumns();
+                + "Table name=" + getName() + "\n"
+                + "tableFile=" + getTableFile() + "\n"
+                + "schemaFile=" + getSchemaFile() + "\n"
+                + "columnsAndTypes=" + getColumnsAndTypes() + "\n"
+                + "notNullColumns=" + getNotNullColumns();
     }
 }
