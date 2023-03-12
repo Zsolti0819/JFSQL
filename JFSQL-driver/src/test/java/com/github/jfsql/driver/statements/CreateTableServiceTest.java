@@ -23,9 +23,6 @@ import static org.mockito.Mockito.*;
 class CreateTableServiceTest {
 
     @Mock
-    private StatementManager statementManager;
-
-    @Mock
     private Transaction transaction;
 
     @Mock
@@ -45,7 +42,6 @@ class CreateTableServiceTest {
 
     @Test
     void testCreateTable_normally() throws SQLException {
-        when(statementManager.getDatabase()).thenReturn(database);
         when(writer.getFileExtension()).thenReturn("xml");
         when(database.getUrl()).thenReturn(TestUtils.DATABASE_XML_FILE_PATH);
         when(semanticValidator.tableExists(createTableStatement, database)).thenReturn(false);
@@ -60,7 +56,6 @@ class CreateTableServiceTest {
 
     @Test
     void testCreateTable_tableNameAndDatabaseNameAreEqual() throws SQLException {
-        when(statementManager.getDatabase()).thenReturn(database);
         when(semanticValidator.tableNameEqualsDatabaseName(createTableStatement.getTableName(), database)).thenReturn(true);
 
         final SQLException thrown = assertThrows(SQLException.class, () -> createTableService.createTable(createTableStatement));
@@ -70,7 +65,6 @@ class CreateTableServiceTest {
 
     @Test
     void testCreateTable_tableExists() throws SQLException {
-        when(statementManager.getDatabase()).thenReturn(database);
         when(createTableStatement.isIfNotExistsPresent()).thenReturn(false);
         when(semanticValidator.tableExists(createTableStatement, database)).thenReturn(true);
 
@@ -81,7 +75,6 @@ class CreateTableServiceTest {
 
     @Test
     void testCreateTable_ifNotExists_doesNotThrowException() throws SQLException {
-        when(statementManager.getDatabase()).thenReturn(database);
         when(createTableStatement.isIfNotExistsPresent()).thenReturn(true);
         when(semanticValidator.tableExists(createTableStatement, database)).thenReturn(true);
 
@@ -91,7 +84,6 @@ class CreateTableServiceTest {
 
     @Test
     void testCreateTable_identicalColumns() throws SQLException {
-        when(statementManager.getDatabase()).thenReturn(database);
         when(semanticValidator.tableExists(createTableStatement, database)).thenReturn(false);
         when(semanticValidator.columnsHaveDuplicate(createTableStatement)).thenReturn(true);
 

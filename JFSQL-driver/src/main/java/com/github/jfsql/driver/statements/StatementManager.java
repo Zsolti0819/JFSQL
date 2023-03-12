@@ -49,7 +49,7 @@ public class StatementManager {
     }
 
     public void createTable(final CreateTableWrapper statement) throws SQLException {
-        new CreateTableService(this, transaction, semanticValidator, writer).createTable(statement);
+        new CreateTableService(database, transaction, semanticValidator, writer).createTable(statement);
     }
 
     public int insertIntoTable(final InsertWrapper statement) throws SQLException {

@@ -1,5 +1,6 @@
 package com.github.jfsql.driver.statements;
 
+import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Writer;
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CreateTableService {
 
-    private final StatementManager statementManager;
+    private final Database database;
     private final Transaction transaction;
     private final SemanticValidator semanticValidator;
     private final Writer writer;
@@ -32,17 +33,17 @@ public class CreateTableService {
     public void createTable(final CreateTableWrapper statement) throws SQLException {
         final String tableName = statement.getTableName();
 
-        if (semanticValidator.tableNameEqualsDatabaseName(statement.getTableName(), statementManager.getDatabase())) {
+        if (semanticValidator.tableNameEqualsDatabaseName(statement.getTableName(), database)) {
             throw new SQLException("Table name cannot be the same as database name.");
         }
 
         final boolean ifNotExistsIsPresent = statement.isIfNotExistsPresent();
 
-        if (!ifNotExistsIsPresent && semanticValidator.tableExists(statement, statementManager.getDatabase())) {
+        if (!ifNotExistsIsPresent && semanticValidator.tableExists(statement, database)) {
             throw new SQLException("Table \"" + tableName + "\" already exists.");
         }
 
-        if (ifNotExistsIsPresent && semanticValidator.tableExists(statement, statementManager.getDatabase())) {
+        if (ifNotExistsIsPresent && semanticValidator.tableExists(statement, database)) {
             logger.info(
                     "Table '{}' already exists, but 'IF NOT EXISTS' clause was present in the statement, no new table will be created.",
                     tableName);
@@ -61,21 +62,21 @@ public class CreateTableService {
                         LinkedHashMap::new));
 
         final Map<String, Boolean> notNulLColumns = statement.getNotNullColumns();
-        final String parentDirectory = String.valueOf(statementManager.getDatabase().getUrl().getParent());
+        final String parentDirectory = String.valueOf(database.getUrl().getParent());
         final String tableFile = parentDirectory + File.separator + tableName + "." + writer.getFileExtension();
         final String schemaFile =
                 writer instanceof WriterJsonImpl ? parentDirectory + File.separator + tableName + "Schema."
                         + writer.getSchemaFileExtension()
                         : parentDirectory + File.separator + tableName + "." + writer.getSchemaFileExtension();
 
-        if (statementManager.getDatabase().getTables() == null) {
-            statementManager.getDatabase().setTables(new ArrayList<>());
+        if (database.getTables() == null) {
+            database.setTables(new ArrayList<>());
         }
 
         final Table table = new Table(tableName, tableFile, schemaFile, columnsAndTypes, notNulLColumns);
         final List<Entry> entries = new ArrayList<>();
         table.setEntries(entries);
-        statementManager.getDatabase().getTables().add(table);
+        database.getTables().add(table);
         transaction.executeDDLOperation(table);
     }
 }
