@@ -1,8 +1,6 @@
 package com.github.jfsql.driver.core;
 
 import com.github.jfsql.driver.cache.Cache;
-import com.github.jfsql.driver.dto.Database;
-import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.factories.CacheFactory;
 import com.github.jfsql.driver.factories.ReaderFactory;
 import com.github.jfsql.driver.factories.TransactionFactory;
@@ -14,15 +12,9 @@ import com.github.jfsql.driver.transactions.Transaction;
 import com.github.jfsql.driver.util.PropertiesReader;
 import lombok.Getter;
 import lombok.Setter;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
 
-import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
@@ -44,49 +36,13 @@ public class JfsqlConnection implements Connection {
     private boolean readOnly;
 
     public JfsqlConnection(final Path url) throws SQLException {
+        this.url = url;
         cache = CacheFactory.createCache(PropertiesReader.getProperty("statement.caching"));
         reader = ReaderFactory.createReader(PropertiesReader.getProperty("persistence"));
         writer = WriterFactory.createWriter(PropertiesReader.getProperty("persistence"));
-        final Database database = getDatabase(url);
-        this.url = database.getUrl();
-        transaction = TransactionFactory.createTransactionManager(PropertiesReader.getProperty("transactions"), database, reader, writer);
-        statementManager = new StatementManager(this, database, reader, writer);
+        transaction = TransactionFactory.createTransactionManager(PropertiesReader.getProperty("transactions"), url, reader, writer);
+        statementManager = new StatementManager(transaction, reader, writer);
         metaData = new JfsqlDatabaseMetaData(this);
-    }
-
-    private Path formDatabaseUrl(final Path url) {
-        return Path.of(url + File.separator + url.getFileName() + "." + writer.getFileExtension());
-    }
-
-    private Database getDatabase(final Path url) throws SQLException {
-        final Database database = new Database(formDatabaseUrl(url));
-        if (!database.getUrl().toFile().exists()) {
-            initDatabase(database);
-        } else {
-            openDatabase(database);
-        }
-        return database;
-    }
-
-    private void openDatabase(final Database database) throws SQLException {
-        try (final Git ignored = Git.open(database.getUrl().getParent().toFile())) {
-            final List<Table> tables = reader.readDatabaseFile(database);
-            database.setTables(tables);
-        } catch (final IOException e) {
-            throw new SQLException("Couldn't open git repository.\n" + e.getMessage());
-        }
-    }
-
-    public void initDatabase(final Database database) throws SQLException {
-        try (final Git git = Git.init().setDirectory(database.getUrl().getParent().toFile()).call()) {
-            final List<Table> tables = new ArrayList<>();
-            database.setTables(tables);
-            writer.writeDatabaseFile(database);
-            git.add().addFilepattern(".").call();
-            git.commit().setMessage("Initial commit").call();
-        } catch (final GitAPIException e) {
-            throw new SQLException("Couldn't init git repository.\n" + e.getMessage());
-        }
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.github.jfsql.driver.transactions;
 
-import lombok.experimental.SuperBuilder;
+import com.github.jfsql.driver.persistence.Reader;
+import com.github.jfsql.driver.persistence.Writer;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,10 +17,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 
-@SuperBuilder
 public class CommittingTransaction extends Transaction {
 
     private static final Logger logger = LogManager.getLogger(CommittingTransaction.class);
+
+    public CommittingTransaction(final Path url, final Reader reader, final Writer writer) throws SQLException {
+        super(url, reader, writer);
+    }
 
     @Override
     public void commit() throws SQLException {

@@ -1,10 +1,10 @@
 package com.github.jfsql.driver.statements;
 
-import com.github.jfsql.driver.core.JfsqlConnection;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
+import com.github.jfsql.driver.transactions.Transaction;
 import com.github.jfsql.driver.util.ColumnToTypeMapper;
 import com.github.jfsql.driver.util.WhereConditionSolver;
 import com.github.jfsql.driver.validation.SemanticValidator;
@@ -18,7 +18,7 @@ import java.util.Objects;
 @Data
 public class StatementManager {
 
-    private final JfsqlConnection connection;
+    private final Transaction transaction;
     private final SemanticValidator semanticValidator;
     private final ColumnToTypeMapper columnToTypeMapper;
     private final WhereConditionSolver whereConditionSolver;
@@ -26,10 +26,9 @@ public class StatementManager {
     private final Writer writer;
     private Database database;
 
-    public StatementManager(final JfsqlConnection connection, final Database database, final Reader reader,
-                            final Writer writer) {
-        this.connection = connection;
-        this.database = database;
+    public StatementManager(final Transaction transaction, final Reader reader, final Writer writer) {
+        this.transaction = transaction;
+        database = transaction.getDatabase();
         this.reader = reader;
         this.writer = writer;
         semanticValidator = new SemanticValidator();
@@ -38,7 +37,7 @@ public class StatementManager {
     }
 
     public void alterTable(final AlterTableWrapper statement) throws SQLException {
-        new AlterTableService(this, semanticValidator, reader, writer).alterTable(statement);
+        new AlterTableService(this, transaction, semanticValidator, reader, writer).alterTable(statement);
     }
 
     public void createDatabase(final CreateDatabaseWrapper statement) throws SQLException {
@@ -84,52 +83,52 @@ public class StatementManager {
     }
 
     public void executeDMLOperation(final Table table) throws SQLException {
-        if (!connection.getAutoCommit()) {
+        if (!transaction.getAutoCommit()) {
             writer.addTableToUncommittedObjects(table);
-        } else if (connection.getAutoCommit()) {
+        } else if (transaction.getAutoCommit()) {
             try {
                 writer.writeTable(table);
-                connection.commit();
+                transaction.commit();
             } catch (final SQLException e) {
                 e.printStackTrace();
-                connection.rollback();
+                transaction.rollback();
             }
         }
     }
 
     public void executeDDLOperation(final Table table) throws SQLException {
-        if (!connection.getAutoCommit()) {
+        if (!transaction.getAutoCommit()) {
             writer.addSchemaToUncommittedObjects(table);
             writer.addTableToUncommittedObjects(table);
             writer.addDatabaseToUncommittedObjects(database);
-        } else if (connection.getAutoCommit()) {
+        } else if (transaction.getAutoCommit()) {
             try {
                 writer.writeSchema(table);
                 writer.writeTable(table);
                 writer.writeDatabaseFile(database);
-                connection.commit();
+                transaction.commit();
             } catch (final SQLException e) {
                 e.printStackTrace();
-                connection.rollback();
+                transaction.rollback();
             }
         }
     }
 
     public void executeDropTableOperation() throws SQLException {
-        if (!connection.getAutoCommit()) {
+        if (!transaction.getAutoCommit()) {
             writer.addDatabaseToUncommittedObjects(database);
-        } else if (connection.getAutoCommit()) {
+        } else if (transaction.getAutoCommit()) {
             try {
                 writer.writeDatabaseFile(database);
-                connection.commit();
+                transaction.commit();
             } catch (final SQLException e) {
                 e.printStackTrace();
-                connection.rollback();
+                transaction.rollback();
             }
         }
     }
 
     public void executeCreateDatabaseOperation(final Database database) throws SQLException {
-        connection.initDatabase(database);
+        transaction.initDatabase(database);
     }
 }
