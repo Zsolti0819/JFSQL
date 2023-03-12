@@ -84,4 +84,54 @@ public abstract class Transaction {
         }
     }
 
+    public void executeDMLOperation(final Table table) throws SQLException {
+        if (!autoCommit) {
+            writer.addTableToUncommittedObjects(table);
+        } else {
+            try {
+                writer.writeTable(table);
+                commit();
+            } catch (final SQLException e) {
+                e.printStackTrace();
+                rollback();
+            }
+        }
+    }
+
+    public void executeDDLOperation(final Table table) throws SQLException {
+        if (!autoCommit) {
+            writer.addSchemaToUncommittedObjects(table);
+            writer.addTableToUncommittedObjects(table);
+            writer.addDatabaseToUncommittedObjects(database);
+        } else {
+            try {
+                writer.writeSchema(table);
+                writer.writeTable(table);
+                writer.writeDatabaseFile(database);
+                commit();
+            } catch (final SQLException e) {
+                e.printStackTrace();
+                rollback();
+            }
+        }
+    }
+
+    public void executeDropTableOperation() throws SQLException {
+        if (!autoCommit) {
+            writer.addDatabaseToUncommittedObjects(database);
+        } else {
+            try {
+                writer.writeDatabaseFile(database);
+                commit();
+            } catch (final SQLException e) {
+                e.printStackTrace();
+                rollback();
+            }
+        }
+    }
+
+    public void executeCreateDatabaseOperation(final Database database) throws SQLException {
+        initDatabase(database);
+    }
+
 }

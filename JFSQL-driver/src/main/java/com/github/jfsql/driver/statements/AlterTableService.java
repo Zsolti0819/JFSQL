@@ -44,7 +44,7 @@ class AlterTableService {
         } else if (statement.getColumnToDrop() != null) {
             dropColumn(statement, table);
         }
-        statementManager.executeDDLOperation(table);
+        transaction.executeDDLOperation(table);
     }
 
     private void renameTable(final AlterTableWrapper statement, final Table table) throws SQLException {

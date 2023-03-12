@@ -2,6 +2,7 @@ package com.github.jfsql.driver.statements;
 
 import com.github.jfsql.driver.TestUtils;
 import com.github.jfsql.driver.persistence.Writer;
+import com.github.jfsql.driver.transactions.Transaction;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.CreateDatabaseWrapper;
 import org.junit.jupiter.api.Test;
@@ -23,10 +24,10 @@ class CreateDatabaseServiceTest {
     private SemanticValidator semanticValidator;
 
     @Mock
-    private Writer writer;
+    private Transaction transaction;
 
     @Mock
-    private StatementManager statementManager;
+    private Writer writer;
 
     @Mock
     private CreateDatabaseWrapper createDatabaseStatement;
@@ -40,7 +41,7 @@ class CreateDatabaseServiceTest {
         when(semanticValidator.urlIsAnExistingRegularFile(createDatabaseStatement)).thenReturn(false);
         when(semanticValidator.databaseExist(createDatabaseStatement, writer.getFileExtension())).thenReturn(false);
         createDatabaseService.createDatabase(createDatabaseStatement);
-        verify(statementManager, times(1)).executeCreateDatabaseOperation(any());
+        verify(transaction, times(1)).executeCreateDatabaseOperation(any());
     }
 
     @Test
@@ -51,7 +52,7 @@ class CreateDatabaseServiceTest {
                 () -> createDatabaseService.createDatabase(createDatabaseStatement));
         assertEquals("Database is not a directory.", thrown.getMessage());
 
-        verify(statementManager, never()).executeCreateDatabaseOperation(any());
+        verify(transaction, never()).executeCreateDatabaseOperation(any());
     }
 
     @Test
@@ -63,6 +64,6 @@ class CreateDatabaseServiceTest {
                 () -> createDatabaseService.createDatabase(createDatabaseStatement));
         assertEquals("Database already exists, will not create another one.", thrown.getMessage());
 
-        verify(statementManager, never()).executeCreateDatabaseOperation(any());
+        verify(transaction, never()).executeCreateDatabaseOperation(any());
     }
 }

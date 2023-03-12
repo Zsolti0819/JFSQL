@@ -3,6 +3,7 @@ package com.github.jfsql.driver.statements;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
+import com.github.jfsql.driver.transactions.Transaction;
 import com.github.jfsql.driver.util.WhereConditionSolver;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.DeleteWrapper;
@@ -15,6 +16,7 @@ import java.util.List;
 public class DeleteService {
 
     private final StatementManager statementManager;
+    private final Transaction transaction;
     private final SemanticValidator semanticValidator;
     private final WhereConditionSolver whereConditionSolver;
     private final Reader reader;
@@ -42,7 +44,7 @@ public class DeleteService {
             deleteCount = entriesSizeBefore - entriesSizeAfter;
         }
 
-        statementManager.executeDMLOperation(activeTable);
+        transaction.executeDMLOperation(activeTable);
         return deleteCount;
     }
 }

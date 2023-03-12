@@ -3,6 +3,7 @@ package com.github.jfsql.driver.statements;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
+import com.github.jfsql.driver.transactions.Transaction;
 import com.github.jfsql.driver.util.ColumnToTypeMapper;
 import com.github.jfsql.driver.util.WhereConditionSolver;
 import com.github.jfsql.driver.validation.SemanticValidator;
@@ -16,6 +17,7 @@ import java.util.List;
 public class UpdateService {
 
     private final StatementManager statementManager;
+    private final Transaction transaction;
     private final SemanticValidator semanticValidator;
     private final ColumnToTypeMapper columnToTypeMapper;
     private final WhereConditionSolver whereConditionSolver;
@@ -54,7 +56,7 @@ public class UpdateService {
             }
         }
 
-        statementManager.executeDMLOperation(activeTable);
+        transaction.executeDMLOperation(activeTable);
 
         return whereEntries.size();
     }

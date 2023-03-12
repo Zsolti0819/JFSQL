@@ -2,6 +2,7 @@ package com.github.jfsql.driver.statements;
 
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.persistence.Writer;
+import com.github.jfsql.driver.transactions.Transaction;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.CreateDatabaseWrapper;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +14,7 @@ import java.sql.SQLException;
 @RequiredArgsConstructor
 public class CreateDatabaseService {
 
-    private final StatementManager statementManager;
+    private final Transaction transaction;
     private final SemanticValidator semanticValidator;
     private final Writer writer;
 
@@ -31,6 +32,6 @@ public class CreateDatabaseService {
         final Path databaseFilePath = Path.of(url + fileName);
         final Database database = new Database(databaseFilePath);
 
-        statementManager.executeCreateDatabaseOperation(database);
+        transaction.executeCreateDatabaseOperation(database);
     }
 }

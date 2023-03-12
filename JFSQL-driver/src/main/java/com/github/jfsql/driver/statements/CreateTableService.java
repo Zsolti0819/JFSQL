@@ -4,6 +4,7 @@ import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Writer;
 import com.github.jfsql.driver.persistence.WriterJsonImpl;
+import com.github.jfsql.driver.transactions.Transaction;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.CreateTableWrapper;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 public class CreateTableService {
 
     private final StatementManager statementManager;
+    private final Transaction transaction;
     private final SemanticValidator semanticValidator;
     private final Writer writer;
     private static final Logger logger = LogManager.getLogger(CreateTableService.class);
@@ -74,6 +76,6 @@ public class CreateTableService {
         final List<Entry> entries = new ArrayList<>();
         table.setEntries(entries);
         statementManager.getDatabase().getTables().add(table);
-        statementManager.executeDDLOperation(table);
+        transaction.executeDDLOperation(table);
     }
 }
