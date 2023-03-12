@@ -10,6 +10,8 @@ import com.github.jfsql.parser.dto.AlterTableWrapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +28,7 @@ class AlterTableService {
     private final SemanticValidator semanticValidator;
     private final Reader reader;
     private final Writer writer;
+    private static final Logger logger = LogManager.getLogger(AlterTableService.class);
 
     void alterTable(final AlterTableWrapper statement) throws SQLException {
         final String tableName = statement.getTableName();
@@ -63,10 +66,12 @@ class AlterTableService {
             FileUtils.moveFile(FileUtils.getFile(oldTableFile), FileUtils.getFile(newTableFile));
             FileUtils.moveFile(FileUtils.getFile(oldSchemaFile), FileUtils.getFile(newSchemaFile));
         } catch (final IOException e) {
-            throw new SQLException("Failed to rename files\n" + e.getMessage());
+            if (!statementManager.getConnection().getAutoCommit() && writer.getUncommittedTables().contains(table)) {
+                logger.debug("The table has not yet been written to files, but is present in the list of uncommitted tables.");
+            } else {
+                throw new SQLException("Failed to rename files\n" + e.getMessage());
+            }
         }
-
-        final String oldTableName = table.getName();
 
         table.setName(newTableName);
         table.setTableFile(newTableFile);
@@ -75,10 +80,6 @@ class AlterTableService {
             final List<Entry> entries = reader.readTable(table);
             table.setEntries(entries);
         }
-
-        // FIXME: 3/10/2023 Test this later
-        writer.getUncommittedTables().removeIf(t -> Objects.equals(t.getName(), oldTableName));
-        writer.getUncommittedSchemas().removeIf(t -> Objects.equals(t.getName(), oldTableName));
     }
 
     private void renameColumn(final AlterTableWrapper statement, final Table table) throws SQLException {
