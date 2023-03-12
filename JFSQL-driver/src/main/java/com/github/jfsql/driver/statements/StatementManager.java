@@ -110,7 +110,6 @@ public class StatementManager {
                 connection.commit();
             } catch (final SQLException e) {
                 e.printStackTrace();
-                database.getTables().remove(table);
                 connection.rollback();
             }
         }
