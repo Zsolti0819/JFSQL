@@ -25,4 +25,5 @@
 - Transactions are not guaranteed to work in multithreaded applications, but file locking mechanism was implemented.
 
 ## TODO:
-- Improve overall test coverage# JFSQL
+- Improve overall test coverage
+- Fix BLOBs won't be deleted
