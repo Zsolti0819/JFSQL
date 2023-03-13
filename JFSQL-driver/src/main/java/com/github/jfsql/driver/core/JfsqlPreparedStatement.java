@@ -1,6 +1,7 @@
 package com.github.jfsql.driver.core;
 
 import com.github.jfsql.driver.statements.StatementManager;
+import com.github.jfsql.driver.statements.TableFinder;
 import com.github.jfsql.driver.util.PreparedStatementCreator;
 import com.github.jfsql.parser.core.Parser;
 import com.github.jfsql.parser.dto.*;
@@ -22,6 +23,7 @@ public class JfsqlPreparedStatement implements PreparedStatement {
 
     private final Parser parser;
     private final StatementManager statementManager;
+    private final TableFinder tableFinder;
     private final String preparedStatement;
     private final Object[] parameters;
     private JfsqlConnection connection;
@@ -29,9 +31,10 @@ public class JfsqlPreparedStatement implements PreparedStatement {
     private int updateCount = 0;
 
     JfsqlPreparedStatement(final JfsqlConnection connection, final String preparedStatement,
-                           final StatementManager statementManager) throws SQLException {
+                           final TableFinder tableFinder, final StatementManager statementManager) throws SQLException {
         this.connection = connection;
         this.preparedStatement = preparedStatement;
+        this.tableFinder = tableFinder;
         this.statementManager = statementManager;
         parser = new Parser();
         parameters = new Object[getParameterCount(preparedStatement)];

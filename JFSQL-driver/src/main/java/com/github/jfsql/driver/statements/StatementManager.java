@@ -1,7 +1,6 @@
 package com.github.jfsql.driver.statements;
 
 import com.github.jfsql.driver.dto.Database;
-import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
 import com.github.jfsql.driver.transactions.Transaction;
@@ -13,26 +12,25 @@ import lombok.Data;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Objects;
 
 @Data
 public class StatementManager {
 
     private final Transaction transaction;
+    private final TableFinder tableFinder;
     private final SemanticValidator semanticValidator;
     private final ColumnToTypeMapper columnToTypeMapper;
     private final WhereConditionSolver whereConditionSolver;
-    private final TableFinder tableFinder;
     private final Reader reader;
     private final Writer writer;
     private final Database database;
 
-    public StatementManager(final Database database, final Transaction transaction, final Reader reader, final Writer writer) {
+    public StatementManager(final Database database, final TableFinder tableFinder, final Transaction transaction, final Reader reader, final Writer writer) {
         this.transaction = transaction;
         this.database = database;
         this.reader = reader;
         this.writer = writer;
-        tableFinder = new TableFinder(database);
+        this.tableFinder = tableFinder;
         semanticValidator = new SemanticValidator();
         columnToTypeMapper = new ColumnToTypeMapper();
         whereConditionSolver = new WhereConditionSolver();
@@ -73,15 +71,6 @@ public class StatementManager {
 
     public int dropTable(final DropTableWrapper statement) throws SQLException {
         return new DropTableService(tableFinder, database, transaction, semanticValidator, reader).dropTable(statement);
-    }
-
-    // Common methods
-
-    public Table getTableByName(final String tableName) throws SQLException {
-        return database.getTables().stream()
-                .filter(t -> Objects.equals(tableName, t.getName()))
-                .findFirst()
-                .orElseThrow(() -> new SQLException("\"" + tableName + "\" not found"));
     }
 
 }

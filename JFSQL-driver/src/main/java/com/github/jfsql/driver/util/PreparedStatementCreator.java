@@ -26,7 +26,7 @@ public class PreparedStatementCreator {
         final List<String> columns;
         final List<List<String>> listOfValueLists = new ArrayList<>();
         if (statement.getColumns().isEmpty()) {
-            columns = List.of(preparedStatement.getStatementManager().getTableByName(statement.getTableName()).getColumns());
+            columns = List.of(preparedStatement.getTableFinder().getTableByName(statement.getTableName()).getColumns());
         } else {
             columns = statement.getColumns();
         }

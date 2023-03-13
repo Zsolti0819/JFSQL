@@ -1,6 +1,7 @@
 package com.github.jfsql.driver.core;
 
 import com.github.jfsql.driver.cache.Cache;
+import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.factories.CacheFactory;
 import com.github.jfsql.driver.factories.ReaderFactory;
 import com.github.jfsql.driver.factories.TransactionFactory;
@@ -8,6 +9,7 @@ import com.github.jfsql.driver.factories.WriterFactory;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
 import com.github.jfsql.driver.statements.StatementManager;
+import com.github.jfsql.driver.statements.TableFinder;
 import com.github.jfsql.driver.transactions.Transaction;
 import com.github.jfsql.driver.util.PropertiesReader;
 import lombok.Getter;
@@ -26,8 +28,9 @@ public class JfsqlConnection implements Connection {
     private final Path url;
     private final Reader reader;
     private final Writer writer;
-    private final StatementManager statementManager;
     private final Transaction transaction;
+    private final StatementManager statementManager;
+    private final TableFinder tableFinder;
     private final Cache cache;
     private JfsqlStatement statement;
     private JfsqlPreparedStatement preparedStatement;
@@ -41,7 +44,9 @@ public class JfsqlConnection implements Connection {
         reader = ReaderFactory.createReader(PropertiesReader.getProperty("persistence"));
         writer = WriterFactory.createWriter(PropertiesReader.getProperty("persistence"));
         transaction = TransactionFactory.createTransactionManager(PropertiesReader.getProperty("transactions"), url, reader, writer);
-        statementManager = new StatementManager(transaction.getDatabase(), transaction, reader, writer);
+        final Database database = transaction.getDatabase();
+        tableFinder = new TableFinder(database);
+        statementManager = new StatementManager(database, tableFinder, transaction, reader, writer);
         metaData = new JfsqlDatabaseMetaData(this);
     }
 
@@ -53,7 +58,7 @@ public class JfsqlConnection implements Connection {
 
     @Override
     public PreparedStatement prepareStatement(final String sql) throws SQLException {
-        preparedStatement = new JfsqlPreparedStatement(this, sql, statementManager);
+        preparedStatement = new JfsqlPreparedStatement(this, sql, tableFinder, statementManager);
         return preparedStatement;
     }
 
