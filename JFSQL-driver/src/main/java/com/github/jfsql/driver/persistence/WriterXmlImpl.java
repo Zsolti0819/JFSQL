@@ -30,16 +30,6 @@ public class WriterXmlImpl extends Writer {
 
     private static final XmlSchemaValidator XML_SCHEMA_VALIDATOR = XmlSchemaValidator.INSTANCE;
 
-    @Override
-    public String getFileExtension() {
-        return "xml";
-    }
-
-    @Override
-    public String getSchemaFileExtension() {
-        return "xsd";
-    }
-
     private void beautifyAndWrite(final FileOutputStream fileOutputStream, final Document document)
             throws SQLException {
         try {
@@ -219,7 +209,7 @@ public class WriterXmlImpl extends Writer {
         } catch (final IOException e) {
             throw new SQLException("Failed to create directory for BLOBs.\n" + e.getMessage());
         }
-        final String newBlobName = incrementFileName(blobParent, getFileExtension());
+        final String newBlobName = incrementFileName(blobParent, "xml");
         final Path blobPath = Path.of(blobParent + File.separator + newBlobName);
         try (final FileOutputStream fileOutputStream = new FileOutputStream(blobPath.toFile());
              final FileChannel fileChannel = fileOutputStream.getChannel()) {

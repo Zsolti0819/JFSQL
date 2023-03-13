@@ -1,7 +1,7 @@
 package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.TestUtils;
-import com.github.jfsql.driver.persistence.Writer;
+import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.CreateDatabaseWrapper;
@@ -27,7 +27,7 @@ class CreateDatabaseServiceTest {
     private TransactionManager transactionManager;
 
     @Mock
-    private Writer writer;
+    private Reader reader;
 
     @Mock
     private CreateDatabaseWrapper createDatabaseStatement;
@@ -39,7 +39,7 @@ class CreateDatabaseServiceTest {
     void testCreateDatabase_normally() throws SQLException {
         when(createDatabaseStatement.getDatabaseUrl()).thenReturn(String.valueOf(TestUtils.DATABASE_PATH));
         when(semanticValidator.urlIsAnExistingRegularFile(createDatabaseStatement)).thenReturn(false);
-        when(semanticValidator.databaseExist(createDatabaseStatement, writer.getFileExtension())).thenReturn(false);
+        when(semanticValidator.databaseExist(createDatabaseStatement, reader.getFileExtension())).thenReturn(false);
         createDatabaseService.createDatabase(createDatabaseStatement);
         verify(transactionManager, times(1)).executeCreateDatabaseOperation(any());
     }
@@ -58,7 +58,7 @@ class CreateDatabaseServiceTest {
     @Test
     void testCreateDatabase_databaseExists() throws SQLException {
         when(semanticValidator.urlIsAnExistingRegularFile(createDatabaseStatement)).thenReturn(false);
-        when(semanticValidator.databaseExist(createDatabaseStatement, writer.getFileExtension())).thenReturn(true);
+        when(semanticValidator.databaseExist(createDatabaseStatement, reader.getFileExtension())).thenReturn(true);
 
         final SQLException thrown = assertThrows(SQLException.class,
                 () -> createDatabaseService.createDatabase(createDatabaseStatement));

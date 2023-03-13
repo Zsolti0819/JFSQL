@@ -38,7 +38,7 @@ class TransactionManagerTest {
 
     @Test
     void testCommit_xml() throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterXmlImpl);
+        assumeTrue(connection.getReader() instanceof WriterXmlImpl);
         statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
         connection.setAutoCommit(false);
         connection.commit();
@@ -74,7 +74,7 @@ class TransactionManagerTest {
 
     @Test
     void testCommit_json() throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterJsonImpl);
+        assumeTrue(connection.getReader() instanceof WriterJsonImpl);
         statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
         connection.setAutoCommit(false);
         connection.commit();
@@ -110,7 +110,7 @@ class TransactionManagerTest {
 
     @Test
     void testCommitDropTable_xml() throws SQLException {
-        assumeTrue(connection.getWriter() instanceof WriterXmlImpl);
+        assumeTrue(connection.getReader() instanceof WriterXmlImpl);
         assumeTrue(connection.getTransactionManager() instanceof JGitTransactionManagerImpl);
         statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
         connection.setAutoCommit(false);
@@ -135,7 +135,7 @@ class TransactionManagerTest {
 
     @Test
     void testCommitDropTable_json() throws SQLException {
-        assumeTrue(connection.getWriter() instanceof WriterJsonImpl);
+        assumeTrue(connection.getReader() instanceof WriterJsonImpl);
         assumeTrue(connection.getTransactionManager() instanceof JGitTransactionManagerImpl);
         statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
         connection.setAutoCommit(false);
@@ -160,7 +160,7 @@ class TransactionManagerTest {
 
     @Test
     void testCommitAndRollback_xml() throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterXmlImpl);
+        assumeTrue(connection.getReader() instanceof WriterXmlImpl);
         assumeTrue(connection.getTransactionManager() instanceof JGitTransactionManagerImpl);
         statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
         connection.setAutoCommit(false);
@@ -190,7 +190,7 @@ class TransactionManagerTest {
 
     @Test
     void testCommitAndRollback_json() throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterJsonImpl);
+        assumeTrue(connection.getReader() instanceof WriterJsonImpl);
         assumeTrue(connection.getTransactionManager() instanceof JGitTransactionManagerImpl);
         statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
         connection.setAutoCommit(false);

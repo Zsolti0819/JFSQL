@@ -9,6 +9,10 @@ import java.util.List;
 
 public interface Reader {
 
+    String getFileExtension();
+
+    String getSchemaFileExtension();
+
     List<Entry> readTable(final Table table) throws SQLException;
 
     Table readSchema(final String pathToSchema) throws SQLException;

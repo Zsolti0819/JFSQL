@@ -4,7 +4,6 @@ import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
-import com.github.jfsql.driver.persistence.Writer;
 import com.github.jfsql.driver.persistence.WriterJsonImpl;
 import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.validation.SemanticValidator;
@@ -32,7 +31,6 @@ class AlterTableService {
     private final TransactionManager transactionManager;
     private final SemanticValidator semanticValidator;
     private final Reader reader;
-    private final Writer writer;
 
     void alterTable(final AlterTableWrapper statement) throws SQLException {
         final String tableName = statement.getTableName();
@@ -57,11 +55,11 @@ class AlterTableService {
             throw new SQLException("Table name cannot be the same as database name.");
         }
 
-        final String newTableFile = parentDirectory + File.separator + newTableName + "." + writer.getFileExtension();
+        final String newTableFile = parentDirectory + File.separator + newTableName + "." + reader.getFileExtension();
         final String newSchemaFile =
-                writer instanceof WriterJsonImpl ? parentDirectory + File.separator + newTableName + "Schema."
-                        + writer.getSchemaFileExtension()
-                        : parentDirectory + File.separator + newTableName + "." + writer.getSchemaFileExtension();
+                reader instanceof WriterJsonImpl ? parentDirectory + File.separator + newTableName + "Schema."
+                        + reader.getSchemaFileExtension()
+                        : parentDirectory + File.separator + newTableName + "." + reader.getSchemaFileExtension();
 
         final String oldTableFile = table.getTableFile();
         final String oldSchemaFile = table.getSchemaFile();
@@ -70,7 +68,7 @@ class AlterTableService {
             FileUtils.moveFile(FileUtils.getFile(oldTableFile), FileUtils.getFile(newTableFile));
             FileUtils.moveFile(FileUtils.getFile(oldSchemaFile), FileUtils.getFile(newSchemaFile));
         } catch (final IOException e) {
-            if (!transactionManager.getAutoCommit() && writer.getUncommittedTables().contains(table)) {
+            if (!transactionManager.getAutoCommit() && transactionManager.getUncommittedTables().contains(table)) {
                 logger.debug("The table has not yet been written to files, but is present in the list of uncommitted tables.");
             } else {
                 throw new SQLException("Failed to rename files\n" + e.getMessage());

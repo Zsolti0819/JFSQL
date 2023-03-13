@@ -27,16 +27,6 @@ public class WriterJsonImpl extends Writer {
 
     private static final JsonSchemaValidator JSON_SCHEMA_VALIDATOR = JsonSchemaValidator.INSTANCE;
 
-    @Override
-    public String getFileExtension() {
-        return "json";
-    }
-
-    @Override
-    public String getSchemaFileExtension() {
-        return getFileExtension();
-    }
-
     private String beautify(final Object object) {
         final Gson gson = new GsonBuilder().serializeNulls().setPrettyPrinting().create();
         final StringWriter stringWriter = new StringWriter();
@@ -207,7 +197,7 @@ public class WriterJsonImpl extends Writer {
         } catch (final IOException e) {
             throw new SQLException("Failed to create directory for BLOBs.\n" + e.getMessage());
         }
-        final String newBlobName = incrementFileName(blobParent, getFileExtension());
+        final String newBlobName = incrementFileName(blobParent, "json");
         final Path blobPath = Path.of(blobParent + File.separator + newBlobName);
         try (final FileOutputStream fileOutputStream = new FileOutputStream(blobPath.toFile());
              final FileChannel fileChannel = fileOutputStream.getChannel()) {

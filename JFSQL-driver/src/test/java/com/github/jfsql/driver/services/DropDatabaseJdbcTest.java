@@ -34,7 +34,7 @@ class DropDatabaseJdbcTest {
 
     @Test
     void testDropDatabase_json() throws SQLException {
-        assumeTrue(connection.getWriter() instanceof WriterJsonImpl);
+        assumeTrue(connection.getReader() instanceof WriterJsonImpl);
         assertTrue(TestUtils.DATABASE_JSON_FILE_PATH.toFile().exists());
         assertEquals(1, statement.executeUpdate("DROP DATABASE [" + TestUtils.DATABASE_PATH + "];"));
         assertFalse(TestUtils.DATABASE_JSON_FILE_PATH.toFile().exists());
@@ -42,7 +42,7 @@ class DropDatabaseJdbcTest {
 
     @Test
     void testDropDatabase_xml() throws SQLException {
-        assumeTrue(connection.getWriter() instanceof WriterXmlImpl);
+        assumeTrue(connection.getReader() instanceof WriterXmlImpl);
         assertTrue(TestUtils.DATABASE_XML_FILE_PATH.toFile().exists());
         assertEquals(1, statement.executeUpdate("DROP DATABASE [" + TestUtils.DATABASE_PATH + "];"));
         assertFalse(TestUtils.DATABASE_XML_FILE_PATH.toFile().exists());

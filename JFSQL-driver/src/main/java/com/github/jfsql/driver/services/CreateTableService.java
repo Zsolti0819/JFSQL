@@ -3,7 +3,7 @@ package com.github.jfsql.driver.services;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
-import com.github.jfsql.driver.persistence.Writer;
+import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.WriterJsonImpl;
 import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.validation.SemanticValidator;
@@ -28,7 +28,7 @@ public class CreateTableService {
     private final Database database;
     private final TransactionManager transactionManager;
     private final SemanticValidator semanticValidator;
-    private final Writer writer;
+    private final Reader reader;
 
     public void createTable(final CreateTableWrapper statement) throws SQLException {
         final String tableName = statement.getTableName();
@@ -63,11 +63,11 @@ public class CreateTableService {
 
         final Map<String, Boolean> notNulLColumns = statement.getNotNullColumns();
         final String parentDirectory = String.valueOf(database.getUrl().getParent());
-        final String tableFile = parentDirectory + File.separator + tableName + "." + writer.getFileExtension();
+        final String tableFile = parentDirectory + File.separator + tableName + "." + reader.getFileExtension();
         final String schemaFile =
-                writer instanceof WriterJsonImpl ? parentDirectory + File.separator + tableName + "Schema."
-                        + writer.getSchemaFileExtension()
-                        : parentDirectory + File.separator + tableName + "." + writer.getSchemaFileExtension();
+                reader instanceof WriterJsonImpl ? parentDirectory + File.separator + tableName + "Schema."
+                        + reader.getSchemaFileExtension()
+                        : parentDirectory + File.separator + tableName + "." + reader.getSchemaFileExtension();
 
         if (database.getTables() == null) {
             database.setTables(new ArrayList<>());

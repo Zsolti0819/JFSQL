@@ -37,7 +37,7 @@ class CreateTableJdbcTest {
 
     @Test
     void testCreateTable_normally_json() throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterJsonImpl);
+        assumeTrue(connection.getReader() instanceof WriterJsonImpl);
         assertEquals(0, statement.executeUpdate(
                 "CREATE TABLE myTable (id INTEGER NOT NULL, name TEXT NOT NULL, age INTEGER NOT NULL)"));
         final String realTableFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
@@ -92,7 +92,7 @@ class CreateTableJdbcTest {
 
     @Test
     void testCreateTable_normally_xml() throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterXmlImpl);
+        assumeTrue(connection.getReader() instanceof WriterXmlImpl);
         assertEquals(0, statement.executeUpdate(
                 "CREATE TABLE myTable (id INTEGER NOT NULL, name TEXT NOT NULL, age INTEGER NOT NULL)"));
         final String realTableFileContent = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),

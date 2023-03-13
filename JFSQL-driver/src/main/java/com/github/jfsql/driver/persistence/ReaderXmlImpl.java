@@ -30,6 +30,16 @@ public class ReaderXmlImpl implements Reader {
     private static final Logger logger = LogManager.getLogger(ReaderXmlImpl.class);
 
     @Override
+    public String getFileExtension() {
+        return "xml";
+    }
+
+    @Override
+    public String getSchemaFileExtension() {
+        return "xsd";
+    }
+
+    @Override
     public List<Entry> readTable(final Table table) throws SQLException {
         final String tableFile = table.getTableFile();
         final List<Entry> entries = new ArrayList<>();

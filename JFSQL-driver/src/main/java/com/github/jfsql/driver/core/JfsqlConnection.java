@@ -46,7 +46,7 @@ public class JfsqlConnection implements Connection {
         transactionManager = TransactionManagerFactory.createTransactionManager(PropertiesReader.getProperty("transaction.versioning"), url, reader, writer);
         final Database database = transactionManager.getDatabase();
         tableFinder = new TableFinder(database);
-        statementServiceManager = new StatementServiceManager(database, tableFinder, transactionManager, reader, writer);
+        statementServiceManager = new StatementServiceManager(database, tableFinder, transactionManager, reader);
         metaData = new JfsqlDatabaseMetaData(this);
     }
 

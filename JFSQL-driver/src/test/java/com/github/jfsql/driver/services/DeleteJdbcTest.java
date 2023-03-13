@@ -56,7 +56,7 @@ class DeleteJdbcTest {
             "DELETE FROM myTable WHERE id > 3 AND age > 25 AND name = 'Lukas'"
     })
     void testDelete_multipleANDs_json(final String sql) throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterJsonImpl);
+        assumeTrue(connection.getReader() instanceof WriterJsonImpl);
         assertEquals(1, statement.executeUpdate(sql));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
                 StandardCharsets.UTF_8);
@@ -88,7 +88,7 @@ class DeleteJdbcTest {
             "DELETE FROM myTable WHERE id > 3 AND age > 25 AND name = 'Lukas'"
     })
     void testDelete_multipleANDs_xml(final String sql) throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterXmlImpl);
+        assumeTrue(connection.getReader() instanceof WriterXmlImpl);
         assertEquals(1, statement.executeUpdate(sql));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
                 StandardCharsets.UTF_8);
@@ -119,7 +119,7 @@ class DeleteJdbcTest {
             "DELETE FROM myTable WHERE name = 'Zsolti' OR age = 24 OR id = 3 OR name = 'Lukas'"
     })
     void testDelete_multipleORs_json(final String sql) throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterJsonImpl);
+        assumeTrue(connection.getReader() instanceof WriterJsonImpl);
         assertEquals(4, statement.executeUpdate(sql));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
                 StandardCharsets.UTF_8);
@@ -135,7 +135,7 @@ class DeleteJdbcTest {
             "DELETE FROM myTable WHERE name = 'Zsolti' OR age = 24 OR id = 3 OR name = 'Lukas'"
     })
     void testDelete_multipleORs_xml(final String sql) throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterXmlImpl);
+        assumeTrue(connection.getReader() instanceof WriterXmlImpl);
         assertEquals(4, statement.executeUpdate(
                 sql));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
@@ -151,7 +151,7 @@ class DeleteJdbcTest {
             "DELETE FROM myTable WHERE id = 1 AND name = 'Zsolti' and age = 25"
     })
     void testDelete_multipleANDsSameEntry_json(final String sql) throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterJsonImpl);
+        assumeTrue(connection.getReader() instanceof WriterJsonImpl);
         assertEquals(1, statement.executeUpdate(sql));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
                 StandardCharsets.UTF_8);
@@ -183,7 +183,7 @@ class DeleteJdbcTest {
             "DELETE FROM myTable WHERE id = 1 AND name = 'Zsolti' and age = 25"
     })
     void testDelete_multipleANDsSameEntry_xml(final String sql) throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterXmlImpl);
+        assumeTrue(connection.getReader() instanceof WriterXmlImpl);
         assertEquals(1, statement.executeUpdate(sql));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
                 StandardCharsets.UTF_8);
@@ -214,7 +214,7 @@ class DeleteJdbcTest {
             "DELETE FROM myTable WHERE id > 3 AND age > 25 AND name = 'Lukas' OR name = 'Zsolti'"
     })
     void testDelete_multipleBinaryOperators_json(final String sql) throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterJsonImpl);
+        assumeTrue(connection.getReader() instanceof WriterJsonImpl);
         assertEquals(2, statement.executeUpdate(sql));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
                 StandardCharsets.UTF_8);
@@ -241,7 +241,7 @@ class DeleteJdbcTest {
             "DELETE FROM myTable WHERE id > 3 AND age > 25 AND name = 'Lukas' OR name = 'Zsolti'"
     })
     void testDelete_multipleBinaryOperators_xml(final String sql) throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterXmlImpl);
+        assumeTrue(connection.getReader() instanceof WriterXmlImpl);
         assertEquals(2, statement.executeUpdate(sql));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
                 StandardCharsets.UTF_8);
@@ -267,7 +267,7 @@ class DeleteJdbcTest {
             "DELETE FROM myTable WHERE name = 'Tomi'"
     })
     void testDelete_equals_json(final String sql) throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterJsonImpl);
+        assumeTrue(connection.getReader() instanceof WriterJsonImpl);
         assertEquals(1, statement.executeUpdate(sql));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
                 StandardCharsets.UTF_8);
@@ -299,7 +299,7 @@ class DeleteJdbcTest {
             "DELETE FROM myTable WHERE name = 'Tomi'"
     })
     void testDelete_equals_xml(final String sql) throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterXmlImpl);
+        assumeTrue(connection.getReader() instanceof WriterXmlImpl);
         assertEquals(1, statement.executeUpdate(sql));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
                 StandardCharsets.UTF_8);
@@ -330,7 +330,7 @@ class DeleteJdbcTest {
             "DELETE FROM myTable WHERE age <= 34"
     })
     void testDelete_lte_json(final String sql) throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterJsonImpl);
+        assumeTrue(connection.getReader() instanceof WriterJsonImpl);
         assertEquals(4, statement.executeUpdate(sql));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
                 StandardCharsets.UTF_8);
@@ -346,7 +346,7 @@ class DeleteJdbcTest {
             "DELETE FROM myTable WHERE age <= 34"
     })
     void testDelete_lte_xml(final String sql) throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterXmlImpl);
+        assumeTrue(connection.getReader() instanceof WriterXmlImpl);
         assertEquals(4, statement.executeUpdate(sql));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
                 StandardCharsets.UTF_8);
@@ -361,7 +361,7 @@ class DeleteJdbcTest {
             "DELETE FROM myTable"
     })
     void testDelete_withoutWhere_json(final String sql) throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterJsonImpl);
+        assumeTrue(connection.getReader() instanceof WriterJsonImpl);
         assertEquals(4, statement.executeUpdate(sql));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
                 StandardCharsets.UTF_8);
@@ -377,7 +377,7 @@ class DeleteJdbcTest {
             "DELETE FROM myTable"
     })
     void testDelete_withoutWhere_xml(final String sql) throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterXmlImpl);
+        assumeTrue(connection.getReader() instanceof WriterXmlImpl);
         assertEquals(4, statement.executeUpdate(sql));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
                 StandardCharsets.UTF_8);

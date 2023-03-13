@@ -44,7 +44,7 @@ class UpdateJdbcTest {
 
     @Test
     void testUpdate_oneEntry1_json() throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterJsonImpl);
+        assumeTrue(connection.getReader() instanceof WriterJsonImpl);
         assertEquals(1, statement.executeUpdate(
                 "UPDATE myTable SET id = 5, name = 'Marian', age=99 WHERE id = 4 AND name = 'Lukas' AND age = 34"));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
@@ -79,7 +79,7 @@ class UpdateJdbcTest {
 
     @Test
     void testUpdate_oneEntry1_xml() throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterXmlImpl);
+        assumeTrue(connection.getReader() instanceof WriterXmlImpl);
         assertEquals(1, statement.executeUpdate(
                 "UPDATE myTable SET id = 5, name = 'Marian', age=99 WHERE id = 4 AND name = 'Lukas' AND age = 34"));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
@@ -113,7 +113,7 @@ class UpdateJdbcTest {
 
     @Test
     void testUpdate_oneEntry1PreparedStatement_json() throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterJsonImpl);
+        assumeTrue(connection.getReader() instanceof WriterJsonImpl);
         final PreparedStatement preparedStatement = connection.prepareStatement(
                 "UPDATE myTable SET id = ?, name = ?, age = ? WHERE id = ? AND name = ? AND age = ?");
         preparedStatement.setInt(1, 5);
@@ -156,7 +156,7 @@ class UpdateJdbcTest {
 
     @Test
     void testUpdate_oneEntry1PreparedStatement_xml() throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterXmlImpl);
+        assumeTrue(connection.getReader() instanceof WriterXmlImpl);
         final PreparedStatement preparedStatement = connection.prepareStatement(
                 "UPDATE myTable SET id = ?, name = ?, age = ? WHERE id = ? AND name = ? AND age = ?");
         preparedStatement.setInt(1, 5);
@@ -197,7 +197,7 @@ class UpdateJdbcTest {
 
     @Test
     void testUpdate_oneEntry2_json() throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterJsonImpl);
+        assumeTrue(connection.getReader() instanceof WriterJsonImpl);
         assertEquals(1, statement.executeUpdate("UPDATE myTable SET name = 'TomiEdited' WHERE age <= 24"));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
                 StandardCharsets.UTF_8);
@@ -231,7 +231,7 @@ class UpdateJdbcTest {
 
     @Test
     void testUpdate_oneEntry2_xml() throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterXmlImpl);
+        assumeTrue(connection.getReader() instanceof WriterXmlImpl);
         assertEquals(1, statement.executeUpdate("UPDATE myTable SET name = 'TomiEdited' WHERE age <= 24"));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
                 StandardCharsets.UTF_8);

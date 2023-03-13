@@ -40,7 +40,7 @@ class InsertJdbcTest {
 
     @Test
     void testInsert_simple_json() throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterJsonImpl);
+        assumeTrue(connection.getReader() instanceof WriterJsonImpl);
         assertEquals(1, statement.executeUpdate(
                 "INSERT INTO myTable (id, name, age) VALUES (1, 'Zsolti', 25)"));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
@@ -60,7 +60,7 @@ class InsertJdbcTest {
 
     @Test
     void testInsert_simple_xml() throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterXmlImpl);
+        assumeTrue(connection.getReader() instanceof WriterXmlImpl);
         assertEquals(1, statement.executeUpdate(
                 "INSERT INTO myTable (id, name, age) VALUES (1, 'Zsolti', 25)"));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
@@ -79,7 +79,7 @@ class InsertJdbcTest {
 
     @Test
     void testInsert_multiRow_json() throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterJsonImpl);
+        assumeTrue(connection.getReader() instanceof WriterJsonImpl);
         assertEquals(4, statement.executeUpdate(
                 "INSERT INTO myTable (id, name, age) VALUES (1, 'Zsolti', 25), (2, 'Tomi', 24), (3, 'Ivan', 26), (4, 'Lukas', 34)"));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
@@ -114,7 +114,7 @@ class InsertJdbcTest {
 
     @Test
     void testInsert_multiRow_xml() throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterXmlImpl);
+        assumeTrue(connection.getReader() instanceof WriterXmlImpl);
         assertEquals(4, statement.executeUpdate(
                 "INSERT INTO myTable (id, name, age) VALUES (1, 'Zsolti', 25), (2, 'Tomi', 24), (3, 'Ivan', 26), (4, 'Lukas', 34)"));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
@@ -148,7 +148,7 @@ class InsertJdbcTest {
 
     @Test
     void testInsert_noExplicitColumns_xml() throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterXmlImpl);
+        assumeTrue(connection.getReader() instanceof WriterXmlImpl);
         assertEquals(4, statement.executeUpdate(
                 "INSERT INTO myTable VALUES (1, 'Zsolti', 25), (2, 'Tomi', 24), (3, 'Ivan', 26), (4, 'Lukas', 34)"));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
@@ -182,7 +182,7 @@ class InsertJdbcTest {
 
     @Test
     void testInsert_noExplicitColumns_json() throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterJsonImpl);
+        assumeTrue(connection.getReader() instanceof WriterJsonImpl);
         assertEquals(4, statement.executeUpdate(
                 "INSERT INTO myTable VALUES (1, 'Zsolti', 25), (2, 'Tomi', 24), (3, 'Ivan', 26), (4, 'Lukas', 34)"));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),

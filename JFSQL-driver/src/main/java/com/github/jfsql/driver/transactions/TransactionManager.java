@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 public abstract class TransactionManager {
@@ -22,45 +23,24 @@ public abstract class TransactionManager {
     protected final Writer writer;
     protected Database database;
     boolean autoCommit;
+    private final List<Table> uncommittedTables;
+    private final List<Table> uncommittedSchemas;
+    private final List<Database> uncommittedDatabases;
 
     protected TransactionManager(final Path url, final Reader reader, final Writer writer) throws SQLException {
         autoCommit = true;
         this.reader = reader;
         this.writer = writer;
-        final Path databaseFile = Path.of(url + File.separator + url.getFileName() + "." + writer.getFileExtension());
+        final Path databaseFile = Path.of(url + File.separator + url.getFileName() + "." + reader.getFileExtension());
         database = new Database(databaseFile);
         if (!database.getUrl().toFile().exists()) {
             initDatabase(database);
         } else {
             openDatabase();
         }
-    }
-
-    public abstract void commit() throws SQLException;
-
-    public abstract void rollback() throws SQLException;
-
-    public boolean getAutoCommit() {
-        return autoCommit;
-    }
-
-    public void setAutoCommit(final boolean autoCommit) {
-        this.autoCommit = autoCommit;
-    }
-
-    void writeUncommittedObjects() throws SQLException {
-        try {
-            writer.writeUncommittedDatabases();
-            writer.writeUncommittedSchemas();
-            writer.writeUncommittedTables();
-        } catch (final SQLException e) {
-            e.printStackTrace();
-            rollback();
-        } finally {
-            writer.getUncommittedDatabases().clear();
-            writer.getUncommittedSchemas().clear();
-            writer.getUncommittedTables().clear();
-        }
+        uncommittedTables = new ArrayList<>();
+        uncommittedSchemas = new ArrayList<>();
+        uncommittedDatabases = new ArrayList<>();
     }
 
     public void openDatabase() throws SQLException {
@@ -84,9 +64,42 @@ public abstract class TransactionManager {
         }
     }
 
+    public abstract void commit() throws SQLException;
+
+    public abstract void rollback() throws SQLException;
+
+    public boolean getAutoCommit() {
+        return autoCommit;
+    }
+
+    public void setAutoCommit(final boolean autoCommit) {
+        this.autoCommit = autoCommit;
+    }
+
+    void writeUncommittedObjects() throws SQLException {
+        try {
+            for (final Database db : uncommittedDatabases) {
+                writer.writeDatabaseFile(db);
+            }
+            for (final Table table : uncommittedSchemas) {
+                writer.writeSchema(table);
+            }
+            for (final Table table : uncommittedTables) {
+                writer.writeTable(table);
+            }
+        } catch (final SQLException e) {
+            e.printStackTrace();
+            rollback();
+        } finally {
+            uncommittedDatabases.clear();
+            uncommittedSchemas.clear();
+            uncommittedTables.clear();
+        }
+    }
+
     public void executeDMLOperation(final Table table) throws SQLException {
         if (!autoCommit) {
-            writer.addTableToUncommittedObjects(table);
+            addTableToUncommittedObjects(table);
         } else {
             try {
                 writer.writeTable(table);
@@ -100,9 +113,9 @@ public abstract class TransactionManager {
 
     public void executeDDLOperation(final Table table) throws SQLException {
         if (!autoCommit) {
-            writer.addSchemaToUncommittedObjects(table);
-            writer.addTableToUncommittedObjects(table);
-            writer.addDatabaseToUncommittedObjects(database);
+            addSchemaToUncommittedObjects(table);
+            addTableToUncommittedObjects(table);
+            addDatabaseToUncommittedObjects(database);
         } else {
             try {
                 writer.writeSchema(table);
@@ -118,7 +131,7 @@ public abstract class TransactionManager {
 
     public void executeDropTableOperation() throws SQLException {
         if (!autoCommit) {
-            writer.addDatabaseToUncommittedObjects(database);
+            addDatabaseToUncommittedObjects(database);
         } else {
             try {
                 writer.writeDatabaseFile(database);
@@ -132,6 +145,21 @@ public abstract class TransactionManager {
 
     public void executeCreateDatabaseOperation(final Database database) throws SQLException {
         initDatabase(database);
+    }
+
+    public void addTableToUncommittedObjects(final Table table) {
+        uncommittedTables.removeIf(t -> Objects.equals(t.getName(), table.getName()));
+        uncommittedTables.add(table);
+    }
+
+    public void addSchemaToUncommittedObjects(final Table table) {
+        uncommittedSchemas.removeIf(t -> Objects.equals(t.getName(), table.getName()));
+        uncommittedSchemas.add(table);
+    }
+
+    public void addDatabaseToUncommittedObjects(final Database database) {
+        uncommittedDatabases.removeIf(db -> Objects.equals(db.getUrl(), database.getUrl()));
+        uncommittedDatabases.add(database);
     }
 
 }

@@ -2,7 +2,7 @@ package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.TestUtils;
 import com.github.jfsql.driver.dto.Database;
-import com.github.jfsql.driver.persistence.Writer;
+import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.CreateTableWrapper;
@@ -29,7 +29,7 @@ class CreateTableServiceTest {
     private SemanticValidator semanticValidator;
 
     @Mock
-    private Writer writer;
+    private Reader reader;
 
     @Mock
     private Database database;
@@ -42,7 +42,7 @@ class CreateTableServiceTest {
 
     @Test
     void testCreateTable_normally() throws SQLException {
-        when(writer.getFileExtension()).thenReturn("xml");
+        when(reader.getFileExtension()).thenReturn("xml");
         when(database.getUrl()).thenReturn(TestUtils.DATABASE_XML_FILE_PATH);
         when(semanticValidator.tableExists(createTableStatement, database)).thenReturn(false);
 

@@ -2,7 +2,6 @@ package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.persistence.Reader;
-import com.github.jfsql.driver.persistence.Writer;
 import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.util.ColumnToTypeMapper;
 import com.github.jfsql.driver.util.WhereConditionSolver;
@@ -22,34 +21,32 @@ public class StatementServiceManager {
     private final ColumnToTypeMapper columnToTypeMapper;
     private final WhereConditionSolver whereConditionSolver;
     private final Reader reader;
-    private final Writer writer;
     private final Database database;
 
-    public StatementServiceManager(final Database database, final TableFinder tableFinder, final TransactionManager transactionManager, final Reader reader, final Writer writer) {
+    public StatementServiceManager(final Database database, final TableFinder tableFinder, final TransactionManager transactionManager, final Reader reader) {
         this.database = database;
         this.tableFinder = tableFinder;
         this.transactionManager = transactionManager;
         this.reader = reader;
-        this.writer = writer;
         semanticValidator = new SemanticValidator();
         columnToTypeMapper = new ColumnToTypeMapper();
         whereConditionSolver = new WhereConditionSolver();
     }
 
     public void alterTable(final AlterTableWrapper statement) throws SQLException {
-        new AlterTableService(tableFinder, database, transactionManager, semanticValidator, reader, writer).alterTable(statement);
+        new AlterTableService(tableFinder, database, transactionManager, semanticValidator, reader).alterTable(statement);
     }
 
     public void createDatabase(final CreateDatabaseWrapper statement) throws SQLException {
-        new CreateDatabaseService(transactionManager, semanticValidator, writer).createDatabase(statement);
+        new CreateDatabaseService(transactionManager, semanticValidator, reader).createDatabase(statement);
     }
 
     public int dropDatabase(final DropDatabaseWrapper statement) throws SQLException {
-        return new DropDatabaseService(transactionManager, semanticValidator, writer).dropDatabase(statement);
+        return new DropDatabaseService(transactionManager, semanticValidator, reader).dropDatabase(statement);
     }
 
     public void createTable(final CreateTableWrapper statement) throws SQLException {
-        new CreateTableService(database, transactionManager, semanticValidator, writer).createTable(statement);
+        new CreateTableService(database, transactionManager, semanticValidator, reader).createTable(statement);
     }
 
     public int insertIntoTable(final InsertWrapper statement) throws SQLException {

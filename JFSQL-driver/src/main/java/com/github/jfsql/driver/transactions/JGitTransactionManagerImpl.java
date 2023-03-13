@@ -57,8 +57,8 @@ public class JGitTransactionManagerImpl extends TransactionManager {
     }
 
     private Collection<File> getFilesThatShouldNotBePresent() throws SQLException {
-        final String fileExtension = writer.getFileExtension();
-        final String schemaExtension = writer.getSchemaFileExtension();
+        final String fileExtension = reader.getFileExtension();
+        final String schemaExtension = reader.getSchemaFileExtension();
         final String[] extensions = new String[]{fileExtension, schemaExtension};
         final Collection<File> files = FileUtils.listFiles(database.getUrl().getParent().toFile(), extensions, false);
         final Collection<File> filesToDelete = new ArrayList<>();

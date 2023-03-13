@@ -22,6 +22,16 @@ public class ReaderJsonImpl implements Reader {
     private static final Logger logger = LogManager.getLogger(ReaderJsonImpl.class);
 
     @Override
+    public String getFileExtension() {
+        return "json";
+    }
+
+    @Override
+    public String getSchemaFileExtension() {
+        return getFileExtension();
+    }
+
+    @Override
     public List<Entry> readTable(final Table table) throws SQLException {
         final String tableFile = table.getTableFile();
         final List<Entry> entries = new ArrayList<>();

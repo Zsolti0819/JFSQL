@@ -39,7 +39,7 @@ class CreateDatabaseJdbcTest {
 
     @Test
     void testCreateDatabase_normally_json() throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterJsonImpl);
+        assumeTrue(connection.getReader() instanceof WriterJsonImpl);
         assertEquals(0, statement.executeUpdate("CREATE DATABASE [" + TestUtils.DATABASE2_PATH + "];"));
         final String realFileContent = FileUtils.readFileToString(new File(TestUtils.DATABASE2_JSON_FILE_PATH.toUri()),
                 StandardCharsets.UTF_8);
@@ -54,7 +54,7 @@ class CreateDatabaseJdbcTest {
 
     @Test
     void testCreateDatabase_normally_xml() throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterXmlImpl);
+        assumeTrue(connection.getReader() instanceof WriterXmlImpl);
         assertEquals(0, statement.executeUpdate("CREATE DATABASE [" + TestUtils.DATABASE2_PATH + "];"));
         final String realFileContent = FileUtils.readFileToString(new File(TestUtils.DATABASE2_XML_FILE_PATH.toUri()),
                 StandardCharsets.UTF_8);

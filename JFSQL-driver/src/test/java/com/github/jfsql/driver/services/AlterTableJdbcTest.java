@@ -42,7 +42,7 @@ class AlterTableJdbcTest {
 
     @Test
     void testAlterTable_renameTable_json() throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterJsonImpl);
+        assumeTrue(connection.getReader() instanceof WriterJsonImpl);
         statement.execute("ALTER TABLE myTable RENAME to myTableEdited;");
         final String realDatabaseFileContentAfter = FileUtils.readFileToString(
                 TestUtils.DATABASE_JSON_FILE_PATH.toFile(), StandardCharsets.UTF_8);
@@ -84,7 +84,7 @@ class AlterTableJdbcTest {
 
     @Test
     void testAlterTable_renameTable_xml() throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterXmlImpl);
+        assumeTrue(connection.getReader() instanceof WriterXmlImpl);
         statement.execute("ALTER TABLE myTable RENAME to myTableEdited;");
         final String realDatabaseFileContentAfter = FileUtils.readFileToString(
                 TestUtils.DATABASE_XML_FILE_PATH.toFile(), StandardCharsets.UTF_8);
@@ -126,7 +126,7 @@ class AlterTableJdbcTest {
 
     @Test
     void testAlterTable_renameColumn_json() throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterJsonImpl);
+        assumeTrue(connection.getReader() instanceof WriterJsonImpl);
         statement.execute("ALTER TABLE myTable RENAME COLUMN age TO age_edited;");
         final String realTableFileContentAfter = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
                 StandardCharsets.UTF_8);
@@ -160,7 +160,7 @@ class AlterTableJdbcTest {
 
     @Test
     void testAlterTable_renameColumn_xml() throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterXmlImpl);
+        assumeTrue(connection.getReader() instanceof WriterXmlImpl);
         statement.execute("ALTER TABLE myTable RENAME COLUMN age TO age_edited;");
         final String realTableFileContentAfter = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
                 StandardCharsets.UTF_8);
@@ -194,7 +194,7 @@ class AlterTableJdbcTest {
 
     @Test
     void testAlterTable_dropColumn_json() throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterJsonImpl);
+        assumeTrue(connection.getReader() instanceof WriterJsonImpl);
         statement.execute("ALTER TABLE myTable DROP COLUMN age;");
         final String realTableFileContentAfter = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
                 StandardCharsets.UTF_8);
@@ -224,7 +224,7 @@ class AlterTableJdbcTest {
 
     @Test
     void testAlterTable_dropColumn_xml() throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterXmlImpl);
+        assumeTrue(connection.getReader() instanceof WriterXmlImpl);
         statement.execute("ALTER TABLE myTable DROP COLUMN age;");
         final String realTableFileContentAfter = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
                 StandardCharsets.UTF_8);
@@ -254,7 +254,7 @@ class AlterTableJdbcTest {
 
     @Test
     void testAlterTable_addColumn_json() throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterJsonImpl);
+        assumeTrue(connection.getReader() instanceof WriterJsonImpl);
         statement.execute("ALTER TABLE myTable ADD COLUMN salary REAL;");
         final String realTableFileContentAfter = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
                 StandardCharsets.UTF_8);
@@ -292,7 +292,7 @@ class AlterTableJdbcTest {
 
     @Test
     void testAlterTable_addColumn_xml() throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterXmlImpl);
+        assumeTrue(connection.getReader() instanceof WriterXmlImpl);
         statement.execute("ALTER TABLE myTable ADD COLUMN salary REAL;");
         final String realTableFileContentAfter = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
                 StandardCharsets.UTF_8);

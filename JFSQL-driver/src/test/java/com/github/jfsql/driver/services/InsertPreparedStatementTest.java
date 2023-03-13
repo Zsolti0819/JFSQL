@@ -42,7 +42,7 @@ class InsertPreparedStatementTest {
 
     @Test
     void testInsert_preparedStatement_simple_json() throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterJsonImpl);
+        assumeTrue(connection.getReader() instanceof WriterJsonImpl);
         final PreparedStatement preparedStatement = connection.prepareStatement(
                 "INSERT INTO myTable (id, name, age, file) VALUES (?, ?, ?, ?)");
         preparedStatement.setInt(1, 1);
@@ -68,7 +68,7 @@ class InsertPreparedStatementTest {
 
     @Test
     void testInsert_preparedStatement_simple_xml() throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterXmlImpl);
+        assumeTrue(connection.getReader() instanceof WriterXmlImpl);
         final PreparedStatement preparedStatement = connection.prepareStatement(
                 "INSERT INTO myTable (id, name, age, file) VALUES (?, ?, ?, ?)");
         preparedStatement.setInt(1, 1);
@@ -92,7 +92,7 @@ class InsertPreparedStatementTest {
 
     @Test
     void testInsert_preparedStatement_blob_xml() throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterXmlImpl);
+        assumeTrue(connection.getReader() instanceof WriterXmlImpl);
         final PreparedStatement preparedStatement = connection.prepareStatement(
                 "INSERT INTO myTable (id, name, age, file) VALUES (?, ?, ?, ?)");
         preparedStatement.setInt(1, 1);
@@ -130,7 +130,7 @@ class InsertPreparedStatementTest {
 
     @Test
     void testInsert_preparedStatement_blob_json() throws SQLException, IOException {
-        assumeTrue(connection.getWriter() instanceof WriterJsonImpl);
+        assumeTrue(connection.getReader() instanceof WriterJsonImpl);
         final PreparedStatement preparedStatement = connection.prepareStatement(
                 "INSERT INTO myTable (id, name, age, file) VALUES (?, ?, ?, ?)");
         preparedStatement.setInt(1, 1);

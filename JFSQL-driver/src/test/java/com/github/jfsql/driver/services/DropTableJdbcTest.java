@@ -35,7 +35,7 @@ class DropTableJdbcTest {
 
     @Test
     void testDropTable_normally_json() throws SQLException {
-        assumeTrue(connection.getWriter() instanceof WriterJsonImpl);
+        assumeTrue(connection.getReader() instanceof WriterJsonImpl);
         assertTrue(TestUtils.TABLE_JSON_FILE_PATH.toFile().exists());
         assertTrue(TestUtils.TABLE_JSON_SCHEMA_FILE_PATH.toFile().exists());
         assertFalse(statement.execute("DROP TABLE myTable"));
@@ -45,7 +45,7 @@ class DropTableJdbcTest {
 
     @Test
     void testDropTable_normally_xml() throws SQLException {
-        assumeTrue(connection.getWriter() instanceof WriterXmlImpl);
+        assumeTrue(connection.getReader() instanceof WriterXmlImpl);
         assertTrue(TestUtils.TABLE_XML_FILE_PATH.toFile().exists());
         assertTrue(TestUtils.TABLE_XSD_FILE_PATH.toFile().exists());
         assertFalse(statement.execute("DROP TABLE myTable"));

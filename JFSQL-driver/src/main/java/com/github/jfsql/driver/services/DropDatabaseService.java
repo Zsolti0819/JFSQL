@@ -1,6 +1,6 @@
 package com.github.jfsql.driver.services;
 
-import com.github.jfsql.driver.persistence.Writer;
+import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.DropDatabaseWrapper;
@@ -15,10 +15,10 @@ class DropDatabaseService {
 
     private final TransactionManager transactionManager;
     private final SemanticValidator semanticValidator;
-    private final Writer writer;
+    private final Reader reader;
 
     int dropDatabase(final DropDatabaseWrapper statement) throws SQLException {
-        if (!semanticValidator.databaseExist(statement, writer.getFileExtension())) {
+        if (!semanticValidator.databaseExist(statement, reader.getFileExtension())) {
             throw new SQLException("Database file does not exist, it cannot be deleted.");
         }
 
