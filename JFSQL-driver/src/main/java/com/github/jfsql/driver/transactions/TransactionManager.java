@@ -5,11 +5,8 @@ import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
 import lombok.Data;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -21,11 +18,11 @@ public abstract class TransactionManager {
 
     protected final Reader reader;
     protected final Writer writer;
-    protected Database database;
-    boolean autoCommit;
     private final List<Table> uncommittedTables;
     private final List<Table> uncommittedSchemas;
     private final List<Database> uncommittedDatabases;
+    protected Database database;
+    boolean autoCommit;
 
     protected TransactionManager(final Path url, final Reader reader, final Writer writer) throws SQLException {
         autoCommit = true;
@@ -43,26 +40,9 @@ public abstract class TransactionManager {
         uncommittedDatabases = new ArrayList<>();
     }
 
-    public void openDatabase() throws SQLException {
-        try (final Git ignored = Git.open(database.getUrl().getParent().toFile())) {
-            final List<Table> tables = reader.readDatabaseFile(database);
-            database.setTables(tables);
-        } catch (final IOException e) {
-            throw new SQLException("Couldn't open git repository.\n" + e.getMessage());
-        }
-    }
+    public abstract void initDatabase(final Database database) throws SQLException;
 
-    public void initDatabase(final Database database) throws SQLException {
-        try (final Git git = Git.init().setDirectory(database.getUrl().getParent().toFile()).call()) {
-            final List<Table> tables = new ArrayList<>();
-            database.setTables(tables);
-            writer.writeDatabaseFile(database);
-            git.add().addFilepattern(".").call();
-            git.commit().setMessage("Initial commit").call();
-        } catch (final GitAPIException e) {
-            throw new SQLException("Couldn't init git repository.\n" + e.getMessage());
-        }
-    }
+    public abstract void openDatabase() throws SQLException;
 
     public abstract void commit() throws SQLException;
 
