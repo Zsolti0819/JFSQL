@@ -15,7 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DeleteService {
 
-    private final StatementManager statementManager;
+    private final TableFinder tableFinder;
     private final Transaction transaction;
     private final SemanticValidator semanticValidator;
     private final WhereConditionSolver whereConditionSolver;
@@ -23,7 +23,7 @@ public class DeleteService {
 
     public int deleteFromTable(final DeleteWrapper statement) throws SQLException {
         final List<String> whereColumns = statement.getWhereColumns();
-        final Table activeTable = statementManager.getTableByName(statement.getTableName());
+        final Table activeTable = tableFinder.getTableByName(statement.getTableName());
         if (activeTable.getEntries() == null) {
             final List<Entry> entries = reader.readTable(activeTable);
             activeTable.setEntries(entries);

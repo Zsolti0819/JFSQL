@@ -68,7 +68,7 @@ public class StatementManager {
     }
 
     public int deleteFromTable(final DeleteWrapper statement) throws SQLException {
-        return new DeleteService(this, transaction, semanticValidator, whereConditionSolver, reader).deleteFromTable(statement);
+        return new DeleteService(tableFinder, transaction, semanticValidator, whereConditionSolver, reader).deleteFromTable(statement);
     }
 
     public int dropTable(final DropTableWrapper statement) throws SQLException {

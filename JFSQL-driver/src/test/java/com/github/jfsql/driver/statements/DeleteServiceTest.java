@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 class DeleteServiceTest {
 
     @Mock
-    private StatementManager statementManager;
+    private TableFinder tableFinder;
 
     @Mock
     private Transaction transaction;
@@ -53,7 +53,7 @@ class DeleteServiceTest {
     @Test
     void testDelete_normally() throws SQLException {
         when(deleteStatement.getWhereColumns()).thenReturn(List.of("column1", "column2", "column3"));
-        when(statementManager.getTableByName(deleteStatement.getTableName())).thenReturn(table);
+        when(tableFinder.getTableByName(deleteStatement.getTableName())).thenReturn(table);
         when(table.getEntries()).thenReturn(entries);
         when(semanticValidator.allWhereColumnsExist(table, deleteStatement)).thenReturn(true);
         when(whereConditionSolver.getWhereEntries(table, deleteStatement)).thenReturn(whereEntries);
@@ -67,7 +67,7 @@ class DeleteServiceTest {
     @Test
     void testDelete_whereColumnIsEmpty() throws SQLException {
         when(deleteStatement.getWhereColumns()).thenReturn(Collections.emptyList());
-        when(statementManager.getTableByName(deleteStatement.getTableName())).thenReturn(table);
+        when(tableFinder.getTableByName(deleteStatement.getTableName())).thenReturn(table);
         when(table.getEntries()).thenReturn(entries);
 
         deleteService.deleteFromTable(deleteStatement);
@@ -78,7 +78,7 @@ class DeleteServiceTest {
 
     @Test
     void testDelete_columnsNotExists() throws SQLException {
-        when(statementManager.getTableByName(deleteStatement.getTableName())).thenReturn(table);
+        when(tableFinder.getTableByName(deleteStatement.getTableName())).thenReturn(table);
         when(deleteStatement.getWhereColumns()).thenReturn(List.of("column1", "column2", "column3"));
         when(semanticValidator.allWhereColumnsExist(table, deleteStatement)).thenReturn(false);
 
