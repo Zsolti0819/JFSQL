@@ -6,7 +6,7 @@ import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
 import com.github.jfsql.driver.persistence.WriterJsonImpl;
-import com.github.jfsql.driver.transactions.Transaction;
+import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.AlterTableWrapper;
 import lombok.RequiredArgsConstructor;
@@ -26,13 +26,13 @@ import java.util.Objects;
 @RequiredArgsConstructor
 class AlterTableService {
 
+    private static final Logger logger = LogManager.getLogger(AlterTableService.class);
     private final TableFinder tableFinder;
     private final Database database;
-    private final Transaction transaction;
+    private final TransactionManager transactionManager;
     private final SemanticValidator semanticValidator;
     private final Reader reader;
     private final Writer writer;
-    private static final Logger logger = LogManager.getLogger(AlterTableService.class);
 
     void alterTable(final AlterTableWrapper statement) throws SQLException {
         final String tableName = statement.getTableName();
@@ -46,7 +46,7 @@ class AlterTableService {
         } else if (statement.getColumnToDrop() != null) {
             dropColumn(statement, table);
         }
-        transaction.executeDDLOperation(table);
+        transactionManager.executeDDLOperation(table);
     }
 
     private void renameTable(final AlterTableWrapper statement, final Table table) throws SQLException {
@@ -70,7 +70,7 @@ class AlterTableService {
             FileUtils.moveFile(FileUtils.getFile(oldTableFile), FileUtils.getFile(newTableFile));
             FileUtils.moveFile(FileUtils.getFile(oldSchemaFile), FileUtils.getFile(newSchemaFile));
         } catch (final IOException e) {
-            if (!transaction.getAutoCommit() && writer.getUncommittedTables().contains(table)) {
+            if (!transactionManager.getAutoCommit() && writer.getUncommittedTables().contains(table)) {
                 logger.debug("The table has not yet been written to files, but is present in the list of uncommitted tables.");
             } else {
                 throw new SQLException("Failed to rename files\n" + e.getMessage());

@@ -16,14 +16,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public abstract class Transaction {
+public abstract class TransactionManager {
 
-    protected Database database;
     protected final Reader reader;
     protected final Writer writer;
+    protected Database database;
     boolean autoCommit;
 
-    protected Transaction(final Path url, final Reader reader, final Writer writer) throws SQLException {
+    protected TransactionManager(final Path url, final Reader reader, final Writer writer) throws SQLException {
         autoCommit = true;
         this.reader = reader;
         this.writer = writer;

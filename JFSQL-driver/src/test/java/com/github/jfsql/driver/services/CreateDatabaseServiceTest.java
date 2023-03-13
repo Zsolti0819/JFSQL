@@ -2,7 +2,7 @@ package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.TestUtils;
 import com.github.jfsql.driver.persistence.Writer;
-import com.github.jfsql.driver.transactions.Transaction;
+import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.CreateDatabaseWrapper;
 import org.junit.jupiter.api.Test;
@@ -24,7 +24,7 @@ class CreateDatabaseServiceTest {
     private SemanticValidator semanticValidator;
 
     @Mock
-    private Transaction transaction;
+    private TransactionManager transactionManager;
 
     @Mock
     private Writer writer;
@@ -41,7 +41,7 @@ class CreateDatabaseServiceTest {
         when(semanticValidator.urlIsAnExistingRegularFile(createDatabaseStatement)).thenReturn(false);
         when(semanticValidator.databaseExist(createDatabaseStatement, writer.getFileExtension())).thenReturn(false);
         createDatabaseService.createDatabase(createDatabaseStatement);
-        verify(transaction, times(1)).executeCreateDatabaseOperation(any());
+        verify(transactionManager, times(1)).executeCreateDatabaseOperation(any());
     }
 
     @Test
@@ -52,7 +52,7 @@ class CreateDatabaseServiceTest {
                 () -> createDatabaseService.createDatabase(createDatabaseStatement));
         assertEquals("Database is not a directory.", thrown.getMessage());
 
-        verify(transaction, never()).executeCreateDatabaseOperation(any());
+        verify(transactionManager, never()).executeCreateDatabaseOperation(any());
     }
 
     @Test
@@ -64,6 +64,6 @@ class CreateDatabaseServiceTest {
                 () -> createDatabaseService.createDatabase(createDatabaseStatement));
         assertEquals("Database already exists, will not create another one.", thrown.getMessage());
 
-        verify(transaction, never()).executeCreateDatabaseOperation(any());
+        verify(transactionManager, never()).executeCreateDatabaseOperation(any());
     }
 }

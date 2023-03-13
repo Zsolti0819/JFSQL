@@ -17,11 +17,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 
-public class CommittingTransaction extends Transaction {
+public class JGitTransactionManagerImpl extends TransactionManager {
 
-    private static final Logger logger = LogManager.getLogger(CommittingTransaction.class);
+    private static final Logger logger = LogManager.getLogger(JGitTransactionManagerImpl.class);
 
-    public CommittingTransaction(final Path url, final Reader reader, final Writer writer) throws SQLException {
+    public JGitTransactionManagerImpl(final Path url, final Reader reader, final Writer writer) throws SQLException {
         super(url, reader, writer);
     }
 
@@ -46,7 +46,7 @@ public class CommittingTransaction extends Transaction {
 
     @Override
     public void rollback() throws SQLException {
-        logger.warn("Transaction rollback...");
+        logger.warn("TransactionManager rollback...");
         try (final Git git = Git.open(database.getUrl().getParent().toFile())) {
             final ResetCommand resetCommand = git.reset().setMode(ResetCommand.ResetType.HARD);
             resetCommand.call();

@@ -2,7 +2,7 @@ package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
-import com.github.jfsql.driver.transactions.Transaction;
+import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.util.WhereConditionSolver;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.DeleteWrapper;
@@ -27,7 +27,7 @@ class DeleteServiceTest {
     private TableFinder tableFinder;
 
     @Mock
-    private Transaction transaction;
+    private TransactionManager transactionManager;
 
     @Mock
     private SemanticValidator semanticValidator;
@@ -61,7 +61,7 @@ class DeleteServiceTest {
         deleteService.deleteFromTable(deleteStatement);
 
         verify(entries, times(1)).removeAll(whereEntries);
-        verify(transaction, times(1)).executeDMLOperation(table);
+        verify(transactionManager, times(1)).executeDMLOperation(table);
     }
 
     @Test
@@ -73,7 +73,7 @@ class DeleteServiceTest {
         deleteService.deleteFromTable(deleteStatement);
 
         verify(entries, times(1)).clear();
-        verify(transaction, times(1)).executeDMLOperation(table);
+        verify(transactionManager, times(1)).executeDMLOperation(table);
     }
 
     @Test
@@ -86,7 +86,7 @@ class DeleteServiceTest {
                 () -> deleteService.deleteFromTable(deleteStatement));
         assertEquals("Some columns entered doesn't exist in \"" + table.getName() + "\".", thrown.getMessage());
 
-        verify(transaction, never()).executeDMLOperation(table);
+        verify(transactionManager, never()).executeDMLOperation(table);
         verifyNoInteractions(whereConditionSolver);
         verifyNoInteractions(entries);
     }

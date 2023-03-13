@@ -20,7 +20,7 @@ import java.sql.Statement;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-class TransactionTest {
+class TransactionManagerTest {
 
     private Statement statement;
     private JfsqlConnection connection;
@@ -111,7 +111,7 @@ class TransactionTest {
     @Test
     void testCommitDropTable_xml() throws SQLException {
         assumeTrue(connection.getWriter() instanceof WriterXmlImpl);
-        assumeTrue(connection.getTransaction() instanceof CommittingTransaction);
+        assumeTrue(connection.getTransactionManager() instanceof JGitTransactionManagerImpl);
         statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
         connection.setAutoCommit(false);
 
@@ -136,7 +136,7 @@ class TransactionTest {
     @Test
     void testCommitDropTable_json() throws SQLException {
         assumeTrue(connection.getWriter() instanceof WriterJsonImpl);
-        assumeTrue(connection.getTransaction() instanceof CommittingTransaction);
+        assumeTrue(connection.getTransactionManager() instanceof JGitTransactionManagerImpl);
         statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
         connection.setAutoCommit(false);
 
@@ -161,7 +161,7 @@ class TransactionTest {
     @Test
     void testCommitAndRollback_xml() throws SQLException, IOException {
         assumeTrue(connection.getWriter() instanceof WriterXmlImpl);
-        assumeTrue(connection.getTransaction() instanceof CommittingTransaction);
+        assumeTrue(connection.getTransactionManager() instanceof JGitTransactionManagerImpl);
         statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
         connection.setAutoCommit(false);
 
@@ -191,7 +191,7 @@ class TransactionTest {
     @Test
     void testCommitAndRollback_json() throws SQLException, IOException {
         assumeTrue(connection.getWriter() instanceof WriterJsonImpl);
-        assumeTrue(connection.getTransaction() instanceof CommittingTransaction);
+        assumeTrue(connection.getTransactionManager() instanceof JGitTransactionManagerImpl);
         statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
         connection.setAutoCommit(false);
 

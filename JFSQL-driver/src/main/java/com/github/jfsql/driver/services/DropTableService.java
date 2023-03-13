@@ -4,7 +4,7 @@ import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
-import com.github.jfsql.driver.transactions.Transaction;
+import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.DropTableWrapper;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ public class DropTableService {
     private static final Logger logger = LogManager.getLogger(DropTableService.class);
     private final TableFinder tableFinder;
     private final Database database;
-    private final Transaction transaction;
+    private final TransactionManager transactionManager;
     private final SemanticValidator semanticValidator;
     private final Reader reader;
 
@@ -49,7 +49,7 @@ public class DropTableService {
 
         final int deleteCount = activeTable.getEntries().size();
         database.getTables().remove(activeTable);
-        transaction.executeDropTableOperation();
+        transactionManager.executeDropTableOperation();
         return deleteCount;
     }
 }

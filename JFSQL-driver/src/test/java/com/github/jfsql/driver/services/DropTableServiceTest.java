@@ -3,7 +3,7 @@ package com.github.jfsql.driver.services;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
-import com.github.jfsql.driver.transactions.Transaction;
+import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.DropTableWrapper;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ class DropTableServiceTest {
     private TableFinder tableFinder;
 
     @Mock
-    private Transaction transaction;
+    private TransactionManager transactionManager;
 
     @Mock
     private SemanticValidator semanticValidator;
@@ -56,7 +56,7 @@ class DropTableServiceTest {
 
         dropTableService.dropTable(dropTableStatement);
 
-        verify(transaction, times(1)).executeDropTableOperation();
+        verify(transactionManager, times(1)).executeDropTableOperation();
 
     }
 
@@ -69,7 +69,7 @@ class DropTableServiceTest {
                 () -> dropTableService.dropTable(dropTableStatement));
         assertEquals("Cannot DROP " + dropTableStatement.getTableName() + " because the table's file or schema doesn't exist.", thrown.getMessage());
 
-        verify(transaction, never()).executeDropTableOperation();
+        verify(transactionManager, never()).executeDropTableOperation();
 
     }
 
@@ -80,7 +80,7 @@ class DropTableServiceTest {
         when(tableFinder.getTableByName(dropTableStatement.getTableName())).thenThrow(SQLException.class);
 
         assertDoesNotThrow(() -> dropTableService.dropTable(dropTableStatement));
-        verify(transaction, never()).executeDropTableOperation();
+        verify(transactionManager, never()).executeDropTableOperation();
     }
 
 }

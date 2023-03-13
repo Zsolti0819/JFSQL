@@ -16,7 +16,7 @@
     <properties>
         <!-- Configuration properties -->
         <persistence>xml</persistence>
-        <transactions>committing</transactions>
+        <transaction.versioning>true</transaction.versioning>
         <statement.caching>true</statement.caching>
         <schema.validation>true</schema.validation>
         <!-- End of configuration properties -->

@@ -4,13 +4,13 @@ import com.github.jfsql.driver.cache.Cache;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.factories.CacheFactory;
 import com.github.jfsql.driver.factories.ReaderFactory;
-import com.github.jfsql.driver.factories.TransactionFactory;
+import com.github.jfsql.driver.factories.TransactionManagerFactory;
 import com.github.jfsql.driver.factories.WriterFactory;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
 import com.github.jfsql.driver.services.StatementServiceManager;
 import com.github.jfsql.driver.services.TableFinder;
-import com.github.jfsql.driver.transactions.Transaction;
+import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.util.PropertiesReader;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,7 +28,7 @@ public class JfsqlConnection implements Connection {
     private final Path url;
     private final Reader reader;
     private final Writer writer;
-    private final Transaction transaction;
+    private final TransactionManager transactionManager;
     private final StatementServiceManager statementServiceManager;
     private final TableFinder tableFinder;
     private final Cache cache;
@@ -43,10 +43,10 @@ public class JfsqlConnection implements Connection {
         cache = CacheFactory.createCache(PropertiesReader.getProperty("statement.caching"));
         reader = ReaderFactory.createReader(PropertiesReader.getProperty("persistence"));
         writer = WriterFactory.createWriter(PropertiesReader.getProperty("persistence"));
-        transaction = TransactionFactory.createTransactionManager(PropertiesReader.getProperty("transactions"), url, reader, writer);
-        final Database database = transaction.getDatabase();
+        transactionManager = TransactionManagerFactory.createTransactionManager(PropertiesReader.getProperty("transaction.versioning"), url, reader, writer);
+        final Database database = transactionManager.getDatabase();
         tableFinder = new TableFinder(database);
-        statementServiceManager = new StatementServiceManager(database, tableFinder, transaction, reader, writer);
+        statementServiceManager = new StatementServiceManager(database, tableFinder, transactionManager, reader, writer);
         metaData = new JfsqlDatabaseMetaData(this);
     }
 
@@ -80,22 +80,22 @@ public class JfsqlConnection implements Connection {
 
     @Override
     public boolean getAutoCommit() {
-        return transaction.getAutoCommit();
+        return transactionManager.getAutoCommit();
     }
 
     @Override
     public void setAutoCommit(final boolean autoCommit) {
-        transaction.setAutoCommit(autoCommit);
+        transactionManager.setAutoCommit(autoCommit);
     }
 
     @Override
     public void commit() throws SQLException {
-        transaction.commit();
+        transactionManager.commit();
     }
 
     @Override
     public void rollback() throws SQLException {
-        transaction.rollback();
+        transactionManager.rollback();
     }
 
     @Override

@@ -3,7 +3,7 @@ package com.github.jfsql.driver.services;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
-import com.github.jfsql.driver.transactions.Transaction;
+import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.InsertWrapper;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ import java.util.stream.IntStream;
 public class InsertService {
 
     private final TableFinder tableFinder;
-    private final Transaction transaction;
+    private final TransactionManager transactionManager;
     private final SemanticValidator semanticValidator;
     private final Reader reader;
 
@@ -53,7 +53,7 @@ public class InsertService {
         final List<Entry> entriesToInsert = getEntriesToInsert(statement, activeTable);
         activeTable.getEntries().addAll(entriesToInsert);
 
-        transaction.executeDMLOperation(activeTable);
+        transactionManager.executeDMLOperation(activeTable);
 
         return statement.getValues().size();
     }

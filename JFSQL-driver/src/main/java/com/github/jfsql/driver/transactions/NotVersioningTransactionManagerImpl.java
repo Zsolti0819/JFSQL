@@ -6,10 +6,10 @@ import com.github.jfsql.driver.persistence.Writer;
 import java.nio.file.Path;
 import java.sql.SQLException;
 
-public class NotCommittingTransaction extends Transaction {
+public class NotVersioningTransactionManagerImpl extends TransactionManager {
 
 
-    public NotCommittingTransaction(final Path url, final Reader reader, final Writer writer) throws SQLException {
+    public NotVersioningTransactionManagerImpl(final Path url, final Reader reader, final Writer writer) throws SQLException {
         super(url, reader, writer);
     }
 

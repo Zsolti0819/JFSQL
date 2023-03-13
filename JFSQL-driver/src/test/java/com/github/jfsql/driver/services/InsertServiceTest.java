@@ -2,7 +2,7 @@ package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
-import com.github.jfsql.driver.transactions.Transaction;
+import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.InsertWrapper;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ class InsertServiceTest {
     private TableFinder tableFinder;
 
     @Mock
-    private Transaction transaction;
+    private TransactionManager transactionManager;
 
     @Mock
     private SemanticValidator semanticValidator;
@@ -52,6 +52,6 @@ class InsertServiceTest {
         insertService.insertIntoTable(insertStatement);
 
         verify(entries, times(1)).addAll(any());
-        verify(transaction, times(1)).executeDMLOperation(table);
+        verify(transactionManager, times(1)).executeDMLOperation(table);
     }
 }

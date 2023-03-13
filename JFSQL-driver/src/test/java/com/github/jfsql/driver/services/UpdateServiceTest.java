@@ -2,7 +2,7 @@ package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
-import com.github.jfsql.driver.transactions.Transaction;
+import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.util.ColumnToTypeMapper;
 import com.github.jfsql.driver.util.WhereConditionSolver;
 import com.github.jfsql.driver.validation.SemanticValidator;
@@ -32,7 +32,7 @@ class UpdateServiceTest {
     private TableFinder tableFinder;
 
     @Mock
-    private Transaction transaction;
+    private TransactionManager transactionManager;
 
     @Mock
     private SemanticValidator semanticValidator;
@@ -64,7 +64,7 @@ class UpdateServiceTest {
 
         updateService.updateTable(updateStatement);
 
-        verify(transaction, times(1)).executeDMLOperation(table);
+        verify(transactionManager, times(1)).executeDMLOperation(table);
     }
 
     @Test
@@ -79,7 +79,7 @@ class UpdateServiceTest {
 
         verifyNoInteractions(whereConditionSolver);
         verifyNoInteractions(columnToTypeMapper);
-        verify(transaction, never()).executeDMLOperation(table);
+        verify(transactionManager, never()).executeDMLOperation(table);
     }
 
     @Test
@@ -95,6 +95,6 @@ class UpdateServiceTest {
 
         verifyNoInteractions(whereConditionSolver);
         verifyNoInteractions(columnToTypeMapper);
-        verify(transaction, never()).executeDMLOperation(table);
+        verify(transactionManager, never()).executeDMLOperation(table);
     }
 }

@@ -3,7 +3,7 @@ package com.github.jfsql.driver.services;
 import com.github.jfsql.driver.TestUtils;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.persistence.Writer;
-import com.github.jfsql.driver.transactions.Transaction;
+import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.CreateTableWrapper;
 import org.junit.jupiter.api.Assertions;
@@ -23,7 +23,7 @@ import static org.mockito.Mockito.*;
 class CreateTableServiceTest {
 
     @Mock
-    private Transaction transaction;
+    private TransactionManager transactionManager;
 
     @Mock
     private SemanticValidator semanticValidator;
@@ -50,7 +50,7 @@ class CreateTableServiceTest {
 
         verify(semanticValidator, times(1)).columnsHaveDuplicate(any());
         verify(database, times(2)).getTables();
-        verify(transaction, times(1)).executeDDLOperation(any());
+        verify(transactionManager, times(1)).executeDDLOperation(any());
 
     }
 
@@ -60,7 +60,7 @@ class CreateTableServiceTest {
 
         final SQLException thrown = assertThrows(SQLException.class, () -> createTableService.createTable(createTableStatement));
         Assertions.assertEquals("Table name cannot be the same as database name.", thrown.getMessage());
-        verify(transaction, never()).executeDDLOperation(any());
+        verify(transactionManager, never()).executeDDLOperation(any());
     }
 
     @Test
@@ -70,7 +70,7 @@ class CreateTableServiceTest {
 
         final SQLException thrown = assertThrows(SQLException.class, () -> createTableService.createTable(createTableStatement));
         Assertions.assertEquals("Table \"" + createTableStatement.getTableName() + "\" already exists.", thrown.getMessage());
-        verify(transaction, never()).executeDDLOperation(any());
+        verify(transactionManager, never()).executeDDLOperation(any());
     }
 
     @Test
@@ -79,7 +79,7 @@ class CreateTableServiceTest {
         when(semanticValidator.tableExists(createTableStatement, database)).thenReturn(true);
 
         assertDoesNotThrow(() -> createTableService.createTable(createTableStatement));
-        verify(transaction, never()).executeDDLOperation(any());
+        verify(transactionManager, never()).executeDDLOperation(any());
     }
 
     @Test
@@ -90,7 +90,7 @@ class CreateTableServiceTest {
         final SQLException thrown = assertThrows(SQLException.class, () -> createTableService.createTable(createTableStatement));
         assertEquals("Some columns were identical during table creation.", thrown.getMessage());
 
-        verify(transaction, never()).executeDDLOperation(any());
+        verify(transactionManager, never()).executeDDLOperation(any());
     }
 
 }
