@@ -1,4 +1,4 @@
-package com.github.jfsql.driver.statements;
+package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
@@ -17,12 +17,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DropTableService {
 
+    private static final Logger logger = LogManager.getLogger(DropTableService.class);
     private final TableFinder tableFinder;
     private final Database database;
     private final Transaction transaction;
     private final SemanticValidator semanticValidator;
     private final Reader reader;
-    private static final Logger logger = LogManager.getLogger(DropTableService.class);
 
     public int dropTable(final DropTableWrapper statement) throws SQLException {
         final boolean ifExistsIsPresent = statement.isIfExistsPresent();

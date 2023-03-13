@@ -1,4 +1,4 @@
-package com.github.jfsql.driver.statements;
+package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.persistence.Writer;
 import com.github.jfsql.driver.transactions.Transaction;

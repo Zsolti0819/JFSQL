@@ -1,4 +1,4 @@
-package com.github.jfsql.driver.statements;
+package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.core.JfsqlResultSet;
 import com.github.jfsql.driver.dto.Entry;
@@ -21,12 +21,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 class SelectService {
 
+    private static final Logger logger = LogManager.getLogger(SelectService.class);
     private final TableFinder tableFinder;
     private final SemanticValidator semanticValidator;
     private final ColumnToTypeMapper columnToTypeMapper;
     private final WhereConditionSolver whereConditionSolver;
     private final Reader reader;
-    private static final Logger logger = LogManager.getLogger(SelectService.class);
 
     ResultSet selectFromTable(final SelectWrapper statement) throws SQLException {
         final List<JoinType> joinTypes = statement.getJoinTypes();

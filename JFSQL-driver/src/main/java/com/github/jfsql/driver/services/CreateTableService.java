@@ -1,4 +1,4 @@
-package com.github.jfsql.driver.statements;
+package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
@@ -24,11 +24,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CreateTableService {
 
+    private static final Logger logger = LogManager.getLogger(CreateTableService.class);
     private final Database database;
     private final Transaction transaction;
     private final SemanticValidator semanticValidator;
     private final Writer writer;
-    private static final Logger logger = LogManager.getLogger(CreateTableService.class);
 
     public void createTable(final CreateTableWrapper statement) throws SQLException {
         final String tableName = statement.getTableName();

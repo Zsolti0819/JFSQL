@@ -1,4 +1,4 @@
-package com.github.jfsql.driver.statements;
+package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.TestUtils;
 import com.github.jfsql.driver.core.JfsqlConnection;

@@ -1,4 +1,4 @@
-package com.github.jfsql.driver.statements;
+package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.persistence.Reader;
@@ -26,11 +26,11 @@ public class StatementServiceManager {
     private final Database database;
 
     public StatementServiceManager(final Database database, final TableFinder tableFinder, final Transaction transaction, final Reader reader, final Writer writer) {
-        this.transaction = transaction;
         this.database = database;
+        this.tableFinder = tableFinder;
+        this.transaction = transaction;
         this.reader = reader;
         this.writer = writer;
-        this.tableFinder = tableFinder;
         semanticValidator = new SemanticValidator();
         columnToTypeMapper = new ColumnToTypeMapper();
         whereConditionSolver = new WhereConditionSolver();

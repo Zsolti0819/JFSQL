@@ -1,7 +1,7 @@
 package com.github.jfsql.driver.core;
 
 import com.github.jfsql.driver.cache.Cache;
-import com.github.jfsql.driver.statements.StatementServiceManager;
+import com.github.jfsql.driver.services.StatementServiceManager;
 import com.github.jfsql.parser.core.Parser;
 import com.github.jfsql.parser.dto.*;
 
@@ -14,9 +14,9 @@ public class JfsqlStatement implements Statement {
     private final Parser parser;
     private final StatementServiceManager statementServiceManager;
     private final Cache cache;
+    private final List<String> batch;
     private Connection connection;
     private ResultSet resultSet;
-    private final List<String> batch;
 
     JfsqlStatement(final Connection connection, final StatementServiceManager statementServiceManager, final Cache cache) {
         this.connection = connection;
