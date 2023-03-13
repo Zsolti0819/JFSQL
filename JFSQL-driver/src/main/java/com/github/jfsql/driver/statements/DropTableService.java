@@ -1,5 +1,6 @@
 package com.github.jfsql.driver.statements;
 
+import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
@@ -16,7 +17,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DropTableService {
 
-    private final StatementManager statementManager;
+    private final TableFinder tableFinder;
+    private final Database database;
     private final Transaction transaction;
     private final SemanticValidator semanticValidator;
     private final Reader reader;
@@ -26,7 +28,7 @@ public class DropTableService {
         final boolean ifExistsIsPresent = statement.isIfExistsPresent();
 
         try {
-            statementManager.getTableByName(statement.getTableName());
+            tableFinder.getTableByName(statement.getTableName());
         } catch (final SQLException e) {
             final String tableName = statement.getTableName();
             if (ifExistsIsPresent) {
@@ -35,18 +37,18 @@ public class DropTableService {
             }
         }
 
-        final Table activeTable = statementManager.getTableByName(statement.getTableName());
+        final Table activeTable = tableFinder.getTableByName(statement.getTableName());
         if (activeTable.getEntries() == null) {
             final List<Entry> entries = reader.readTable(activeTable);
             activeTable.setEntries(entries);
         }
 
-        if (!ifExistsIsPresent && (!semanticValidator.tableExists(statement, statementManager.getDatabase()))) {
+        if (!ifExistsIsPresent && (!semanticValidator.tableExists(statement, database))) {
             throw new SQLException("Cannot DROP " + statement.getTableName() + " because the table's file or schema doesn't exist.");
         }
 
         final int deleteCount = activeTable.getEntries().size();
-        statementManager.getDatabase().getTables().remove(activeTable);
+        database.getTables().remove(activeTable);
         transaction.executeDropTableOperation();
         return deleteCount;
     }

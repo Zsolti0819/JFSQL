@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 class DropTableServiceTest {
 
     @Mock
-    private StatementManager statementManager;
+    private TableFinder tableFinder;
 
     @Mock
     private Transaction transaction;
@@ -47,8 +47,7 @@ class DropTableServiceTest {
 
     @Test
     void testDropTable_normally() throws SQLException {
-        when(statementManager.getDatabase()).thenReturn(database);
-        when(statementManager.getTableByName(dropTableStatement.getTableName())).thenReturn(table);
+        when(tableFinder.getTableByName(dropTableStatement.getTableName())).thenReturn(table);
         when(dropTableStatement.isIfExistsPresent()).thenReturn(false);
         when(semanticValidator.tableExists(dropTableStatement, database)).thenReturn(true);
 
@@ -63,7 +62,7 @@ class DropTableServiceTest {
 
     @Test
     void testDropTable_tableFileNotExists() throws SQLException {
-        when(statementManager.getTableByName(dropTableStatement.getTableName())).thenReturn(table);
+        when(tableFinder.getTableByName(dropTableStatement.getTableName())).thenReturn(table);
         when(dropTableStatement.isIfExistsPresent()).thenReturn(false);
 
         final SQLException thrown = assertThrows(SQLException.class,
@@ -78,7 +77,7 @@ class DropTableServiceTest {
     void testDropTable_ifExists_doesNotThrowException() throws SQLException {
         when(dropTableStatement.isIfExistsPresent()).thenReturn(true);
         when(dropTableStatement.getTableName()).thenReturn("myTable");
-        when(statementManager.getTableByName(dropTableStatement.getTableName())).thenThrow(SQLException.class);
+        when(tableFinder.getTableByName(dropTableStatement.getTableName())).thenThrow(SQLException.class);
 
         assertDoesNotThrow(() -> dropTableService.dropTable(dropTableStatement));
         verify(transaction, never()).executeDropTableOperation();

@@ -72,7 +72,7 @@ public class StatementManager {
     }
 
     public int dropTable(final DropTableWrapper statement) throws SQLException {
-        return new DropTableService(this, transaction, semanticValidator, reader).dropTable(statement);
+        return new DropTableService(tableFinder, database, transaction, semanticValidator, reader).dropTable(statement);
     }
 
     // Common methods
