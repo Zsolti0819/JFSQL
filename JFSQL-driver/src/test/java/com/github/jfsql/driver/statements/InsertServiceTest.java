@@ -20,7 +20,7 @@ import static org.mockito.Mockito.*;
 class InsertServiceTest {
 
     @Mock
-    private StatementManager statementManager;
+    private TableFinder tableFinder;
 
     @Mock
     private Transaction transaction;
@@ -43,7 +43,7 @@ class InsertServiceTest {
     @Test
     void testInsert_noExplicitColumns() throws SQLException {
         when(semanticValidator.allInsertValuesAreEqualLength(insertStatement)).thenReturn(true);
-        when(statementManager.getTableByName(insertStatement.getTableName())).thenReturn(table);
+        when(tableFinder.getTableByName(insertStatement.getTableName())).thenReturn(table);
         when(semanticValidator.valueCountIsEqualToTableColumnCount(table, insertStatement)).thenReturn(true);
         when(semanticValidator.allColumnsExist(table, insertStatement)).thenReturn(true);
         when(semanticValidator.allInsertValuesAreValid(table, insertStatement)).thenReturn(true);

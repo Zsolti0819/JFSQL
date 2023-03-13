@@ -18,7 +18,7 @@ import java.util.stream.IntStream;
 @RequiredArgsConstructor
 public class InsertService {
 
-    private final StatementManager statementManager;
+    private final TableFinder tableFinder;
     private final Transaction transaction;
     private final SemanticValidator semanticValidator;
     private final Reader reader;
@@ -29,7 +29,7 @@ public class InsertService {
         }
 
         final String tableName = statement.getTableName();
-        final Table activeTable = statementManager.getTableByName(tableName);
+        final Table activeTable = tableFinder.getTableByName(tableName);
 
         if (!semanticValidator.valueCountIsEqualToTableColumnCount(activeTable, statement)) {
             throw new SQLException(

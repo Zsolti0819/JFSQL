@@ -55,7 +55,7 @@ public class StatementManager {
     }
 
     public int insertIntoTable(final InsertWrapper statement) throws SQLException {
-        return new InsertService(this, transaction, semanticValidator, reader).insertIntoTable(statement);
+        return new InsertService(tableFinder, transaction, semanticValidator, reader).insertIntoTable(statement);
     }
 
     public ResultSet selectFromTable(final SelectWrapper statement) throws SQLException {
