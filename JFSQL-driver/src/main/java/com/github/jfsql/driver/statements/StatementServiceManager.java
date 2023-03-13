@@ -14,7 +14,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 @Data
-public class StatementManager {
+public class StatementServiceManager {
 
     private final Transaction transaction;
     private final TableFinder tableFinder;
@@ -25,7 +25,7 @@ public class StatementManager {
     private final Writer writer;
     private final Database database;
 
-    public StatementManager(final Database database, final TableFinder tableFinder, final Transaction transaction, final Reader reader, final Writer writer) {
+    public StatementServiceManager(final Database database, final TableFinder tableFinder, final Transaction transaction, final Reader reader, final Writer writer) {
         this.transaction = transaction;
         this.database = database;
         this.reader = reader;

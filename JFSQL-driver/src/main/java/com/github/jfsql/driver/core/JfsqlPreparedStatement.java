@@ -1,6 +1,6 @@
 package com.github.jfsql.driver.core;
 
-import com.github.jfsql.driver.statements.StatementManager;
+import com.github.jfsql.driver.statements.StatementServiceManager;
 import com.github.jfsql.driver.statements.TableFinder;
 import com.github.jfsql.driver.util.PreparedStatementCreator;
 import com.github.jfsql.parser.core.Parser;
@@ -22,7 +22,7 @@ import java.util.Calendar;
 public class JfsqlPreparedStatement implements PreparedStatement {
 
     private final Parser parser;
-    private final StatementManager statementManager;
+    private final StatementServiceManager statementServiceManager;
     private final TableFinder tableFinder;
     private final String preparedStatement;
     private final Object[] parameters;
@@ -31,11 +31,11 @@ public class JfsqlPreparedStatement implements PreparedStatement {
     private int updateCount = 0;
 
     JfsqlPreparedStatement(final JfsqlConnection connection, final String preparedStatement,
-                           final TableFinder tableFinder, final StatementManager statementManager) throws SQLException {
+                           final TableFinder tableFinder, final StatementServiceManager statementServiceManager) throws SQLException {
         this.connection = connection;
         this.preparedStatement = preparedStatement;
         this.tableFinder = tableFinder;
-        this.statementManager = statementManager;
+        this.statementServiceManager = statementServiceManager;
         parser = new Parser();
         parameters = new Object[getParameterCount(preparedStatement)];
     }
@@ -98,7 +98,7 @@ public class JfsqlPreparedStatement implements PreparedStatement {
             throw new SQLException("Cannot execute executeQuery() because statement was not a Select statement.");
         }
         statement = PreparedStatementCreator.getPreparedSelectStatement((SelectWrapper) statement, this);
-        resultSet = statementManager.selectFromTable((SelectWrapper) statement);
+        resultSet = statementServiceManager.selectFromTable((SelectWrapper) statement);
         return resultSet;
     }
 
@@ -110,34 +110,34 @@ public class JfsqlPreparedStatement implements PreparedStatement {
         }
         switch (statement.getTypeOfStatement()) {
             case ALTER_TABLE:
-                statementManager.alterTable((AlterTableWrapper) statement);
+                statementServiceManager.alterTable((AlterTableWrapper) statement);
                 break;
             case CREATE_DATABASE:
-                statementManager.createDatabase((CreateDatabaseWrapper) statement);
+                statementServiceManager.createDatabase((CreateDatabaseWrapper) statement);
                 break;
             case CREATE_TABLE:
-                statementManager.createTable((CreateTableWrapper) statement);
+                statementServiceManager.createTable((CreateTableWrapper) statement);
                 break;
             case DELETE:
                 final DeleteWrapper preparedDeleteStatement = PreparedStatementCreator.getPreparedDeleteStatement(
                         (DeleteWrapper) statement, this);
-                updateCount = statementManager.deleteFromTable(preparedDeleteStatement);
+                updateCount = statementServiceManager.deleteFromTable(preparedDeleteStatement);
                 break;
             case DROP_DATABASE:
-                updateCount = statementManager.dropDatabase((DropDatabaseWrapper) statement);
+                updateCount = statementServiceManager.dropDatabase((DropDatabaseWrapper) statement);
                 break;
             case DROP_TABLE:
-                updateCount = statementManager.dropTable((DropTableWrapper) statement);
+                updateCount = statementServiceManager.dropTable((DropTableWrapper) statement);
                 break;
             case INSERT:
                 final InsertWrapper preparedInsertStatement = PreparedStatementCreator.getPreparedInsertStatement(
                         (InsertWrapper) statement, this);
-                updateCount = statementManager.insertIntoTable(preparedInsertStatement);
+                updateCount = statementServiceManager.insertIntoTable(preparedInsertStatement);
                 break;
             case UPDATE:
                 final UpdateWrapper preparedUpdateStatement = PreparedStatementCreator.getPreparedUpdateStatement(
                         (UpdateWrapper) statement, this);
-                updateCount = statementManager.updateTable(preparedUpdateStatement);
+                updateCount = statementServiceManager.updateTable(preparedUpdateStatement);
                 break;
             default:
                 throw new SQLException("This statement type is not supported.");
@@ -148,40 +148,40 @@ public class JfsqlPreparedStatement implements PreparedStatement {
     private void executeQuery(final BaseStatement statement) throws SQLException {
         final SelectWrapper preparedSelectStatement = PreparedStatementCreator.getPreparedSelectStatement(
                 (SelectWrapper) statement, this);
-        resultSet = statementManager.selectFromTable(preparedSelectStatement);
+        resultSet = statementServiceManager.selectFromTable(preparedSelectStatement);
     }
 
     private void executeUpdate(final BaseStatement statement) throws SQLException {
         switch (statement.getTypeOfStatement()) {
             case ALTER_TABLE:
-                statementManager.alterTable((AlterTableWrapper) statement);
+                statementServiceManager.alterTable((AlterTableWrapper) statement);
                 break;
             case CREATE_DATABASE:
-                statementManager.createDatabase((CreateDatabaseWrapper) statement);
+                statementServiceManager.createDatabase((CreateDatabaseWrapper) statement);
                 break;
             case CREATE_TABLE:
-                statementManager.createTable((CreateTableWrapper) statement);
+                statementServiceManager.createTable((CreateTableWrapper) statement);
                 break;
             case DELETE:
                 final DeleteWrapper preparedDeleteStatement = PreparedStatementCreator.getPreparedDeleteStatement(
                         (DeleteWrapper) statement, this);
-                statementManager.deleteFromTable(preparedDeleteStatement);
+                statementServiceManager.deleteFromTable(preparedDeleteStatement);
                 break;
             case DROP_DATABASE:
-                statementManager.dropDatabase((DropDatabaseWrapper) statement);
+                statementServiceManager.dropDatabase((DropDatabaseWrapper) statement);
                 break;
             case DROP_TABLE:
-                statementManager.dropTable((DropTableWrapper) statement);
+                statementServiceManager.dropTable((DropTableWrapper) statement);
                 break;
             case INSERT:
                 final InsertWrapper preparedInsertStatement = PreparedStatementCreator.getPreparedInsertStatement(
                         (InsertWrapper) statement, this);
-                statementManager.insertIntoTable(preparedInsertStatement);
+                statementServiceManager.insertIntoTable(preparedInsertStatement);
                 break;
             case UPDATE:
                 final UpdateWrapper preparedUpdateStatement = PreparedStatementCreator.getPreparedUpdateStatement(
                         (UpdateWrapper) statement, this);
-                statementManager.updateTable(preparedUpdateStatement);
+                statementServiceManager.updateTable(preparedUpdateStatement);
                 break;
             default:
                 throw new SQLException("This statement type is not supported.");

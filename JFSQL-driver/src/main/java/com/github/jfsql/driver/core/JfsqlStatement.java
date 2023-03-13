@@ -1,7 +1,7 @@
 package com.github.jfsql.driver.core;
 
 import com.github.jfsql.driver.cache.Cache;
-import com.github.jfsql.driver.statements.StatementManager;
+import com.github.jfsql.driver.statements.StatementServiceManager;
 import com.github.jfsql.parser.core.Parser;
 import com.github.jfsql.parser.dto.*;
 
@@ -12,15 +12,15 @@ import java.util.List;
 public class JfsqlStatement implements Statement {
 
     private final Parser parser;
-    private final StatementManager statementManager;
+    private final StatementServiceManager statementServiceManager;
     private final Cache cache;
     private Connection connection;
     private ResultSet resultSet;
     private final List<String> batch;
 
-    JfsqlStatement(final Connection connection, final StatementManager statementManager, final Cache cache) {
+    JfsqlStatement(final Connection connection, final StatementServiceManager statementServiceManager, final Cache cache) {
         this.connection = connection;
-        this.statementManager = statementManager;
+        this.statementServiceManager = statementServiceManager;
         this.cache = cache;
         batch = new ArrayList<>();
         parser = new Parser();
@@ -39,34 +39,34 @@ public class JfsqlStatement implements Statement {
     }
 
     private void executeQuery(final BaseStatement statement) throws SQLException {
-        resultSet = statementManager.selectFromTable((SelectWrapper) statement);
+        resultSet = statementServiceManager.selectFromTable((SelectWrapper) statement);
     }
 
     private void executeUpdate(final BaseStatement statement) throws SQLException {
         switch (statement.getTypeOfStatement()) {
             case ALTER_TABLE:
-                statementManager.alterTable((AlterTableWrapper) statement);
+                statementServiceManager.alterTable((AlterTableWrapper) statement);
                 break;
             case CREATE_DATABASE:
-                statementManager.createDatabase((CreateDatabaseWrapper) statement);
+                statementServiceManager.createDatabase((CreateDatabaseWrapper) statement);
                 break;
             case CREATE_TABLE:
-                statementManager.createTable((CreateTableWrapper) statement);
+                statementServiceManager.createTable((CreateTableWrapper) statement);
                 break;
             case DELETE:
-                statementManager.deleteFromTable((DeleteWrapper) statement);
+                statementServiceManager.deleteFromTable((DeleteWrapper) statement);
                 break;
             case DROP_DATABASE:
-                statementManager.dropDatabase((DropDatabaseWrapper) statement);
+                statementServiceManager.dropDatabase((DropDatabaseWrapper) statement);
                 break;
             case DROP_TABLE:
-                statementManager.dropTable((DropTableWrapper) statement);
+                statementServiceManager.dropTable((DropTableWrapper) statement);
                 break;
             case INSERT:
-                statementManager.insertIntoTable((InsertWrapper) statement);
+                statementServiceManager.insertIntoTable((InsertWrapper) statement);
                 break;
             case UPDATE:
-                statementManager.updateTable((UpdateWrapper) statement);
+                statementServiceManager.updateTable((UpdateWrapper) statement);
                 break;
             default:
                 throw new SQLException("This statement type is not supported.");
@@ -79,7 +79,7 @@ public class JfsqlStatement implements Statement {
         if (!(TypeOfStatement.SELECT.equals(statement.getTypeOfStatement()))) {
             throw new SQLException("Cannot execute executeQuery() because statement was not a Select statement.");
         }
-        return statementManager.selectFromTable((SelectWrapper) statement);
+        return statementServiceManager.selectFromTable((SelectWrapper) statement);
     }
 
     @Override
@@ -88,31 +88,31 @@ public class JfsqlStatement implements Statement {
         final BaseStatement statement = getFromCacheOrParseStatement(arg0);
         switch (statement.getTypeOfStatement()) {
             case ALTER_TABLE:
-                statementManager.alterTable((AlterTableWrapper) statement);
+                statementServiceManager.alterTable((AlterTableWrapper) statement);
                 break;
             case CREATE_DATABASE:
-                statementManager.createDatabase((CreateDatabaseWrapper) statement);
+                statementServiceManager.createDatabase((CreateDatabaseWrapper) statement);
                 break;
             case CREATE_TABLE:
-                statementManager.createTable((CreateTableWrapper) statement);
+                statementServiceManager.createTable((CreateTableWrapper) statement);
                 break;
             case DELETE:
-                updateCount = statementManager.deleteFromTable((DeleteWrapper) statement);
+                updateCount = statementServiceManager.deleteFromTable((DeleteWrapper) statement);
                 break;
             case DROP_DATABASE:
-                updateCount = statementManager.dropDatabase((DropDatabaseWrapper) statement);
+                updateCount = statementServiceManager.dropDatabase((DropDatabaseWrapper) statement);
                 break;
             case DROP_TABLE:
-                updateCount = statementManager.dropTable((DropTableWrapper) statement);
+                updateCount = statementServiceManager.dropTable((DropTableWrapper) statement);
                 break;
             case INSERT:
-                updateCount = statementManager.insertIntoTable((InsertWrapper) statement);
+                updateCount = statementServiceManager.insertIntoTable((InsertWrapper) statement);
                 break;
             case SELECT:
-                resultSet = statementManager.selectFromTable((SelectWrapper) statement);
+                resultSet = statementServiceManager.selectFromTable((SelectWrapper) statement);
                 break;
             case UPDATE:
-                updateCount = statementManager.updateTable((UpdateWrapper) statement);
+                updateCount = statementServiceManager.updateTable((UpdateWrapper) statement);
                 break;
             default:
                 throw new SQLException("This statement type is not supported.");

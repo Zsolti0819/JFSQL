@@ -8,7 +8,7 @@ import com.github.jfsql.driver.factories.TransactionFactory;
 import com.github.jfsql.driver.factories.WriterFactory;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
-import com.github.jfsql.driver.statements.StatementManager;
+import com.github.jfsql.driver.statements.StatementServiceManager;
 import com.github.jfsql.driver.statements.TableFinder;
 import com.github.jfsql.driver.transactions.Transaction;
 import com.github.jfsql.driver.util.PropertiesReader;
@@ -29,7 +29,7 @@ public class JfsqlConnection implements Connection {
     private final Reader reader;
     private final Writer writer;
     private final Transaction transaction;
-    private final StatementManager statementManager;
+    private final StatementServiceManager statementServiceManager;
     private final TableFinder tableFinder;
     private final Cache cache;
     private JfsqlStatement statement;
@@ -46,19 +46,19 @@ public class JfsqlConnection implements Connection {
         transaction = TransactionFactory.createTransactionManager(PropertiesReader.getProperty("transactions"), url, reader, writer);
         final Database database = transaction.getDatabase();
         tableFinder = new TableFinder(database);
-        statementManager = new StatementManager(database, tableFinder, transaction, reader, writer);
+        statementServiceManager = new StatementServiceManager(database, tableFinder, transaction, reader, writer);
         metaData = new JfsqlDatabaseMetaData(this);
     }
 
     @Override
     public Statement createStatement() {
-        statement = new JfsqlStatement(this, statementManager, cache);
+        statement = new JfsqlStatement(this, statementServiceManager, cache);
         return statement;
     }
 
     @Override
     public PreparedStatement prepareStatement(final String sql) throws SQLException {
-        preparedStatement = new JfsqlPreparedStatement(this, sql, tableFinder, statementManager);
+        preparedStatement = new JfsqlPreparedStatement(this, sql, tableFinder, statementServiceManager);
         return preparedStatement;
     }
 
