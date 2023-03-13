@@ -41,7 +41,7 @@ public class JfsqlConnection implements Connection {
         reader = ReaderFactory.createReader(PropertiesReader.getProperty("persistence"));
         writer = WriterFactory.createWriter(PropertiesReader.getProperty("persistence"));
         transaction = TransactionFactory.createTransactionManager(PropertiesReader.getProperty("transactions"), url, reader, writer);
-        statementManager = new StatementManager(transaction, reader, writer);
+        statementManager = new StatementManager(transaction.getDatabase(), transaction, reader, writer);
         metaData = new JfsqlDatabaseMetaData(this);
     }
 

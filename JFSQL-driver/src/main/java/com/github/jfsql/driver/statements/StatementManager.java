@@ -25,14 +25,14 @@ public class StatementManager {
     private final TableFinder tableFinder;
     private final Reader reader;
     private final Writer writer;
-    private Database database;
+    private final Database database;
 
-    public StatementManager(final Transaction transaction, final Reader reader, final Writer writer) {
+    public StatementManager(final Database database, final Transaction transaction, final Reader reader, final Writer writer) {
         this.transaction = transaction;
-        database = transaction.getDatabase();
-        tableFinder = new TableFinder(database);
+        this.database = database;
         this.reader = reader;
         this.writer = writer;
+        tableFinder = new TableFinder(database);
         semanticValidator = new SemanticValidator();
         columnToTypeMapper = new ColumnToTypeMapper();
         whereConditionSolver = new WhereConditionSolver();
