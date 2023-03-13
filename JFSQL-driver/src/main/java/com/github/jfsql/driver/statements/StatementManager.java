@@ -22,6 +22,7 @@ public class StatementManager {
     private final SemanticValidator semanticValidator;
     private final ColumnToTypeMapper columnToTypeMapper;
     private final WhereConditionSolver whereConditionSolver;
+    private final TableFinder tableFinder;
     private final Reader reader;
     private final Writer writer;
     private Database database;
@@ -29,6 +30,7 @@ public class StatementManager {
     public StatementManager(final Transaction transaction, final Reader reader, final Writer writer) {
         this.transaction = transaction;
         database = transaction.getDatabase();
+        tableFinder = new TableFinder(database);
         this.reader = reader;
         this.writer = writer;
         semanticValidator = new SemanticValidator();
@@ -37,7 +39,7 @@ public class StatementManager {
     }
 
     public void alterTable(final AlterTableWrapper statement) throws SQLException {
-        new AlterTableService(this, transaction, semanticValidator, reader, writer).alterTable(statement);
+        new AlterTableService(tableFinder, database, transaction, semanticValidator, reader, writer).alterTable(statement);
     }
 
     public void createDatabase(final CreateDatabaseWrapper statement) throws SQLException {

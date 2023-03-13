@@ -1,5 +1,6 @@
 package com.github.jfsql.driver.statements;
 
+import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
@@ -25,7 +26,8 @@ import java.util.Objects;
 @RequiredArgsConstructor
 class AlterTableService {
 
-    private final StatementManager statementManager;
+    private final TableFinder tableFinder;
+    private final Database database;
     private final Transaction transaction;
     private final SemanticValidator semanticValidator;
     private final Reader reader;
@@ -34,7 +36,7 @@ class AlterTableService {
 
     void alterTable(final AlterTableWrapper statement) throws SQLException {
         final String tableName = statement.getTableName();
-        final Table table = statementManager.getTableByName(tableName);
+        final Table table = tableFinder.getTableByName(tableName);
         if (statement.getNewTableName() != null) {
             renameTable(statement, table);
         } else if (statement.getOldColumnName() != null) {
@@ -48,10 +50,10 @@ class AlterTableService {
     }
 
     private void renameTable(final AlterTableWrapper statement, final Table table) throws SQLException {
-        final String parentDirectory = String.valueOf(statementManager.getDatabase().getUrl().getParent());
+        final String parentDirectory = String.valueOf(database.getUrl().getParent());
         final String newTableName = statement.getNewTableName();
 
-        if (semanticValidator.tableNameEqualsDatabaseName(newTableName, statementManager.getDatabase())) {
+        if (semanticValidator.tableNameEqualsDatabaseName(newTableName, database)) {
             throw new SQLException("Table name cannot be the same as database name.");
         }
 
