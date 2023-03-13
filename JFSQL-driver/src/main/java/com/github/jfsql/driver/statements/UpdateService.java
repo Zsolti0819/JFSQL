@@ -16,7 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UpdateService {
 
-    private final StatementManager statementManager;
+    private final TableFinder tableFinder;
     private final Transaction transaction;
     private final SemanticValidator semanticValidator;
     private final ColumnToTypeMapper columnToTypeMapper;
@@ -25,7 +25,7 @@ public class UpdateService {
 
     public int updateTable(final UpdateWrapper statement) throws SQLException {
         final String tableName = statement.getTableName();
-        final Table activeTable = statementManager.getTableByName(tableName);
+        final Table activeTable = tableFinder.getTableByName(tableName);
 
         if (!semanticValidator.allColumnsExist(activeTable, statement)) {
             throw new SQLException("Some columns entered doesn't exist in \"" + activeTable.getName() + "\".");

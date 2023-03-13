@@ -63,7 +63,7 @@ public class StatementManager {
     }
 
     public int updateTable(final UpdateWrapper statement) throws SQLException {
-        return new UpdateService(this, transaction, semanticValidator, columnToTypeMapper, whereConditionSolver, reader).updateTable(
+        return new UpdateService(tableFinder, transaction, semanticValidator, columnToTypeMapper, whereConditionSolver, reader).updateTable(
                 statement);
     }
 
