@@ -59,7 +59,7 @@ public class StatementManager {
     }
 
     public ResultSet selectFromTable(final SelectWrapper statement) throws SQLException {
-        return new SelectService(this, semanticValidator, columnToTypeMapper, whereConditionSolver, reader).selectFromTable(statement);
+        return new SelectService(tableFinder, semanticValidator, columnToTypeMapper, whereConditionSolver, reader).selectFromTable(statement);
     }
 
     public int updateTable(final UpdateWrapper statement) throws SQLException {

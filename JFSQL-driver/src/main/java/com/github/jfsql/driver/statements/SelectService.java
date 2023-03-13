@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 class SelectService {
 
-    private final StatementManager statementManager;
+    private final TableFinder tableFinder;
     private final SemanticValidator semanticValidator;
     private final ColumnToTypeMapper columnToTypeMapper;
     private final WhereConditionSolver whereConditionSolver;
@@ -117,7 +117,7 @@ class SelectService {
     }
 
     private ResultSet simpleSelect(final SelectWrapper statement) throws SQLException {
-        final Table activeTable = statementManager.getTableByName(statement.getTableName());
+        final Table activeTable = tableFinder.getTableByName(statement.getTableName());
         if (activeTable.getEntries() == null) {
             final List<Entry> entries = reader.readTable(activeTable);
             activeTable.setEntries(entries);
@@ -206,7 +206,7 @@ class SelectService {
 
         final Map<String, Table> tables = new LinkedHashMap<>();
         for (final String tableName : tableNames) {
-            final Table table = statementManager.getTableByName(tableName);
+            final Table table = tableFinder.getTableByName(tableName);
             tables.put(tableName, table);
         }
 
