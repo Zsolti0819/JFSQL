@@ -1,23 +1,24 @@
 package com.github.jfsql.driver.services;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
 import com.github.jfsql.driver.TestUtils;
 import com.github.jfsql.driver.core.JfsqlConnection;
-import com.github.jfsql.driver.persistence.WriterJsonImpl;
-import com.github.jfsql.driver.persistence.WriterXmlImpl;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
+import com.github.jfsql.driver.persistence.ReaderJsonImpl;
+import com.github.jfsql.driver.persistence.ReaderXmlImpl;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 class CreateTableJdbcTest {
 
@@ -37,7 +38,7 @@ class CreateTableJdbcTest {
 
     @Test
     void testCreateTable_normally_json() throws SQLException, IOException {
-        assumeTrue(connection.getReader() instanceof WriterJsonImpl);
+        assumeTrue(connection.getReader() instanceof ReaderJsonImpl);
         assertEquals(0, statement.executeUpdate(
                 "CREATE TABLE myTable (id INTEGER NOT NULL, name TEXT NOT NULL, age INTEGER NOT NULL)"));
         final String realTableFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
@@ -92,7 +93,7 @@ class CreateTableJdbcTest {
 
     @Test
     void testCreateTable_normally_xml() throws SQLException, IOException {
-        assumeTrue(connection.getReader() instanceof WriterXmlImpl);
+        assumeTrue(connection.getReader() instanceof ReaderXmlImpl);
         assertEquals(0, statement.executeUpdate(
                 "CREATE TABLE myTable (id INTEGER NOT NULL, name TEXT NOT NULL, age INTEGER NOT NULL)"));
         final String realTableFileContent = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
