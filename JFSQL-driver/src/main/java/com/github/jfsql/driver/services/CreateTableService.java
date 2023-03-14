@@ -4,14 +4,10 @@ import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
-import com.github.jfsql.driver.persistence.WriterJsonImpl;
+import com.github.jfsql.driver.persistence.ReaderJsonImpl;
 import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.CreateTableWrapper;
-import lombok.RequiredArgsConstructor;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -20,6 +16,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @RequiredArgsConstructor
 public class CreateTableService {
@@ -45,8 +44,8 @@ public class CreateTableService {
 
         if (ifNotExistsIsPresent && semanticValidator.tableExists(statement, database)) {
             logger.info(
-                    "Table '{}' already exists, but 'IF NOT EXISTS' clause was present in the statement, no new table will be created.",
-                    tableName);
+                "Table '{}' already exists, but 'IF NOT EXISTS' clause was present in the statement, no new table will be created.",
+                tableName);
             return;
         }
 
@@ -58,16 +57,16 @@ public class CreateTableService {
         final List<String> types = statement.getTypes();
 
         final LinkedHashMap<String, String> columnsAndTypes = columns.stream()
-                .collect(Collectors.toMap(Function.identity(), k -> types.get(columns.indexOf(k)), (v1, v2) -> v1,
-                        LinkedHashMap::new));
+            .collect(Collectors.toMap(Function.identity(), k -> types.get(columns.indexOf(k)), (v1, v2) -> v1,
+                LinkedHashMap::new));
 
         final Map<String, Boolean> notNulLColumns = statement.getNotNullColumns();
         final String parentDirectory = String.valueOf(database.getUrl().getParent());
         final String tableFile = parentDirectory + File.separator + tableName + "." + reader.getFileExtension();
         final String schemaFile =
-                reader instanceof WriterJsonImpl ? parentDirectory + File.separator + tableName + "Schema."
-                        + reader.getSchemaFileExtension()
-                        : parentDirectory + File.separator + tableName + "." + reader.getSchemaFileExtension();
+            reader instanceof ReaderJsonImpl ? parentDirectory + File.separator + tableName + "Schema."
+                + reader.getSchemaFileExtension()
+                : parentDirectory + File.separator + tableName + "." + reader.getSchemaFileExtension();
 
         if (database.getTables() == null) {
             database.setTables(new ArrayList<>());

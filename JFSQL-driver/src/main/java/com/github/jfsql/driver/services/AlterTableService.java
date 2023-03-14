@@ -4,16 +4,10 @@ import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
-import com.github.jfsql.driver.persistence.WriterJsonImpl;
+import com.github.jfsql.driver.persistence.ReaderJsonImpl;
 import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.AlterTableWrapper;
-import lombok.RequiredArgsConstructor;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -21,6 +15,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @RequiredArgsConstructor
 class AlterTableService {
@@ -57,9 +56,9 @@ class AlterTableService {
 
         final String newTableFile = parentDirectory + File.separator + newTableName + "." + reader.getFileExtension();
         final String newSchemaFile =
-                reader instanceof WriterJsonImpl ? parentDirectory + File.separator + newTableName + "Schema."
-                        + reader.getSchemaFileExtension()
-                        : parentDirectory + File.separator + newTableName + "." + reader.getSchemaFileExtension();
+            reader instanceof ReaderJsonImpl ? parentDirectory + File.separator + newTableName + "Schema."
+                + reader.getSchemaFileExtension()
+                : parentDirectory + File.separator + newTableName + "." + reader.getSchemaFileExtension();
 
         final String oldTableFile = table.getTableFile();
         final String oldSchemaFile = table.getSchemaFile();
@@ -69,7 +68,8 @@ class AlterTableService {
             FileUtils.moveFile(FileUtils.getFile(oldSchemaFile), FileUtils.getFile(newSchemaFile));
         } catch (final IOException e) {
             if (!transactionManager.getAutoCommit() && transactionManager.getUncommittedTables().contains(table)) {
-                logger.debug("The table has not yet been written to files, but is present in the list of uncommitted tables.");
+                logger.debug(
+                    "The table has not yet been written to files, but is present in the list of uncommitted tables.");
             } else {
                 throw new SQLException("Failed to rename files\n" + e.getMessage());
             }
@@ -88,7 +88,7 @@ class AlterTableService {
 
         if (table.getColumnsAndTypes().containsKey(statement.getNewColumnName())) {
             throw new SQLException(
-                    "The column '" + statement.getNewColumnName() + "' already exists in '" + table.getName() + "'");
+                "The column '" + statement.getNewColumnName() + "' already exists in '" + table.getName() + "'");
         }
 
         final Map<String, String> modifiedColumnsAndTypes = getModifiedColumnsAndTypes(statement, table);
@@ -186,7 +186,7 @@ class AlterTableService {
     private void dropColumn(final AlterTableWrapper statement, final Table table) throws SQLException {
         if (!table.getColumnsAndTypes().containsKey(statement.getColumnToDrop())) {
             throw new SQLException(
-                    "The column '" + statement.getColumnToDrop() + "' doesn't exist in '" + table.getName() + "'");
+                "The column '" + statement.getColumnToDrop() + "' doesn't exist in '" + table.getName() + "'");
         }
 
         table.getColumnsAndTypes().remove(statement.getColumnToDrop());
