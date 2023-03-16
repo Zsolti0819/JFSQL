@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -28,7 +29,7 @@ class ReaderJsonImplTest {
 
     @BeforeAll
     static void beforeAll() throws SQLException {
-        database = new Database(TestUtils.DATABASE_JSON_FILE_PATH);
+        database = new Database(TestUtils.DATABASE_JSON_FILE_PATH, new LinkedList<>());
         try (final Git ignored = Git.init().setDirectory(database.getUrl().getParent().toFile()).call()) {
             final Map<String, String> returnColumnsAndTypes = new LinkedHashMap<>();
             returnColumnsAndTypes.put("id", "INTEGER");
@@ -63,7 +64,7 @@ class ReaderJsonImplTest {
                     new Entry(entry4ColumnsAndTypes)
             );
             table.setEntries(returnEntries);
-            database = new Database(TestUtils.DATABASE_JSON_FILE_PATH);
+            database = new Database(TestUtils.DATABASE_JSON_FILE_PATH, new LinkedList<>());
             database.setTables(List.of(table));
             Files.createFile(TestUtils.TABLE_XML_FILE_PATH);
             Files.createFile(TestUtils.TABLE_XSD_FILE_PATH);

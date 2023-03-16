@@ -49,7 +49,7 @@ class CreateTableServiceTest {
         createTableService.createTable(createTableStatement);
 
         verify(semanticValidator, times(1)).columnsHaveDuplicate(any());
-        verify(database, times(2)).getTables();
+        verify(database, times(1)).getTables();
         verify(transactionManager, times(1)).executeDDLOperation(any());
 
     }

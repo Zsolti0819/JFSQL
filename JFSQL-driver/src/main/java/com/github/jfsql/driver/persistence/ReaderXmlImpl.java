@@ -153,9 +153,6 @@ public class ReaderXmlImpl implements Reader {
                 final String xsdPath = (String) xpath.evaluate("pathToSchema/text()", nodeList.item(i),
                         XPathConstants.STRING);
                 final Table schema = readSchema(xsdPath);
-                if (database.getTables() == null) {
-                    database.setTables(new ArrayList<>());
-                }
                 final Table table = new Table(tableName, xmlPath, xsdPath, schema.getColumnsAndTypes(), schema.getNotNullColumns());
                 tables.add(table);
             }

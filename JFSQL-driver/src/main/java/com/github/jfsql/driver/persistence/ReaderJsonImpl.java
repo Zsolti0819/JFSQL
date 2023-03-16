@@ -121,9 +121,6 @@ public class ReaderJsonImpl implements Reader {
                 final String tablePath = jsonTableObject.get("pathToTable").getAsString();
                 final String schemaPath = jsonTableObject.get("pathToSchema").getAsString();
                 final Table schema = readSchema(schemaPath);
-                if (database.getTables() == null) {
-                    database.setTables(new ArrayList<>());
-                }
                 final Table table = new Table(tableName, tablePath, schemaPath, schema.getColumnsAndTypes(), schema.getNotNullColumns());
                 tables.add(table);
             }

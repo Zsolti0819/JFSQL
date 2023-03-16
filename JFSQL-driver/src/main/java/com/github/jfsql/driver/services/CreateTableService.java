@@ -68,10 +68,6 @@ public class CreateTableService {
                 + reader.getSchemaFileExtension()
                 : parentDirectory + File.separator + tableName + "." + reader.getSchemaFileExtension();
 
-        if (database.getTables() == null) {
-            database.setTables(new ArrayList<>());
-        }
-
         final Table table = new Table(tableName, tableFile, schemaFile, columnsAndTypes, notNulLColumns);
         final List<Entry> entries = new ArrayList<>();
         table.setEntries(entries);

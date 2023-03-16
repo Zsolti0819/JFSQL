@@ -19,9 +19,6 @@ public class SemanticValidator {
 
     public boolean tableExists(final StatementWithTableName statement, final Database database) {
         final List<Table> tables = database.getTables();
-        if (tables == null) {
-            return false;
-        }
 
         final String tableName = statement.getTableName();
         for (final Table table : tables) {

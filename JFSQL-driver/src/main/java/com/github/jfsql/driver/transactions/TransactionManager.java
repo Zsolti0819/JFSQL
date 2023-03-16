@@ -10,6 +10,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -29,7 +30,7 @@ public abstract class TransactionManager {
         this.reader = reader;
         this.writer = writer;
         final Path databaseFile = Path.of(url + File.separator + url.getFileName() + "." + reader.getFileExtension());
-        database = new Database(databaseFile);
+        database = new Database(databaseFile, new LinkedList<>());
         if (!database.getUrl().toFile().exists()) {
             initDatabase(database);
         } else {

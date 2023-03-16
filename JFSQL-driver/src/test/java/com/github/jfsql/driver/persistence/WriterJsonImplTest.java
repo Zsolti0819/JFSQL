@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -29,7 +30,7 @@ class WriterJsonImplTest {
 
     @BeforeAll
     static void setUp() {
-        database = new Database(TestUtils.DATABASE_JSON_FILE_PATH);
+        database = new Database(TestUtils.DATABASE_JSON_FILE_PATH, new LinkedList<>());
         try (final Git ignored = Git.init().setDirectory(database.getUrl().getParent().toFile()).call()) {
             final Map<String, String> returnColumnsAndTypes = new LinkedHashMap<>();
             returnColumnsAndTypes.put("id", "INTEGER");
@@ -64,7 +65,7 @@ class WriterJsonImplTest {
                     new Entry(entry4ColumnsAndTypes)
             );
             table.setEntries(returnEntries);
-            database = new Database(TestUtils.DATABASE_JSON_FILE_PATH);
+            database = new Database(TestUtils.DATABASE_JSON_FILE_PATH, new LinkedList<>());
             database.setTables(List.of(table));
         } catch (final GitAPIException e) {
             e.printStackTrace();

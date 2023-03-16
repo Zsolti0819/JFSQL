@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import java.io.File;
 import java.nio.file.Path;
 import java.sql.SQLException;
+import java.util.LinkedList;
 
 @RequiredArgsConstructor
 public class CreateDatabaseService {
@@ -30,7 +31,7 @@ public class CreateDatabaseService {
         final Path url = Path.of(statement.getDatabaseUrl());
         final String fileName = File.separator + url.getFileName() + "." + reader.getFileExtension();
         final Path databaseFilePath = Path.of(url + fileName);
-        final Database database = new Database(databaseFilePath);
+        final Database database = new Database(databaseFilePath, new LinkedList<>());
 
         transactionManager.executeCreateDatabaseOperation(database);
     }
