@@ -53,7 +53,8 @@ public class JGitTransactionManagerImpl extends TransactionManager {
         try (final Git git = Git.open(database.getUrl().getParent().toFile())) {
             final ResetCommand resetCommand = git.reset().setMode(ResetCommand.ResetType.HARD);
             resetCommand.call();
-            database.setTables(null);
+            final List<Table> tables = reader.readDatabaseFile(database);
+            database.setTables(tables);
         } catch (final GitAPIException | IOException e) {
             throw new SQLException("There was an error executing the rollback.\n" + e.getMessage());
         }
