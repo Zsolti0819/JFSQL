@@ -1,16 +1,12 @@
 package com.github.jfsql.driver.persistence;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.github.jfsql.driver.TestUtils;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
-import org.apache.commons.io.FileUtils;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
@@ -18,9 +14,12 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.apache.commons.io.FileUtils;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 class WriterJsonImplTest {
 
@@ -41,7 +40,7 @@ class WriterJsonImplTest {
             notNullColumns.put("name", true);
             notNullColumns.put("age", true);
             table = new Table("myTable", String.valueOf(TestUtils.TABLE_JSON_FILE_PATH),
-                    String.valueOf(TestUtils.TABLE_JSON_SCHEMA_FILE_PATH), returnColumnsAndTypes, notNullColumns);
+                String.valueOf(TestUtils.TABLE_JSON_SCHEMA_FILE_PATH), returnColumnsAndTypes, notNullColumns);
             final Map<String, String> entry1ColumnsAndTypes = new LinkedHashMap<>();
             entry1ColumnsAndTypes.put("id", "1");
             entry1ColumnsAndTypes.put("name", "Zsolti");
@@ -59,10 +58,10 @@ class WriterJsonImplTest {
             entry4ColumnsAndTypes.put("name", "Lukas");
             entry4ColumnsAndTypes.put("age", "34");
             final List<Entry> returnEntries = List.of(
-                    new Entry(entry1ColumnsAndTypes),
-                    new Entry(entry2ColumnsAndTypes),
-                    new Entry(entry3ColumnsAndTypes),
-                    new Entry(entry4ColumnsAndTypes)
+                new Entry(entry1ColumnsAndTypes),
+                new Entry(entry2ColumnsAndTypes),
+                new Entry(entry3ColumnsAndTypes),
+                new Entry(entry4ColumnsAndTypes)
             );
             table.setEntries(returnEntries);
             database = new Database(TestUtils.DATABASE_JSON_FILE_PATH, new LinkedList<>());
@@ -81,45 +80,45 @@ class WriterJsonImplTest {
     void testWriter_writeSchema() throws SQLException, IOException {
         writer.writeSchema(table);
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_SCHEMA_FILE_PATH.toFile(),
-                StandardCharsets.UTF_8);
+            StandardCharsets.UTF_8);
         final String expectedContent = "" +
-                "{\n" +
-                "  \"$schema\": \"http://json-schema.org/draft-06/schema#\",\n" +
-                "  \"type\": \"object\",\n" +
-                "  \"required\": [\n" +
-                "    \"Entry\"\n" +
-                "  ],\n" +
-                "  \"properties\": {\n" +
-                "    \"Entry\": {\n" +
-                "      \"type\": \"array\",\n" +
-                "      \"items\": {\n" +
-                "        \"type\": \"object\",\n" +
-                "        \"required\": [\n" +
-                "          \"id\",\n" +
-                "          \"name\",\n" +
-                "          \"age\"\n" +
-                "        ],\n" +
-                "        \"properties\": {\n" +
-                "          \"id\": {\n" +
-                "            \"type\": [\n" +
-                "              \"integer\"\n" +
-                "            ]\n" +
-                "          },\n" +
-                "          \"name\": {\n" +
-                "            \"type\": [\n" +
-                "              \"string\"\n" +
-                "            ]\n" +
-                "          },\n" +
-                "          \"age\": {\n" +
-                "            \"type\": [\n" +
-                "              \"integer\"\n" +
-                "            ]\n" +
-                "          }\n" +
-                "        }\n" +
-                "      }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}";
+            "{\n" +
+            "  \"$schema\": \"http://json-schema.org/draft-06/schema#\",\n" +
+            "  \"type\": \"object\",\n" +
+            "  \"required\": [\n" +
+            "    \"Entry\"\n" +
+            "  ],\n" +
+            "  \"properties\": {\n" +
+            "    \"Entry\": {\n" +
+            "      \"type\": \"array\",\n" +
+            "      \"items\": {\n" +
+            "        \"type\": \"object\",\n" +
+            "        \"required\": [\n" +
+            "          \"id\",\n" +
+            "          \"name\",\n" +
+            "          \"age\"\n" +
+            "        ],\n" +
+            "        \"properties\": {\n" +
+            "          \"id\": {\n" +
+            "            \"type\": [\n" +
+            "              \"integer\"\n" +
+            "            ]\n" +
+            "          },\n" +
+            "          \"name\": {\n" +
+            "            \"type\": [\n" +
+            "              \"string\"\n" +
+            "            ]\n" +
+            "          },\n" +
+            "          \"age\": {\n" +
+            "            \"type\": [\n" +
+            "              \"integer\"\n" +
+            "            ]\n" +
+            "          }\n" +
+            "        }\n" +
+            "      }\n" +
+            "    }\n" +
+            "  }\n" +
+            "}";
         assertEquals(expectedContent, realFileContent);
     }
 
@@ -127,32 +126,32 @@ class WriterJsonImplTest {
     void testWriter_writeTable() throws SQLException, IOException {
         writer.writeTable(table);
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
-                StandardCharsets.UTF_8);
+            StandardCharsets.UTF_8);
         final String expectedContent = "" +
-                "{\n" +
-                "  \"Entry\": [\n" +
-                "    {\n" +
-                "      \"id\": 1,\n" +
-                "      \"name\": \"Zsolti\",\n" +
-                "      \"age\": 25\n" +
-                "    },\n" +
-                "    {\n" +
-                "      \"id\": 2,\n" +
-                "      \"name\": \"Tomi\",\n" +
-                "      \"age\": 24\n" +
-                "    },\n" +
-                "    {\n" +
-                "      \"id\": 3,\n" +
-                "      \"name\": \"Ivan\",\n" +
-                "      \"age\": 26\n" +
-                "    },\n" +
-                "    {\n" +
-                "      \"id\": 4,\n" +
-                "      \"name\": \"Lukas\",\n" +
-                "      \"age\": 34\n" +
-                "    }\n" +
-                "  ]\n" +
-                "}";
+            "{\n" +
+            "  \"Entry\": [\n" +
+            "    {\n" +
+            "      \"id\": 1,\n" +
+            "      \"name\": \"Zsolti\",\n" +
+            "      \"age\": 25\n" +
+            "    },\n" +
+            "    {\n" +
+            "      \"id\": 2,\n" +
+            "      \"name\": \"Tomi\",\n" +
+            "      \"age\": 24\n" +
+            "    },\n" +
+            "    {\n" +
+            "      \"id\": 3,\n" +
+            "      \"name\": \"Ivan\",\n" +
+            "      \"age\": 26\n" +
+            "    },\n" +
+            "    {\n" +
+            "      \"id\": 4,\n" +
+            "      \"name\": \"Lukas\",\n" +
+            "      \"age\": 34\n" +
+            "    }\n" +
+            "  ]\n" +
+            "}";
         assertEquals(expectedContent, realFileContent);
     }
 

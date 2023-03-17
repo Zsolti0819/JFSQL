@@ -7,12 +7,11 @@ import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.DropTableWrapper;
+import java.sql.SQLException;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.sql.SQLException;
-import java.util.List;
 
 @RequiredArgsConstructor
 public class DropTableService {
@@ -32,7 +31,9 @@ public class DropTableService {
         } catch (final SQLException e) {
             final String tableName = statement.getTableName();
             if (ifExistsIsPresent) {
-                logger.info("Table '{}' does not exist, but 'IF EXISTS' clause was present in the statement, will not throw SQLException.", tableName);
+                logger.info(
+                    "Table '{}' does not exist, but 'IF EXISTS' clause was present in the statement, will not throw SQLException.",
+                    tableName);
                 return 0;
             }
         }
@@ -44,7 +45,8 @@ public class DropTableService {
         }
 
         if (!ifExistsIsPresent && (!semanticValidator.tableExists(statement, database))) {
-            throw new SQLException("Cannot DROP " + statement.getTableName() + " because the table's file or schema doesn't exist.");
+            throw new SQLException(
+                "Cannot DROP " + statement.getTableName() + " because the table's file or schema doesn't exist.");
         }
 
         final int deleteCount = activeTable.getEntries().size();

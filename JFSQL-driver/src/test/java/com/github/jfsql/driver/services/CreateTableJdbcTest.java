@@ -40,54 +40,54 @@ class CreateTableJdbcTest {
     void testCreateTable_normally_json() throws SQLException, IOException {
         assumeTrue(connection.getReader() instanceof ReaderJsonImpl);
         assertEquals(0, statement.executeUpdate(
-                "CREATE TABLE myTable (id INTEGER NOT NULL, name TEXT NOT NULL, age INTEGER NOT NULL)"));
+            "CREATE TABLE myTable (id INTEGER NOT NULL, name TEXT NOT NULL, age INTEGER NOT NULL)"));
         final String realTableFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
-                StandardCharsets.UTF_8);
+            StandardCharsets.UTF_8);
         final String expectedTableFileContent = "" +
-                "{\n" +
-                "  \"Entry\": []\n" +
-                "}";
+            "{\n" +
+            "  \"Entry\": []\n" +
+            "}";
         assertEquals(expectedTableFileContent, realTableFileContent);
         final String realSchemaFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_SCHEMA_FILE_PATH.toFile(),
-                StandardCharsets.UTF_8);
+            StandardCharsets.UTF_8);
         final String expectedSchemaFileContent = "" +
-                "{\n" +
-                "  \"$schema\": \"http://json-schema.org/draft-06/schema#\",\n" +
-                "  \"type\": \"object\",\n" +
-                "  \"required\": [\n" +
-                "    \"Entry\"\n" +
-                "  ],\n" +
-                "  \"properties\": {\n" +
-                "    \"Entry\": {\n" +
-                "      \"type\": \"array\",\n" +
-                "      \"items\": {\n" +
-                "        \"type\": \"object\",\n" +
-                "        \"required\": [\n" +
-                "          \"id\",\n" +
-                "          \"name\",\n" +
-                "          \"age\"\n" +
-                "        ],\n" +
-                "        \"properties\": {\n" +
-                "          \"id\": {\n" +
-                "            \"type\": [\n" +
-                "              \"integer\"\n" +
-                "            ]\n" +
-                "          },\n" +
-                "          \"name\": {\n" +
-                "            \"type\": [\n" +
-                "              \"string\"\n" +
-                "            ]\n" +
-                "          },\n" +
-                "          \"age\": {\n" +
-                "            \"type\": [\n" +
-                "              \"integer\"\n" +
-                "            ]\n" +
-                "          }\n" +
-                "        }\n" +
-                "      }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}";
+            "{\n" +
+            "  \"$schema\": \"http://json-schema.org/draft-06/schema#\",\n" +
+            "  \"type\": \"object\",\n" +
+            "  \"required\": [\n" +
+            "    \"Entry\"\n" +
+            "  ],\n" +
+            "  \"properties\": {\n" +
+            "    \"Entry\": {\n" +
+            "      \"type\": \"array\",\n" +
+            "      \"items\": {\n" +
+            "        \"type\": \"object\",\n" +
+            "        \"required\": [\n" +
+            "          \"id\",\n" +
+            "          \"name\",\n" +
+            "          \"age\"\n" +
+            "        ],\n" +
+            "        \"properties\": {\n" +
+            "          \"id\": {\n" +
+            "            \"type\": [\n" +
+            "              \"integer\"\n" +
+            "            ]\n" +
+            "          },\n" +
+            "          \"name\": {\n" +
+            "            \"type\": [\n" +
+            "              \"string\"\n" +
+            "            ]\n" +
+            "          },\n" +
+            "          \"age\": {\n" +
+            "            \"type\": [\n" +
+            "              \"integer\"\n" +
+            "            ]\n" +
+            "          }\n" +
+            "        }\n" +
+            "      }\n" +
+            "    }\n" +
+            "  }\n" +
+            "}";
         assertEquals(expectedSchemaFileContent, realSchemaFileContent);
     }
 
@@ -95,44 +95,44 @@ class CreateTableJdbcTest {
     void testCreateTable_normally_xml() throws SQLException, IOException {
         assumeTrue(connection.getReader() instanceof ReaderXmlImpl);
         assertEquals(0, statement.executeUpdate(
-                "CREATE TABLE myTable (id INTEGER NOT NULL, name TEXT NOT NULL, age INTEGER NOT NULL)"));
+            "CREATE TABLE myTable (id INTEGER NOT NULL, name TEXT NOT NULL, age INTEGER NOT NULL)"));
         final String realTableFileContent = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
-                StandardCharsets.UTF_8);
+            StandardCharsets.UTF_8);
         final String expectedTableFileContent = "" +
-                "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
-                "<myTable/>\n";
+            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
+            "<myTable/>\n";
         assertEquals(StringUtils.deleteWhitespace(expectedTableFileContent),
-                StringUtils.deleteWhitespace(realTableFileContent));
+            StringUtils.deleteWhitespace(realTableFileContent));
         final String realSchemaFileContent = FileUtils.readFileToString(TestUtils.TABLE_XSD_FILE_PATH.toFile(),
-                StandardCharsets.UTF_8);
+            StandardCharsets.UTF_8);
         final String expectedSchemaFileContent = "" +
-                "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
-                "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\">\n" +
-                "    <xs:element name=\"myTable\">\n" +
-                "        <xs:complexType>\n" +
-                "            <xs:sequence>\n" +
-                "                <xs:element maxOccurs=\"unbounded\" minOccurs=\"0\" name=\"Entry\">\n" +
-                "                    <xs:complexType>\n" +
-                "                        <xs:sequence>\n" +
-                "                            <xs:element name=\"id\" type=\"xs:long\"/>\n" +
-                "                            <xs:element name=\"name\" type=\"xs:string\"/>\n" +
-                "                            <xs:element name=\"age\" type=\"xs:long\"/>\n" +
-                "                        </xs:sequence>\n" +
-                "                    </xs:complexType>\n" +
-                "                </xs:element>\n" +
-                "            </xs:sequence>\n" +
-                "        </xs:complexType>\n" +
-                "    </xs:element>\n" +
-                "</xs:schema>\n";
+            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
+            "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\">\n" +
+            "    <xs:element name=\"myTable\">\n" +
+            "        <xs:complexType>\n" +
+            "            <xs:sequence>\n" +
+            "                <xs:element maxOccurs=\"unbounded\" minOccurs=\"0\" name=\"Entry\">\n" +
+            "                    <xs:complexType>\n" +
+            "                        <xs:sequence>\n" +
+            "                            <xs:element name=\"id\" type=\"xs:long\"/>\n" +
+            "                            <xs:element name=\"name\" type=\"xs:string\"/>\n" +
+            "                            <xs:element name=\"age\" type=\"xs:long\"/>\n" +
+            "                        </xs:sequence>\n" +
+            "                    </xs:complexType>\n" +
+            "                </xs:element>\n" +
+            "            </xs:sequence>\n" +
+            "        </xs:complexType>\n" +
+            "    </xs:element>\n" +
+            "</xs:schema>\n";
         assertEquals(StringUtils.deleteWhitespace(expectedSchemaFileContent),
-                StringUtils.deleteWhitespace(realSchemaFileContent));
+            StringUtils.deleteWhitespace(realSchemaFileContent));
 
     }
 
     @Test
     void testCreateTable_tableNameAndDatabaseNameAreEqual() {
         final SQLException thrown = assertThrows(SQLException.class,
-                () -> statement.executeUpdate("CREATE TABLE myDatabase (id INTEGER, name TEXT, age INTEGER)"));
+            () -> statement.executeUpdate("CREATE TABLE myDatabase (id INTEGER, name TEXT, age INTEGER)"));
         assertEquals("Table name cannot be the same as database name.", thrown.getMessage());
     }
 
@@ -140,20 +140,21 @@ class CreateTableJdbcTest {
     void testCreateTable_tableExists() throws SQLException {
         assertEquals(0, statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)"));
         final SQLException thrown = assertThrows(SQLException.class,
-                () -> statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)"));
+            () -> statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)"));
         assertEquals("Table \"myTable\" already exists.", thrown.getMessage());
     }
 
     @Test
     void testCreateTable_ifNotExists_doesNotThrowException() throws SQLException {
         assertEquals(0, statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)"));
-        assertDoesNotThrow(() -> statement.executeUpdate("CREATE TABLE IF NOT EXISTS myTable (id INTEGER, name TEXT, age INTEGER)"));
+        assertDoesNotThrow(
+            () -> statement.executeUpdate("CREATE TABLE IF NOT EXISTS myTable (id INTEGER, name TEXT, age INTEGER)"));
     }
 
     @Test
     void testCreateTable_duplicateColumns() {
         final SQLException thrown = assertThrows(SQLException.class,
-                () -> statement.executeUpdate("CREATE TABLE myTable (name TEXT, name TEXT, age INTEGER)"));
+            () -> statement.executeUpdate("CREATE TABLE myTable (name TEXT, name TEXT, age INTEGER)"));
         assertEquals("Some columns were identical during table creation.", thrown.getMessage());
     }
 

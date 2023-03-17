@@ -1,12 +1,16 @@
 package com.github.jfsql.driver.core;
 
-import lombok.Getter;
-
 import java.io.File;
 import java.nio.file.Path;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.DriverPropertyInfo;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
 import java.util.logging.Logger;
+import lombok.Getter;
 
 @Getter
 public class JfsqlDriver implements Driver {
@@ -72,7 +76,7 @@ public class JfsqlDriver implements Driver {
 
     @Override
     public DriverPropertyInfo[] getPropertyInfo(final String url, final Properties info)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 

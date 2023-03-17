@@ -10,7 +10,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonWriter;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -40,7 +39,7 @@ public class WriterJsonImpl extends Writer {
     public void writeTable(final Table table) throws SQLException {
         final String tableFile = table.getTableFile();
         try (final FileOutputStream fileOutputStream = new FileOutputStream(tableFile);
-             final FileChannel fileChannel = fileOutputStream.getChannel()) {
+            final FileChannel fileChannel = fileOutputStream.getChannel()) {
             fileChannel.tryLock();
             final List<Entry> entries = table.getEntries();
             final JsonObject root = new JsonObject();
@@ -71,7 +70,8 @@ public class WriterJsonImpl extends Writer {
         }
     }
 
-    private void checkTypeAndValueThenAddProperty(final Table table, final Entry entry, final JsonObject entryObject, final int index) throws SQLException {
+    private void checkTypeAndValueThenAddProperty(final Table table, final Entry entry, final JsonObject entryObject,
+        final int index) throws SQLException {
         if (entry.getValues()[index] == null) {
             entryObject.add(entry.getColumns()[index], null);
         } else if (entry.getValues()[index] != null) {
@@ -96,7 +96,7 @@ public class WriterJsonImpl extends Writer {
     public void writeSchema(final Table table) throws SQLException {
         final String schemaFile = table.getSchemaFile();
         try (final FileOutputStream fileOutputStream = new FileOutputStream(schemaFile);
-             final FileChannel fileChannel = fileOutputStream.getChannel()) {
+            final FileChannel fileChannel = fileOutputStream.getChannel()) {
             fileChannel.tryLock();
             final String[] columnNames = table.getColumns();
             final String[] columnTypes = table.getTypes();
@@ -159,24 +159,22 @@ public class WriterJsonImpl extends Writer {
         final String databaseFileParentPath = String.valueOf(databaseFilePath.getParent());
         final Path databaseFolderName = Path.of(databaseFileParentPath);
         try (final FileOutputStream fileOutputStream = new FileOutputStream(String.valueOf(databaseFilePath));
-             final FileChannel fileChannel = fileOutputStream.getChannel()) {
+            final FileChannel fileChannel = fileOutputStream.getChannel()) {
             fileChannel.tryLock();
             final JsonObject root = new JsonObject();
             root.addProperty("Database", String.valueOf(databaseFolderName.getFileName()));
             final List<Table> tables = database.getTables();
 
             final Gson gson = new Gson();
-            if (tables != null) {
-                final JsonObject[] tablesArray = new JsonObject[tables.size()];
-                for (int i = 0; i < tables.size(); i++) {
-                    final JsonObject tableJsonObject = new JsonObject();
-                    tableJsonObject.addProperty("name", tables.get(i).getName());
-                    tableJsonObject.addProperty("pathToTable", tables.get(i).getTableFile());
-                    tableJsonObject.addProperty("pathToSchema", tables.get(i).getSchemaFile());
-                    tablesArray[i] = tableJsonObject;
-                }
-                root.add("Table", gson.toJsonTree(tablesArray));
+            final JsonObject[] tablesArray = new JsonObject[tables.size()];
+            for (int i = 0; i < tables.size(); i++) {
+                final JsonObject tableJsonObject = new JsonObject();
+                tableJsonObject.addProperty("name", tables.get(i).getName());
+                tableJsonObject.addProperty("pathToTable", tables.get(i).getTableFile());
+                tableJsonObject.addProperty("pathToSchema", tables.get(i).getSchemaFile());
+                tablesArray[i] = tableJsonObject;
             }
+            root.add("Table", gson.toJsonTree(tablesArray));
 
             final String jsonString = beautify(root);
             fileOutputStream.write(jsonString.getBytes());
@@ -200,7 +198,7 @@ public class WriterJsonImpl extends Writer {
         final String newBlobName = incrementFileName(blobParent, "json");
         final Path blobPath = Path.of(blobParent + File.separator + newBlobName);
         try (final FileOutputStream fileOutputStream = new FileOutputStream(blobPath.toFile());
-             final FileChannel fileChannel = fileOutputStream.getChannel()) {
+            final FileChannel fileChannel = fileOutputStream.getChannel()) {
             fileChannel.tryLock();
             final JsonObject root = new JsonObject();
             root.addProperty("blob", value);

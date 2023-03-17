@@ -1,5 +1,13 @@
 package com.github.jfsql.driver.services;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
+
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.transactions.TransactionManager;
@@ -7,27 +15,22 @@ import com.github.jfsql.driver.util.ColumnToTypeMapper;
 import com.github.jfsql.driver.util.WhereConditionSolver;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.UpdateWrapper;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.sql.SQLException;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 class UpdateServiceTest {
 
     private final List<Entry> whereEntries = List.of(
-            new Entry(Map.of("column1", "1", "column2", "a", "column3", "2.5")));
+        new Entry(Map.of("column1", "1", "column2", "a", "column3", "2.5")));
     private final Map<String, String> mappedColumnsAndTypes = Map.of("column1", "INTEGER", "TEXT", "column2", "column3",
-            "REAL");
+        "REAL");
     @Mock
     private TableFinder tableFinder;
 
@@ -74,7 +77,7 @@ class UpdateServiceTest {
         when(semanticValidator.allColumnsExist(table, updateStatement)).thenReturn(false);
 
         final SQLException thrown = assertThrows(SQLException.class,
-                () -> updateService.updateTable(updateStatement));
+            () -> updateService.updateTable(updateStatement));
         assertEquals("Some columns entered doesn't exist in \"" + table.getName() + "\".", thrown.getMessage());
 
         verifyNoInteractions(whereConditionSolver);
@@ -90,7 +93,7 @@ class UpdateServiceTest {
         when(semanticValidator.allWhereColumnsExist(table, updateStatement)).thenReturn(false);
 
         final SQLException thrown = assertThrows(SQLException.class,
-                () -> updateService.updateTable(updateStatement));
+            () -> updateService.updateTable(updateStatement));
         assertEquals("Some columns entered doesn't exist in \"" + table.getName() + "\".", thrown.getMessage());
 
         verifyNoInteractions(whereConditionSolver);

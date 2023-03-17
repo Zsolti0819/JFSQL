@@ -6,11 +6,18 @@ import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.util.ColumnToTypeMapper;
 import com.github.jfsql.driver.util.WhereConditionSolver;
 import com.github.jfsql.driver.validation.SemanticValidator;
-import com.github.jfsql.parser.dto.*;
-import lombok.Data;
-
+import com.github.jfsql.parser.dto.AlterTableWrapper;
+import com.github.jfsql.parser.dto.CreateDatabaseWrapper;
+import com.github.jfsql.parser.dto.CreateTableWrapper;
+import com.github.jfsql.parser.dto.DeleteWrapper;
+import com.github.jfsql.parser.dto.DropDatabaseWrapper;
+import com.github.jfsql.parser.dto.DropTableWrapper;
+import com.github.jfsql.parser.dto.InsertWrapper;
+import com.github.jfsql.parser.dto.SelectWrapper;
+import com.github.jfsql.parser.dto.UpdateWrapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import lombok.Data;
 
 @Data
 public class StatementServiceManager {
@@ -23,7 +30,8 @@ public class StatementServiceManager {
     private final Reader reader;
     private final Database database;
 
-    public StatementServiceManager(final Database database, final TableFinder tableFinder, final TransactionManager transactionManager, final Reader reader) {
+    public StatementServiceManager(final Database database, final TableFinder tableFinder,
+        final TransactionManager transactionManager, final Reader reader) {
         this.database = database;
         this.tableFinder = tableFinder;
         this.transactionManager = transactionManager;
@@ -34,7 +42,8 @@ public class StatementServiceManager {
     }
 
     public void alterTable(final AlterTableWrapper statement) throws SQLException {
-        new AlterTableService(tableFinder, database, transactionManager, semanticValidator, reader).alterTable(statement);
+        new AlterTableService(tableFinder, database, transactionManager, semanticValidator, reader).alterTable(
+            statement);
     }
 
     public void createDatabase(final CreateDatabaseWrapper statement) throws SQLException {
@@ -54,20 +63,24 @@ public class StatementServiceManager {
     }
 
     public ResultSet selectFromTable(final SelectWrapper statement) throws SQLException {
-        return new SelectService(tableFinder, semanticValidator, columnToTypeMapper, whereConditionSolver, reader).selectFromTable(statement);
+        return new SelectService(tableFinder, semanticValidator, columnToTypeMapper, whereConditionSolver,
+            reader).selectFromTable(statement);
     }
 
     public int updateTable(final UpdateWrapper statement) throws SQLException {
-        return new UpdateService(tableFinder, transactionManager, semanticValidator, columnToTypeMapper, whereConditionSolver, reader).updateTable(
-                statement);
+        return new UpdateService(tableFinder, transactionManager, semanticValidator, columnToTypeMapper,
+            whereConditionSolver, reader).updateTable(
+            statement);
     }
 
     public int deleteFromTable(final DeleteWrapper statement) throws SQLException {
-        return new DeleteService(tableFinder, transactionManager, semanticValidator, whereConditionSolver, reader).deleteFromTable(statement);
+        return new DeleteService(tableFinder, transactionManager, semanticValidator, whereConditionSolver,
+            reader).deleteFromTable(statement);
     }
 
     public int dropTable(final DropTableWrapper statement) throws SQLException {
-        return new DropTableService(tableFinder, database, transactionManager, semanticValidator, reader).dropTable(statement);
+        return new DropTableService(tableFinder, database, transactionManager, semanticValidator, reader).dropTable(
+            statement);
     }
 
 }

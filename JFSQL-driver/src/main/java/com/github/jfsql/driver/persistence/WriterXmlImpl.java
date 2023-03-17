@@ -5,17 +5,6 @@ import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.util.DatatypeConverter;
 import com.github.jfsql.driver.validation.XmlSchemaValidator;
-import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import javax.xml.XMLConstants;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -25,13 +14,28 @@ import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 public class WriterXmlImpl extends Writer {
 
     private static final XmlSchemaValidator XML_SCHEMA_VALIDATOR = XmlSchemaValidator.INSTANCE;
 
     private void beautifyAndWrite(final FileOutputStream fileOutputStream, final Document document)
-            throws SQLException {
+        throws SQLException {
         try {
             final TransformerFactory transformerFactory = TransformerFactory.newInstance();
             transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
@@ -50,7 +54,7 @@ public class WriterXmlImpl extends Writer {
     public void writeTable(final Table table) throws SQLException {
         final String tableFile = table.getTableFile();
         try (final FileOutputStream fileOutputStream = new FileOutputStream(tableFile);
-             final FileChannel fileChannel = fileOutputStream.getChannel()) {
+            final FileChannel fileChannel = fileOutputStream.getChannel()) {
             fileChannel.tryLock();
             final String tableName = table.getName();
             final List<Entry> entries = table.getEntries();
@@ -82,7 +86,8 @@ public class WriterXmlImpl extends Writer {
         }
     }
 
-    private void checkTypeAndValueThenAddProperty(final Table table, final Document document, final String[] columns, final String[] values, final Element element, final int index) throws SQLException {
+    private void checkTypeAndValueThenAddProperty(final Table table, final Document document, final String[] columns,
+        final String[] values, final Element element, final int index) throws SQLException {
         if (values[index] != null) {
             Element row = null;
             if (Objects.equals(table.getTypes()[index], "BLOB")) {
@@ -106,7 +111,7 @@ public class WriterXmlImpl extends Writer {
         final String tableName = table.getName();
         final String schemaFile = table.getSchemaFile();
         try (final FileOutputStream fileOutputStream = new FileOutputStream(schemaFile);
-             final FileChannel fileChannel = fileOutputStream.getChannel()) {
+            final FileChannel fileChannel = fileOutputStream.getChannel()) {
             fileChannel.tryLock();
             final String[] columnNames = table.getColumns();
             final String[] columnTypes = table.getTypes();
@@ -165,7 +170,7 @@ public class WriterXmlImpl extends Writer {
         final String databaseFileParentPath = String.valueOf(databaseFilePath.getParent());
         final Path databaseFolderName = Path.of(databaseFileParentPath);
         try (final FileOutputStream fileOutputStream = new FileOutputStream(databaseFilePath.toFile());
-             final FileChannel fileChannel = fileOutputStream.getChannel()) {
+            final FileChannel fileChannel = fileOutputStream.getChannel()) {
             fileChannel.tryLock();
             final Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
             final Element root = document.createElement("Database");
@@ -173,24 +178,23 @@ public class WriterXmlImpl extends Writer {
             document.appendChild(root);
 
             final List<Table> tables = database.getTables();
-            if (tables != null) {
-                for (final Table table : tables) {
-                    final Element tableElement = document.createElement("Table");
-                    tableElement.setAttribute("name", table.getName());
+            for (final Table table : tables) {
+                final Element tableElement = document.createElement("Table");
+                tableElement.setAttribute("name", table.getName());
 
-                    final Element tableFile = document.createElement("pathToTable");
-                    final String xmlPath = table.getTableFile();
-                    tableFile.setTextContent(xmlPath);
-                    tableElement.appendChild(tableFile);
+                final Element tableFile = document.createElement("pathToTable");
+                final String xmlPath = table.getTableFile();
+                tableFile.setTextContent(xmlPath);
+                tableElement.appendChild(tableFile);
 
-                    final Element schemaFile = document.createElement("pathToSchema");
-                    final String xsdPath = table.getSchemaFile();
-                    schemaFile.setTextContent(xsdPath);
-                    tableElement.appendChild(schemaFile);
+                final Element schemaFile = document.createElement("pathToSchema");
+                final String xsdPath = table.getSchemaFile();
+                schemaFile.setTextContent(xsdPath);
+                tableElement.appendChild(schemaFile);
 
-                    root.appendChild(tableElement);
-                }
+                root.appendChild(tableElement);
             }
+
             beautifyAndWrite(fileOutputStream, document);
         } catch (final IOException | ParserConfigurationException e) {
             throw new SQLException("Failed to write the database file.\n" + e.getMessage());
@@ -212,7 +216,7 @@ public class WriterXmlImpl extends Writer {
         final String newBlobName = incrementFileName(blobParent, "xml");
         final Path blobPath = Path.of(blobParent + File.separator + newBlobName);
         try (final FileOutputStream fileOutputStream = new FileOutputStream(blobPath.toFile());
-             final FileChannel fileChannel = fileOutputStream.getChannel()) {
+            final FileChannel fileChannel = fileOutputStream.getChannel()) {
             fileChannel.tryLock();
             final DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             final Document document = documentBuilder.newDocument();

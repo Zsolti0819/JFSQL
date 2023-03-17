@@ -2,7 +2,6 @@ package com.github.jfsql.driver.util;
 
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.parser.dto.StatementWithColumns;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;

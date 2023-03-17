@@ -1,15 +1,20 @@
 package com.github.jfsql.driver.core;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.github.jfsql.driver.TestUtils;
+import java.io.IOException;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class JfsqlDatabaseMetaDataTest {
 
@@ -752,7 +757,7 @@ class JfsqlDatabaseMetaDataTest {
 
     @Test
     void getUDTs() {
-//        assertFalse(metaData.getUDTs());
+        assertThrows(SQLFeatureNotSupportedException.class, () -> metaData.getUDTs(null, null, null, new int[0]));
     }
 
     @Test
@@ -782,17 +787,17 @@ class JfsqlDatabaseMetaDataTest {
 
     @Test
     void getSuperTypes() {
-//        assertFalse(metaData.());
+        assertThrows(SQLFeatureNotSupportedException.class, () -> metaData.getSuperTypes(null, null, null));
     }
 
     @Test
     void getSuperTables() {
-//        assertFalse(metaData.());
+        assertThrows(SQLFeatureNotSupportedException.class, () -> metaData.getSuperTables(null, null, null));
     }
 
     @Test
     void getAttributes() {
-//        assertFalse(metaData.());
+        assertThrows(SQLFeatureNotSupportedException.class, () -> metaData.getAttributes(null, null, null, null));
     }
 
     @Test
@@ -802,7 +807,7 @@ class JfsqlDatabaseMetaDataTest {
 
     @Test
     void getResultSetHoldability() {
-//        assertFalse(metaData.());
+        assertEquals(0, metaData.getResultSetHoldability());
     }
 
     @Test
@@ -827,52 +832,52 @@ class JfsqlDatabaseMetaDataTest {
 
     @Test
     void getSQLStateType() {
-//        assertFalse(metaData.());
+        assertEquals(DatabaseMetaData.sqlStateSQL99, metaData.getSQLStateType());
     }
 
     @Test
     void locatorsUpdateCopy() {
-//        assertFalse(metaData.());
+        assertFalse(metaData.locatorsUpdateCopy());
     }
 
     @Test
     void supportsStatementPooling() {
-//        assertFalse(metaData.());
+        assertFalse(metaData.supportsStatementPooling());
     }
 
     @Test
     void getRowIdLifetime() {
-//        assertFalse(metaData.());
+        assertNull(metaData.getRowIdLifetime());
     }
 
     @Test
     void supportsStoredFunctionsUsingCallSyntax() {
-//        assertFalse(metaData.());
+        assertFalse(metaData.supportsStoredFunctionsUsingCallSyntax());
     }
 
     @Test
     void autoCommitFailureClosesAllResultSets() {
-//        assertFalse(metaData.());
+        assertFalse(metaData.autoCommitFailureClosesAllResultSets());
     }
 
     @Test
     void getClientInfoProperties() {
-//        assertFalse(metaData.());
+        assertThrows(SQLFeatureNotSupportedException.class, () -> metaData.getClientInfoProperties());
     }
 
     @Test
     void getFunctions() {
-//        assertFalse(metaData.());
+        assertThrows(SQLFeatureNotSupportedException.class, () -> metaData.getFunctions(null, null, null));
     }
 
     @Test
     void getFunctionColumns() {
-//        assertFalse(metaData.());
+        assertThrows(SQLFeatureNotSupportedException.class, () -> metaData.getFunctionColumns(null, null, null, null));
     }
 
     @Test
     void getPseudoColumns() {
-//        assertFalse(metaData.());
+        assertThrows(SQLFeatureNotSupportedException.class, () -> metaData.getPseudoColumns(null, null, null, null));
     }
 
     @Test

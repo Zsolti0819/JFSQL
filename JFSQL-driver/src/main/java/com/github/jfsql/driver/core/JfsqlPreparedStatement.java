@@ -4,19 +4,45 @@ import com.github.jfsql.driver.services.StatementServiceManager;
 import com.github.jfsql.driver.services.TableFinder;
 import com.github.jfsql.driver.util.PreparedStatementCreator;
 import com.github.jfsql.parser.core.Parser;
-import com.github.jfsql.parser.dto.*;
-import lombok.Data;
-
+import com.github.jfsql.parser.dto.AlterTableWrapper;
+import com.github.jfsql.parser.dto.BaseStatement;
+import com.github.jfsql.parser.dto.CreateDatabaseWrapper;
+import com.github.jfsql.parser.dto.CreateTableWrapper;
+import com.github.jfsql.parser.dto.DeleteWrapper;
+import com.github.jfsql.parser.dto.DropDatabaseWrapper;
+import com.github.jfsql.parser.dto.DropTableWrapper;
+import com.github.jfsql.parser.dto.InsertWrapper;
+import com.github.jfsql.parser.dto.SelectWrapper;
+import com.github.jfsql.parser.dto.TypeOfStatement;
+import com.github.jfsql.parser.dto.UpdateWrapper;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
-import java.sql.*;
+import java.sql.Array;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.NClob;
+import java.sql.ParameterMetaData;
+import java.sql.PreparedStatement;
+import java.sql.Ref;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.RowId;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.sql.SQLWarning;
+import java.sql.SQLXML;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Calendar;
+import lombok.Data;
 
 @Data
 public class JfsqlPreparedStatement implements PreparedStatement {
@@ -31,7 +57,7 @@ public class JfsqlPreparedStatement implements PreparedStatement {
     private int updateCount = 0;
 
     JfsqlPreparedStatement(final JfsqlConnection connection, final String preparedStatement,
-                           final TableFinder tableFinder, final StatementServiceManager statementServiceManager) throws SQLException {
+        final TableFinder tableFinder, final StatementServiceManager statementServiceManager) throws SQLException {
         this.connection = connection;
         this.preparedStatement = preparedStatement;
         this.tableFinder = tableFinder;
@@ -65,7 +91,7 @@ public class JfsqlPreparedStatement implements PreparedStatement {
                 break;
             case UPDATE:
                 parameterCount = ((UpdateWrapper) statement).getValues().size()
-                        + ((UpdateWrapper) statement).getWhereValues().size();
+                    + ((UpdateWrapper) statement).getWhereValues().size();
                 break;
             default:
                 throw new SQLException("Cannot determine the type of the statement.");
@@ -120,7 +146,7 @@ public class JfsqlPreparedStatement implements PreparedStatement {
                 break;
             case DELETE:
                 final DeleteWrapper preparedDeleteStatement = PreparedStatementCreator.getPreparedDeleteStatement(
-                        (DeleteWrapper) statement, this);
+                    (DeleteWrapper) statement, this);
                 updateCount = statementServiceManager.deleteFromTable(preparedDeleteStatement);
                 break;
             case DROP_DATABASE:
@@ -131,12 +157,12 @@ public class JfsqlPreparedStatement implements PreparedStatement {
                 break;
             case INSERT:
                 final InsertWrapper preparedInsertStatement = PreparedStatementCreator.getPreparedInsertStatement(
-                        (InsertWrapper) statement, this);
+                    (InsertWrapper) statement, this);
                 updateCount = statementServiceManager.insertIntoTable(preparedInsertStatement);
                 break;
             case UPDATE:
                 final UpdateWrapper preparedUpdateStatement = PreparedStatementCreator.getPreparedUpdateStatement(
-                        (UpdateWrapper) statement, this);
+                    (UpdateWrapper) statement, this);
                 updateCount = statementServiceManager.updateTable(preparedUpdateStatement);
                 break;
             default:
@@ -147,7 +173,7 @@ public class JfsqlPreparedStatement implements PreparedStatement {
 
     private void executeQuery(final BaseStatement statement) throws SQLException {
         final SelectWrapper preparedSelectStatement = PreparedStatementCreator.getPreparedSelectStatement(
-                (SelectWrapper) statement, this);
+            (SelectWrapper) statement, this);
         resultSet = statementServiceManager.selectFromTable(preparedSelectStatement);
     }
 
@@ -164,7 +190,7 @@ public class JfsqlPreparedStatement implements PreparedStatement {
                 break;
             case DELETE:
                 final DeleteWrapper preparedDeleteStatement = PreparedStatementCreator.getPreparedDeleteStatement(
-                        (DeleteWrapper) statement, this);
+                    (DeleteWrapper) statement, this);
                 statementServiceManager.deleteFromTable(preparedDeleteStatement);
                 break;
             case DROP_DATABASE:
@@ -175,12 +201,12 @@ public class JfsqlPreparedStatement implements PreparedStatement {
                 break;
             case INSERT:
                 final InsertWrapper preparedInsertStatement = PreparedStatementCreator.getPreparedInsertStatement(
-                        (InsertWrapper) statement, this);
+                    (InsertWrapper) statement, this);
                 statementServiceManager.insertIntoTable(preparedInsertStatement);
                 break;
             case UPDATE:
                 final UpdateWrapper preparedUpdateStatement = PreparedStatementCreator.getPreparedUpdateStatement(
-                        (UpdateWrapper) statement, this);
+                    (UpdateWrapper) statement, this);
                 statementServiceManager.updateTable(preparedUpdateStatement);
                 break;
             default:
@@ -196,7 +222,7 @@ public class JfsqlPreparedStatement implements PreparedStatement {
         }
         if (TypeOfStatement.SELECT.equals(statement.getTypeOfStatement())) {
             final SelectWrapper preparedSelectStatement = PreparedStatementCreator.getPreparedSelectStatement(
-                    (SelectWrapper) statement, this);
+                (SelectWrapper) statement, this);
             executeQuery(preparedSelectStatement);
             return true;
         } else {
@@ -364,25 +390,25 @@ public class JfsqlPreparedStatement implements PreparedStatement {
 
     @Override
     public void setAsciiStream(final int parameterIndex, final InputStream x, final int length)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void setUnicodeStream(final int parameterIndex, final InputStream x, final int length)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void setBinaryStream(final int parameterIndex, final InputStream x, final int length)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void setObject(final int parameterIndex, final Object x, final int targetSqlType)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
@@ -393,31 +419,31 @@ public class JfsqlPreparedStatement implements PreparedStatement {
 
     @Override
     public void setCharacterStream(final int parameterIndex, final Reader reader, final int length)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void setDate(final int parameterIndex, final Date x, final Calendar cal)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void setTime(final int parameterIndex, final Time x, final Calendar cal)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void setTimestamp(final int parameterIndex, final Timestamp x, final Calendar cal)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void setNull(final int parameterIndex, final int sqlType, final String typeName)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
@@ -438,7 +464,7 @@ public class JfsqlPreparedStatement implements PreparedStatement {
 
     @Override
     public void setNCharacterStream(final int parameterIndex, final Reader value, final long length)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
@@ -449,19 +475,19 @@ public class JfsqlPreparedStatement implements PreparedStatement {
 
     @Override
     public void setClob(final int parameterIndex, final Reader reader, final long length)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void setBlob(final int parameterIndex, final InputStream inputStream, final long length)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void setNClob(final int parameterIndex, final Reader reader, final long length)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
@@ -472,25 +498,25 @@ public class JfsqlPreparedStatement implements PreparedStatement {
 
     @Override
     public void setObject(final int parameterIndex, final Object x, final int targetSqlType, final int scaleOrLength)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void setAsciiStream(final int parameterIndex, final InputStream x, final long length)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void setBinaryStream(final int parameterIndex, final InputStream x, final long length)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void setCharacterStream(final int parameterIndex, final Reader reader, final long length)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
@@ -501,13 +527,13 @@ public class JfsqlPreparedStatement implements PreparedStatement {
 
     @Override
     public void setCharacterStream(final int parameterIndex, final Reader reader)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void setNCharacterStream(final int parameterIndex, final Reader value)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 

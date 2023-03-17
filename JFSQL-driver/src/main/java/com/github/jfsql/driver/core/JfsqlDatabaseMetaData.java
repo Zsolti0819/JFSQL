@@ -1,6 +1,10 @@
 package com.github.jfsql.driver.core;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.RowIdLifetime;
+import java.sql.SQLFeatureNotSupportedException;
 
 public class JfsqlDatabaseMetaData implements DatabaseMetaData {
 
@@ -601,18 +605,21 @@ public class JfsqlDatabaseMetaData implements DatabaseMetaData {
     }
 
     @Override
-    public ResultSet getProcedures(final String catalog, final String schemaPattern, final String procedureNamePattern) {
+    public ResultSet getProcedures(final String catalog, final String schemaPattern,
+        final String procedureNamePattern) {
         return null;
     }
 
     @Override
-    public ResultSet getProcedureColumns(final String catalog, final String schemaPattern, final String procedureNamePattern,
-                                         final String columnNamePattern) {
+    public ResultSet getProcedureColumns(final String catalog, final String schemaPattern,
+        final String procedureNamePattern,
+        final String columnNamePattern) {
         return null;
     }
 
     @Override
-    public ResultSet getTables(final String catalog, final String schemaPattern, final String tableNamePattern, final String[] types) {
+    public ResultSet getTables(final String catalog, final String schemaPattern, final String tableNamePattern,
+        final String[] types) {
         return null;
     }
 
@@ -632,22 +639,26 @@ public class JfsqlDatabaseMetaData implements DatabaseMetaData {
     }
 
     @Override
-    public ResultSet getColumns(final String catalog, final String schemaPattern, final String tableNamePattern, final String columnNamePattern) {
+    public ResultSet getColumns(final String catalog, final String schemaPattern, final String tableNamePattern,
+        final String columnNamePattern) {
         return null;
     }
 
     @Override
-    public ResultSet getColumnPrivileges(final String catalog, final String schema, final String table, final String columnNamePattern) {
+    public ResultSet getColumnPrivileges(final String catalog, final String schema, final String table,
+        final String columnNamePattern) {
         return null;
     }
 
     @Override
-    public ResultSet getTablePrivileges(final String catalog, final String schemaPattern, final String tableNamePattern) {
+    public ResultSet getTablePrivileges(final String catalog, final String schemaPattern,
+        final String tableNamePattern) {
         return null;
     }
 
     @Override
-    public ResultSet getBestRowIdentifier(final String catalog, final String schema, final String table, final int scope, final boolean nullable) {
+    public ResultSet getBestRowIdentifier(final String catalog, final String schema, final String table,
+        final int scope, final boolean nullable) {
         return null;
     }
 
@@ -673,7 +684,7 @@ public class JfsqlDatabaseMetaData implements DatabaseMetaData {
 
     @Override
     public ResultSet getCrossReference(final String parentCatalog, final String parentSchema, final String parentTable,
-                                       final String foreignCatalog, final String foreignSchema, final String foreignTable) {
+        final String foreignCatalog, final String foreignSchema, final String foreignTable) {
         return null;
     }
 
@@ -683,7 +694,8 @@ public class JfsqlDatabaseMetaData implements DatabaseMetaData {
     }
 
     @Override
-    public ResultSet getIndexInfo(final String catalog, final String schema, final String table, final boolean unique, final boolean approximate) {
+    public ResultSet getIndexInfo(final String catalog, final String schema, final String table, final boolean unique,
+        final boolean approximate) {
         return null;
     }
 
@@ -748,8 +760,9 @@ public class JfsqlDatabaseMetaData implements DatabaseMetaData {
     }
 
     @Override
-    public ResultSet getUDTs(final String catalog, final String schemaPattern, final String typeNamePattern, final int[] types) {
-        return null;
+    public ResultSet getUDTs(final String catalog, final String schemaPattern, final String typeNamePattern,
+        final int[] types) throws SQLFeatureNotSupportedException {
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
@@ -778,18 +791,21 @@ public class JfsqlDatabaseMetaData implements DatabaseMetaData {
     }
 
     @Override
-    public ResultSet getSuperTypes(final String catalog, final String schemaPattern, final String typeNamePattern) {
-        return null;
+    public ResultSet getSuperTypes(final String catalog, final String schemaPattern, final String typeNamePattern)
+        throws SQLFeatureNotSupportedException {
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
-    public ResultSet getSuperTables(final String catalog, final String schemaPattern, final String tableNamePattern) {
-        return null;
+    public ResultSet getSuperTables(final String catalog, final String schemaPattern, final String tableNamePattern)
+        throws SQLFeatureNotSupportedException {
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
-    public ResultSet getAttributes(final String catalog, final String schemaPattern, final String typeNamePattern, final String attributeNamePattern) {
-        return null;
+    public ResultSet getAttributes(final String catalog, final String schemaPattern, final String typeNamePattern,
+        final String attributeNamePattern) throws SQLFeatureNotSupportedException {
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
@@ -858,25 +874,27 @@ public class JfsqlDatabaseMetaData implements DatabaseMetaData {
     }
 
     @Override
-    public ResultSet getClientInfoProperties() {
-        return null;
+    public ResultSet getClientInfoProperties() throws SQLFeatureNotSupportedException {
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
-    public ResultSet getFunctions(final String catalog, final String schemaPattern, final String functionNamePattern) {
-        return null;
+    public ResultSet getFunctions(final String catalog, final String schemaPattern, final String functionNamePattern)
+        throws SQLFeatureNotSupportedException {
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
-    public ResultSet getFunctionColumns(final String catalog, final String schemaPattern, final String functionNamePattern,
-                                        final String columnNamePattern) {
-        return null;
+    public ResultSet getFunctionColumns(final String catalog, final String schemaPattern,
+        final String functionNamePattern,
+        final String columnNamePattern) throws SQLFeatureNotSupportedException {
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public ResultSet getPseudoColumns(final String catalog, final String schemaPattern, final String tableNamePattern,
-                                      final String columnNamePattern) {
-        return null;
+        final String columnNamePattern) throws SQLFeatureNotSupportedException {
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override

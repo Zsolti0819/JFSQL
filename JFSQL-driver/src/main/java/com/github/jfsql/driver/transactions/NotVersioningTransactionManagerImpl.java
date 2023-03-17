@@ -4,7 +4,6 @@ import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,7 +14,8 @@ import java.util.List;
 public class NotVersioningTransactionManagerImpl extends TransactionManager {
 
 
-    public NotVersioningTransactionManagerImpl(final Path url, final Reader reader, final Writer writer) throws SQLException {
+    public NotVersioningTransactionManagerImpl(final Path url, final Reader reader, final Writer writer)
+        throws SQLException {
         super(url, reader, writer);
     }
 

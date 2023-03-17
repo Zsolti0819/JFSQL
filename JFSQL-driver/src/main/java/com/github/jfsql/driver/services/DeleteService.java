@@ -7,10 +7,9 @@ import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.util.WhereConditionSolver;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.DeleteWrapper;
-import lombok.RequiredArgsConstructor;
-
 import java.sql.SQLException;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class DeleteService {

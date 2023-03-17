@@ -1,11 +1,10 @@
 package com.github.jfsql.driver.dto;
 
+import java.nio.file.Path;
+import java.util.List;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-
-import java.nio.file.Path;
-import java.util.List;
 
 @Data
 @RequiredArgsConstructor

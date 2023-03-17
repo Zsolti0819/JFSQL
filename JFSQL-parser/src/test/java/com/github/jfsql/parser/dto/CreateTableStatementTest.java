@@ -1,11 +1,11 @@
 package com.github.jfsql.parser.dto;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.github.jfsql.parser.core.Parser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CreateTableStatementTest {
 
@@ -18,9 +18,11 @@ class CreateTableStatementTest {
 
     @ParameterizedTest
     @CsvSource({
-            "'create table myTable (a integer not null, b real, c text not null, d blob)','myTable','a','integer','b','real','c','text','d','blob'",
+        "'create table myTable (a integer not null, b real, c text not null, d blob)','myTable','a','integer','b','real','c','text','d','blob'",
     })
-    void testCreateTableStatements(final String statement, final String tableName, final String column1Name, final String column1Type, final String column2Name, final String column2Type, final String column3Name, final String column3Type, final String column4Name, final String column4Type) {
+    void testCreateTableStatements(final String statement, final String tableName, final String column1Name,
+        final String column1Type, final String column2Name, final String column2Type, final String column3Name,
+        final String column3Type, final String column4Name, final String column4Type) {
         final CreateTableStatement createTableStatement = (CreateTableStatement) parser.parse(statement);
         assertEquals(tableName, createTableStatement.getTableName());
         assertEquals(column1Name, createTableStatement.getColumns().get(0));

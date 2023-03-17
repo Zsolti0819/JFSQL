@@ -1,16 +1,23 @@
 package com.github.jfsql.driver.services;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.github.jfsql.driver.TestUtils;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class SelectJdbcTest {
 
@@ -22,10 +29,10 @@ class SelectJdbcTest {
             statement = connection.createStatement();
             statement.execute("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
             statement.executeUpdate(
-                    "INSERT INTO myTable (id, name, age) VALUES (1, 'Zsolti', 25), (2, 'Tomi', 24), (3, 'Ivan', 26), (4, 'Lukas', 34)");
+                "INSERT INTO myTable (id, name, age) VALUES (1, 'Zsolti', 25), (2, 'Tomi', 24), (3, 'Ivan', 26), (4, 'Lukas', 34)");
             statement.execute("CREATE TABLE myTable2 (id INTEGER , name2 TEXT, age2 INTEGER)");
             statement.executeUpdate(
-                    "INSERT INTO myTable2 (id, name2, age2) VALUES (1, 'Zsolti', 25), (2, 'Tomi', 24), (3, 'Ivan', 26), (4, 'Lukas', 1)");
+                "INSERT INTO myTable2 (id, name2, age2) VALUES (1, 'Zsolti', 25), (2, 'Tomi', 24), (3, 'Ivan', 26), (4, 'Lukas', 1)");
         } catch (final SQLException e) {
             e.printStackTrace();
         }
@@ -44,29 +51,39 @@ class SelectJdbcTest {
         statement.execute("DROP TABLE IF EXISTS sales");
         statement.execute("DROP TABLE IF EXISTS orders");
         statement.execute("DROP TABLE IF EXISTS onlineCustomers");
-        statement.execute("CREATE TABLE onlineCustomers (customerId INTEGER, customerName TEXT, customerCity TEXT, customerMail TEXT)");
-        statement.execute("CREATE TABLE orders (orderId INTEGER, customerId INTEGER, orderTotal REAL, discountRate REAL, orderDate TEXT)");
+        statement.execute(
+            "CREATE TABLE onlineCustomers (customerId INTEGER, customerName TEXT, customerCity TEXT, customerMail TEXT)");
+        statement.execute(
+            "CREATE TABLE orders (orderId INTEGER, customerId INTEGER, orderTotal REAL, discountRate REAL, orderDate TEXT)");
         statement.execute("CREATE TABLE sales (salesId INTEGER, orderId INTEGER, salesTotal REAL)");
-        statement.execute("INSERT INTO onlineCustomers VALUES (1, 'Salvador', 'Philadelphia', 'tyiptqo.wethls@chttw.org')");
+        statement.execute(
+            "INSERT INTO onlineCustomers VALUES (1, 'Salvador', 'Philadelphia', 'tyiptqo.wethls@chttw.org')");
         statement.execute("INSERT INTO onlineCustomers VALUES (2, 'Gilbert', 'San Diego', 'rrvyy.wdumos@lklkj.org')");
         statement.execute("INSERT INTO onlineCustomers VALUES (3, 'Ernest', 'New York', 'ymuea.pnxkukf@dwv.org')");
         statement.execute("INSERT INTO onlineCustomers VALUES (4, 'Stella', 'Phoenix', 'xvsfzp.rjhtni@rdn.com')");
         statement.execute("INSERT INTO onlineCustomers VALUES (5, 'Jorge', 'Los Angeles', 'oykbo.vlxopp@nmwhv.org')");
         statement.execute("INSERT INTO onlineCustomers VALUES (6, 'Jerome', 'San Antonio', 'wkabc.ofmhetq@gtmh.co')");
         statement.execute("INSERT INTO onlineCustomers VALUES (7, 'Edward', 'Chicago', 'wguexiymy.nnbdgpc@juc.co')");
-        statement.execute("INSERT INTO orders (orderId, customerId, orderTotal, discountRate, orderDate) VALUES (1, 3, 1910.64,5.49, '03-Dec-2019')");
-        statement.execute("INSERT INTO orders (orderId, customerId, orderTotal, discountRate, orderDate) VALUES (2, 4, 150.89,15.33, '11-Jun-2019')");
-        statement.execute("INSERT INTO orders (orderId, customerId, orderTotal, discountRate, orderDate) VALUES (3, 5, 912.55,13.74, '15-Sep-2019')");
-        statement.execute("INSERT INTO orders (orderId, customerId, orderTotal, discountRate, orderDate) VALUES (4, 7, 418.24,14.53, '28-May-2019')");
-        statement.execute("INSERT INTO orders (orderId, customerId, orderTotal, discountRate, orderDate) VALUES (5, 55 ,512.55,13.74, '15-Jun-2019')");
-        statement.execute("INSERT INTO orders (orderId, customerId, orderTotal, discountRate, orderDate) VALUES (6, 57, 118.24,14.53, '28-Dec-2019')");
+        statement.execute(
+            "INSERT INTO orders (orderId, customerId, orderTotal, discountRate, orderDate) VALUES (1, 3, 1910.64,5.49, '03-Dec-2019')");
+        statement.execute(
+            "INSERT INTO orders (orderId, customerId, orderTotal, discountRate, orderDate) VALUES (2, 4, 150.89,15.33, '11-Jun-2019')");
+        statement.execute(
+            "INSERT INTO orders (orderId, customerId, orderTotal, discountRate, orderDate) VALUES (3, 5, 912.55,13.74, '15-Sep-2019')");
+        statement.execute(
+            "INSERT INTO orders (orderId, customerId, orderTotal, discountRate, orderDate) VALUES (4, 7, 418.24,14.53, '28-May-2019')");
+        statement.execute(
+            "INSERT INTO orders (orderId, customerId, orderTotal, discountRate, orderDate) VALUES (5, 55 ,512.55,13.74, '15-Jun-2019')");
+        statement.execute(
+            "INSERT INTO orders (orderId, customerId, orderTotal, discountRate, orderDate) VALUES (6, 57, 118.24,14.53, '28-Dec-2019')");
         statement.execute("INSERT INTO sales (salesId, orderId, salesTotal) VALUES(1, 3, 370.95)");
         statement.execute("INSERT INTO sales (salesId, orderId, salesTotal) VALUES(2, 4, 882.13)");
         statement.execute("INSERT INTO sales (salesId, orderId, salesTotal) VALUES(3, 12, 370.95)");
         statement.execute("INSERT INTO sales (salesId, orderId, salesTotal) VALUES(4, 13, 882.13)");
         statement.execute("INSERT INTO sales (salesId, orderId, salesTotal) VALUES(5, 55, 170.95)");
         statement.execute("INSERT INTO sales (salesId, orderId, salesTotal) VALUES(6, 57, 382.13)");
-        statement.execute("SELECT customerName, customerCity, customerMail, salesTotal FROM onlineCustomers INNER JOIN orders ON onlineCustomers.customerId = orders.customerId INNER JOIN sales ON orders.orderId = sales.orderId");
+        statement.execute(
+            "SELECT customerName, customerCity, customerMail, salesTotal FROM onlineCustomers INNER JOIN orders ON onlineCustomers.customerId = orders.customerId INNER JOIN sales ON orders.orderId = sales.orderId");
 
         final List<String> customerNames = new ArrayList<>();
         final List<String> customerCities = new ArrayList<>();
@@ -197,7 +214,7 @@ class SelectJdbcTest {
         final List<String> names = new ArrayList<>();
         final List<Integer> ids = new ArrayList<>();
         final ResultSet resultSet = statement.executeQuery(
-                "SELECT age, name, id FROM myTable WHERE name LIKE 'Z_olti' OR name LIKE '%uka%'");
+            "SELECT age, name, id FROM myTable WHERE name LIKE 'Z_olti' OR name LIKE '%uka%'");
         while (resultSet.next()) {
             ages.add(resultSet.getInt("age"));
             names.add(resultSet.getString("name"));
@@ -219,7 +236,7 @@ class SelectJdbcTest {
         final List<String> names = new ArrayList<>();
         final List<Integer> ids = new ArrayList<>();
         final ResultSet resultSet = statement.executeQuery(
-                "SELECT age, name, id FROM myTable WHERE id > 1 AND age >= 24 AND name = 'Lukas'");
+            "SELECT age, name, id FROM myTable WHERE id > 1 AND age >= 24 AND name = 'Lukas'");
         while (resultSet.next()) {
             ages.add(resultSet.getInt("age"));
             names.add(resultSet.getString("name"));

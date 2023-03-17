@@ -3,9 +3,23 @@ package com.github.jfsql.driver.core;
 import com.github.jfsql.driver.cache.Cache;
 import com.github.jfsql.driver.services.StatementServiceManager;
 import com.github.jfsql.parser.core.Parser;
-import com.github.jfsql.parser.dto.*;
-
-import java.sql.*;
+import com.github.jfsql.parser.dto.AlterTableWrapper;
+import com.github.jfsql.parser.dto.BaseStatement;
+import com.github.jfsql.parser.dto.CreateDatabaseWrapper;
+import com.github.jfsql.parser.dto.CreateTableWrapper;
+import com.github.jfsql.parser.dto.DeleteWrapper;
+import com.github.jfsql.parser.dto.DropDatabaseWrapper;
+import com.github.jfsql.parser.dto.DropTableWrapper;
+import com.github.jfsql.parser.dto.InsertWrapper;
+import com.github.jfsql.parser.dto.SelectWrapper;
+import com.github.jfsql.parser.dto.TypeOfStatement;
+import com.github.jfsql.parser.dto.UpdateWrapper;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.sql.SQLWarning;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +32,8 @@ public class JfsqlStatement implements Statement {
     private Connection connection;
     private ResultSet resultSet;
 
-    JfsqlStatement(final Connection connection, final StatementServiceManager statementServiceManager, final Cache cache) {
+    JfsqlStatement(final Connection connection, final StatementServiceManager statementServiceManager,
+        final Cache cache) {
         this.connection = connection;
         this.statementServiceManager = statementServiceManager;
         this.cache = cache;

@@ -2,10 +2,9 @@ package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
-import lombok.RequiredArgsConstructor;
-
 import java.sql.SQLException;
 import java.util.Objects;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class TableFinder {
@@ -14,9 +13,9 @@ public class TableFinder {
 
     public Table getTableByName(final String tableName) throws SQLException {
         return database.getTables().stream()
-                .filter(t -> Objects.equals(tableName, t.getName()))
-                .findFirst()
-                .orElseThrow(() -> new SQLException("\"" + tableName + "\" not found"));
+            .filter(t -> Objects.equals(tableName, t.getName()))
+            .findFirst()
+            .orElseThrow(() -> new SQLException("\"" + tableName + "\" not found"));
     }
 
 }

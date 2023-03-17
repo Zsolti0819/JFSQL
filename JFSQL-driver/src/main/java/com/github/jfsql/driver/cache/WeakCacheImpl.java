@@ -1,9 +1,8 @@
 package com.github.jfsql.driver.cache;
 
+import com.github.jfsql.parser.dto.BaseStatement;
 import java.util.Map;
 import java.util.WeakHashMap;
-
-import com.github.jfsql.parser.dto.BaseStatement;
 import lombok.Getter;
 
 @Getter

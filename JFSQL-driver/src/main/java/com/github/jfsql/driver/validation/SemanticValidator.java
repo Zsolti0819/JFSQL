@@ -2,13 +2,21 @@ package com.github.jfsql.driver.validation;
 
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
-import com.github.jfsql.parser.dto.*;
-import org.apache.commons.lang3.math.NumberUtils;
-
+import com.github.jfsql.parser.dto.CreateTableWrapper;
+import com.github.jfsql.parser.dto.InsertWrapper;
+import com.github.jfsql.parser.dto.StatementWithColumns;
+import com.github.jfsql.parser.dto.StatementWithTableName;
+import com.github.jfsql.parser.dto.StatementWithUrl;
+import com.github.jfsql.parser.dto.StatementWithWhere;
 import java.io.File;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.math.NumberUtils;
 
 public class SemanticValidator {
 
@@ -36,19 +44,19 @@ public class SemanticValidator {
 
     public boolean allColumnsExist(final Table table, final StatementWithColumns statement) {
         return new HashSet<>(Arrays.stream(table.getColumns()).collect(Collectors.toList())).containsAll(
-                statement.getColumns());
+            statement.getColumns());
     }
 
     public boolean allWhereColumnsExist(final Table table, final StatementWithWhere statement) {
         return new HashSet<>(Arrays.stream(table.getColumns()).collect(Collectors.toList())).containsAll(
-                statement.getWhereColumns());
+            statement.getWhereColumns());
     }
 
     public boolean isValid(final String value, final String type) {
         return Objects.equals(type, "INTEGER") && NumberUtils.isCreatable(value)
-                || Objects.equals(type, "REAL") && NumberUtils.isCreatable(value)
-                || Objects.equals(type, "TEXT")
-                || Objects.equals(type, "BLOB");
+            || Objects.equals(type, "REAL") && NumberUtils.isCreatable(value)
+            || Objects.equals(type, "TEXT")
+            || Objects.equals(type, "BLOB");
     }
 
     public boolean columnsHaveDuplicate(final CreateTableWrapper statement) {
@@ -92,8 +100,8 @@ public class SemanticValidator {
 
     public boolean columnIsPresentInTable(final String tableName, final String columnName, final Table table) {
         return Arrays.stream(table.getColumns()).anyMatch(
-                s -> Objects.equals(s, columnName) ||
-                        Objects.equals(s, tableName + "." + columnName));
+            s -> Objects.equals(s, columnName) ||
+                Objects.equals(s, tableName + "." + columnName));
     }
 
     public boolean urlIsAnExistingRegularFile(final StatementWithUrl statementWithUrl) {

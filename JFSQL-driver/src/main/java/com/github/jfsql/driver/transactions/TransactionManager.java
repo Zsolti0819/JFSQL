@@ -4,8 +4,6 @@ import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
-import lombok.Data;
-
 import java.io.File;
 import java.nio.file.Path;
 import java.sql.SQLException;
@@ -13,6 +11,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import lombok.Data;
 
 @Data
 public abstract class TransactionManager {

@@ -4,6 +4,21 @@ import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.util.DatatypeConverter;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,18 +27,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.sql.SQLException;
-import java.util.*;
 
 public class ReaderXmlImpl implements Reader {
 
@@ -79,7 +82,8 @@ public class ReaderXmlImpl implements Reader {
         return entries;
     }
 
-    private String getValue(final Table table, final String[] columns, final Element entry, final int index) throws SQLException {
+    private String getValue(final Table table, final String[] columns, final Element entry, final int index)
+        throws SQLException {
         if (entry.getElementsByTagName(columns[index]).item(0) == null) {
             return null;
         }
@@ -149,11 +153,12 @@ public class ReaderXmlImpl implements Reader {
                 tableNames[i] = (String) xpath.evaluate("@name", nodeList.item(i), XPathConstants.STRING);
                 final String tableName = tableNames[i];
                 final String xmlPath = (String) xpath.evaluate("pathToTable/text()", nodeList.item(i),
-                        XPathConstants.STRING);
+                    XPathConstants.STRING);
                 final String xsdPath = (String) xpath.evaluate("pathToSchema/text()", nodeList.item(i),
-                        XPathConstants.STRING);
+                    XPathConstants.STRING);
                 final Table schema = readSchema(xsdPath);
-                final Table table = new Table(tableName, xmlPath, xsdPath, schema.getColumnsAndTypes(), schema.getNotNullColumns());
+                final Table table = new Table(tableName, xmlPath, xsdPath, schema.getColumnsAndTypes(),
+                    schema.getNotNullColumns());
                 tables.add(table);
             }
         } catch (final ParserConfigurationException | SAXException | IOException | XPathExpressionException |

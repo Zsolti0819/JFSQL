@@ -6,14 +6,13 @@ import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.InsertWrapper;
-import lombok.RequiredArgsConstructor;
-
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class InsertService {
@@ -33,7 +32,7 @@ public class InsertService {
 
         if (!semanticValidator.valueCountIsEqualToTableColumnCount(activeTable, statement)) {
             throw new SQLException(
-                    "The values in the parentheses were lower or greater than the table's column count.");
+                "The values in the parentheses were lower or greater than the table's column count.");
         }
 
         if (!semanticValidator.allColumnsExist(activeTable, statement)) {
@@ -42,7 +41,7 @@ public class InsertService {
 
         if (!semanticValidator.allInsertValuesAreValid(activeTable, statement)) {
             throw new SQLException(
-                    "Some value's type didn't match the type of the column, to which it was intended to be inserted.");
+                "Some value's type didn't match the type of the column, to which it was intended to be inserted.");
         }
 
         if (activeTable.getEntries() == null) {
@@ -65,12 +64,12 @@ public class InsertService {
             final int finalI = i;
             if (insertStatement.getColumns().isEmpty()) {
                 IntStream.range(0, activeTable.getColumns().length)
-                        .forEach(j -> columnsAndValues.put(activeTable.getColumns()[j],
-                                insertStatement.getValues().get(finalI).get(j)));
+                    .forEach(j -> columnsAndValues.put(activeTable.getColumns()[j],
+                        insertStatement.getValues().get(finalI).get(j)));
             } else {
                 IntStream.range(0, insertStatement.getColumns().size())
-                        .forEach(j -> columnsAndValues.put(insertStatement.getColumns().get(j),
-                                insertStatement.getValues().get(finalI).get(j)));
+                    .forEach(j -> columnsAndValues.put(insertStatement.getColumns().get(j),
+                        insertStatement.getValues().get(finalI).get(j)));
             }
             insertEntries.add(new Entry(columnsAndValues));
         }

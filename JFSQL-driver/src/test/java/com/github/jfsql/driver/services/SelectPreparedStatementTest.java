@@ -1,17 +1,22 @@
 package com.github.jfsql.driver.services;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import com.github.jfsql.driver.TestUtils;
 import com.github.jfsql.driver.core.JfsqlConnection;
+import java.io.IOException;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class SelectPreparedStatementTest {
 
@@ -23,10 +28,10 @@ class SelectPreparedStatementTest {
         final Statement statement = connection.createStatement();
         statement.execute("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
         statement.executeUpdate(
-                "INSERT INTO myTable (id, name, age) VALUES (1, 'Zsolti', 25), (2, 'Tomi', 24), (3, 'Ivan', 26), (4, 'Lukas', 34)");
+            "INSERT INTO myTable (id, name, age) VALUES (1, 'Zsolti', 25), (2, 'Tomi', 24), (3, 'Ivan', 26), (4, 'Lukas', 34)");
         statement.execute("CREATE TABLE myTable2 (id INTEGER , name2 TEXT, age2 INTEGER)");
         statement.executeUpdate(
-                "INSERT INTO myTable2 (id, name2, age2) VALUES (1, 'Zsolti', 25), (2, 'Tomi', 24), (3, 'Ivan', 26), (4, 'Lukas', 1)");
+            "INSERT INTO myTable2 (id, name2, age2) VALUES (1, 'Zsolti', 25), (2, 'Tomi', 24), (3, 'Ivan', 26), (4, 'Lukas', 1)");
 
     }
 
@@ -40,7 +45,8 @@ class SelectPreparedStatementTest {
         final List<Integer> ages = new ArrayList<>();
         final List<String> names = new ArrayList<>();
         final List<Integer> ids = new ArrayList<>();
-        final PreparedStatement preparedStatement = connection.prepareStatement("SELECT age, name, id FROM myTable WHERE id > 1");
+        final PreparedStatement preparedStatement = connection.prepareStatement(
+            "SELECT age, name, id FROM myTable WHERE id > 1");
         preparedStatement.setInt(1, 1);
         final ResultSet resultSet = preparedStatement.executeQuery();
         while (resultSet.next()) {
@@ -63,7 +69,8 @@ class SelectPreparedStatementTest {
         final List<Integer> ages = new ArrayList<>();
         final List<String> names = new ArrayList<>();
         final List<Integer> ids = new ArrayList<>();
-        final PreparedStatement preparedStatement = connection.prepareStatement("SELECT age, name, id FROM myTable WHERE name LIKE ? OR name LIKE ?");
+        final PreparedStatement preparedStatement = connection.prepareStatement(
+            "SELECT age, name, id FROM myTable WHERE name LIKE ? OR name LIKE ?");
         preparedStatement.setString(1, "Z_olti");
         preparedStatement.setString(2, "%uka%");
         final ResultSet resultSet = preparedStatement.executeQuery();
@@ -87,7 +94,8 @@ class SelectPreparedStatementTest {
         final List<Integer> ages = new ArrayList<>();
         final List<String> names = new ArrayList<>();
         final List<Integer> ids = new ArrayList<>();
-        final PreparedStatement preparedStatement = connection.prepareStatement("SELECT age, name, id FROM myTable WHERE id > ? AND age >= ? AND name = ?");
+        final PreparedStatement preparedStatement = connection.prepareStatement(
+            "SELECT age, name, id FROM myTable WHERE id > ? AND age >= ? AND name = ?");
         preparedStatement.setInt(1, 1);
         preparedStatement.setInt(2, 24);
         preparedStatement.setString(3, "Lukas");
@@ -112,7 +120,8 @@ class SelectPreparedStatementTest {
         final List<Integer> ages = new ArrayList<>();
         final List<String> names = new ArrayList<>();
         final List<Integer> ids = new ArrayList<>();
-        final PreparedStatement preparedStatement = connection.prepareStatement("SELECT age, name, id FROM myTable WHERE id >= ?");
+        final PreparedStatement preparedStatement = connection.prepareStatement(
+            "SELECT age, name, id FROM myTable WHERE id >= ?");
         preparedStatement.setInt(1, 2);
         final ResultSet resultSet = preparedStatement.executeQuery();
         while (resultSet.next()) {
@@ -132,7 +141,8 @@ class SelectPreparedStatementTest {
 
     @Test
     void testSelect_preparedStatement_columnsByIndex() throws SQLException {
-        final PreparedStatement preparedStatement = connection.prepareStatement("SELECT id, age, name FROM myTable WHERE id = ?");
+        final PreparedStatement preparedStatement = connection.prepareStatement(
+            "SELECT id, age, name FROM myTable WHERE id = ?");
         preparedStatement.setInt(1, 1);
         final ResultSet resultSet = preparedStatement.executeQuery();
         while (resultSet.next()) {
@@ -144,7 +154,8 @@ class SelectPreparedStatementTest {
 
     @Test
     void testSelect_preparedStatement_columnsByColumnName() throws SQLException {
-        final PreparedStatement preparedStatement = connection.prepareStatement("SELECT id, age, name FROM myTable WHERE id = ?");
+        final PreparedStatement preparedStatement = connection.prepareStatement(
+            "SELECT id, age, name FROM myTable WHERE id = ?");
         preparedStatement.setInt(1, 1);
         final ResultSet resultSet = preparedStatement.executeQuery();
         while (resultSet.next()) {
@@ -156,7 +167,8 @@ class SelectPreparedStatementTest {
 
     @Test
     void testSelect_preparedStatement_columnsNotInResultSet() throws SQLException {
-        final PreparedStatement preparedStatement = connection.prepareStatement("SELECT name FROM myTable WHERE id = ?");
+        final PreparedStatement preparedStatement = connection.prepareStatement(
+            "SELECT name FROM myTable WHERE id = ?");
         preparedStatement.setInt(1, 3);
         final ResultSet resultSet = preparedStatement.executeQuery();
         while (resultSet.next()) {

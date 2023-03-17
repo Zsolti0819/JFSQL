@@ -8,10 +8,9 @@ import com.github.jfsql.driver.util.ColumnToTypeMapper;
 import com.github.jfsql.driver.util.WhereConditionSolver;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.UpdateWrapper;
-import lombok.RequiredArgsConstructor;
-
 import java.sql.SQLException;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class UpdateService {
@@ -36,7 +35,7 @@ public class UpdateService {
         }
 
         final String[] types = columnToTypeMapper.mapColumnsToTypes(statement, activeTable).values()
-                .toArray(new String[0]);
+            .toArray(new String[0]);
 
         if (activeTable.getEntries() == null) {
             final List<Entry> entries = reader.readTable(activeTable);

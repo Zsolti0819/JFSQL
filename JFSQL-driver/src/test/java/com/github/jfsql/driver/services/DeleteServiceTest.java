@@ -1,24 +1,27 @@
 package com.github.jfsql.driver.services;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
+
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.util.WhereConditionSolver;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.DeleteWrapper;
+import java.sql.SQLException;
+import java.util.Collections;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.sql.SQLException;
-import java.util.Collections;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DeleteServiceTest {
@@ -83,7 +86,7 @@ class DeleteServiceTest {
         when(semanticValidator.allWhereColumnsExist(table, deleteStatement)).thenReturn(false);
 
         final SQLException thrown = assertThrows(SQLException.class,
-                () -> deleteService.deleteFromTable(deleteStatement));
+            () -> deleteService.deleteFromTable(deleteStatement));
         assertEquals("Some columns entered doesn't exist in \"" + table.getName() + "\".", thrown.getMessage());
 
         verify(transactionManager, never()).executeDMLOperation(table);

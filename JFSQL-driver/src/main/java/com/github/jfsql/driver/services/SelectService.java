@@ -9,14 +9,22 @@ import com.github.jfsql.driver.util.WhereConditionSolver;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.JoinType;
 import com.github.jfsql.parser.dto.SelectWrapper;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 class SelectService {
@@ -76,11 +84,11 @@ class SelectService {
             Table joinTable = null;
             if (Objects.equals(joinTypes.get(i), JoinType.INNER_JOIN)) {
                 joinTable = innerJoin(leftTable, rightTable, mergedColumnsAndTypes, mergedNotNullColumns,
-                        modifiedJoinColumns);
+                    modifiedJoinColumns);
                 logger.debug("table created by inner join = {}", joinTable);
             } else if (Objects.equals(joinTypes.get(i), JoinType.LEFT_JOIN)) {
                 joinTable = leftJoin(leftTable, rightTable, mergedColumnsAndTypes, mergedNotNullColumns,
-                        modifiedJoinColumns);
+                    modifiedJoinColumns);
                 logger.debug("table created by left join = {}", joinTable);
             }
             modifiedTables.remove(leftTable);
@@ -126,8 +134,8 @@ class SelectService {
     }
 
     private Table innerJoin(final Table firstTable, final Table secondTable,
-                            final Map<String, String> mergedColumnsAndTypes, final Map<String, Boolean> mergedNotNullColumns,
-                            final List<String> joinColumns) {
+        final Map<String, String> mergedColumnsAndTypes, final Map<String, Boolean> mergedNotNullColumns,
+        final List<String> joinColumns) {
         final String t1JoinColumn = joinColumns.get(0);
         final String t2JoinColumn = joinColumns.get(1);
         final Table joinTable = new Table("joinTable", null, null, mergedColumnsAndTypes, mergedNotNullColumns);
@@ -136,7 +144,7 @@ class SelectService {
         for (final Entry t1e : firstTable.getEntries()) {
             for (final Entry t2e : secondTable.getEntries()) {
                 if (Objects.equals(t1e.getColumnsAndValues().get(t1JoinColumn),
-                        t2e.getColumnsAndValues().get(t2JoinColumn))) {
+                    t2e.getColumnsAndValues().get(t2JoinColumn))) {
                     final Map<String, String> commonColumnsAndValues = new LinkedHashMap<>(t1e.getColumnsAndValues());
                     commonColumnsAndValues.putAll(t2e.getColumnsAndValues());
                     commonEntries.add(new Entry(commonColumnsAndValues));
@@ -148,8 +156,8 @@ class SelectService {
     }
 
     private Table leftJoin(final Table firstTable, final Table secondTable,
-                           final Map<String, String> mergedColumnsAndTypes, final Map<String, Boolean> mergedNotNullColumns,
-                           final List<String> joinColumns) {
+        final Map<String, String> mergedColumnsAndTypes, final Map<String, Boolean> mergedNotNullColumns,
+        final List<String> joinColumns) {
         final String t1JoinColumn = joinColumns.get(0);
         final String t2JoinColumn = joinColumns.get(1);
         final Table joinTable = new Table("joinTable", null, null, mergedColumnsAndTypes, mergedNotNullColumns);
@@ -159,7 +167,7 @@ class SelectService {
             boolean t1eMatched = false;
             for (final Entry t2e : secondTable.getEntries()) {
                 if (Objects.equals(t1e.getColumnsAndValues().get(t1JoinColumn),
-                        t2e.getColumnsAndValues().get(t2JoinColumn))) {
+                    t2e.getColumnsAndValues().get(t2JoinColumn))) {
                     t1eMatched = true;
                     final Map<String, String> mergedValues = new LinkedHashMap<>(t1e.getColumnsAndValues());
                     for (final Map.Entry<String, String> t2ColumnAndValue : t2e.getColumnsAndValues().entrySet()) {
@@ -173,7 +181,7 @@ class SelectService {
             if (!t1eMatched) {
                 final Map<String, String> mergedValues = new LinkedHashMap<>(t1e.getColumnsAndValues());
                 for (final Map.Entry<String, String> t2ColumnAndValue : secondTable.getEntries().get(0)
-                        .getColumnsAndValues().entrySet()) {
+                    .getColumnsAndValues().entrySet()) {
                     final String column = t2ColumnAndValue.getKey();
                     mergedValues.putIfAbsent(column, null);
                 }
@@ -256,7 +264,7 @@ class SelectService {
             final List<Entry> modifiedEntries = createModifiedEntries(tableNameMap, table);
 
             final Table modifiedTable = new Table(table.getName(), null, null, modifiedColumnsAndTypes,
-                    modifiedNotNullColumns);
+                modifiedNotNullColumns);
             modifiedTable.setEntries(modifiedEntries);
             modifiedTables.add(modifiedTable);
         }
@@ -297,7 +305,7 @@ class SelectService {
     }
 
     private List<String> modifyJoinColumns(final Table firstTable, final Table secondTable,
-                                           final List<String> joinColumns) {
+        final List<String> joinColumns) {
         if (Arrays.stream(firstTable.getColumns()).noneMatch(joinColumns.get(0)::equals)) {
             joinColumns.set(0, getColumnName(joinColumns.get(0)));
         }

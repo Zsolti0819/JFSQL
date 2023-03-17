@@ -3,7 +3,6 @@ package com.github.jfsql.driver.util;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.parser.dto.StatementWithWhere;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -33,9 +32,11 @@ public class WhereConditionSolver {
                 whereEntries = getEntries(whereEntries, types, whereColumns.get(i), whereValues.get(i), symbols.get(i));
             } else {
                 if (Objects.equals(statement.getBinaryOperators().get(i - 1), "AND")) {
-                    whereEntries = getEntries(whereEntries, types, whereColumns.get(i), whereValues.get(i), symbols.get(i));
+                    whereEntries = getEntries(whereEntries, types, whereColumns.get(i), whereValues.get(i),
+                        symbols.get(i));
                 } else if (Objects.equals(statement.getBinaryOperators().get(i - 1), "OR")) {
-                    whereEntries.addAll(getEntries(entries, types, whereColumns.get(i), whereValues.get(i), symbols.get(i)));
+                    whereEntries.addAll(
+                        getEntries(entries, types, whereColumns.get(i), whereValues.get(i), symbols.get(i)));
                 }
             }
         }
@@ -43,14 +44,15 @@ public class WhereConditionSolver {
         return whereEntries;
     }
 
-    private List<Entry> getEntries(final List<Entry> entries, final List<String> types, final String whereColumn, final String whereValue, final String symbol) {
+    private List<Entry> getEntries(final List<Entry> entries, final List<String> types, final String whereColumn,
+        final String whereValue, final String symbol) {
         final List<Entry> entriesFulfillingConditions = new ArrayList<>();
         for (final Entry entry : entries) {
             for (int i = 0; i < entry.getColumns().length; i++) {
                 if (Objects.equals(entry.getColumns()[i], whereColumn) && Objects.equals(symbol, "LIKE") && likeCompare(
-                        entry.getValues()[i], whereValue, types.get(i))
-                        || Objects.equals(entry.getColumns()[i], whereColumn) && !Objects.equals(symbol, "LIKE")
-                        && compareValues(entry.getValues()[i], whereValue, symbol, types.get(i))) {
+                    entry.getValues()[i], whereValue, types.get(i))
+                    || Objects.equals(entry.getColumns()[i], whereColumn) && !Objects.equals(symbol, "LIKE")
+                    && compareValues(entry.getValues()[i], whereValue, symbol, types.get(i))) {
                     entriesFulfillingConditions.add(entry);
                 }
             }
@@ -66,7 +68,8 @@ public class WhereConditionSolver {
      * @return The value 0 if originalValue == whereValue; a value less than 0 if originalValue < whereValue; and a
      * value greater than 0 if originalValue > whereValue
      */
-    private boolean compareValues(final String originalValue, final String whereValue, final String compareSymbol, final String originalType) {
+    private boolean compareValues(final String originalValue, final String whereValue, final String compareSymbol,
+        final String originalType) {
         if (originalValue == null) {
             return false;
         }
@@ -87,12 +90,12 @@ public class WhereConditionSolver {
         }
 
         return (Objects.equals("=", compareSymbol) && comparisonResult == 0)
-                || (Objects.equals(">", compareSymbol) && comparisonResult > 0)
-                || (Objects.equals(">=", compareSymbol) && comparisonResult > 0
-                || compareSymbol.equals(">=") && comparisonResult == 0)
-                || (Objects.equals("<", compareSymbol) && comparisonResult < 0)
-                || (Objects.equals("<=", compareSymbol) && comparisonResult < 0
-                || compareSymbol.equals("<=") && comparisonResult == 0);
+            || (Objects.equals(">", compareSymbol) && comparisonResult > 0)
+            || (Objects.equals(">=", compareSymbol) && comparisonResult > 0
+            || compareSymbol.equals(">=") && comparisonResult == 0)
+            || (Objects.equals("<", compareSymbol) && comparisonResult < 0)
+            || (Objects.equals("<=", compareSymbol) && comparisonResult < 0
+            || compareSymbol.equals("<=") && comparisonResult == 0);
     }
 
     private boolean likeCompare(final String originalValue, final String whereValue, final String originalType) {

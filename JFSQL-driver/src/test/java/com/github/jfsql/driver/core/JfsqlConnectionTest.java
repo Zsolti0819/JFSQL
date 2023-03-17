@@ -1,17 +1,20 @@
 package com.github.jfsql.driver.core;
 
-import com.github.jfsql.driver.TestUtils;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.github.jfsql.driver.TestUtils;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 class JfsqlConnectionTest {
 
@@ -29,12 +32,18 @@ class JfsqlConnectionTest {
 
     @Test
     void testCreateStatement() {
-        assertThrows(SQLFeatureNotSupportedException.class, () -> connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY));
-        assertThrows(SQLFeatureNotSupportedException.class, () -> connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE));
-        assertThrows(SQLFeatureNotSupportedException.class, () -> connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY));
-        assertThrows(SQLFeatureNotSupportedException.class, () -> connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE));
-        assertThrows(SQLFeatureNotSupportedException.class, () -> connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY));
-        assertThrows(SQLFeatureNotSupportedException.class, () -> connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE));
+        assertThrows(SQLFeatureNotSupportedException.class,
+            () -> connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY));
+        assertThrows(SQLFeatureNotSupportedException.class,
+            () -> connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE));
+        assertThrows(SQLFeatureNotSupportedException.class,
+            () -> connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY));
+        assertThrows(SQLFeatureNotSupportedException.class,
+            () -> connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE));
+        assertThrows(SQLFeatureNotSupportedException.class,
+            () -> connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY));
+        assertThrows(SQLFeatureNotSupportedException.class,
+            () -> connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE));
     }
 
     @Test
@@ -106,26 +115,40 @@ class JfsqlConnectionTest {
     @Test
     void testPrepareCall() {
         assertThrows(SQLFeatureNotSupportedException.class, () -> connection.prepareCall(null));
-        assertThrows(SQLFeatureNotSupportedException.class, () -> connection.prepareCall(null, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY));
-        assertThrows(SQLFeatureNotSupportedException.class, () -> connection.prepareCall(null, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE));
-        assertThrows(SQLFeatureNotSupportedException.class, () -> connection.prepareCall(null, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY));
-        assertThrows(SQLFeatureNotSupportedException.class, () -> connection.prepareCall(null, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE));
-        assertThrows(SQLFeatureNotSupportedException.class, () -> connection.prepareCall(null, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY));
-        assertThrows(SQLFeatureNotSupportedException.class, () -> connection.prepareCall(null, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE));
+        assertThrows(SQLFeatureNotSupportedException.class,
+            () -> connection.prepareCall(null, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY));
+        assertThrows(SQLFeatureNotSupportedException.class,
+            () -> connection.prepareCall(null, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE));
+        assertThrows(SQLFeatureNotSupportedException.class,
+            () -> connection.prepareCall(null, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY));
+        assertThrows(SQLFeatureNotSupportedException.class,
+            () -> connection.prepareCall(null, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE));
+        assertThrows(SQLFeatureNotSupportedException.class,
+            () -> connection.prepareCall(null, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY));
+        assertThrows(SQLFeatureNotSupportedException.class,
+            () -> connection.prepareCall(null, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE));
     }
 
     @Test
     void testPrepareStatement() {
         assertThrows(SQLFeatureNotSupportedException.class, () -> connection.prepareStatement(null, new int[0]));
-        assertThrows(SQLFeatureNotSupportedException.class, () -> connection.prepareStatement(null, Statement.RETURN_GENERATED_KEYS));
-        assertThrows(SQLFeatureNotSupportedException.class, () -> connection.prepareStatement(null, Statement.NO_GENERATED_KEYS));
+        assertThrows(SQLFeatureNotSupportedException.class,
+            () -> connection.prepareStatement(null, Statement.RETURN_GENERATED_KEYS));
+        assertThrows(SQLFeatureNotSupportedException.class,
+            () -> connection.prepareStatement(null, Statement.NO_GENERATED_KEYS));
         assertThrows(SQLFeatureNotSupportedException.class, () -> connection.prepareStatement(null, new String[0]));
-        assertThrows(SQLFeatureNotSupportedException.class, () -> connection.prepareStatement(null, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY));
-        assertThrows(SQLFeatureNotSupportedException.class, () -> connection.prepareStatement(null, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE));
-        assertThrows(SQLFeatureNotSupportedException.class, () -> connection.prepareStatement(null, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY));
-        assertThrows(SQLFeatureNotSupportedException.class, () -> connection.prepareStatement(null, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE));
-        assertThrows(SQLFeatureNotSupportedException.class, () -> connection.prepareStatement(null, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY));
-        assertThrows(SQLFeatureNotSupportedException.class, () -> connection.prepareStatement(null, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE));
+        assertThrows(SQLFeatureNotSupportedException.class,
+            () -> connection.prepareStatement(null, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY));
+        assertThrows(SQLFeatureNotSupportedException.class,
+            () -> connection.prepareStatement(null, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE));
+        assertThrows(SQLFeatureNotSupportedException.class,
+            () -> connection.prepareStatement(null, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY));
+        assertThrows(SQLFeatureNotSupportedException.class,
+            () -> connection.prepareStatement(null, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE));
+        assertThrows(SQLFeatureNotSupportedException.class,
+            () -> connection.prepareStatement(null, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY));
+        assertThrows(SQLFeatureNotSupportedException.class,
+            () -> connection.prepareStatement(null, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE));
     }
 
     @Test

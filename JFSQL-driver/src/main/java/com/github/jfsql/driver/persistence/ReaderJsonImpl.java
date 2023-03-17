@@ -8,14 +8,17 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ReaderJsonImpl implements Reader {
 
@@ -90,7 +93,8 @@ public class ReaderJsonImpl implements Reader {
                 final JsonArray typeJsonArray = entry.getValue().getAsJsonObject().get("type").getAsJsonArray();
                 String columnType = DatatypeConverter.convertFromJsonToSql(typeJsonArray.get(0).getAsString());
                 final JsonElement formatElement = entry.getValue().getAsJsonObject().get("format");
-                if (Objects.equals(columnType, "TEXT") && formatElement != null && Objects.equals(formatElement.getAsString(), "iri-reference")) {
+                if (Objects.equals(columnType, "TEXT") && formatElement != null && Objects.equals(
+                    formatElement.getAsString(), "iri-reference")) {
                     columnType = "BLOB";
                 }
                 columnsAndTypes.put(columnName, columnType);
@@ -121,7 +125,8 @@ public class ReaderJsonImpl implements Reader {
                 final String tablePath = jsonTableObject.get("pathToTable").getAsString();
                 final String schemaPath = jsonTableObject.get("pathToSchema").getAsString();
                 final Table schema = readSchema(schemaPath);
-                final Table table = new Table(tableName, tablePath, schemaPath, schema.getColumnsAndTypes(), schema.getNotNullColumns());
+                final Table table = new Table(tableName, tablePath, schemaPath, schema.getColumnsAndTypes(),
+                    schema.getNotNullColumns());
                 tables.add(table);
             }
         } catch (final IOException | SQLException e) {

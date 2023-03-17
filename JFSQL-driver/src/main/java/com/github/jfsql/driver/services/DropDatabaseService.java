@@ -4,11 +4,10 @@ import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.DropDatabaseWrapper;
-import lombok.RequiredArgsConstructor;
-import org.apache.commons.io.FileUtils;
-
 import java.io.File;
 import java.sql.SQLException;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.io.FileUtils;
 
 @RequiredArgsConstructor
 class DropDatabaseService {

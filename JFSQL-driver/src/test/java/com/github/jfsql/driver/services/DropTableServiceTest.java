@@ -1,22 +1,26 @@
 package com.github.jfsql.driver.services;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.DropTableWrapper;
+import java.sql.SQLException;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.sql.SQLException;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DropTableServiceTest {
@@ -66,8 +70,10 @@ class DropTableServiceTest {
         when(dropTableStatement.isIfExistsPresent()).thenReturn(false);
 
         final SQLException thrown = assertThrows(SQLException.class,
-                () -> dropTableService.dropTable(dropTableStatement));
-        assertEquals("Cannot DROP " + dropTableStatement.getTableName() + " because the table's file or schema doesn't exist.", thrown.getMessage());
+            () -> dropTableService.dropTable(dropTableStatement));
+        assertEquals(
+            "Cannot DROP " + dropTableStatement.getTableName() + " because the table's file or schema doesn't exist.",
+            thrown.getMessage());
 
         verify(transactionManager, never()).executeDropTableOperation();
 

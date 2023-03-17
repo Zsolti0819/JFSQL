@@ -3,15 +3,32 @@ package com.github.jfsql.driver.core;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.parser.dto.SelectWrapper;
-import lombok.Data;
-
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.sql.Array;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Date;
-import java.sql.*;
-import java.util.*;
+import java.sql.NClob;
+import java.sql.Ref;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.RowId;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.sql.SQLWarning;
+import java.sql.SQLXML;
+import java.sql.Statement;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.Base64;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import lombok.Data;
 
 @Data
 public class JfsqlResultSet implements ResultSet {
@@ -67,7 +84,7 @@ public class JfsqlResultSet implements ResultSet {
     public boolean getBoolean(final int columnIndex) throws SQLException {
         if (!Objects.equals(getColumnTypes()[columnIndex - 1], "INTEGER")) {
             throw new SQLException(
-                    "Expected INTEGER, but the column had type " + getColumnTypes()[columnIndex - 1] + ".");
+                "Expected INTEGER, but the column had type " + getColumnTypes()[columnIndex - 1] + ".");
         }
 
         if (getValue(currentEntry - 1, columnIndex - 1) == null) {
@@ -92,7 +109,7 @@ public class JfsqlResultSet implements ResultSet {
     public int getInt(final int columnIndex) throws SQLException {
         if (!Objects.equals(getColumnTypes()[columnIndex - 1], "INTEGER")) {
             throw new SQLException(
-                    "Expected INTEGER, but the column had type " + getColumnTypes()[columnIndex - 1] + ".");
+                "Expected INTEGER, but the column had type " + getColumnTypes()[columnIndex - 1] + ".");
         }
 
         if (getValue(currentEntry - 1, columnIndex - 1) == null) {
@@ -117,7 +134,7 @@ public class JfsqlResultSet implements ResultSet {
     public long getLong(final int columnIndex) throws SQLException {
         if (!Objects.equals(getColumnTypes()[columnIndex - 1], "INTEGER")) {
             throw new SQLException(
-                    "Expected INTEGER, but the column had type " + getColumnTypes()[columnIndex - 1] + ".");
+                "Expected INTEGER, but the column had type " + getColumnTypes()[columnIndex - 1] + ".");
         }
 
         if (getValue(currentEntry - 1, columnIndex - 1) == null) {
@@ -571,25 +588,25 @@ public class JfsqlResultSet implements ResultSet {
 
     @Override
     public void updateAsciiStream(final int columnIndex, final InputStream x, final int length)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void updateBinaryStream(final int columnIndex, final InputStream x, final int length)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void updateCharacterStream(final int columnIndex, final Reader x, final int length)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void updateObject(final int columnIndex, final Object x, final int scaleOrLength)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
@@ -670,25 +687,25 @@ public class JfsqlResultSet implements ResultSet {
 
     @Override
     public void updateAsciiStream(final String columnLabel, final InputStream x, final int length)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void updateBinaryStream(final String columnLabel, final InputStream x, final int length)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void updateCharacterStream(final String columnLabel, final Reader reader, final int length)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void updateObject(final String columnLabel, final Object x, final int scaleOrLength)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
@@ -734,7 +751,7 @@ public class JfsqlResultSet implements ResultSet {
 
     @Override
     public Object getObject(final int columnIndex, final Map<String, Class<?>> map)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
@@ -760,7 +777,7 @@ public class JfsqlResultSet implements ResultSet {
 
     @Override
     public Object getObject(final String columnLabel, final Map<String, Class<?>> map)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
@@ -966,85 +983,85 @@ public class JfsqlResultSet implements ResultSet {
 
     @Override
     public void updateNCharacterStream(final int columnIndex, final Reader x, final long length)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void updateNCharacterStream(final String columnLabel, final Reader reader, final long length)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void updateAsciiStream(final int columnIndex, final InputStream x, final long length)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void updateBinaryStream(final int columnIndex, final InputStream x, final long length)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void updateCharacterStream(final int columnIndex, final Reader x, final long length)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void updateAsciiStream(final String columnLabel, final InputStream x, final long length)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void updateBinaryStream(final String columnLabel, final InputStream x, final long length)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void updateCharacterStream(final String columnLabel, final Reader reader, final long length)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void updateBlob(final int columnIndex, final InputStream inputStream, final long length)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void updateBlob(final String columnLabel, final InputStream inputStream, final long length)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void updateClob(final int columnIndex, final Reader reader, final long length)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void updateClob(final String columnLabel, final Reader reader, final long length)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void updateNClob(final int columnIndex, final Reader reader, final long length)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void updateNClob(final String columnLabel, final Reader reader, final long length)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
@@ -1055,7 +1072,7 @@ public class JfsqlResultSet implements ResultSet {
 
     @Override
     public void updateNCharacterStream(final String columnLabel, final Reader reader)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
@@ -1076,31 +1093,31 @@ public class JfsqlResultSet implements ResultSet {
 
     @Override
     public void updateAsciiStream(final String columnLabel, final InputStream x)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void updateBinaryStream(final String columnLabel, final InputStream x)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void updateCharacterStream(final String columnLabel, final Reader reader)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void updateBlob(final int columnIndex, final InputStream inputStream)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void updateBlob(final String columnLabel, final InputStream inputStream)
-            throws SQLFeatureNotSupportedException {
+        throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 

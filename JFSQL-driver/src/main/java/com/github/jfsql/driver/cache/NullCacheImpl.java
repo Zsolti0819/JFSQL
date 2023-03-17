@@ -1,11 +1,10 @@
 package com.github.jfsql.driver.cache;
 
+import com.github.jfsql.parser.dto.BaseStatement;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
-
-import com.github.jfsql.parser.dto.BaseStatement;
 import lombok.Getter;
 
 @Getter
