@@ -42,7 +42,6 @@ class TransactionManagerTest {
         assumeTrue(connection.getReader() instanceof ReaderXmlImpl);
         statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
         connection.setAutoCommit(false);
-        connection.commit();
         statement.execute("INSERT INTO myTable VALUES (1, 'a', 25)");
 
         // Inserted, but not yet committed, so the table looks the same
@@ -78,7 +77,6 @@ class TransactionManagerTest {
         assumeTrue(connection.getReader() instanceof ReaderJsonImpl);
         statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
         connection.setAutoCommit(false);
-        connection.commit();
         statement.execute("INSERT INTO myTable VALUES (1, 'a', 25)");
 
         // Inserted, but not yet committed, so the table looks the same
