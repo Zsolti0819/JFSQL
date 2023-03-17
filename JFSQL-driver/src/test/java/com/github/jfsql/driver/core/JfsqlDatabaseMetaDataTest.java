@@ -207,12 +207,13 @@ class JfsqlDatabaseMetaDataTest {
 
     @Test
     void nullPlusNonNullIsNull() {
-        assertFalse(metaData.supportsColumnAliasing());
+        assertFalse(metaData.nullPlusNonNullIsNull());
     }
 
     @Test
     void supportsConvert() {
         assertFalse(metaData.supportsConvert());
+        assertFalse(metaData.supportsConvert(0, 0));
     }
 
     @Test
@@ -628,6 +629,7 @@ class JfsqlDatabaseMetaDataTest {
     @Test
     void getSchemas() {
         assertNull(metaData.getSchemas());
+        assertNull(metaData.getSchemas(null, null));
     }
 
     @Test
