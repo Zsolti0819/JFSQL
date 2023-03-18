@@ -1,33 +1,40 @@
-package com.github.jfsql.driver.services;
+package com.github.jfsql.driver.jdbc.xml;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import com.github.jfsql.driver.TestUtils;
 import com.github.jfsql.driver.core.JfsqlConnection;
 import com.github.jfsql.driver.core.JfsqlResultSet;
-import com.github.jfsql.driver.persistence.ReaderJsonImpl;
 import com.github.jfsql.driver.persistence.ReaderXmlImpl;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class InsertJdbcTest {
+class InsertXmlTest {
 
     private JfsqlConnection connection;
     private Statement statement;
 
     @BeforeEach
     void setUp() throws SQLException {
-        connection = (JfsqlConnection) DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH);
+        final Properties properties = new Properties();
+        properties.setProperty("persistence", "xml");
+        connection = (JfsqlConnection) DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
         statement = connection.createStatement();
         statement.execute("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
     }
@@ -38,27 +45,7 @@ class InsertJdbcTest {
     }
 
     @Test
-    void testInsert_simple_json() throws SQLException, IOException {
-        assumeTrue(connection.getReader() instanceof ReaderJsonImpl);
-        assertEquals(1, statement.executeUpdate(
-            "INSERT INTO myTable (id, name, age) VALUES (1, 'Zsolti', 25)"));
-        final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
-            StandardCharsets.UTF_8);
-        final String expectedFileContent = "" +
-            "{\n" +
-            "  \"Entry\": [\n" +
-            "    {\n" +
-            "      \"id\": 1,\n" +
-            "      \"name\": \"Zsolti\",\n" +
-            "      \"age\": 25\n" +
-            "    }\n" +
-            "  ]\n" +
-            "}";
-        assertEquals(expectedFileContent, realFileContent);
-    }
-
-    @Test
-    void testInsert_simple_xml() throws SQLException, IOException {
+    void testInsert_simple() throws SQLException, IOException {
         assumeTrue(connection.getReader() instanceof ReaderXmlImpl);
         assertEquals(1, statement.executeUpdate(
             "INSERT INTO myTable (id, name, age) VALUES (1, 'Zsolti', 25)"));
@@ -77,42 +64,74 @@ class InsertJdbcTest {
     }
 
     @Test
-    void testInsert_multiRow_json() throws SQLException, IOException {
-        assumeTrue(connection.getReader() instanceof ReaderJsonImpl);
-        assertEquals(4, statement.executeUpdate(
-            "INSERT INTO myTable (id, name, age) VALUES (1, 'Zsolti', 25), (2, 'Tomi', 24), (3, 'Ivan', 26), (4, 'Lukas', 34)"));
-        final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
+    void testInsert_preparedStatement_simple() throws SQLException, IOException {
+        assumeTrue(connection.getReader() instanceof ReaderXmlImpl);
+        statement.execute("DROP TABLE IF EXISTS myTable");
+        statement.execute("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER, file BLOB)");
+        final PreparedStatement preparedStatement = connection.prepareStatement(
+            "INSERT INTO myTable (id, name, age, file) VALUES (?, ?, ?, ?)");
+        preparedStatement.setInt(1, 1);
+        preparedStatement.setString(2, "Zsolti");
+        preparedStatement.setInt(3, 25);
+        preparedStatement.setBinaryStream(4, null);
+        assertEquals(1, preparedStatement.executeUpdate());
+        final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "" +
-            "{\n" +
-            "  \"Entry\": [\n" +
-            "    {\n" +
-            "      \"id\": 1,\n" +
-            "      \"name\": \"Zsolti\",\n" +
-            "      \"age\": 25\n" +
-            "    },\n" +
-            "    {\n" +
-            "      \"id\": 2,\n" +
-            "      \"name\": \"Tomi\",\n" +
-            "      \"age\": 24\n" +
-            "    },\n" +
-            "    {\n" +
-            "      \"id\": 3,\n" +
-            "      \"name\": \"Ivan\",\n" +
-            "      \"age\": 26\n" +
-            "    },\n" +
-            "    {\n" +
-            "      \"id\": 4,\n" +
-            "      \"name\": \"Lukas\",\n" +
-            "      \"age\": 34\n" +
-            "    }\n" +
-            "  ]\n" +
-            "}";
-        assertEquals(expectedFileContent, realFileContent);
+            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
+            "<myTable>\n" +
+            "    <Entry>\n" +
+            "        <id>1</id>\n" +
+            "        <name>Zsolti</name>\n" +
+            "        <age>25</age>\n" +
+            "    </Entry>\n" +
+            "</myTable>\n";
+        assertEquals(StringUtils.deleteWhitespace(expectedFileContent), StringUtils.deleteWhitespace(realFileContent));
     }
 
     @Test
-    void testInsert_multiRow_xml() throws SQLException, IOException {
+    void testInsert_preparedStatement_blob() throws SQLException, IOException {
+        assumeTrue(connection.getReader() instanceof ReaderXmlImpl);
+        statement.execute("DROP TABLE IF EXISTS myTable");
+        statement.execute("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER, file BLOB)");
+        final PreparedStatement preparedStatement = connection.prepareStatement(
+            "INSERT INTO myTable (id, name, age, file) VALUES (?, ?, ?, ?)");
+        preparedStatement.setInt(1, 1);
+        preparedStatement.setString(2, "Zsolti");
+        preparedStatement.setInt(3, 25);
+        preparedStatement.setBinaryStream(4, new FileInputStream(TestUtils.META_INF_DRIVER_FILE_PATH.toFile()));
+        assertEquals(1, preparedStatement.executeUpdate());
+
+        final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
+            StandardCharsets.UTF_8);
+        final String expectedFileContent = "" +
+            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
+            "<myTable>\n" +
+            "    <Entry>\n" +
+            "        <id>1</id>\n" +
+            "        <name>Zsolti</name>\n" +
+            "        <age>25</age>\n" +
+            "        <file>" + TestUtils.ENCODED_BLOB_PATH_XML + "</file>\n" +
+            "    </Entry>\n" +
+            "</myTable>\n";
+        assertEquals(StringUtils.deleteWhitespace(expectedFileContent),
+            StringUtils.deleteWhitespace(realFileContent));
+
+        final PreparedStatement selectPreparedStatement = connection.prepareStatement(
+            "SELECT file FROM myTable WHERE id = 1");
+        final ResultSet resultSet = selectPreparedStatement.executeQuery();
+        while (resultSet.next()) {
+            final byte[] bytes = resultSet.getBytes("file");
+            final FileOutputStream fileOutputStream = new FileOutputStream(TestUtils.BLOB_COPY_FILE_PATH.toFile());
+            fileOutputStream.write(bytes);
+            fileOutputStream.close();
+        }
+
+        assertTrue(TestUtils.BLOB_COPY_FILE_PATH.toFile().exists());
+    }
+
+    @Test
+    void testInsert_multiRow() throws SQLException, IOException {
         assumeTrue(connection.getReader() instanceof ReaderXmlImpl);
         assertEquals(4, statement.executeUpdate(
             "INSERT INTO myTable (id, name, age) VALUES (1, 'Zsolti', 25), (2, 'Tomi', 24), (3, 'Ivan', 26), (4, 'Lukas', 34)"));
@@ -146,7 +165,7 @@ class InsertJdbcTest {
     }
 
     @Test
-    void testInsert_noExplicitColumns_xml() throws SQLException, IOException {
+    void testInsert_noExplicitColumns() throws SQLException, IOException {
         assumeTrue(connection.getReader() instanceof ReaderXmlImpl);
         assertEquals(4, statement.executeUpdate(
             "INSERT INTO myTable VALUES (1, 'Zsolti', 25), (2, 'Tomi', 24), (3, 'Ivan', 26), (4, 'Lukas', 34)"));
@@ -177,41 +196,6 @@ class InsertJdbcTest {
             "    </Entry>\n" +
             "</myTable>\n";
         assertEquals(StringUtils.deleteWhitespace(expectedFileContent), StringUtils.deleteWhitespace(realFileContent));
-    }
-
-    @Test
-    void testInsert_noExplicitColumns_json() throws SQLException, IOException {
-        assumeTrue(connection.getReader() instanceof ReaderJsonImpl);
-        assertEquals(4, statement.executeUpdate(
-            "INSERT INTO myTable VALUES (1, 'Zsolti', 25), (2, 'Tomi', 24), (3, 'Ivan', 26), (4, 'Lukas', 34)"));
-        final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
-            StandardCharsets.UTF_8);
-        final String expectedFileContent = "" +
-            "{\n" +
-            "  \"Entry\": [\n" +
-            "    {\n" +
-            "      \"id\": 1,\n" +
-            "      \"name\": \"Zsolti\",\n" +
-            "      \"age\": 25\n" +
-            "    },\n" +
-            "    {\n" +
-            "      \"id\": 2,\n" +
-            "      \"name\": \"Tomi\",\n" +
-            "      \"age\": 24\n" +
-            "    },\n" +
-            "    {\n" +
-            "      \"id\": 3,\n" +
-            "      \"name\": \"Ivan\",\n" +
-            "      \"age\": 26\n" +
-            "    },\n" +
-            "    {\n" +
-            "      \"id\": 4,\n" +
-            "      \"name\": \"Lukas\",\n" +
-            "      \"age\": 34\n" +
-            "    }\n" +
-            "  ]\n" +
-            "}";
-        assertEquals(expectedFileContent, realFileContent);
     }
 
     @Test

@@ -5,22 +5,21 @@ import com.github.jfsql.driver.persistence.Writer;
 import com.github.jfsql.driver.transactions.JGitTransactionManagerImpl;
 import com.github.jfsql.driver.transactions.NotVersioningTransactionManagerImpl;
 import com.github.jfsql.driver.transactions.TransactionManager;
+import com.github.jfsql.driver.util.PropertiesReader;
 import java.nio.file.Path;
 import java.sql.SQLException;
-import java.util.Objects;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class TransactionManagerFactory {
 
-    public TransactionManager createTransactionManager(final String type, final Path url, final Reader reader,
-        final Writer writer) throws SQLException {
-        if (Objects.equals("true", type)) {
+    public TransactionManager createTransactionManager(final PropertiesReader propertiesReader, final Path url,
+        final Reader reader, final Writer writer) throws SQLException {
+        final boolean useJgit = propertiesReader.isTransactionVersioning();
+        if (useJgit) {
             return new JGitTransactionManagerImpl(url, reader, writer);
-        } else if (Objects.equals("false", type)) {
-            return new NotVersioningTransactionManagerImpl(url, reader, writer);
         } else {
-            throw new IllegalArgumentException("Unknown TransactionManager type");
+            return new NotVersioningTransactionManagerImpl(url, reader, writer);
         }
     }
 }

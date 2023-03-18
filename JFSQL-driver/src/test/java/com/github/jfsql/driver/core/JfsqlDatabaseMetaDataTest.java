@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.github.jfsql.driver.TestUtils;
+import com.github.jfsql.driver.util.PropertiesReader;
 import java.io.IOException;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -22,7 +23,7 @@ class JfsqlDatabaseMetaDataTest {
 
     @BeforeAll
     static void beforeAll() throws SQLException {
-        metaData = new JfsqlDatabaseMetaData(new JfsqlConnection(TestUtils.DATABASE_PATH));
+        metaData = new JfsqlDatabaseMetaData(new JfsqlConnection(TestUtils.DATABASE_PATH, new PropertiesReader(null)));
     }
 
     @AfterAll

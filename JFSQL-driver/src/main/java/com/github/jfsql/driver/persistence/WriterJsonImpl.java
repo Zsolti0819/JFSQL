@@ -26,6 +26,10 @@ public class WriterJsonImpl extends Writer {
 
     private static final JsonSchemaValidator JSON_SCHEMA_VALIDATOR = JsonSchemaValidator.INSTANCE;
 
+    public WriterJsonImpl(final boolean useSchemaValidation) {
+        super(useSchemaValidation);
+    }
+
     private String beautify(final Object object) {
         final Gson gson = new GsonBuilder().serializeNulls().setPrettyPrinting().create();
         final StringWriter stringWriter = new StringWriter();
@@ -61,7 +65,7 @@ public class WriterJsonImpl extends Writer {
             throw new SQLException("Failed to write the table." + e.getMessage());
         }
 
-        if (USE_SCHEMA_VALIDATION.equals(true)) {
+        if (useSchemaValidation) {
             final String schemaFile = table.getSchemaFile();
             final boolean isValid = JSON_SCHEMA_VALIDATOR.schemaIsValid(schemaFile, tableFile);
             if (!isValid) {
@@ -184,7 +188,7 @@ public class WriterJsonImpl extends Writer {
     }
 
     @Override
-    Path writeBlob(final Table table, final String value) throws SQLException {
+    public Path writeBlob(final Table table, final String value) throws SQLException {
         if (Objects.equals(value, "null")) {
             return null;
         }

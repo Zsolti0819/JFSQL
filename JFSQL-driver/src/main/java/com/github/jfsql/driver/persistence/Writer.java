@@ -2,7 +2,6 @@ package com.github.jfsql.driver.persistence;
 
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
-import com.github.jfsql.driver.util.PropertiesReader;
 import java.io.File;
 import java.nio.file.Path;
 import java.sql.SQLException;
@@ -11,13 +10,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import lombok.Getter;
 import org.apache.commons.io.FileUtils;
 
-@Getter
 public abstract class Writer {
 
-    static final Boolean USE_SCHEMA_VALIDATION = Boolean.valueOf(PropertiesReader.getProperty("schema.validation"));
+    final boolean useSchemaValidation;
+
+    protected Writer(final boolean useSchemaValidation) {
+        this.useSchemaValidation = useSchemaValidation;
+    }
 
     public abstract void writeTable(final Table table) throws SQLException;
 

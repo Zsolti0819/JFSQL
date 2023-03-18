@@ -69,9 +69,9 @@ class ReaderXmlImplTest {
         } catch (final IOException | GitAPIException e) {
             e.printStackTrace();
         }
-        new WriterXmlImpl().writeSchema(table);
-        new WriterXmlImpl().writeTable(table);
-        new WriterXmlImpl().writeDatabaseFile(database);
+        new WriterXmlImpl(true).writeSchema(table);
+        new WriterXmlImpl(true).writeTable(table);
+        new WriterXmlImpl(true).writeDatabaseFile(database);
     }
 
     @AfterAll

@@ -1,5 +1,6 @@
 package com.github.jfsql.driver.core;
 
+import com.github.jfsql.driver.util.PropertiesReader;
 import java.io.File;
 import java.nio.file.Path;
 import java.sql.Connection;
@@ -52,7 +53,8 @@ public class JfsqlDriver implements Driver {
             if (urlPath.toFile().isFile()) {
                 throw new SQLException("Database is not a directory.");
             }
-            return new JfsqlConnection(urlPath);
+            final PropertiesReader propertiesReader = new PropertiesReader(info);
+            return new JfsqlConnection(urlPath, propertiesReader);
         }
         throw new SQLException("Couldn't establish connection, because wrong connection string format was used.");
     }

@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 
 class WriterJsonImplTest {
 
-    private static final Writer writer = new WriterJsonImpl();
+    private static final Writer writer = new WriterJsonImpl(true);
     private static Table table;
     private static Database database;
 

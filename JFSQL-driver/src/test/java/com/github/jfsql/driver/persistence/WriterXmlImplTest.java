@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 
 class WriterXmlImplTest {
 
-    private static final Writer writer = new WriterXmlImpl();
+    private static final Writer writer = new WriterXmlImpl(true);
     private static Table table;
     private static Database database;
 

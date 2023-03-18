@@ -51,13 +51,12 @@ public class JfsqlConnection implements Connection {
     private int transactionIsolation;
     private boolean readOnly;
 
-    public JfsqlConnection(final Path url) throws SQLException {
+    public JfsqlConnection(final Path url, final PropertiesReader propertiesReader) throws SQLException {
         this.url = url;
-        cache = CacheFactory.createCache(PropertiesReader.getProperty("statement.caching"));
-        reader = ReaderFactory.createReader(PropertiesReader.getProperty("persistence"));
-        writer = WriterFactory.createWriter(PropertiesReader.getProperty("persistence"));
-        transactionManager = TransactionManagerFactory.createTransactionManager(
-            PropertiesReader.getProperty("transaction.versioning"), url, reader, writer);
+        cache = CacheFactory.createCache(propertiesReader);
+        reader = ReaderFactory.createReader(propertiesReader);
+        writer = WriterFactory.createWriter(propertiesReader);
+        transactionManager = TransactionManagerFactory.createTransactionManager(propertiesReader, url, reader, writer);
         final Database database = transactionManager.getDatabase();
         tableFinder = new TableFinder(database);
         statementServiceManager = new StatementServiceManager(database, tableFinder, transactionManager, reader);

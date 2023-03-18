@@ -34,6 +34,10 @@ public class WriterXmlImpl extends Writer {
 
     private static final XmlSchemaValidator XML_SCHEMA_VALIDATOR = XmlSchemaValidator.INSTANCE;
 
+    public WriterXmlImpl(final boolean useSchemaValidation) {
+        super(useSchemaValidation);
+    }
+
     private void beautifyAndWrite(final FileOutputStream fileOutputStream, final Document document)
         throws SQLException {
         try {
@@ -77,7 +81,7 @@ public class WriterXmlImpl extends Writer {
         } catch (final IOException | ParserConfigurationException e) {
             throw new SQLException("Failed to write the table\n" + e.getMessage());
         }
-        if (USE_SCHEMA_VALIDATION.equals(true)) {
+        if (useSchemaValidation) {
             final String schemaFile = table.getSchemaFile();
             final boolean isValid = XML_SCHEMA_VALIDATOR.schemaIsValid(schemaFile, tableFile);
             if (!isValid) {
@@ -202,7 +206,7 @@ public class WriterXmlImpl extends Writer {
     }
 
     @Override
-    Path writeBlob(final Table table, final String value) throws SQLException {
+    public Path writeBlob(final Table table, final String value) throws SQLException {
         if (Objects.equals(value, "null")) {
             return null;
         }

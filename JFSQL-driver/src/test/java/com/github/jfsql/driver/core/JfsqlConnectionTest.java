@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.github.jfsql.driver.TestUtils;
+import com.github.jfsql.driver.util.PropertiesReader;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -22,7 +23,7 @@ class JfsqlConnectionTest {
 
     @BeforeAll
     static void beforeAll() throws SQLException {
-        connection = new JfsqlConnection(TestUtils.DATABASE_PATH);
+        connection = new JfsqlConnection(TestUtils.DATABASE_PATH, new PropertiesReader(null));
     }
 
     @AfterAll

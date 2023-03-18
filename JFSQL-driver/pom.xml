@@ -14,12 +14,6 @@
     <version>1.0</version>
 
     <properties>
-        <!-- Configuration properties -->
-        <persistence>xml</persistence>
-        <transaction.versioning>true</transaction.versioning>
-        <statement.caching>true</statement.caching>
-        <schema.validation>true</schema.validation>
-        <!-- End of configuration properties -->
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

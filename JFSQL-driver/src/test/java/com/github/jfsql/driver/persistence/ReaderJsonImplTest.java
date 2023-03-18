@@ -72,9 +72,9 @@ class ReaderJsonImplTest {
             } catch (final IOException e) {
                 throw new SQLException("Failed to create directories." + e.getMessage());
             }
-            new WriterJsonImpl().writeSchema(table);
-            new WriterJsonImpl().writeTable(table);
-            new WriterJsonImpl().writeDatabaseFile(database);
+            new WriterJsonImpl(true).writeSchema(table);
+            new WriterJsonImpl(true).writeTable(table);
+            new WriterJsonImpl(true).writeDatabaseFile(database);
         } catch (final IOException | GitAPIException e) {
             e.printStackTrace();
         }
