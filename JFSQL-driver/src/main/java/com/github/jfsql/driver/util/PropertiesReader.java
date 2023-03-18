@@ -99,16 +99,4 @@ public class PropertiesReader {
         }
     }
 
-    public boolean isStatementCaching() {
-        return statementCaching;
-    }
-
-    public String getPersistence() {
-        return persistence;
-    }
-
-    public boolean isTransactionVersioning() {
-        return transactionVersioning;
-    }
-
 }
