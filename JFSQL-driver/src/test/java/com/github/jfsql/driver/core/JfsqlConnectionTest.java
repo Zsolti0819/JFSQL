@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.github.jfsql.driver.TestUtils;
 import com.github.jfsql.driver.util.PropertiesReader;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
@@ -19,7 +20,7 @@ import org.junit.jupiter.api.Test;
 
 class JfsqlConnectionTest {
 
-    private static JfsqlConnection connection;
+    private static Connection connection;
 
     @BeforeAll
     static void beforeAll() throws SQLException {
@@ -48,7 +49,7 @@ class JfsqlConnectionTest {
     }
 
     @Test
-    void testIsValid() {
+    void testIsValid() throws SQLException {
         assertTrue(connection.isValid(0));
     }
 
@@ -58,7 +59,7 @@ class JfsqlConnectionTest {
     }
 
     @Test
-    void testIsClosed() {
+    void testIsClosed() throws SQLException {
         assertFalse(connection.isClosed());
     }
 
@@ -73,7 +74,7 @@ class JfsqlConnectionTest {
     }
 
     @Test
-    void testGetWarnings() {
+    void testGetWarnings() throws SQLException {
         assertNull(connection.getWarnings());
     }
 
@@ -215,7 +216,7 @@ class JfsqlConnectionTest {
     }
 
     @Test
-    void testGetNetworkTimeout() {
+    void testGetNetworkTimeout() throws SQLException {
         assertEquals(0, connection.getNetworkTimeout());
     }
 

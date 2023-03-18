@@ -3,13 +3,11 @@ package com.github.jfsql.driver.jdbc.json;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import com.github.jfsql.driver.TestUtils;
-import com.github.jfsql.driver.core.JfsqlConnection;
-import com.github.jfsql.driver.persistence.ReaderJsonImpl;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -21,14 +19,13 @@ import org.junit.jupiter.api.Test;
 
 class CreateTableJsonTest {
 
-    private JfsqlConnection connection;
     private Statement statement;
 
     @BeforeEach
     void setUp() throws SQLException {
         final Properties properties = new Properties();
         properties.setProperty("persistence", "json");
-        connection = (JfsqlConnection) DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
+        final Connection connection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
         statement = connection.createStatement();
     }
 
@@ -39,7 +36,6 @@ class CreateTableJsonTest {
 
     @Test
     void testCreateTable_normally() throws SQLException, IOException {
-        assumeTrue(connection.getReader() instanceof ReaderJsonImpl);
         assertEquals(0, statement.executeUpdate(
             "CREATE TABLE myTable (id INTEGER NOT NULL, name TEXT NOT NULL, age INTEGER NOT NULL)"));
         final String realTableFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),

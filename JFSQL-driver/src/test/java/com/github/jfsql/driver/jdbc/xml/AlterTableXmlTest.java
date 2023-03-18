@@ -3,13 +3,11 @@ package com.github.jfsql.driver.jdbc.xml;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import com.github.jfsql.driver.TestUtils;
-import com.github.jfsql.driver.core.JfsqlConnection;
-import com.github.jfsql.driver.persistence.ReaderXmlImpl;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -22,14 +20,13 @@ import org.junit.jupiter.api.Test;
 
 class AlterTableXmlTest {
 
-    private JfsqlConnection connection;
     private Statement statement;
 
     @BeforeEach
     void setUp() throws SQLException {
         final Properties properties = new Properties();
         properties.setProperty("persistence", "xml");
-        connection = (JfsqlConnection) DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
+        final Connection connection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
         statement = connection.createStatement();
         statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
         statement.executeUpdate("INSERT INTO myTable (id, name, age) VALUES (1, 'Zsolti', 25)");
@@ -45,7 +42,6 @@ class AlterTableXmlTest {
 
     @Test
     void testAlterTable_renameTable() throws SQLException, IOException {
-        assumeTrue(connection.getReader() instanceof ReaderXmlImpl);
         statement.execute("ALTER TABLE myTable RENAME to myTableEdited;");
         final String realDatabaseFileContentAfter = FileUtils.readFileToString(
             TestUtils.DATABASE_XML_FILE_PATH.toFile(), StandardCharsets.UTF_8);
@@ -87,7 +83,6 @@ class AlterTableXmlTest {
 
     @Test
     void testAlterTable_renameColumn() throws SQLException, IOException {
-        assumeTrue(connection.getReader() instanceof ReaderXmlImpl);
         statement.execute("ALTER TABLE myTable RENAME COLUMN age TO age_edited;");
         final String realTableFileContentAfter = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
             StandardCharsets.UTF_8);
@@ -121,7 +116,6 @@ class AlterTableXmlTest {
 
     @Test
     void testAlterTable_dropColumn() throws SQLException, IOException {
-        assumeTrue(connection.getReader() instanceof ReaderXmlImpl);
         statement.execute("ALTER TABLE myTable DROP COLUMN age;");
         final String realTableFileContentAfter = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
             StandardCharsets.UTF_8);
@@ -151,7 +145,6 @@ class AlterTableXmlTest {
 
     @Test
     void testAlterTable_addColumn() throws SQLException, IOException {
-        assumeTrue(connection.getReader() instanceof ReaderXmlImpl);
         statement.execute("ALTER TABLE myTable ADD COLUMN salary REAL;");
         final String realTableFileContentAfter = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
             StandardCharsets.UTF_8);
@@ -185,7 +178,6 @@ class AlterTableXmlTest {
 
     @Test
     void testAlterTable_addNotNullColumn() throws SQLException, IOException {
-        assumeTrue(connection.getReader() instanceof ReaderXmlImpl);
         statement.execute("ALTER TABLE myTable ADD COLUMN salary REAL NOT NULL;");
         final String realTableFileContentAfter = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
             StandardCharsets.UTF_8);

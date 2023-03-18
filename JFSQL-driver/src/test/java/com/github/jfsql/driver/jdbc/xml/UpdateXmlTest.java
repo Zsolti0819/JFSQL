@@ -2,13 +2,11 @@ package com.github.jfsql.driver.jdbc.xml;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import com.github.jfsql.driver.TestUtils;
-import com.github.jfsql.driver.core.JfsqlConnection;
-import com.github.jfsql.driver.persistence.ReaderXmlImpl;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -22,14 +20,14 @@ import org.junit.jupiter.api.Test;
 
 class UpdateXmlTest {
 
-    private JfsqlConnection connection;
+    private Connection connection;
     private Statement statement;
 
     @BeforeEach
     void setUp() throws SQLException {
         final Properties properties = new Properties();
         properties.setProperty("persistence", "xml");
-        connection = (JfsqlConnection) DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
+        connection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
         statement = connection.createStatement();
         statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
         statement.executeUpdate("INSERT INTO myTable (id, name, age) VALUES (1, 'Zsolti', 25)");
@@ -45,7 +43,6 @@ class UpdateXmlTest {
 
     @Test
     void testUpdate_oneEntry1() throws SQLException, IOException {
-        assumeTrue(connection.getReader() instanceof ReaderXmlImpl);
         assertEquals(1, statement.executeUpdate(
             "UPDATE myTable SET id = 5, name = 'Marian', age=99 WHERE id = 4 AND name = 'Lukas' AND age = 34"));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
@@ -79,7 +76,6 @@ class UpdateXmlTest {
 
     @Test
     void testUpdate_oneEntry1PreparedStatement() throws SQLException, IOException {
-        assumeTrue(connection.getReader() instanceof ReaderXmlImpl);
         final PreparedStatement preparedStatement = connection.prepareStatement(
             "UPDATE myTable SET id = ?, name = ?, age = ? WHERE id = ? AND name = ? AND age = ?");
         preparedStatement.setInt(1, 5);
@@ -120,7 +116,6 @@ class UpdateXmlTest {
 
     @Test
     void testUpdate_oneEntry2() throws SQLException, IOException {
-        assumeTrue(connection.getReader() instanceof ReaderXmlImpl);
         assertEquals(1, statement.executeUpdate("UPDATE myTable SET name = 'TomiEdited' WHERE age <= 24"));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
             StandardCharsets.UTF_8);

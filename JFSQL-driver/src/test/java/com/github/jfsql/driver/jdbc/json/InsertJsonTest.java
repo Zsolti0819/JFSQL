@@ -3,16 +3,14 @@ package com.github.jfsql.driver.jdbc.json;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import com.github.jfsql.driver.TestUtils;
-import com.github.jfsql.driver.core.JfsqlConnection;
 import com.github.jfsql.driver.core.JfsqlResultSet;
-import com.github.jfsql.driver.persistence.ReaderJsonImpl;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -26,14 +24,14 @@ import org.junit.jupiter.api.Test;
 
 class InsertJsonTest {
 
-    private JfsqlConnection connection;
+    private Connection connection;
     private Statement statement;
 
     @BeforeEach
     void setUp() throws SQLException {
         final Properties properties = new Properties();
         properties.setProperty("persistence", "json");
-        connection = (JfsqlConnection) DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
+        connection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
         statement = connection.createStatement();
         statement.execute("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
     }
@@ -45,7 +43,6 @@ class InsertJsonTest {
 
     @Test
     void testInsert_simple() throws SQLException, IOException {
-        assumeTrue(connection.getReader() instanceof ReaderJsonImpl);
         assertEquals(1, statement.executeUpdate(
             "INSERT INTO myTable (id, name, age) VALUES (1, 'Zsolti', 25)"));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
@@ -65,7 +62,6 @@ class InsertJsonTest {
 
     @Test
     void testInsert_preparedStatement_simple() throws SQLException, IOException {
-        assumeTrue(connection.getReader() instanceof ReaderJsonImpl);
         statement.execute("DROP TABLE IF EXISTS myTable");
         statement.execute("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER, file BLOB)");
         final PreparedStatement preparedStatement = connection.prepareStatement(
@@ -93,7 +89,6 @@ class InsertJsonTest {
 
     @Test
     void testInsert_preparedStatement_blob() throws SQLException, IOException {
-        assumeTrue(connection.getReader() instanceof ReaderJsonImpl);
         statement.execute("DROP TABLE IF EXISTS myTable");
         statement.execute("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER, file BLOB)");
         final PreparedStatement preparedStatement = connection.prepareStatement(
@@ -134,7 +129,6 @@ class InsertJsonTest {
 
     @Test
     void testInsert_multiRow() throws SQLException, IOException {
-        assumeTrue(connection.getReader() instanceof ReaderJsonImpl);
         assertEquals(4, statement.executeUpdate(
             "INSERT INTO myTable (id, name, age) VALUES (1, 'Zsolti', 25), (2, 'Tomi', 24), (3, 'Ivan', 26), (4, 'Lukas', 34)"));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
@@ -169,7 +163,6 @@ class InsertJsonTest {
 
     @Test
     void testInsert_noExplicitColumns() throws SQLException, IOException {
-        assumeTrue(connection.getReader() instanceof ReaderJsonImpl);
         assertEquals(4, statement.executeUpdate(
             "INSERT INTO myTable VALUES (1, 'Zsolti', 25), (2, 'Tomi', 24), (3, 'Ivan', 26), (4, 'Lukas', 34)"));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),

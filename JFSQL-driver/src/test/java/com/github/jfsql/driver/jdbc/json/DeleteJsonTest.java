@@ -2,13 +2,11 @@ package com.github.jfsql.driver.jdbc.json;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import com.github.jfsql.driver.TestUtils;
-import com.github.jfsql.driver.core.JfsqlConnection;
-import com.github.jfsql.driver.persistence.ReaderJsonImpl;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -22,14 +20,13 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class DeleteJsonTest {
 
-    private JfsqlConnection connection;
     private Statement statement;
 
     @BeforeEach
     void setUp() throws SQLException {
         final Properties properties = new Properties();
         properties.setProperty("persistence", "json");
-        connection = (JfsqlConnection) DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
+        final Connection connection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
         statement = connection.createStatement();
         statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
         statement.executeUpdate("INSERT INTO myTable (id, name, age) VALUES (1, 'Zsolti', 25)");
@@ -56,7 +53,6 @@ class DeleteJsonTest {
         "DELETE FROM myTable WHERE id > 3 AND age > 25 AND name = 'Lukas'"
     })
     void testDelete_multipleANDs(final String sql) throws SQLException, IOException {
-        assumeTrue(connection.getReader() instanceof ReaderJsonImpl);
         assertEquals(1, statement.executeUpdate(sql));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
             StandardCharsets.UTF_8);
@@ -88,7 +84,6 @@ class DeleteJsonTest {
         "DELETE FROM myTable WHERE name = 'Zsolti' OR age = 24 OR id = 3 OR name = 'Lukas'"
     })
     void testDelete_multipleORs(final String sql) throws SQLException, IOException {
-        assumeTrue(connection.getReader() instanceof ReaderJsonImpl);
         assertEquals(4, statement.executeUpdate(sql));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
             StandardCharsets.UTF_8);
@@ -104,7 +99,6 @@ class DeleteJsonTest {
         "DELETE FROM myTable WHERE id = 1 AND name = 'Zsolti' and age = 25"
     })
     void testDelete_multipleANDsSameEntry(final String sql) throws SQLException, IOException {
-        assumeTrue(connection.getReader() instanceof ReaderJsonImpl);
         assertEquals(1, statement.executeUpdate(sql));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
             StandardCharsets.UTF_8);
@@ -136,7 +130,6 @@ class DeleteJsonTest {
         "DELETE FROM myTable WHERE id > 3 AND age > 25 AND name = 'Lukas' OR name = 'Zsolti'"
     })
     void testDelete_multipleBinaryOperators(final String sql) throws SQLException, IOException {
-        assumeTrue(connection.getReader() instanceof ReaderJsonImpl);
         assertEquals(2, statement.executeUpdate(sql));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
             StandardCharsets.UTF_8);
@@ -163,7 +156,6 @@ class DeleteJsonTest {
         "DELETE FROM myTable WHERE name = 'Tomi'"
     })
     void testDelete_equals(final String sql) throws SQLException, IOException {
-        assumeTrue(connection.getReader() instanceof ReaderJsonImpl);
         assertEquals(1, statement.executeUpdate(sql));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
             StandardCharsets.UTF_8);
@@ -195,7 +187,6 @@ class DeleteJsonTest {
         "DELETE FROM myTable WHERE age <= 34"
     })
     void testDelete_lte(final String sql) throws SQLException, IOException {
-        assumeTrue(connection.getReader() instanceof ReaderJsonImpl);
         assertEquals(4, statement.executeUpdate(sql));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
             StandardCharsets.UTF_8);
@@ -211,7 +202,6 @@ class DeleteJsonTest {
         "DELETE FROM myTable"
     })
     void testDelete_withoutWhere(final String sql) throws SQLException, IOException {
-        assumeTrue(connection.getReader() instanceof ReaderJsonImpl);
         assertEquals(4, statement.executeUpdate(sql));
         final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
             StandardCharsets.UTF_8);

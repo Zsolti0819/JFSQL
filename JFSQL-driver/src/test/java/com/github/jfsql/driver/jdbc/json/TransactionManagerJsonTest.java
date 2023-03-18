@@ -3,15 +3,12 @@ package com.github.jfsql.driver.jdbc.json;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import com.github.jfsql.driver.TestUtils;
-import com.github.jfsql.driver.core.JfsqlConnection;
-import com.github.jfsql.driver.persistence.ReaderJsonImpl;
-import com.github.jfsql.driver.transactions.JGitTransactionManagerImpl;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -25,14 +22,14 @@ import org.junit.jupiter.api.Test;
 class TransactionManagerJsonTest {
 
     private Statement statement;
-    private JfsqlConnection connection;
+    private Connection connection;
 
     @BeforeEach
     void setUp() throws SQLException {
         final Properties properties = new Properties();
         properties.setProperty("persistence", "json");
         properties.setProperty("transaction.versioning", "true");
-        connection = (JfsqlConnection) DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
+        connection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
         statement = connection.createStatement();
     }
 
@@ -43,7 +40,6 @@ class TransactionManagerJsonTest {
 
     @Test
     void testCommit_json() throws SQLException, IOException {
-        assumeTrue(connection.getReader() instanceof ReaderJsonImpl);
         statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
         connection.setAutoCommit(false);
         statement.execute("INSERT INTO myTable VALUES (1, 'a', 25)");
@@ -78,8 +74,6 @@ class TransactionManagerJsonTest {
 
     @Test
     void testCommitDropTable_json() throws SQLException {
-        assumeTrue(connection.getReader() instanceof ReaderJsonImpl);
-        assumeTrue(connection.getTransactionManager() instanceof JGitTransactionManagerImpl);
         statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
         connection.setAutoCommit(false);
 
@@ -103,8 +97,6 @@ class TransactionManagerJsonTest {
 
     @Test
     void testCommitAndRollback_json() throws SQLException, IOException {
-        assumeTrue(connection.getReader() instanceof ReaderJsonImpl);
-        assumeTrue(connection.getTransactionManager() instanceof JGitTransactionManagerImpl);
         statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
         connection.setAutoCommit(false);
 
