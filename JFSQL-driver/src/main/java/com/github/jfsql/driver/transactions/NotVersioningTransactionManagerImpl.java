@@ -21,9 +21,7 @@ public class NotVersioningTransactionManagerImpl extends TransactionManager {
 
     @Override
     public void commit() throws SQLException {
-        if (!autoCommit) {
-            writeUncommittedObjects();
-        }
+        writeUncommittedObjects();
     }
 
     @Override

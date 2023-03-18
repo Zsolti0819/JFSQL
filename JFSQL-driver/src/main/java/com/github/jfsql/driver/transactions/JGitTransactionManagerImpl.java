@@ -29,11 +29,9 @@ public class JGitTransactionManagerImpl extends TransactionManager {
 
     @Override
     public void commit() throws SQLException {
-        if (!autoCommit) {
-            writeUncommittedObjects();
-        }
         final File databaseDirectoryPath = database.getUrl().getParent().toFile();
         try (final Git git = Git.open(databaseDirectoryPath)) {
+            writeUncommittedObjects();
             final Collection<File> filesToDelete = getFilesThatShouldNotBePresent();
             for (final File file : filesToDelete) {
                 git.rm().addFilepattern(file.getName()).call();
