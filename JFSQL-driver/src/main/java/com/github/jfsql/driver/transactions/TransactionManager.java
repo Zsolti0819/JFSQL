@@ -10,7 +10,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 import lombok.Data;
 
 @Data
@@ -128,18 +127,21 @@ public abstract class TransactionManager {
     }
 
     public void addTableToUncommittedObjects(final Table table) {
-        uncommittedTables.removeIf(t -> Objects.equals(t.getName(), table.getName()));
-        uncommittedTables.add(table);
+        if (!uncommittedTables.contains(table)) {
+            uncommittedTables.add(table);
+        }
     }
 
     public void addSchemaToUncommittedObjects(final Table table) {
-        uncommittedSchemas.removeIf(t -> Objects.equals(t.getName(), table.getName()));
-        uncommittedSchemas.add(table);
+        if (!uncommittedSchemas.contains(table)) {
+            uncommittedSchemas.add(table);
+        }
     }
 
     public void addDatabaseToUncommittedObjects(final Database database) {
-        uncommittedDatabases.removeIf(db -> Objects.equals(db.getUrl(), database.getUrl()));
-        uncommittedDatabases.add(database);
+        if (!uncommittedDatabases.contains(database)) {
+            uncommittedDatabases.add(database);
+        }
     }
 
 }
