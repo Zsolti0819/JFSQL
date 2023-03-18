@@ -95,7 +95,7 @@ public class PropertiesReader {
                     persistenceString);
             }
         } else {
-            logger.info("No value was found for key 'persistence', the default value (true) will be used");
+            logger.info("No value was found for key 'persistence', the default value (xml) will be used");
         }
     }
 
