@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.github.jfsql.driver.TestUtils;
 import com.github.jfsql.driver.util.PropertiesReader;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -21,15 +20,17 @@ import org.junit.jupiter.api.Test;
 class JfsqlConnectionTest {
 
     private static Connection connection;
+    private static Statement statement;
 
     @BeforeAll
     static void beforeAll() throws SQLException {
         connection = new JfsqlConnection(TestUtils.DATABASE_PATH, new PropertiesReader(null));
+        statement = connection.createStatement();
     }
 
     @AfterAll
-    static void afterAll() throws IOException {
-        TestUtils.deleteDatabaseDirectory();
+    static void afterAll() throws SQLException {
+        statement.execute("DROP DATABASE [" + TestUtils.DATABASE_PATH + "]");
     }
 
     @Test

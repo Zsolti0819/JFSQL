@@ -54,25 +54,30 @@ public class ReaderJsonImpl implements Reader {
 
             for (int i = 0; i < entryList.size(); i++) {
                 final JsonObject entry = entryList.get(i).getAsJsonObject();
-                for (int j = 0; j < columns.length; j++) {
-                    if (Objects.equals(table.getTypes()[j], "BLOB")) {
-                        values[j] = readBlob(entry.get(columns[j]).getAsString());
-                    } else {
-                        values[j] = entry.get(columns[j]).getAsString();
-                    }
-                }
-
                 final LinkedHashMap<String, String> columnsAndValues = new LinkedHashMap<>();
                 for (int j = 0; j < columns.length; j++) {
+                    values[j] = getValue(table, columns, entry, j);
                     columnsAndValues.put(columns[j], values[j]);
                 }
-
                 entries.add(new Entry(columnsAndValues));
             }
         } catch (final IOException e) {
             throw new SQLException("Failed to read the table.\n" + e.getMessage());
         }
         return entries;
+    }
+
+    private String getValue(final Table table, final String[] columns, final JsonObject entry, final int index)
+        throws SQLException {
+        if (entry.get(columns[index]).isJsonNull()) {
+            return null;
+        } else {
+            if (Objects.equals(table.getTypes()[index], "BLOB")) {
+                return readBlob(entry.get(columns[index]).getAsString());
+            } else {
+                return entry.get(columns[index]).getAsString();
+            }
+        }
     }
 
     @Override
@@ -104,7 +109,7 @@ public class ReaderJsonImpl implements Reader {
                     notNullColumns.put(columnName, true);
                 }
             }
-            return new Table(null, null, null, columnsAndTypes, notNullColumns);
+            return new Table(null, null, null, columnsAndTypes, notNullColumns, new ArrayList<>());
         } catch (final IOException e) {
             throw new SQLException("Failed to read the schema for the table.\n" + e.getMessage());
         }
@@ -126,7 +131,7 @@ public class ReaderJsonImpl implements Reader {
                 final String schemaPath = jsonTableObject.get("pathToSchema").getAsString();
                 final Table schema = readSchema(schemaPath);
                 final Table table = new Table(tableName, tablePath, schemaPath, schema.getColumnsAndTypes(),
-                    schema.getNotNullColumns());
+                    schema.getNotNullColumns(), new ArrayList<>());
                 tables.add(table);
             }
         } catch (final IOException | SQLException e) {

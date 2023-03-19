@@ -44,7 +44,7 @@ public class InsertService {
                 "Some value's type didn't match the type of the column, to which it was intended to be inserted.");
         }
 
-        if (activeTable.getEntries() == null) {
+        if (activeTable.getEntries().isEmpty()) {
             final List<Entry> entries = reader.readTable(activeTable);
             activeTable.setEntries(entries);
         }

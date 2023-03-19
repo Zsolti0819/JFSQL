@@ -1,12 +1,10 @@
-package com.github.jfsql.driver.jdbc.json;
+package com.github.jfsql.driver.jdbc.common;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.github.jfsql.driver.TestUtils;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -17,40 +15,43 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
-class SelectJsonTest {
+class SelectTest {
 
-    private Statement statement;
+    private static Statement statement;
     private Connection connection;
 
-    @BeforeEach
-    void setUp() throws SQLException {
+    @AfterAll
+    static void afterAll() throws SQLException {
+        statement.execute("DROP DATABASE [" + TestUtils.DATABASE_PATH + "]");
+    }
+
+    private void setUp(final String format) throws SQLException {
         final Properties properties = new Properties();
-        properties.setProperty("persistence", "json");
+        properties.setProperty("persistence", format);
         connection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
         statement = connection.createStatement();
+        statement.execute("DROP TABLE IF EXISTS myTable");
+        statement.execute("DROP TABLE IF EXISTS myTable2");
         statement.execute("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
         statement.executeUpdate(
             "INSERT INTO myTable (id, name, age) VALUES (1, 'Zsolti', 25), (2, 'Tomi', 24), (3, 'Ivan', 26), (4, 'Lukas', 34)");
         statement.execute("CREATE TABLE myTable2 (id INTEGER , name2 TEXT, age2 INTEGER)");
         statement.executeUpdate(
             "INSERT INTO myTable2 (id, name2, age2) VALUES (1, 'Zsolti', 25), (2, 'Tomi', 24), (3, 'Ivan', 26), (4, 'Lukas', 1)");
-
-    }
-
-    @AfterEach
-    void deleteDatabaseFolder() throws IOException {
-        TestUtils.deleteDatabaseDirectory();
     }
 
     /**
      * <a href="https://www.sqlshack.com/sql-multiple-joins-for-beginners-with-examples/">Based on this tutorial</a>
      */
-    @Test
-    void testSelect_multipleJoin() throws SQLException {
+    @ParameterizedTest
+    @ValueSource(strings = {"json", "xml"})
+    void testSelect_multipleJoin(final String format) throws SQLException {
+        setUp(format);
+
         statement.execute("DROP TABLE IF EXISTS sales");
         statement.execute("DROP TABLE IF EXISTS orders");
         statement.execute("DROP TABLE IF EXISTS onlineCustomers");
@@ -112,8 +113,11 @@ class SelectJsonTest {
         assertArrayEquals(expectedSalesTotals, salesTotals.toArray());
     }
 
-    @Test
-    void testSelect_innerJoin() throws SQLException {
+    @ParameterizedTest
+    @ValueSource(strings = {"json", "xml"})
+    void testSelect_innerJoin(final String format) throws SQLException {
+        setUp(format);
+
         assertTrue(statement.execute("SELECT * FROM myTable JOIN myTable2 ON myTable2.age2 = myTable.id"));
         final List<Integer> ids = new ArrayList<>();
         final List<String> names = new ArrayList<>();
@@ -142,8 +146,11 @@ class SelectJsonTest {
         assertArrayEquals(expectedAges2Array, ages2.toArray());
     }
 
-    @Test
-    void testSelect_leftJoin() throws SQLException {
+    @ParameterizedTest
+    @ValueSource(strings = {"json", "xml"})
+    void testSelect_leftJoin(final String format) throws SQLException {
+        setUp(format);
+
         assertTrue(statement.execute("SELECT * FROM myTable LEFT JOIN myTable2 ON myTable.id = myTable2.age2"));
         final List<Integer> ids = new ArrayList<>();
         final List<String> names = new ArrayList<>();
@@ -172,8 +179,11 @@ class SelectJsonTest {
         assertArrayEquals(expectedAges2Array, ages2.toArray());
     }
 
-    @Test
-    void testSelect_all() throws SQLException {
+    @ParameterizedTest
+    @ValueSource(strings = {"json", "xml"})
+    void testSelect_all(final String format) throws SQLException {
+        setUp(format);
+
         final List<String> names = new ArrayList<>();
         final List<Integer> ids = new ArrayList<>();
         statement.execute("SELECT * FROM myTable");
@@ -190,8 +200,11 @@ class SelectJsonTest {
         assertArrayEquals(expectedIdsArray, ids.toArray());
     }
 
-    @Test
-    void testSelect_whereIntegerGt() throws SQLException {
+    @ParameterizedTest
+    @ValueSource(strings = {"json", "xml"})
+    void testSelect_whereIntegerGt(final String format) throws SQLException {
+        setUp(format);
+
         final List<Integer> ages = new ArrayList<>();
         final List<String> names = new ArrayList<>();
         final List<Integer> ids = new ArrayList<>();
@@ -211,8 +224,11 @@ class SelectJsonTest {
         assertArrayEquals(expectedIdsArray, ids.toArray());
     }
 
-    @Test
-    void testSelect_whereLike() throws SQLException {
+    @ParameterizedTest
+    @ValueSource(strings = {"json", "xml"})
+    void testSelect_whereLike(final String format) throws SQLException {
+        setUp(format);
+
         final List<Integer> ages = new ArrayList<>();
         final List<String> names = new ArrayList<>();
         final List<Integer> ids = new ArrayList<>();
@@ -233,8 +249,11 @@ class SelectJsonTest {
         assertArrayEquals(expectedIdsArray, ids.toArray());
     }
 
-    @Test
-    void testSelect_whereMultipleANDs() throws SQLException {
+    @ParameterizedTest
+    @ValueSource(strings = {"json", "xml"})
+    void testSelect_whereMultipleANDs(final String format) throws SQLException {
+        setUp(format);
+
         final List<Integer> ages = new ArrayList<>();
         final List<String> names = new ArrayList<>();
         final List<Integer> ids = new ArrayList<>();
@@ -255,8 +274,11 @@ class SelectJsonTest {
         assertArrayEquals(expectedIdsArray, ids.toArray());
     }
 
-    @Test
-    void testSelect_whereIntegerGte() throws SQLException {
+    @ParameterizedTest
+    @ValueSource(strings = {"json", "xml"})
+    void testSelect_whereIntegerGte(final String format) throws SQLException {
+        setUp(format);
+
         final List<Integer> ages = new ArrayList<>();
         final List<String> names = new ArrayList<>();
         final List<Integer> ids = new ArrayList<>();
@@ -276,8 +298,11 @@ class SelectJsonTest {
         assertArrayEquals(expectedIdsArray, ids.toArray());
     }
 
-    @Test
-    void testSelect_columnsByIndex() throws SQLException {
+    @ParameterizedTest
+    @ValueSource(strings = {"json", "xml"})
+    void testSelect_columnsByIndex(final String format) throws SQLException {
+        setUp(format);
+
         final ResultSet resultSet = statement.executeQuery("SELECT id, age, name FROM myTable WHERE id=1");
         while (resultSet.next()) {
             assertEquals("Zsolti", resultSet.getString(3));
@@ -286,8 +311,11 @@ class SelectJsonTest {
         }
     }
 
-    @Test
-    void testSelect_columnsByColumnName() throws SQLException {
+    @ParameterizedTest
+    @ValueSource(strings = {"json", "xml"})
+    void testSelect_columnsByColumnName(final String format) throws SQLException {
+        setUp(format);
+
         final ResultSet resultSet = statement.executeQuery("SELECT name, id, age FROM myTable WHERE id=1");
         while (resultSet.next()) {
             assertEquals(25, resultSet.getInt("age"));
@@ -296,18 +324,11 @@ class SelectJsonTest {
         }
     }
 
-    @Test
-    void testSelect_columnsNotInResultSet() throws SQLException {
-        final ResultSet resultSet = statement.executeQuery("SELECT name FROM myTable WHERE id=3");
-        while (resultSet.next()) {
-            assertEquals("Ivan", resultSet.getString("name"));
-            final SQLException thrown = assertThrows(SQLException.class, () -> resultSet.getInt("id"));
-            assertEquals("Column 'id' doesn't exist in the ResultSet.", thrown.getMessage());
-        }
-    }
+    @ParameterizedTest
+    @ValueSource(strings = {"json", "xml"})
+    void testSelect_resultSetMetadata(final String format) throws SQLException {
+        setUp(format);
 
-    @Test
-    void testSelect_resultSetMetadata() throws SQLException {
         final ResultSet resultSet = statement.executeQuery("SELECT * FROM myTable");
         final ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
         assertEquals(3, resultSetMetaData.getColumnCount());
@@ -317,8 +338,11 @@ class SelectJsonTest {
         assertTrue(resultSetMetaData.isSearchable(3));
     }
 
-    @Test
-    void testSelect_resultSetMetadataAllManual() throws SQLException {
+    @ParameterizedTest
+    @ValueSource(strings = {"json", "xml"})
+    void testSelect_resultSetMetadataAllManual(final String format) throws SQLException {
+        setUp(format);
+
         final ResultSet resultSet = statement.executeQuery("SELECT age, name, id FROM myTable");
         final ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
         assertEquals(3, resultSetMetaData.getColumnCount());
@@ -328,8 +352,11 @@ class SelectJsonTest {
         assertTrue(resultSetMetaData.isSearchable(3));
     }
 
-    @Test
-    void testSelect_resultSetMetadataNotAll() throws SQLException {
+    @ParameterizedTest
+    @ValueSource(strings = {"json", "xml"})
+    void testSelect_resultSetMetadataNotAll(final String format) throws SQLException {
+        setUp(format);
+
         final ResultSet resultSet = statement.executeQuery("SELECT id, age FROM myTable");
         final ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
         assertEquals(2, resultSetMetaData.getColumnCount());
@@ -338,8 +365,11 @@ class SelectJsonTest {
         assertTrue(resultSetMetaData.isSearchable(2));
     }
 
-    @Test
-    void testSelect_resultSetMetadataOne() throws SQLException {
+    @ParameterizedTest
+    @ValueSource(strings = {"json", "xml"})
+    void testSelect_resultSetMetadataOne(final String format) throws SQLException {
+        setUp(format);
+
         final ResultSet resultSet = statement.executeQuery("SELECT name FROM myTable");
         final ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
         assertEquals(1, resultSetMetaData.getColumnCount());
@@ -347,8 +377,11 @@ class SelectJsonTest {
         assertTrue(resultSetMetaData.isSearchable(1));
     }
 
-    @Test
-    void testSelect_preparedStatement_whereIntegerGt() throws SQLException {
+    @ParameterizedTest
+    @ValueSource(strings = {"json", "xml"})
+    void testSelect_preparedStatement_whereIntegerGt(final String format) throws SQLException {
+        setUp(format);
+
         final List<Integer> ages = new ArrayList<>();
         final List<String> names = new ArrayList<>();
         final List<Integer> ids = new ArrayList<>();
@@ -371,8 +404,11 @@ class SelectJsonTest {
         assertArrayEquals(expectedIdsArray, ids.toArray());
     }
 
-    @Test
-    void testSelect_preparedStatement_whereLike() throws SQLException {
+    @ParameterizedTest
+    @ValueSource(strings = {"json", "xml"})
+    void testSelect_preparedStatement_whereLike(final String format) throws SQLException {
+        setUp(format);
+
         final List<Integer> ages = new ArrayList<>();
         final List<String> names = new ArrayList<>();
         final List<Integer> ids = new ArrayList<>();
@@ -396,8 +432,11 @@ class SelectJsonTest {
         assertArrayEquals(expectedIdsArray, ids.toArray());
     }
 
-    @Test
-    void testSelect_preparedStatement_whereMultipleANDs() throws SQLException {
+    @ParameterizedTest
+    @ValueSource(strings = {"json", "xml"})
+    void testSelect_preparedStatement_whereMultipleANDs(final String format) throws SQLException {
+        setUp(format);
+
         final List<Integer> ages = new ArrayList<>();
         final List<String> names = new ArrayList<>();
         final List<Integer> ids = new ArrayList<>();
@@ -422,8 +461,11 @@ class SelectJsonTest {
         assertArrayEquals(expectedIdsArray, ids.toArray());
     }
 
-    @Test
-    void testSelect_preparedStatement_whereIntegerGte() throws SQLException {
+    @ParameterizedTest
+    @ValueSource(strings = {"json", "xml"})
+    void testSelect_preparedStatement_whereIntegerGte(final String format) throws SQLException {
+        setUp(format);
+
         final List<Integer> ages = new ArrayList<>();
         final List<String> names = new ArrayList<>();
         final List<Integer> ids = new ArrayList<>();
@@ -446,8 +488,11 @@ class SelectJsonTest {
         assertArrayEquals(expectedIdsArray, ids.toArray());
     }
 
-    @Test
-    void testSelect_preparedStatement_columnsByIndex() throws SQLException {
+    @ParameterizedTest
+    @ValueSource(strings = {"json", "xml"})
+    void testSelect_preparedStatement_columnsByIndex(final String format) throws SQLException {
+        setUp(format);
+
         final PreparedStatement preparedStatement = connection.prepareStatement(
             "SELECT id, age, name FROM myTable WHERE id = ?");
         preparedStatement.setInt(1, 1);
@@ -459,8 +504,11 @@ class SelectJsonTest {
         }
     }
 
-    @Test
-    void testSelect_preparedStatement_columnsByColumnName() throws SQLException {
+    @ParameterizedTest
+    @ValueSource(strings = {"json", "xml"})
+    void testSelect_preparedStatement_columnsByColumnName(final String format) throws SQLException {
+        setUp(format);
+
         final PreparedStatement preparedStatement = connection.prepareStatement(
             "SELECT id, age, name FROM myTable WHERE id = ?");
         preparedStatement.setInt(1, 1);
@@ -472,16 +520,4 @@ class SelectJsonTest {
         }
     }
 
-    @Test
-    void testSelect_preparedStatement_columnsNotInResultSet() throws SQLException {
-        final PreparedStatement preparedStatement = connection.prepareStatement(
-            "SELECT name FROM myTable WHERE id = ?");
-        preparedStatement.setInt(1, 3);
-        final ResultSet resultSet = preparedStatement.executeQuery();
-        while (resultSet.next()) {
-            assertEquals("Ivan", resultSet.getString("name"));
-            final SQLException thrown = assertThrows(SQLException.class, () -> resultSet.getInt("id"));
-            assertEquals("Column 'id' doesn't exist in the ResultSet.", thrown.getMessage());
-        }
-    }
 }

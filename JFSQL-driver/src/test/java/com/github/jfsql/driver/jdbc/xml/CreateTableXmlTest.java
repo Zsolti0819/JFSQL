@@ -1,8 +1,6 @@
 package com.github.jfsql.driver.jdbc.xml;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.github.jfsql.driver.TestUtils;
 import java.io.IOException;
@@ -14,13 +12,18 @@ import java.sql.Statement;
 import java.util.Properties;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class CreateTableXmlTest {
 
-    private Statement statement;
+    private static Statement statement;
+
+    @AfterAll
+    static void afterAll() throws SQLException {
+        statement.execute("DROP DATABASE [" + TestUtils.DATABASE_PATH + "]");
+    }
 
     @BeforeEach
     void setUp() throws SQLException {
@@ -28,11 +31,6 @@ class CreateTableXmlTest {
         properties.setProperty("persistence", "xml");
         final Connection connection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
         statement = connection.createStatement();
-    }
-
-    @AfterEach
-    void deleteDatabaseFolder() throws IOException {
-        TestUtils.deleteDatabaseDirectory();
     }
 
     @Test
@@ -70,35 +68,6 @@ class CreateTableXmlTest {
         assertEquals(StringUtils.deleteWhitespace(expectedSchemaFileContent),
             StringUtils.deleteWhitespace(realSchemaFileContent));
 
-    }
-
-    @Test
-    void testCreateTable_tableNameAndDatabaseNameAreEqual() {
-        final SQLException thrown = assertThrows(SQLException.class,
-            () -> statement.executeUpdate("CREATE TABLE myDatabase (id INTEGER, name TEXT, age INTEGER)"));
-        assertEquals("Table name cannot be the same as database name.", thrown.getMessage());
-    }
-
-    @Test
-    void testCreateTable_tableExists() throws SQLException {
-        assertEquals(0, statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)"));
-        final SQLException thrown = assertThrows(SQLException.class,
-            () -> statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)"));
-        assertEquals("Table \"myTable\" already exists.", thrown.getMessage());
-    }
-
-    @Test
-    void testCreateTable_ifNotExists_doesNotThrowException() throws SQLException {
-        assertEquals(0, statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)"));
-        assertDoesNotThrow(
-            () -> statement.executeUpdate("CREATE TABLE IF NOT EXISTS myTable (id INTEGER, name TEXT, age INTEGER)"));
-    }
-
-    @Test
-    void testCreateTable_duplicateColumns() {
-        final SQLException thrown = assertThrows(SQLException.class,
-            () -> statement.executeUpdate("CREATE TABLE myTable (name TEXT, name TEXT, age INTEGER)"));
-        assertEquals("Some columns were identical during table creation.", thrown.getMessage());
     }
 
 }

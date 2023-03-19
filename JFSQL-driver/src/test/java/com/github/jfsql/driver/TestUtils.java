@@ -48,7 +48,7 @@ public class TestUtils {
         BASE_PATH + File.separator + "src" + File.separator + "main" + File.separator + "resources" + File.separator
             + "META-INF" + File.separator + "services" + File.separator + "java.sql.Driver");
 
-    public void deleteDatabaseDirectory() throws IOException {
+    public void deleteDatabaseDirectory() {
         final File folder = new File(TestUtils.DATABASE_PATH.toUri());
         boolean isDeleted = false;
         while (!isDeleted) {

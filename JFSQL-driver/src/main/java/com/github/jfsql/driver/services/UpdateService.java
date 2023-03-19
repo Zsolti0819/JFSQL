@@ -37,7 +37,7 @@ public class UpdateService {
         final String[] types = columnToTypeMapper.mapColumnsToTypes(statement, activeTable).values()
             .toArray(new String[0]);
 
-        if (activeTable.getEntries() == null) {
+        if (activeTable.getEntries().isEmpty()) {
             final List<Entry> entries = reader.readTable(activeTable);
             activeTable.setEntries(entries);
         }

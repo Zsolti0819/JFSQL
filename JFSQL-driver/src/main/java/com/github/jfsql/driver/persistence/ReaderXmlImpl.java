@@ -65,15 +65,11 @@ public class ReaderXmlImpl implements Reader {
 
             for (int i = 0; i < entryList.getLength(); i++) {
                 final Element entry = (Element) entryList.item(i);
-                for (int j = 0; j < columns.length; j++) {
-                    values[j] = getValue(table, columns, entry, j);
-                }
-
                 final LinkedHashMap<String, String> columnsAndValues = new LinkedHashMap<>();
                 for (int j = 0; j < columns.length; j++) {
+                    values[j] = getValue(table, columns, entry, j);
                     columnsAndValues.put(columns[j], values[j]);
                 }
-
                 entries.add(new Entry(columnsAndValues));
             }
         } catch (final ParserConfigurationException | SAXException | IOException e) {
@@ -128,7 +124,7 @@ public class ReaderXmlImpl implements Reader {
                     notNullColumns.put(columnNames[i], false);
                 }
             }
-            return new Table(null, null, null, columnsAndTypes, notNullColumns);
+            return new Table(null, null, null, columnsAndTypes, notNullColumns, new ArrayList<>());
 
         } catch (final ParserConfigurationException | IOException | SAXException e) {
             throw new SQLException("Failed to read the schema for the table.\n" + e.getMessage());
@@ -158,7 +154,7 @@ public class ReaderXmlImpl implements Reader {
                     XPathConstants.STRING);
                 final Table schema = readSchema(xsdPath);
                 final Table table = new Table(tableName, xmlPath, xsdPath, schema.getColumnsAndTypes(),
-                    schema.getNotNullColumns());
+                    schema.getNotNullColumns(), new ArrayList<>());
                 tables.add(table);
             }
         } catch (final ParserConfigurationException | SAXException | IOException | XPathExpressionException |

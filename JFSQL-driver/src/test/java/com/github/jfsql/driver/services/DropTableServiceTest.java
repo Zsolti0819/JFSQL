@@ -68,6 +68,7 @@ class DropTableServiceTest {
     void testDropTable_tableFileNotExists() throws SQLException {
         when(tableFinder.getTableByName(dropTableStatement.getTableName())).thenReturn(table);
         when(dropTableStatement.isIfExistsPresent()).thenReturn(false);
+        when(table.getEntries()).thenReturn(entries);
 
         final SQLException thrown = assertThrows(SQLException.class,
             () -> dropTableService.dropTable(dropTableStatement));

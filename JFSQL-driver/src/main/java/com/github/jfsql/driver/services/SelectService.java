@@ -52,7 +52,7 @@ class SelectService {
         final List<Table> extractedTables = extractTables(statement);
         // Now we can load the entries into memory
         for (final Table table : extractedTables) {
-            if (table.getEntries() == null) {
+            if (table.getEntries().isEmpty()) {
                 final List<Entry> entries = reader.readTable(table);
                 table.setEntries(entries);
             }
@@ -113,20 +113,21 @@ class SelectService {
 
         final List<Entry> whereEntries = whereConditionSolver.getWhereEntries(table, statement);
 
+        final String tableName = table.getName();
         final String tableFile = table.getTableFile();
         final String schemaFile = table.getSchemaFile();
         final Map<String, Boolean> notNullColumns = table.getNotNullColumns();
 
-        final Table newTable = new Table(null, tableFile, schemaFile, columnsAndTypes, notNullColumns);
         final List<Entry> orderedEntries = getEntriesWithSortedColumns(selectedColumns, whereEntries);
-        newTable.setEntries(orderedEntries);
+        final Table newTable = new Table(tableName, tableFile, schemaFile, columnsAndTypes, notNullColumns,
+            orderedEntries);
 
         return new JfsqlResultSet(statement, newTable);
     }
 
     private ResultSet simpleSelect(final SelectWrapper statement) throws SQLException {
         final Table activeTable = tableFinder.getTableByName(statement.getTableName());
-        if (activeTable.getEntries() == null) {
+        if (activeTable.getEntries().isEmpty()) {
             final List<Entry> entries = reader.readTable(activeTable);
             activeTable.setEntries(entries);
         }
@@ -138,7 +139,6 @@ class SelectService {
         final List<String> joinColumns) {
         final String t1JoinColumn = joinColumns.get(0);
         final String t2JoinColumn = joinColumns.get(1);
-        final Table joinTable = new Table("joinTable", null, null, mergedColumnsAndTypes, mergedNotNullColumns);
         final List<Entry> commonEntries = new ArrayList<>();
 
         for (final Entry t1e : firstTable.getEntries()) {
@@ -151,8 +151,8 @@ class SelectService {
                 }
             }
         }
-        joinTable.setEntries(commonEntries);
-        return joinTable;
+
+        return new Table("joinTable", null, null, mergedColumnsAndTypes, mergedNotNullColumns, commonEntries);
     }
 
     private Table leftJoin(final Table firstTable, final Table secondTable,
@@ -160,7 +160,6 @@ class SelectService {
         final List<String> joinColumns) {
         final String t1JoinColumn = joinColumns.get(0);
         final String t2JoinColumn = joinColumns.get(1);
-        final Table joinTable = new Table("joinTable", null, null, mergedColumnsAndTypes, mergedNotNullColumns);
         final List<Entry> resultEntries = new ArrayList<>();
 
         for (final Entry t1e : firstTable.getEntries()) {
@@ -189,8 +188,7 @@ class SelectService {
             }
         }
 
-        joinTable.setEntries(resultEntries);
-        return joinTable;
+        return new Table("joinTable", null, null, mergedColumnsAndTypes, mergedNotNullColumns, resultEntries);
     }
 
     private List<Table> extractTables(final SelectWrapper statement) throws SQLException {
@@ -264,8 +262,7 @@ class SelectService {
             final List<Entry> modifiedEntries = createModifiedEntries(tableNameMap, table);
 
             final Table modifiedTable = new Table(table.getName(), null, null, modifiedColumnsAndTypes,
-                modifiedNotNullColumns);
-            modifiedTable.setEntries(modifiedEntries);
+                modifiedNotNullColumns, modifiedEntries);
             modifiedTables.add(modifiedTable);
         }
         return modifiedTables;

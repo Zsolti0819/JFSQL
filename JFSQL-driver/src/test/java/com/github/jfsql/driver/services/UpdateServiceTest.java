@@ -16,6 +16,7 @@ import com.github.jfsql.driver.util.WhereConditionSolver;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.UpdateWrapper;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -27,10 +28,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class UpdateServiceTest {
 
-    private final List<Entry> whereEntries = List.of(
-        new Entry(Map.of("column1", "1", "column2", "a", "column3", "2.5")));
-    private final Map<String, String> mappedColumnsAndTypes = Map.of("column1", "INTEGER", "TEXT", "column2", "column3",
-        "REAL");
+    @Mock
+    private Map<String, String> mappedColumnsAndTypes;
+
+    @Mock
+    private List<Entry> entries;
+
     @Mock
     private TableFinder tableFinder;
 
@@ -63,7 +66,8 @@ class UpdateServiceTest {
         when(semanticValidator.allColumnsExist(table, updateStatement)).thenReturn(true);
         when(semanticValidator.allWhereColumnsExist(table, updateStatement)).thenReturn(true);
         when(columnToTypeMapper.mapColumnsToTypes(updateStatement, table)).thenReturn(mappedColumnsAndTypes);
-        when(whereConditionSolver.getWhereEntries(table, updateStatement)).thenReturn(whereEntries);
+        when(whereConditionSolver.getWhereEntries(table, updateStatement)).thenReturn(Collections.emptyList());
+        when(table.getEntries()).thenReturn(entries);
 
         updateService.updateTable(updateStatement);
 

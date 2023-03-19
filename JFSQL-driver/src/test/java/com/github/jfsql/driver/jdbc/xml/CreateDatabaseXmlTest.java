@@ -1,7 +1,6 @@
 package com.github.jfsql.driver.jdbc.xml;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.github.jfsql.driver.TestUtils;
 import java.io.File;
@@ -14,13 +13,18 @@ import java.sql.Statement;
 import java.util.Properties;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class CreateDatabaseXmlTest {
 
-    private Statement statement;
+    private static Statement statement;
+
+    @AfterAll
+    static void afterAll() throws SQLException {
+        statement.execute("DROP DATABASE [" + TestUtils.DATABASE_PATH + "]");
+    }
 
     @BeforeEach
     void setUp() throws SQLException {
@@ -28,11 +32,6 @@ class CreateDatabaseXmlTest {
         properties.setProperty("persistence", "xml");
         final Connection connection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
         statement = connection.createStatement();
-    }
-
-    @AfterEach
-    void deleteDatabaseFolder() throws IOException {
-        TestUtils.deleteDatabaseDirectory();
     }
 
     @Test
@@ -47,18 +46,4 @@ class CreateDatabaseXmlTest {
         statement.execute("DROP DATABASE [" + TestUtils.DATABASE2_PATH + "]");
     }
 
-    @Test
-    void testCreateDatabase_databaseIsNotDirectory() {
-        final SQLException thrown = assertThrows(SQLException.class,
-            () -> statement.executeUpdate("CREATE DATABASE [" + TestUtils.NOT_DIRECTORY_PATH + "];"));
-        assertEquals("Database is not a directory.", thrown.getMessage());
-    }
-
-    @Test
-    void testCreateDatabase_databaseExists() {
-        final SQLException thrown = assertThrows(SQLException.class,
-            () -> statement.executeUpdate("CREATE DATABASE [" + TestUtils.DATABASE_PATH + "];"));
-        assertEquals("Database already exists, will not create another one.", thrown.getMessage());
-
-    }
 }

@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.github.jfsql.driver.TestUtils;
 import com.github.jfsql.driver.util.PropertiesReader;
-import java.io.IOException;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
@@ -27,7 +26,7 @@ class JfsqlDatabaseMetaDataTest {
     }
 
     @AfterAll
-    static void afterAll() throws IOException {
+    static void afterAll() {
         TestUtils.deleteDatabaseDirectory();
     }
 

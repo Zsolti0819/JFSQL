@@ -23,7 +23,7 @@ public class DeleteService {
     public int deleteFromTable(final DeleteWrapper statement) throws SQLException {
         final List<String> whereColumns = statement.getWhereColumns();
         final Table activeTable = tableFinder.getTableByName(statement.getTableName());
-        if (activeTable.getEntries() == null) {
+        if (activeTable.getEntries().isEmpty()) {
             final List<Entry> entries = reader.readTable(activeTable);
             activeTable.setEntries(entries);
         }

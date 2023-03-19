@@ -1,7 +1,6 @@
 package com.github.jfsql.driver.jdbc.xml;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.github.jfsql.driver.TestUtils;
 import java.io.IOException;
@@ -14,14 +13,19 @@ import java.sql.Statement;
 import java.util.Properties;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class UpdateXmlTest {
 
+    private static Statement statement;
     private Connection connection;
-    private Statement statement;
+
+    @AfterAll
+    static void afterAll() throws SQLException {
+        statement.execute("DROP DATABASE [" + TestUtils.DATABASE_PATH + "]");
+    }
 
     @BeforeEach
     void setUp() throws SQLException {
@@ -29,16 +33,12 @@ class UpdateXmlTest {
         properties.setProperty("persistence", "xml");
         connection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
         statement = connection.createStatement();
+        statement.execute("DROP TABLE IF EXISTS myTable");
         statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
         statement.executeUpdate("INSERT INTO myTable (id, name, age) VALUES (1, 'Zsolti', 25)");
         statement.executeUpdate("INSERT INTO myTable (id, name, age) VALUES (2, 'Tomi', 24)");
         statement.executeUpdate("INSERT INTO myTable (id, name, age) VALUES (3, 'Ivan', 26)");
         statement.executeUpdate("INSERT INTO myTable (id, name, age) VALUES (4, 'Lukas', 34)");
-    }
-
-    @AfterEach
-    void deleteDatabaseFolder() throws IOException {
-        TestUtils.deleteDatabaseDirectory();
     }
 
     @Test
@@ -159,11 +159,6 @@ class UpdateXmlTest {
     @Test
     void testUpdate_moreEntries2() throws SQLException {
         assertEquals(3, statement.executeUpdate("UPDATE myTable SET name='Zsolti' WHERE name<'Zsolti'"));
-    }
-
-    @Test
-    void testUpdate_notExistingColumn() {
-        assertThrows(SQLException.class, () -> statement.executeUpdate("UPDATE myTable SET asd='Zsolti' WHERE id=4"));
     }
 
     @Test

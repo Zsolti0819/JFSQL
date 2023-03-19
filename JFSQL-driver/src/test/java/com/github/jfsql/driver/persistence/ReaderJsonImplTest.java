@@ -9,6 +9,7 @@ import com.github.jfsql.driver.dto.Table;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -38,8 +39,6 @@ class ReaderJsonImplTest {
             notNullColumns.put("id", true);
             notNullColumns.put("name", true);
             notNullColumns.put("age", true);
-            table = new Table("myTable", String.valueOf(TestUtils.TABLE_JSON_FILE_PATH),
-                String.valueOf(TestUtils.TABLE_JSON_SCHEMA_FILE_PATH), returnColumnsAndTypes, notNullColumns);
             final Map<String, String> entry1ColumnsAndTypes = new LinkedHashMap<>();
             entry1ColumnsAndTypes.put("id", "1");
             entry1ColumnsAndTypes.put("name", "Zsolti");
@@ -62,7 +61,9 @@ class ReaderJsonImplTest {
                 new Entry(entry3ColumnsAndTypes),
                 new Entry(entry4ColumnsAndTypes)
             );
-            table.setEntries(returnEntries);
+            table = new Table("myTable", String.valueOf(TestUtils.TABLE_JSON_FILE_PATH),
+                String.valueOf(TestUtils.TABLE_JSON_SCHEMA_FILE_PATH), returnColumnsAndTypes, notNullColumns,
+                returnEntries);
             database = new Database(TestUtils.DATABASE_JSON_FILE_PATH, new LinkedList<>());
             database.setTables(List.of(table));
             Files.createFile(TestUtils.TABLE_XML_FILE_PATH);
@@ -81,7 +82,7 @@ class ReaderJsonImplTest {
     }
 
     @AfterAll
-    static void deleteDatabaseFolder() throws IOException {
+    static void deleteDatabaseFolder() {
         TestUtils.deleteDatabaseDirectory();
     }
 
@@ -95,7 +96,7 @@ class ReaderJsonImplTest {
     void testReader_readSchemaForTable() throws SQLException {
         final Table table = reader.readSchema(String.valueOf(TestUtils.TABLE_JSON_SCHEMA_FILE_PATH));
         final Table tableWithoutEntries = new Table(table.getName(), table.getTableFile(), table.getSchemaFile(),
-            table.getColumnsAndTypes(), table.getNotNullColumns());
+            table.getColumnsAndTypes(), table.getNotNullColumns(), Collections.emptyList());
         assertEquals(tableWithoutEntries, table);
     }
 
@@ -104,7 +105,7 @@ class ReaderJsonImplTest {
         final List<Table> tables = reader.readDatabaseFile(database);
         // Because we don't read the table's entries at this point
         final Table tableWithoutEntries = new Table(table.getName(), table.getTableFile(), table.getSchemaFile(),
-            table.getColumnsAndTypes(), table.getNotNullColumns());
+            table.getColumnsAndTypes(), table.getNotNullColumns(), Collections.emptyList());
         final List<Table> returnTables = List.of(tableWithoutEntries);
         assertEquals(returnTables, tables);
     }

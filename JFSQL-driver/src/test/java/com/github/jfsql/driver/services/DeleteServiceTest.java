@@ -84,6 +84,7 @@ class DeleteServiceTest {
         when(tableFinder.getTableByName(deleteStatement.getTableName())).thenReturn(table);
         when(deleteStatement.getWhereColumns()).thenReturn(List.of("column1", "column2", "column3"));
         when(semanticValidator.allWhereColumnsExist(table, deleteStatement)).thenReturn(false);
+        when(table.getEntries()).thenReturn(entries);
 
         final SQLException thrown = assertThrows(SQLException.class,
             () -> deleteService.deleteFromTable(deleteStatement));
@@ -91,6 +92,5 @@ class DeleteServiceTest {
 
         verify(transactionManager, never()).executeDMLOperation(table);
         verifyNoInteractions(whereConditionSolver);
-        verifyNoInteractions(entries);
     }
 }

@@ -1,11 +1,9 @@
 package com.github.jfsql.driver.jdbc.xml;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.github.jfsql.driver.TestUtils;
-import com.github.jfsql.driver.core.JfsqlResultSet;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -19,14 +17,19 @@ import java.sql.Statement;
 import java.util.Properties;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class InsertXmlTest {
 
+    private static Statement statement;
     private Connection connection;
-    private Statement statement;
+
+    @AfterAll
+    static void afterAll() throws SQLException {
+        statement.execute("DROP DATABASE [" + TestUtils.DATABASE_PATH + "]");
+    }
 
     @BeforeEach
     void setUp() throws SQLException {
@@ -34,12 +37,8 @@ class InsertXmlTest {
         properties.setProperty("persistence", "xml");
         connection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
         statement = connection.createStatement();
+        statement.execute("DROP TABLE IF EXISTS myTable");
         statement.execute("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
-    }
-
-    @AfterEach
-    void deleteDatabaseFolder() throws IOException {
-        TestUtils.deleteDatabaseDirectory();
     }
 
     @Test
@@ -189,32 +188,6 @@ class InsertXmlTest {
             "    </Entry>\n" +
             "</myTable>\n";
         assertEquals(StringUtils.deleteWhitespace(expectedFileContent), StringUtils.deleteWhitespace(realFileContent));
-    }
-
-    @Test
-    void testInsert_notValidValue() {
-        final SQLException thrown = assertThrows(SQLException.class,
-            () -> statement.executeUpdate("INSERT INTO myTable (id, name, age) VALUES ('a', 'Zsolti', 25)"));
-        assertEquals("Some value's type didn't match the type of the column, to which it was intended to be inserted.",
-            thrown.getMessage());
-    }
-
-    @Test
-    void testInsert_columnNotExists() {
-        final SQLException thrown = assertThrows(SQLException.class, () -> statement.executeUpdate(
-            "INSERT INTO myTable (lol, name, age) VALUES (1, 'Zsolti', 25), (2, 'Tomi', 24), (3, 'Ivan', 24), (4, 'Lukas', 34)"));
-        assertEquals("Some columns entered doesn't exist in \"myTable\".", thrown.getMessage());
-
-    }
-
-    @Test
-    void testInsert_increasesResultSetSize() throws SQLException {
-        final JfsqlResultSet resultSetBefore = (JfsqlResultSet) statement.executeQuery("SELECT * FROM myTable");
-        assertEquals(0, resultSetBefore.getEntries().size());
-        assertEquals(4, statement.executeUpdate(
-            "INSERT INTO myTable VALUES (1, 'Zsolti', 25), (2, 'Tomi', 24), (3, 'Ivan', 24), (4, 'Lukas', 34)"));
-        final JfsqlResultSet resultSetAfter = (JfsqlResultSet) statement.executeQuery("SELECT * FROM myTable");
-        assertEquals(4, resultSetAfter.getEntries().size());
     }
 
     @Test

@@ -40,8 +40,6 @@ class WriterXmlImplTest {
             notNullColumns.put("id", true);
             notNullColumns.put("name", true);
             notNullColumns.put("age", true);
-            table = new Table("myTable", String.valueOf(TestUtils.TABLE_XML_FILE_PATH),
-                String.valueOf(TestUtils.TABLE_XSD_FILE_PATH), returnColumnsAndTypes, notNullColumns);
             final Map<String, String> entry1ColumnsAndTypes = new LinkedHashMap<>();
             entry1ColumnsAndTypes.put("id", "1");
             entry1ColumnsAndTypes.put("name", "Zsolti");
@@ -64,7 +62,8 @@ class WriterXmlImplTest {
                 new Entry(entry3ColumnsAndTypes),
                 new Entry(entry4ColumnsAndTypes)
             );
-            table.setEntries(returnEntries);
+            table = new Table("myTable", String.valueOf(TestUtils.TABLE_XML_FILE_PATH),
+                String.valueOf(TestUtils.TABLE_XSD_FILE_PATH), returnColumnsAndTypes, notNullColumns, returnEntries);
             database = new Database(TestUtils.DATABASE_XML_FILE_PATH, new LinkedList<>());
             database.setTables(List.of(table));
         } catch (final GitAPIException e) {
@@ -73,7 +72,7 @@ class WriterXmlImplTest {
     }
 
     @AfterAll
-    static void deleteDatabaseFolder() throws IOException {
+    static void deleteDatabaseFolder() {
         TestUtils.deleteDatabaseDirectory();
     }
 

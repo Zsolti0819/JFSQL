@@ -78,7 +78,7 @@ class AlterTableService {
         table.setName(newTableName);
         table.setTableFile(newTableFile);
         table.setSchemaFile(newSchemaFile);
-        if (table.getEntries() == null) {
+        if (table.getEntries().isEmpty()) {
             final List<Entry> entries = reader.readTable(table);
             table.setEntries(entries);
         }
@@ -97,7 +97,7 @@ class AlterTableService {
         final Map<String, Boolean> modifiedNotNullColumns = getModifiedNotNullColumns(statement, table);
         table.setNotNullColumns(modifiedNotNullColumns);
 
-        if (table.getEntries() == null) {
+        if (table.getEntries().isEmpty()) {
             final List<Entry> entries = reader.readTable(table);
             table.setEntries(entries);
         }
@@ -155,7 +155,7 @@ class AlterTableService {
             table.getNotNullColumns().put(columnNameToAdd, false);
         }
 
-        if (table.getEntries() == null) {
+        if (table.getEntries().isEmpty()) {
             final List<Entry> entries = reader.readTable(table);
             table.setEntries(entries);
         }
@@ -192,7 +192,7 @@ class AlterTableService {
         table.getColumnsAndTypes().remove(statement.getColumnToDrop());
         table.getNotNullColumns().remove(statement.getColumnToDrop());
 
-        if (table.getEntries() == null) {
+        if (table.getEntries().isEmpty()) {
             final List<Entry> entries = reader.readTable(table);
             table.setEntries(entries);
         }
