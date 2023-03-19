@@ -145,10 +145,20 @@ class SelectService {
         final String t2JoinColumn = joinColumns.get(1);
         final List<Entry> commonEntries = new ArrayList<>();
 
+        // create a hash table for the first table
+        final Map<String, List<Entry>> hashTable = new LinkedHashMap<>();
         for (final Entry t1e : firstTable.getEntries()) {
-            for (final Entry t2e : secondTable.getEntries()) {
-                if (Objects.equals(t1e.getColumnsAndValues().get(t1JoinColumn),
-                    t2e.getColumnsAndValues().get(t2JoinColumn))) {
+            final String key = t1e.getColumnsAndValues().get(t1JoinColumn);
+            hashTable.computeIfAbsent(key, k -> new ArrayList<>());
+            hashTable.get(key).add(t1e);
+        }
+
+        // probe the second table using the hash table
+        for (final Entry t2e : secondTable.getEntries()) {
+            final String key = t2e.getColumnsAndValues().get(t2JoinColumn);
+            if (hashTable.containsKey(key)) {
+                final List<Entry> matchedEntries = hashTable.get(key);
+                for (final Entry t1e : matchedEntries) {
                     final Map<String, String> commonColumnsAndValues = new LinkedHashMap<>(t1e.getColumnsAndValues());
                     commonColumnsAndValues.putAll(t2e.getColumnsAndValues());
                     commonEntries.add(new Entry(commonColumnsAndValues));
