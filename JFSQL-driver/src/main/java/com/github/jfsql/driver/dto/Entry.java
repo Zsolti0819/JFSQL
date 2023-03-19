@@ -12,11 +12,4 @@ public class Entry {
     @NonNull
     private Map<String, String> columnsAndValues;
 
-    public String[] getColumns() {
-        return columnsAndValues.keySet().toArray(new String[0]);
-    }
-
-    public String[] getValues() {
-        return columnsAndValues.values().toArray(new String[0]);
-    }
 }

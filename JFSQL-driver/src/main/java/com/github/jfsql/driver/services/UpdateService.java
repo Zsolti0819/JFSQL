@@ -10,6 +10,7 @@ import com.github.jfsql.driver.util.WhereConditionSolver;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.UpdateWrapper;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 
@@ -35,8 +36,8 @@ public class UpdateService {
             throw new SQLException("Some columns entered doesn't exist in \"" + activeTable.getName() + "\".");
         }
 
-        final String[] types = columnToTypeMapper.mapColumnsToTypes(statement, activeTable).values()
-            .toArray(new String[0]);
+        final List<String> types = new ArrayList<>(
+            columnToTypeMapper.mapColumnsToTypes(statement, activeTable).values());
 
         if (activeTable.getEntries().isEmpty()) {
             final List<Entry> entries = reader.readEntriesFromTable(activeTable);
@@ -50,7 +51,7 @@ public class UpdateService {
 
         for (final Entry entry : whereEntries) {
             for (int i = 0; i < columns.size(); i++) {
-                if (semanticValidator.isValid(values.get(i), types[i])) {
+                if (semanticValidator.isValid(values.get(i), types.get(i))) {
                     entry.getColumnsAndValues().put(columns.get(i), values.get(i));
                 }
             }

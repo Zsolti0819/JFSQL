@@ -10,12 +10,12 @@ import com.github.jfsql.parser.dto.StatementWithUrl;
 import com.github.jfsql.parser.dto.StatementWithWhere;
 import java.io.File;
 import java.nio.file.Path;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.math.NumberUtils;
 
 public class SemanticValidator {
@@ -43,13 +43,13 @@ public class SemanticValidator {
     }
 
     public boolean allColumnsExist(final Table table, final StatementWithColumns statement) {
-        return new HashSet<>(Arrays.stream(table.getColumns()).collect(Collectors.toList())).containsAll(
-            statement.getColumns());
+        final Map<String, String> columnsAndTypes = table.getSchema().getColumnsAndTypes();
+        return new HashSet<>(columnsAndTypes.keySet()).containsAll(statement.getColumns());
     }
 
     public boolean allWhereColumnsExist(final Table table, final StatementWithWhere statement) {
-        return new HashSet<>(Arrays.stream(table.getColumns()).collect(Collectors.toList())).containsAll(
-            statement.getWhereColumns());
+        final Map<String, String> columnsAndTypes = table.getSchema().getColumnsAndTypes();
+        return new HashSet<>(columnsAndTypes.keySet()).containsAll(statement.getWhereColumns());
     }
 
     public boolean isValid(final String value, final String type) {
@@ -78,13 +78,16 @@ public class SemanticValidator {
 
     public boolean valueCountIsEqualToTableColumnCount(final Table table, final InsertWrapper statement) {
         final List<List<String>> listOfValueLists = statement.getValues();
-        return listOfValueLists.get(0).size() == table.getColumns().length;
+        return listOfValueLists.get(0).size() == table.getSchema().getColumnsAndTypes().size();
     }
 
     public boolean allInsertValuesAreValid(final Table activeTable, final InsertWrapper statement) {
+        final List<String> types = new ArrayList<>(activeTable.getSchema().getColumnsAndTypes().values());
         for (int i = 0; i < statement.getValues().size(); i++) {
             for (int j = 0; j < statement.getValues().get(i).size(); j++) {
-                if (!isValid(statement.getValues().get(i).get(j), activeTable.getTypes()[j])) {
+                final String value = statement.getValues().get(i).get(j);
+                final String type = types.get(j);
+                if (!isValid(value, type)) {
                     return false;
                 }
             }
@@ -99,9 +102,12 @@ public class SemanticValidator {
     }
 
     public boolean columnIsPresentInTable(final String tableName, final String columnName, final Table table) {
-        return Arrays.stream(table.getColumns()).anyMatch(
-            s -> Objects.equals(s, columnName) ||
-                Objects.equals(s, tableName + "." + columnName));
+        for (final String key : table.getSchema().getColumnsAndTypes().keySet()) {
+            if (Objects.equals(key, columnName) || Objects.equals(key, tableName + "." + columnName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean urlIsAnExistingRegularFile(final StatementWithUrl statementWithUrl) {

@@ -61,15 +61,13 @@ public class ReaderXmlImpl implements Reader {
             document.getDocumentElement().normalize();
             final NodeList entryList = document.getElementsByTagName("Entry");
 
-            final String[] columns = table.getColumns();
-            final String[] values = new String[columns.length];
-
+            final Map<String, String> columnsAndTypes = table.getSchema().getColumnsAndTypes();
             for (int i = 0; i < entryList.getLength(); i++) {
                 final Element entry = (Element) entryList.item(i);
                 final LinkedHashMap<String, String> columnsAndValues = new LinkedHashMap<>();
-                for (int j = 0; j < columns.length; j++) {
-                    values[j] = getValue(table, columns, entry, j);
-                    columnsAndValues.put(columns[j], values[j]);
+                for (final String column : columnsAndTypes.keySet()) {
+                    final String value = getValue(table, column, entry);
+                    columnsAndValues.put(column, value);
                 }
                 entries.add(new Entry(columnsAndValues));
             }
@@ -79,15 +77,15 @@ public class ReaderXmlImpl implements Reader {
         return entries;
     }
 
-    private String getValue(final Table table, final String[] columns, final Element entry, final int index)
+    private String getValue(final Table table, final String column, final Element entry)
         throws SQLException {
-        if (entry.getElementsByTagName(columns[index]).item(0) == null) {
+        if (entry.getElementsByTagName(column).item(0) == null) {
             return null;
         }
-        if (Objects.equals(table.getTypes()[index], "BLOB")) {
-            return readBlob(entry.getElementsByTagName(columns[index]).item(0).getTextContent());
+        if (Objects.equals(table.getSchema().getColumnsAndTypes().get(column), "BLOB")) {
+            return readBlob(entry.getElementsByTagName(column).item(0).getTextContent());
         } else {
-            return entry.getElementsByTagName(columns[index]).item(0).getTextContent();
+            return entry.getElementsByTagName(column).item(0).getTextContent();
         }
     }
 

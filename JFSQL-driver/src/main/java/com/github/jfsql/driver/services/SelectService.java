@@ -14,7 +14,6 @@ import com.github.jfsql.parser.dto.SelectWrapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -24,6 +23,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -109,7 +109,7 @@ class SelectService {
 
         List<String> selectedColumns = statement.getColumns();
         if (selectedColumns.size() == 1 && Objects.equals(selectedColumns.get(0), "*")) {
-            selectedColumns = List.of(table.getColumns());
+            selectedColumns = new ArrayList<>(table.getSchema().getColumnsAndTypes().keySet());
             columnsAndTypes = table.getSchema().getColumnsAndTypes();
         } else {
             columnsAndTypes = columnToTypeMapper.mapColumnsToTypes(statement, table);
@@ -309,11 +309,13 @@ class SelectService {
 
     private List<String> modifyJoinColumns(final Table firstTable, final Table secondTable,
         final List<String> joinColumns) {
-        if (Arrays.stream(firstTable.getColumns()).noneMatch(joinColumns.get(0)::equals)) {
+        final Stream<String> firstTableColumns = firstTable.getSchema().getColumnsAndTypes().keySet().stream();
+        if (firstTableColumns.noneMatch(joinColumns.get(0)::equals)) {
             joinColumns.set(0, getColumnName(joinColumns.get(0)));
         }
 
-        if (Arrays.stream(secondTable.getColumns()).noneMatch(joinColumns.get(1)::equals)) {
+        final Stream<String> secondTableColumns = secondTable.getSchema().getColumnsAndTypes().keySet().stream();
+        if (secondTableColumns.noneMatch(joinColumns.get(1)::equals)) {
             joinColumns.set(1, getColumnName(joinColumns.get(1)));
         }
 
@@ -325,7 +327,7 @@ class SelectService {
         // Find common columns and create table name mapping
         for (final Table table : tables) {
             final String tableName = table.getName();
-            for (final String column : table.getColumns()) {
+            for (final String column : table.getSchema().getColumnsAndTypes().keySet()) {
                 if (commonColumns.containsKey(column)) {
                     // Column already found in another table
                     commonColumns.get(column).add(tableName);

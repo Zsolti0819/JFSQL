@@ -18,6 +18,7 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -99,8 +100,8 @@ public class WriterJsonImpl extends Writer {
         try (final FileOutputStream fileOutputStream = new FileOutputStream(schemaFile);
             final FileChannel fileChannel = fileOutputStream.getChannel()) {
             fileChannel.tryLock();
-            final String[] columnNames = table.getColumns();
-            final String[] columnTypes = table.getTypes();
+            final List<String> columnNames = new ArrayList<>(table.getSchema().getColumnsAndTypes().keySet());
+            final List<String> columnTypes = new ArrayList<>(table.getSchema().getColumnsAndTypes().values());
 
             final JsonObject root = new JsonObject();
             root.addProperty("$schema", "http://json-schema.org/draft-06/schema#");
@@ -130,19 +131,19 @@ public class WriterJsonImpl extends Writer {
 
             final JsonObject thirdProperties = new JsonObject();
             items.add("properties", thirdProperties);
-            for (int i = 0; i < columnTypes.length; i++) {
+            for (int i = 0; i < columnTypes.size(); i++) {
                 final JsonObject columnName = new JsonObject();
-                thirdProperties.add(columnNames[i], columnName);
+                thirdProperties.add(columnNames.get(i), columnName);
                 final JsonArray columns = new JsonArray();
-                final String jsonDatatype = DatatypeConverter.convertFromSqlToJson(columnTypes[i]);
-                if (Boolean.TRUE.equals(table.getSchema().getNotNullColumns().get(columnNames[i]))) {
+                final String jsonDatatype = DatatypeConverter.convertFromSqlToJson(columnTypes.get(i));
+                if (Boolean.TRUE.equals(table.getSchema().getNotNullColumns().get(columnNames.get(i)))) {
                     columns.add(jsonDatatype);
-                } else if (Boolean.FALSE.equals(table.getSchema().getNotNullColumns().get(columnNames[i]))) {
+                } else if (Boolean.FALSE.equals(table.getSchema().getNotNullColumns().get(columnNames.get(i)))) {
                     columns.add(jsonDatatype);
                     columns.add("null");
                 }
                 columnName.add("type", columns);
-                if (Objects.equals(columnTypes[i], "BLOB")) {
+                if (Objects.equals(columnTypes.get(i), "BLOB")) {
                     columnName.addProperty("format", "iri-reference");
                 }
             }

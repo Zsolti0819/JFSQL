@@ -12,6 +12,7 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -116,8 +117,8 @@ public class WriterXmlImpl extends Writer {
         try (final FileOutputStream fileOutputStream = new FileOutputStream(schemaFile);
             final FileChannel fileChannel = fileOutputStream.getChannel()) {
             fileChannel.tryLock();
-            final String[] columnNames = table.getColumns();
-            final String[] columnTypes = table.getTypes();
+            final List<String> columnNames = new ArrayList<>(table.getSchema().getColumnsAndTypes().keySet());
+            final List<String> columnTypes = new ArrayList<>(table.getSchema().getColumnsAndTypes().values());
             final DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             final Document document = documentBuilder.newDocument();
 
@@ -148,15 +149,15 @@ public class WriterXmlImpl extends Writer {
             final Element sequenceElement2 = document.createElement("xs:sequence");
             complexTypeElement2.appendChild(sequenceElement2);
 
-            for (int i = 0; i < columnTypes.length; i++) {
+            for (int i = 0; i < columnTypes.size(); i++) {
                 final Element column = document.createElement("xs:element");
                 final Attr columnType = document.createAttribute("type");
-                columnType.setValue(DatatypeConverter.convertFromSqlToXs(columnTypes[i]));
+                columnType.setValue(DatatypeConverter.convertFromSqlToXs(columnTypes.get(i)));
                 final Attr columnName = document.createAttribute("name");
-                if (Boolean.FALSE.equals(table.getSchema().getNotNullColumns().get(columnNames[i]))) {
+                if (Boolean.FALSE.equals(table.getSchema().getNotNullColumns().get(columnNames.get(i)))) {
                     column.setAttribute("minOccurs", "0");
                 }
-                columnName.setValue(columnNames[i]);
+                columnName.setValue(columnNames.get(i));
                 column.setAttributeNode(columnType);
                 column.setAttributeNode(columnName);
                 sequenceElement2.appendChild(column);

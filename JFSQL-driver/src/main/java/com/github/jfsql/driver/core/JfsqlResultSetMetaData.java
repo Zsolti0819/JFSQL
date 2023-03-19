@@ -19,7 +19,7 @@ public class JfsqlResultSetMetaData implements ResultSetMetaData {
 
     @Override
     public String getColumnName(final int column) {
-        return resultSet.getColumnNames()[column - 1];
+        return resultSet.getColumnNames().get(column - 1);
     }
 
     @Override
@@ -29,7 +29,7 @@ public class JfsqlResultSetMetaData implements ResultSetMetaData {
 
     @Override
     public int getColumnCount() {
-        return resultSet.getColumnNames().length;
+        return resultSet.getColumnNames().size();
     }
 
     @Override

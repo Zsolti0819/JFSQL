@@ -28,13 +28,13 @@ public class ColumnToTypeMapper {
         }
 
         final Map<String, String> orderedColumnsAndTypes = new LinkedHashMap<>();
-        final String[] columns = columnsAndTypes.keySet().toArray(new String[0]);
-        final String[] types = columnsAndTypes.values().toArray(new String[0]);
+        final List<String> columns = new ArrayList<>(columnsAndTypes.keySet());
+        final List<String> types = new ArrayList<>(columnsAndTypes.values());
 
         for (int i = 0; i < columnsAndTypes.size(); i++) {
-            for (int j = 0; j < columns.length; j++) {
-                if (Objects.equals(statementColumnNames.get(i), columns[j])) {
-                    orderedColumnsAndTypes.put(columns[j], types[j]);
+            for (int j = 0; j < columns.size(); j++) {
+                if (Objects.equals(statementColumnNames.get(i), columns.get(j))) {
+                    orderedColumnsAndTypes.put(columns.get(j), types.get(j));
                 }
             }
         }

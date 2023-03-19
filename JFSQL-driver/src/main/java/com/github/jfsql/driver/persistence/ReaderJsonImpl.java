@@ -50,15 +50,13 @@ public class ReaderJsonImpl implements Reader {
             final JsonObject jsonObject = json.getAsJsonObject();
             final JsonArray entryList = jsonObject.getAsJsonArray("Entry");
 
-            final String[] columns = table.getColumns();
-            final String[] values = new String[columns.length];
-
+            final Map<String, String> columnsAndTypes = table.getSchema().getColumnsAndTypes();
             for (int i = 0; i < entryList.size(); i++) {
-                final JsonObject entry = entryList.get(i).getAsJsonObject();
+                final JsonObject entryObject = entryList.get(i).getAsJsonObject();
                 final LinkedHashMap<String, String> columnsAndValues = new LinkedHashMap<>();
-                for (int j = 0; j < columns.length; j++) {
-                    values[j] = getValue(table, columns, entry, j);
-                    columnsAndValues.put(columns[j], values[j]);
+                for (final String column : columnsAndTypes.keySet()) {
+                    final String value = getValue(table, column, entryObject);
+                    columnsAndValues.put(column, value);
                 }
                 entries.add(new Entry(columnsAndValues));
             }
@@ -68,15 +66,15 @@ public class ReaderJsonImpl implements Reader {
         return entries;
     }
 
-    private String getValue(final Table table, final String[] columns, final JsonObject entry, final int index)
+    private String getValue(final Table table, final String column, final JsonObject entryObject)
         throws SQLException {
-        if (entry.get(columns[index]).isJsonNull()) {
+        if (entryObject.get(column).isJsonNull()) {
             return null;
         } else {
-            if (Objects.equals(table.getTypes()[index], "BLOB")) {
-                return readBlob(entry.get(columns[index]).getAsString());
+            if (Objects.equals(table.getSchema().getColumnsAndTypes().get(column), "BLOB")) {
+                return readBlob(entryObject.get(column).getAsString());
             } else {
-                return entry.get(columns[index]).getAsString();
+                return entryObject.get(column).getAsString();
             }
         }
     }

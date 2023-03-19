@@ -17,14 +17,6 @@ public class Table {
     @NonNull
     private List<Entry> entries;
 
-    public String[] getColumns() {
-        return schema.getColumnsAndTypes().keySet().toArray(new String[0]);
-    }
-
-    public String[] getTypes() {
-        return schema.getColumnsAndTypes().values().toArray(new String[0]);
-    }
-
     @Override
     @Generated
     public String toString() {
