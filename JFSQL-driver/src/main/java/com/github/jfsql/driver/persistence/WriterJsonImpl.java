@@ -52,8 +52,8 @@ public class WriterJsonImpl extends Writer {
             for (final Entry entry : entries) {
                 final Map<String, String> columnsAndValues = entry.getColumnsAndValues();
                 final JsonObject entryObject = new JsonObject();
-                for (int i = 0; i < columnsAndValues.size(); i++) {
-                    checkTypeAndValueThenAddProperty(table, entry, entryObject, i);
+                for (final String column : columnsAndValues.keySet()) {
+                    checkTypeAndValueThenAddProperty(table, entry, column, entryObject);
                 }
                 entryArray.add(entryObject);
             }
@@ -74,24 +74,21 @@ public class WriterJsonImpl extends Writer {
         }
     }
 
-    private void checkTypeAndValueThenAddProperty(final Table table, final Entry entry, final JsonObject entryObject,
-        final int index) throws SQLException {
-        if (entry.getValues()[index] == null) {
-            entryObject.add(entry.getColumns()[index], null);
-        } else if (entry.getValues()[index] != null) {
-            if (Objects.equals("INTEGER", table.getTypes()[index])) {
-                entryObject.addProperty(entry.getColumns()[index], Integer.parseInt(entry.getValues()[index]));
-            } else if (Objects.equals("REAL", table.getTypes()[index])) {
-                entryObject.addProperty(entry.getColumns()[index], Double.parseDouble(entry.getValues()[index]));
-            } else if (Objects.equals("TEXT", table.getTypes()[index])) {
-                entryObject.addProperty(entry.getColumns()[index], entry.getValues()[index]);
-            } else if (Objects.equals("BLOB", table.getTypes()[index])) {
-                final Path blobPath = writeBlob(table, entry.getValues()[index]);
-                if (Objects.equals(String.valueOf(blobPath), "null")) {
-                    entryObject.add(entry.getColumns()[index], null);
-                } else {
-                    entryObject.addProperty(entry.getColumns()[index], String.valueOf(blobPath));
-                }
+    private void checkTypeAndValueThenAddProperty(final Table table, final Entry entry, final String column,
+        final JsonObject entryObject) throws SQLException {
+        final String value = entry.getColumnsAndValues().get(column);
+        final String type = table.getSchema().getColumnsAndTypes().get(column);
+        if (value == null || Objects.equals(value, "null")) {
+            entryObject.add(column, null);
+        } else {
+            if (Objects.equals("INTEGER", type)) {
+                entryObject.addProperty(column, Integer.parseInt(value));
+            } else if (Objects.equals("REAL", type)) {
+                entryObject.addProperty(column, Double.parseDouble(value));
+            } else if (Objects.equals("TEXT", type)) {
+                entryObject.addProperty(column, value);
+            } else if (Objects.equals("BLOB", type)) {
+                entryObject.addProperty(column, writeBlob(table, value));
             }
         }
     }
@@ -188,10 +185,7 @@ public class WriterJsonImpl extends Writer {
     }
 
     @Override
-    public Path writeBlob(final Table table, final String value) throws SQLException {
-        if (Objects.equals(value, "null")) {
-            return null;
-        }
+    public String writeBlob(final Table table, final String value) throws SQLException {
         final Path tableParent = Path.of(table.getTableFile()).getParent();
         final Path blobParent = Path.of(tableParent + File.separator + "blob");
         try {
@@ -212,7 +206,7 @@ public class WriterJsonImpl extends Writer {
         } catch (final IOException e) {
             throw new SQLException("Failed to write the blob\n" + e.getMessage());
         }
-        return blobPath;
+        return String.valueOf(blobPath);
     }
 
 }

@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -68,19 +69,19 @@ public class WriterXmlImpl extends Writer {
             final Element root = document.createElement(tableName);
 
             for (final Entry entry : entries) {
-                final String[] columns = entry.getColumns();
-                final String[] values = entry.getValues();
-                final Element element = document.createElement("Entry");
-                for (int i = 0; i < columns.length; i++) {
-                    checkTypeAndValueThenAddProperty(table, document, columns, values, element, i);
+                final Map<String, String> columnsAndValues = entry.getColumnsAndValues();
+                final Element entryElement = document.createElement("Entry");
+                for (final String column : columnsAndValues.keySet()) {
+                    checkTypeAndValueThenAddProperty(table, entry, column, document, entryElement);
                 }
-                root.appendChild(element);
+                root.appendChild(entryElement);
             }
             document.appendChild(root);
             beautifyAndWrite(fileOutputStream, document);
         } catch (final IOException | ParserConfigurationException e) {
             throw new SQLException("Failed to write the table\n" + e.getMessage());
         }
+
         if (useSchemaValidation) {
             final String schemaFile = table.getSchema().getSchemaFile();
             final boolean isValid = XML_SCHEMA_VALIDATOR.schemaIsValid(schemaFile, tableFile);
@@ -90,24 +91,22 @@ public class WriterXmlImpl extends Writer {
         }
     }
 
-    private void checkTypeAndValueThenAddProperty(final Table table, final Document document, final String[] columns,
-        final String[] values, final Element element, final int index) throws SQLException {
-        if (values[index] != null) {
-            Element row = null;
-            if (Objects.equals(table.getTypes()[index], "BLOB")) {
-                final Path blobPath = writeBlob(table, values[index]);
-                if (!Objects.equals(String.valueOf(blobPath), "null")) {
-                    row = document.createElement(columns[index]);
-                    row.setTextContent(String.valueOf(blobPath));
-                }
-            } else {
-                row = document.createElement(columns[index]);
-                row.setTextContent(values[index]);
-            }
-            if (row != null) {
-                element.appendChild(row);
-            }
+    private void checkTypeAndValueThenAddProperty(final Table table, final Entry entry, final String column,
+        final Document document, final Element element) throws SQLException {
+        final String value = entry.getColumnsAndValues().get(column);
+        final String type = table.getSchema().getColumnsAndTypes().get(column);
+        if (value == null || Objects.equals(value, "null")) {
+            return;
         }
+        final Element row;
+        if (Objects.equals(type, "BLOB")) {
+            row = document.createElement(column);
+            row.setTextContent(writeBlob(table, value));
+        } else {
+            row = document.createElement(column);
+            row.setTextContent(value);
+        }
+        element.appendChild(row);
     }
 
     @Override
@@ -206,10 +205,7 @@ public class WriterXmlImpl extends Writer {
     }
 
     @Override
-    public Path writeBlob(final Table table, final String value) throws SQLException {
-        if (Objects.equals(value, "null")) {
-            return null;
-        }
+    public String writeBlob(final Table table, final String value) throws SQLException {
         final Path tableParent = Path.of(table.getTableFile()).getParent();
         final Path blobParent = Path.of(tableParent + File.separator + "blob");
         try {
@@ -231,7 +227,7 @@ public class WriterXmlImpl extends Writer {
         } catch (final IOException | ParserConfigurationException e) {
             throw new SQLException("Failed to write the blob\n" + e.getMessage());
         }
-        return blobPath;
+        return String.valueOf(blobPath);
     }
 
 }

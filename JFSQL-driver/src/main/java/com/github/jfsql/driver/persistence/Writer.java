@@ -26,7 +26,7 @@ public abstract class Writer {
 
     public abstract void writeDatabaseFile(final Database database) throws SQLException;
 
-    abstract Path writeBlob(final Table table, final String value) throws SQLException;
+    abstract String writeBlob(final Table table, final String value) throws SQLException;
 
     String incrementFileName(final Path folderPath, final String fileExtension) {
         final List<Integer> fileNumbers = new ArrayList<>();
