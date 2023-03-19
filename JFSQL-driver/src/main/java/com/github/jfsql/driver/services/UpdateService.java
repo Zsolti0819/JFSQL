@@ -13,10 +13,13 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @RequiredArgsConstructor
 public class UpdateService {
 
+    private static final Logger logger = LogManager.getLogger(UpdateService.class);
     private final TableFinder tableFinder;
     private final TransactionManager transactionManager;
     private final SemanticValidator semanticValidator;
@@ -36,9 +39,6 @@ public class UpdateService {
             throw new SQLException("Some columns entered doesn't exist in \"" + activeTable.getName() + "\".");
         }
 
-        final List<String> types = new ArrayList<>(
-            columnToTypeMapper.mapColumnsToTypes(statement, activeTable).values());
-
         if (activeTable.getEntries().isEmpty()) {
             final List<Entry> entries = reader.readEntriesFromTable(activeTable);
             activeTable.setEntries(entries);
@@ -46,13 +46,21 @@ public class UpdateService {
 
         final List<Entry> whereEntries = whereConditionSolver.getWhereEntries(activeTable, statement);
 
+        logger.debug("whereEntries = {}", whereEntries);
+
         final List<String> columns = statement.getColumns();
         final List<String> values = statement.getValues();
+        final List<String> types = new ArrayList<>(
+            columnToTypeMapper.mapColumnsToTypes(statement, activeTable).values());
 
         for (final Entry entry : whereEntries) {
             for (int i = 0; i < columns.size(); i++) {
                 if (semanticValidator.isValid(values.get(i), types.get(i))) {
                     entry.getColumnsAndValues().put(columns.get(i), values.get(i));
+                } else {
+                    throw new SQLException(
+                        "Not valid update. Value '" + values.get(i) + "' cannot be converted to '" + types.get(i)
+                            + "'.");
                 }
             }
         }
