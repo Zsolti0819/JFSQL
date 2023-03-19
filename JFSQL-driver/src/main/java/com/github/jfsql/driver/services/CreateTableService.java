@@ -2,6 +2,7 @@ package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
+import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.ReaderJsonImpl;
@@ -68,7 +69,7 @@ public class CreateTableService {
                 + reader.getSchemaFileExtension()
                 : parentDirectory + File.separator + tableName + "." + reader.getSchemaFileExtension();
 
-        final Table table = new Table(tableName, tableFile, schemaFile, columnsAndTypes, notNulLColumns,
+        final Table table = new Table(tableName, tableFile, new Schema(schemaFile, columnsAndTypes, notNulLColumns),
             new ArrayList<>());
         final List<Entry> entries = new ArrayList<>();
         table.setEntries(entries);

@@ -2,6 +2,7 @@ package com.github.jfsql.driver.persistence;
 
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
+import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.util.DatatypeConverter;
 import com.google.gson.JsonArray;
@@ -35,7 +36,7 @@ public class ReaderJsonImpl implements Reader {
     }
 
     @Override
-    public List<Entry> readTable(final Table table) throws SQLException {
+    public List<Entry> readEntriesFromTable(final Table table) throws SQLException {
         final String tableFile = table.getTableFile();
         final List<Entry> entries = new ArrayList<>();
 
@@ -81,7 +82,7 @@ public class ReaderJsonImpl implements Reader {
     }
 
     @Override
-    public Table readSchema(final String pathToSchema) throws SQLException {
+    public Schema readSchema(final String pathToSchema) throws SQLException {
         final Map<String, String> columnsAndTypes = new LinkedHashMap<>();
         final Map<String, Boolean> notNullColumns = new LinkedHashMap<>();
         try (final FileReader fileReader = new FileReader(pathToSchema)) {
@@ -109,14 +110,14 @@ public class ReaderJsonImpl implements Reader {
                     notNullColumns.put(columnName, true);
                 }
             }
-            return new Table(null, null, null, columnsAndTypes, notNullColumns, new ArrayList<>());
+            return new Schema(pathToSchema, columnsAndTypes, notNullColumns);
         } catch (final IOException e) {
             throw new SQLException("Failed to read the schema for the table.\n" + e.getMessage());
         }
     }
 
     @Override
-    public List<Table> readDatabaseFile(final Database database) throws SQLException {
+    public List<Table> readTablesFromDatabaseFile(final Database database) throws SQLException {
         final List<Table> tables = new ArrayList<>();
         final String url = String.valueOf(database.getUrl());
         try (final FileReader fileReader = new FileReader(url)) {
@@ -129,9 +130,8 @@ public class ReaderJsonImpl implements Reader {
                 final String tableName = jsonTableObject.get("name").getAsString();
                 final String tablePath = jsonTableObject.get("pathToTable").getAsString();
                 final String schemaPath = jsonTableObject.get("pathToSchema").getAsString();
-                final Table schema = readSchema(schemaPath);
-                final Table table = new Table(tableName, tablePath, schemaPath, schema.getColumnsAndTypes(),
-                    schema.getNotNullColumns(), new ArrayList<>());
+                final Schema schema = readSchema(schemaPath);
+                final Table table = new Table(tableName, tablePath, schema, new ArrayList<>());
                 tables.add(table);
             }
         } catch (final IOException | SQLException e) {

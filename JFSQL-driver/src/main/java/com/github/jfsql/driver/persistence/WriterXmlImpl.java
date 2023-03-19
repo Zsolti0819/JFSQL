@@ -82,7 +82,7 @@ public class WriterXmlImpl extends Writer {
             throw new SQLException("Failed to write the table\n" + e.getMessage());
         }
         if (useSchemaValidation) {
-            final String schemaFile = table.getSchemaFile();
+            final String schemaFile = table.getSchema().getSchemaFile();
             final boolean isValid = XML_SCHEMA_VALIDATOR.schemaIsValid(schemaFile, tableFile);
             if (!isValid) {
                 throw new SQLException("\"" + tableFile + "\" is not valid against \"" + schemaFile + "\"");
@@ -113,7 +113,7 @@ public class WriterXmlImpl extends Writer {
     @Override
     public void writeSchema(final Table table) throws SQLException {
         final String tableName = table.getName();
-        final String schemaFile = table.getSchemaFile();
+        final String schemaFile = table.getSchema().getSchemaFile();
         try (final FileOutputStream fileOutputStream = new FileOutputStream(schemaFile);
             final FileChannel fileChannel = fileOutputStream.getChannel()) {
             fileChannel.tryLock();
@@ -154,7 +154,7 @@ public class WriterXmlImpl extends Writer {
                 final Attr columnType = document.createAttribute("type");
                 columnType.setValue(DatatypeConverter.convertFromSqlToXs(columnTypes[i]));
                 final Attr columnName = document.createAttribute("name");
-                if (Boolean.FALSE.equals(table.getNotNullColumns().get(columnNames[i]))) {
+                if (Boolean.FALSE.equals(table.getSchema().getNotNullColumns().get(columnNames[i]))) {
                     column.setAttribute("minOccurs", "0");
                 }
                 columnName.setValue(columnNames[i]);
@@ -192,7 +192,7 @@ public class WriterXmlImpl extends Writer {
                 tableElement.appendChild(tableFile);
 
                 final Element schemaFile = document.createElement("pathToSchema");
-                final String xsdPath = table.getSchemaFile();
+                final String xsdPath = table.getSchema().getSchemaFile();
                 schemaFile.setTextContent(xsdPath);
                 tableElement.appendChild(schemaFile);
 

@@ -61,7 +61,7 @@ class AlterTableService {
                 : parentDirectory + File.separator + newTableName + "." + reader.getSchemaFileExtension();
 
         final String oldTableFile = table.getTableFile();
-        final String oldSchemaFile = table.getSchemaFile();
+        final String oldSchemaFile = table.getSchema().getSchemaFile();
 
         try {
             FileUtils.moveFile(FileUtils.getFile(oldTableFile), FileUtils.getFile(newTableFile));
@@ -77,28 +77,28 @@ class AlterTableService {
 
         table.setName(newTableName);
         table.setTableFile(newTableFile);
-        table.setSchemaFile(newSchemaFile);
+        table.getSchema().setSchemaFile(newSchemaFile);
         if (table.getEntries().isEmpty()) {
-            final List<Entry> entries = reader.readTable(table);
+            final List<Entry> entries = reader.readEntriesFromTable(table);
             table.setEntries(entries);
         }
     }
 
     private void renameColumn(final AlterTableWrapper statement, final Table table) throws SQLException {
 
-        if (table.getColumnsAndTypes().containsKey(statement.getNewColumnName())) {
+        if (table.getSchema().getColumnsAndTypes().containsKey(statement.getNewColumnName())) {
             throw new SQLException(
                 "The column '" + statement.getNewColumnName() + "' already exists in '" + table.getName() + "'");
         }
 
         final Map<String, String> modifiedColumnsAndTypes = getModifiedColumnsAndTypes(statement, table);
-        table.setColumnsAndTypes(modifiedColumnsAndTypes);
+        table.getSchema().setColumnsAndTypes(modifiedColumnsAndTypes);
 
         final Map<String, Boolean> modifiedNotNullColumns = getModifiedNotNullColumns(statement, table);
-        table.setNotNullColumns(modifiedNotNullColumns);
+        table.getSchema().setNotNullColumns(modifiedNotNullColumns);
 
         if (table.getEntries().isEmpty()) {
-            final List<Entry> entries = reader.readTable(table);
+            final List<Entry> entries = reader.readEntriesFromTable(table);
             table.setEntries(entries);
         }
 
@@ -118,7 +118,7 @@ class AlterTableService {
 
     private Map<String, Boolean> getModifiedNotNullColumns(final AlterTableWrapper statement, final Table table) {
         final LinkedHashMap<String, Boolean> modifiedNotNullColumns = new LinkedHashMap<>();
-        for (final Map.Entry<String, Boolean> notNullColumnPair : table.getNotNullColumns().entrySet()) {
+        for (final Map.Entry<String, Boolean> notNullColumnPair : table.getSchema().getNotNullColumns().entrySet()) {
             if (Objects.equals(notNullColumnPair.getKey(), statement.getOldColumnName())) {
                 modifiedNotNullColumns.put(statement.getNewColumnName(), notNullColumnPair.getValue());
             } else {
@@ -130,7 +130,7 @@ class AlterTableService {
 
     private Map<String, String> getModifiedColumnsAndTypes(final AlterTableWrapper statement, final Table table) {
         final LinkedHashMap<String, String> modifiedColumnsAndTypes = new LinkedHashMap<>();
-        for (final Map.Entry<String, String> columnTypePair : table.getColumnsAndTypes().entrySet()) {
+        for (final Map.Entry<String, String> columnTypePair : table.getSchema().getColumnsAndTypes().entrySet()) {
             if (Objects.equals(columnTypePair.getKey(), statement.getOldColumnName())) {
                 modifiedColumnsAndTypes.put(statement.getNewColumnName(), columnTypePair.getValue());
             } else {
@@ -144,19 +144,19 @@ class AlterTableService {
         final String columnNameToAdd = statement.getColumnNameToAdd();
         final String columnTypeToAdd = statement.getColumnTypeToAdd();
 
-        if (table.getColumnsAndTypes().containsKey(columnNameToAdd)) {
+        if (table.getSchema().getColumnsAndTypes().containsKey(columnNameToAdd)) {
             throw new SQLException("The column '" + columnNameToAdd + "' already exists in '" + table.getName() + "'");
         }
 
-        table.getColumnsAndTypes().put(columnNameToAdd, columnTypeToAdd);
+        table.getSchema().getColumnsAndTypes().put(columnNameToAdd, columnTypeToAdd);
         if (Boolean.TRUE.equals(statement.getColumnToAddCannotBeNull())) {
-            table.getNotNullColumns().put(columnNameToAdd, true);
+            table.getSchema().getNotNullColumns().put(columnNameToAdd, true);
         } else if (Boolean.FALSE.equals(statement.getColumnToAddCannotBeNull())) {
-            table.getNotNullColumns().put(columnNameToAdd, false);
+            table.getSchema().getNotNullColumns().put(columnNameToAdd, false);
         }
 
         if (table.getEntries().isEmpty()) {
-            final List<Entry> entries = reader.readTable(table);
+            final List<Entry> entries = reader.readEntriesFromTable(table);
             table.setEntries(entries);
         }
 
@@ -184,16 +184,16 @@ class AlterTableService {
     }
 
     private void dropColumn(final AlterTableWrapper statement, final Table table) throws SQLException {
-        if (!table.getColumnsAndTypes().containsKey(statement.getColumnToDrop())) {
+        if (!table.getSchema().getColumnsAndTypes().containsKey(statement.getColumnToDrop())) {
             throw new SQLException(
                 "The column '" + statement.getColumnToDrop() + "' doesn't exist in '" + table.getName() + "'");
         }
 
-        table.getColumnsAndTypes().remove(statement.getColumnToDrop());
-        table.getNotNullColumns().remove(statement.getColumnToDrop());
+        table.getSchema().getColumnsAndTypes().remove(statement.getColumnToDrop());
+        table.getSchema().getNotNullColumns().remove(statement.getColumnToDrop());
 
         if (table.getEntries().isEmpty()) {
-            final List<Entry> entries = reader.readTable(table);
+            final List<Entry> entries = reader.readEntriesFromTable(table);
             table.setEntries(entries);
         }
 

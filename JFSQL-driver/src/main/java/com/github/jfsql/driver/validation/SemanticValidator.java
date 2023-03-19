@@ -32,7 +32,7 @@ public class SemanticValidator {
         for (final Table table : tables) {
             if (Objects.equals(table.getName(), tableName)) {
                 final File tableFile = new File(table.getTableFile());
-                final File schemaFile = new File(table.getSchemaFile());
+                final File schemaFile = new File(table.getSchema().getSchemaFile());
                 if (tableFile.exists() && schemaFile.exists()) {
                     return true;
                 }

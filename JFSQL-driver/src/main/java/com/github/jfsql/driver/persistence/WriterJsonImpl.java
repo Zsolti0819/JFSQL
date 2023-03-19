@@ -66,7 +66,7 @@ public class WriterJsonImpl extends Writer {
         }
 
         if (useSchemaValidation) {
-            final String schemaFile = table.getSchemaFile();
+            final String schemaFile = table.getSchema().getSchemaFile();
             final boolean isValid = JSON_SCHEMA_VALIDATOR.schemaIsValid(schemaFile, tableFile);
             if (!isValid) {
                 throw new SQLException("\"" + tableFile + "\" is not valid against \"" + schemaFile + "\"");
@@ -98,7 +98,7 @@ public class WriterJsonImpl extends Writer {
 
     @Override
     public void writeSchema(final Table table) throws SQLException {
-        final String schemaFile = table.getSchemaFile();
+        final String schemaFile = table.getSchema().getSchemaFile();
         try (final FileOutputStream fileOutputStream = new FileOutputStream(schemaFile);
             final FileChannel fileChannel = fileOutputStream.getChannel()) {
             fileChannel.tryLock();
@@ -126,7 +126,7 @@ public class WriterJsonImpl extends Writer {
             final JsonArray requiredColumns = new JsonArray();
             items.add("required", requiredColumns);
             for (final String columnName : columnNames) {
-                if (Boolean.TRUE.equals(table.getNotNullColumns().get(columnName))) {
+                if (Boolean.TRUE.equals(table.getSchema().getNotNullColumns().get(columnName))) {
                     requiredColumns.add(columnName);
                 }
             }
@@ -138,9 +138,9 @@ public class WriterJsonImpl extends Writer {
                 thirdProperties.add(columnNames[i], columnName);
                 final JsonArray columns = new JsonArray();
                 final String jsonDatatype = DatatypeConverter.convertFromSqlToJson(columnTypes[i]);
-                if (Boolean.TRUE.equals(table.getNotNullColumns().get(columnNames[i]))) {
+                if (Boolean.TRUE.equals(table.getSchema().getNotNullColumns().get(columnNames[i]))) {
                     columns.add(jsonDatatype);
-                } else if (Boolean.FALSE.equals(table.getNotNullColumns().get(columnNames[i]))) {
+                } else if (Boolean.FALSE.equals(table.getSchema().getNotNullColumns().get(columnNames[i]))) {
                     columns.add(jsonDatatype);
                     columns.add("null");
                 }
@@ -175,7 +175,7 @@ public class WriterJsonImpl extends Writer {
                 final JsonObject tableJsonObject = new JsonObject();
                 tableJsonObject.addProperty("name", tables.get(i).getName());
                 tableJsonObject.addProperty("pathToTable", tables.get(i).getTableFile());
-                tableJsonObject.addProperty("pathToSchema", tables.get(i).getSchemaFile());
+                tableJsonObject.addProperty("pathToSchema", tables.get(i).getSchema().getSchemaFile());
                 tablesArray[i] = tableJsonObject;
             }
             root.add("Table", gson.toJsonTree(tablesArray));

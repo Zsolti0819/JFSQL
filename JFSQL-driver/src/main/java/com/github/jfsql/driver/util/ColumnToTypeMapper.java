@@ -18,7 +18,7 @@ public class ColumnToTypeMapper {
      */
     public Map<String, String> mapColumnsToTypes(final StatementWithColumns statement, final Table table) {
         final List<String> statementColumnNames = new ArrayList<>(statement.getColumns());
-        final Map<String, String> columnsAndTypes = new LinkedHashMap<>(table.getColumnsAndTypes());
+        final Map<String, String> columnsAndTypes = new LinkedHashMap<>(table.getSchema().getColumnsAndTypes());
         final List<String> excludedColumnNames = getExcludedColumnNames(statementColumnNames,
             new ArrayList<>(columnsAndTypes.keySet()));
 

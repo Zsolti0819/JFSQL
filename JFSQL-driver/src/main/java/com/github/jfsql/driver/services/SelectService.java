@@ -2,6 +2,7 @@ package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.core.JfsqlResultSet;
 import com.github.jfsql.driver.dto.Entry;
+import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.util.ColumnToTypeMapper;
@@ -53,7 +54,7 @@ class SelectService {
         // Now we can load the entries into memory
         for (final Table table : extractedTables) {
             if (table.getEntries().isEmpty()) {
-                final List<Entry> entries = reader.readTable(table);
+                final List<Entry> entries = reader.readEntriesFromTable(table);
                 table.setEntries(entries);
             }
         }
@@ -73,12 +74,14 @@ class SelectService {
             final List<String> modifiedJoinColumns = modifyJoinColumns(leftTable, rightTable, pairedJoinColumns);
             logger.debug("modifiedJoinColumns = {}", modifiedJoinColumns);
 
-            final Map<String, String> mergedColumnsAndTypes = new LinkedHashMap<>(leftTable.getColumnsAndTypes());
-            mergedColumnsAndTypes.putAll(rightTable.getColumnsAndTypes());
+            final Map<String, String> mergedColumnsAndTypes = new LinkedHashMap<>(
+                leftTable.getSchema().getColumnsAndTypes());
+            mergedColumnsAndTypes.putAll(rightTable.getSchema().getColumnsAndTypes());
             logger.debug("mergedColumnsAndTypes = {}", mergedColumnsAndTypes);
 
-            final Map<String, Boolean> mergedNotNullColumns = new LinkedHashMap<>(leftTable.getNotNullColumns());
-            mergedNotNullColumns.putAll(rightTable.getNotNullColumns());
+            final Map<String, Boolean> mergedNotNullColumns = new LinkedHashMap<>(
+                leftTable.getSchema().getNotNullColumns());
+            mergedNotNullColumns.putAll(rightTable.getSchema().getNotNullColumns());
             logger.debug("mergedNotNullColumns = {}", mergedNotNullColumns);
 
             Table joinTable = null;
@@ -106,7 +109,7 @@ class SelectService {
         List<String> selectedColumns = statement.getColumns();
         if (selectedColumns.size() == 1 && Objects.equals(selectedColumns.get(0), "*")) {
             selectedColumns = List.of(table.getColumns());
-            columnsAndTypes = table.getColumnsAndTypes();
+            columnsAndTypes = table.getSchema().getColumnsAndTypes();
         } else {
             columnsAndTypes = columnToTypeMapper.mapColumnsToTypes(statement, table);
         }
@@ -115,11 +118,11 @@ class SelectService {
 
         final String tableName = table.getName();
         final String tableFile = table.getTableFile();
-        final String schemaFile = table.getSchemaFile();
-        final Map<String, Boolean> notNullColumns = table.getNotNullColumns();
+        final String schemaFile = table.getSchema().getSchemaFile();
+        final Map<String, Boolean> notNullColumns = table.getSchema().getNotNullColumns();
 
         final List<Entry> orderedEntries = getEntriesWithSortedColumns(selectedColumns, whereEntries);
-        final Table newTable = new Table(tableName, tableFile, schemaFile, columnsAndTypes, notNullColumns,
+        final Table newTable = new Table(tableName, tableFile, new Schema(schemaFile, columnsAndTypes, notNullColumns),
             orderedEntries);
 
         return new JfsqlResultSet(statement, newTable);
@@ -128,7 +131,7 @@ class SelectService {
     private ResultSet simpleSelect(final SelectWrapper statement) throws SQLException {
         final Table activeTable = tableFinder.getTableByName(statement.getTableName());
         if (activeTable.getEntries().isEmpty()) {
-            final List<Entry> entries = reader.readTable(activeTable);
+            final List<Entry> entries = reader.readEntriesFromTable(activeTable);
             activeTable.setEntries(entries);
         }
         return baseSelect(statement, activeTable);
@@ -152,7 +155,8 @@ class SelectService {
             }
         }
 
-        return new Table("joinTable", null, null, mergedColumnsAndTypes, mergedNotNullColumns, commonEntries);
+        final Schema schema = new Schema(null, mergedColumnsAndTypes, mergedNotNullColumns);
+        return new Table("joinTable", null, schema, commonEntries);
     }
 
     private Table leftJoin(final Table firstTable, final Table secondTable,
@@ -188,7 +192,8 @@ class SelectService {
             }
         }
 
-        return new Table("joinTable", null, null, mergedColumnsAndTypes, mergedNotNullColumns, resultEntries);
+        final Schema schema = new Schema(null, mergedColumnsAndTypes, mergedNotNullColumns);
+        return new Table("joinTable", null, schema, resultEntries);
     }
 
     private List<Table> extractTables(final SelectWrapper statement) throws SQLException {
@@ -242,7 +247,7 @@ class SelectService {
             final Map<String, Boolean> modifiedNotNullColumns = new LinkedHashMap<>();
 
             // Modify column names in columnsAndTypes map
-            for (final Map.Entry<String, String> entry : table.getColumnsAndTypes().entrySet()) {
+            for (final Map.Entry<String, String> entry : table.getSchema().getColumnsAndTypes().entrySet()) {
                 final String column = entry.getKey();
                 final Set<String> tableNames = commonColumns.get(column);
 
@@ -250,19 +255,19 @@ class SelectService {
                     // Column found in multiple tables
                     final String modifiedColumnName = table.getName() + "." + column;
                     modifiedColumnsAndTypes.put(modifiedColumnName, entry.getValue());
-                    modifiedNotNullColumns.put(modifiedColumnName, table.getNotNullColumns().get(column));
+                    modifiedNotNullColumns.put(modifiedColumnName, table.getSchema().getNotNullColumns().get(column));
                     tableNameMap.put(column, table.getName());
                 } else {
                     // Column unique to this table
                     modifiedColumnsAndTypes.put(column, entry.getValue());
-                    modifiedNotNullColumns.put(column, table.getNotNullColumns().get(column));
+                    modifiedNotNullColumns.put(column, table.getSchema().getNotNullColumns().get(column));
                 }
             }
 
             final List<Entry> modifiedEntries = createModifiedEntries(tableNameMap, table);
 
-            final Table modifiedTable = new Table(table.getName(), null, null, modifiedColumnsAndTypes,
-                modifiedNotNullColumns, modifiedEntries);
+            final Schema schema = new Schema(null, modifiedColumnsAndTypes, modifiedNotNullColumns);
+            final Table modifiedTable = new Table(table.getName(), null, schema, modifiedEntries);
             modifiedTables.add(modifiedTable);
         }
         return modifiedTables;

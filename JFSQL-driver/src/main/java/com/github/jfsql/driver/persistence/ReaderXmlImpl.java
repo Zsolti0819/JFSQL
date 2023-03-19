@@ -2,6 +2,7 @@ package com.github.jfsql.driver.persistence;
 
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
+import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.util.DatatypeConverter;
 import java.io.IOException;
@@ -43,7 +44,7 @@ public class ReaderXmlImpl implements Reader {
     }
 
     @Override
-    public List<Entry> readTable(final Table table) throws SQLException {
+    public List<Entry> readEntriesFromTable(final Table table) throws SQLException {
         final String tableFile = table.getTableFile();
         final List<Entry> entries = new ArrayList<>();
 
@@ -91,7 +92,7 @@ public class ReaderXmlImpl implements Reader {
     }
 
     @Override
-    public Table readSchema(final String pathToSchema) throws SQLException {
+    public Schema readSchema(final String pathToSchema) throws SQLException {
         final Map<String, String> columnsAndTypes = new LinkedHashMap<>();
         final Map<String, Boolean> notNullColumns = new LinkedHashMap<>();
         try {
@@ -124,7 +125,7 @@ public class ReaderXmlImpl implements Reader {
                     notNullColumns.put(columnNames[i], false);
                 }
             }
-            return new Table(null, null, null, columnsAndTypes, notNullColumns, new ArrayList<>());
+            return new Schema(pathToSchema, columnsAndTypes, notNullColumns);
 
         } catch (final ParserConfigurationException | IOException | SAXException e) {
             throw new SQLException("Failed to read the schema for the table.\n" + e.getMessage());
@@ -132,7 +133,7 @@ public class ReaderXmlImpl implements Reader {
     }
 
     @Override
-    public List<Table> readDatabaseFile(final Database database) throws SQLException {
+    public List<Table> readTablesFromDatabaseFile(final Database database) throws SQLException {
         final List<Table> tables = new ArrayList<>();
         try {
             final String url = String.valueOf(database.getUrl());
@@ -152,9 +153,8 @@ public class ReaderXmlImpl implements Reader {
                     XPathConstants.STRING);
                 final String xsdPath = (String) xpath.evaluate("pathToSchema/text()", nodeList.item(i),
                     XPathConstants.STRING);
-                final Table schema = readSchema(xsdPath);
-                final Table table = new Table(tableName, xmlPath, xsdPath, schema.getColumnsAndTypes(),
-                    schema.getNotNullColumns(), new ArrayList<>());
+                final Schema schema = readSchema(xsdPath);
+                final Table table = new Table(tableName, xmlPath, schema, new ArrayList<>());
                 tables.add(table);
             }
         } catch (final ParserConfigurationException | SAXException | IOException | XPathExpressionException |

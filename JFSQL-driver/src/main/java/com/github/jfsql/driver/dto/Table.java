@@ -1,7 +1,6 @@
 package com.github.jfsql.driver.dto;
 
 import java.util.List;
-import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Generated;
@@ -13,18 +12,17 @@ public class Table {
 
     private String name;
     private String tableFile;
-    private String schemaFile;
-    private Map<String, String> columnsAndTypes;
-    private Map<String, Boolean> notNullColumns;
+    @NonNull
+    private Schema schema;
     @NonNull
     private List<Entry> entries;
 
     public String[] getColumns() {
-        return columnsAndTypes.keySet().toArray(new String[0]);
+        return schema.getColumnsAndTypes().keySet().toArray(new String[0]);
     }
 
     public String[] getTypes() {
-        return columnsAndTypes.values().toArray(new String[0]);
+        return schema.getColumnsAndTypes().values().toArray(new String[0]);
     }
 
     @Override
@@ -33,8 +31,8 @@ public class Table {
         return "\n"
             + "Table name=" + getName() + "\n"
             + "tableFile=" + getTableFile() + "\n"
-            + "schemaFile=" + getSchemaFile() + "\n"
-            + "columnsAndTypes=" + getColumnsAndTypes() + "\n"
-            + "notNullColumns=" + getNotNullColumns();
+            + "schemaFile=" + schema.getSchemaFile() + "\n"
+            + "columnsAndTypes=" + schema.getColumnsAndTypes() + "\n"
+            + "notNullColumns=" + schema.getNotNullColumns();
     }
 }

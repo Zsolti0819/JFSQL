@@ -6,18 +6,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.github.jfsql.driver.TestUtils;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
+import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -29,46 +28,42 @@ class WriterXmlImplTest {
     private static Database database;
 
     @BeforeAll
-    static void setUp() {
-        database = new Database(TestUtils.DATABASE_XML_FILE_PATH, new LinkedList<>());
-        try (final Git ignored = Git.init().setDirectory(database.getUrl().getParent().toFile()).call()) {
-            final Map<String, String> returnColumnsAndTypes = new LinkedHashMap<>();
-            returnColumnsAndTypes.put("id", "INTEGER");
-            returnColumnsAndTypes.put("name", "TEXT");
-            returnColumnsAndTypes.put("age", "INTEGER");
-            final Map<String, Boolean> notNullColumns = new LinkedHashMap<>();
-            notNullColumns.put("id", true);
-            notNullColumns.put("name", true);
-            notNullColumns.put("age", true);
-            final Map<String, String> entry1ColumnsAndTypes = new LinkedHashMap<>();
-            entry1ColumnsAndTypes.put("id", "1");
-            entry1ColumnsAndTypes.put("name", "Zsolti");
-            entry1ColumnsAndTypes.put("age", "25");
-            final Map<String, String> entry2ColumnsAndTypes = new LinkedHashMap<>();
-            entry2ColumnsAndTypes.put("id", "2");
-            entry2ColumnsAndTypes.put("name", "Tomi");
-            entry2ColumnsAndTypes.put("age", "24");
-            final Map<String, String> entry3ColumnsAndTypes = new LinkedHashMap<>();
-            entry3ColumnsAndTypes.put("id", "3");
-            entry3ColumnsAndTypes.put("name", "Ivan");
-            entry3ColumnsAndTypes.put("age", "26");
-            final Map<String, String> entry4ColumnsAndTypes = new LinkedHashMap<>();
-            entry4ColumnsAndTypes.put("id", "4");
-            entry4ColumnsAndTypes.put("name", "Lukas");
-            entry4ColumnsAndTypes.put("age", "34");
-            final List<Entry> returnEntries = List.of(
-                new Entry(entry1ColumnsAndTypes),
-                new Entry(entry2ColumnsAndTypes),
-                new Entry(entry3ColumnsAndTypes),
-                new Entry(entry4ColumnsAndTypes)
-            );
-            table = new Table("myTable", String.valueOf(TestUtils.TABLE_XML_FILE_PATH),
-                String.valueOf(TestUtils.TABLE_XSD_FILE_PATH), returnColumnsAndTypes, notNullColumns, returnEntries);
-            database = new Database(TestUtils.DATABASE_XML_FILE_PATH, new LinkedList<>());
-            database.setTables(List.of(table));
-        } catch (final GitAPIException e) {
-            e.printStackTrace();
-        }
+    static void setUp() throws IOException {
+        Files.createDirectories(TestUtils.DATABASE_XML_FILE_PATH.getParent());
+        final Map<String, String> returnColumnsAndTypes = new LinkedHashMap<>();
+        returnColumnsAndTypes.put("id", "INTEGER");
+        returnColumnsAndTypes.put("name", "TEXT");
+        returnColumnsAndTypes.put("age", "INTEGER");
+        final Map<String, Boolean> notNullColumns = new LinkedHashMap<>();
+        notNullColumns.put("id", true);
+        notNullColumns.put("name", true);
+        notNullColumns.put("age", true);
+        final Map<String, String> entry1ColumnsAndTypes = new LinkedHashMap<>();
+        entry1ColumnsAndTypes.put("id", "1");
+        entry1ColumnsAndTypes.put("name", "Zsolti");
+        entry1ColumnsAndTypes.put("age", "25");
+        final Map<String, String> entry2ColumnsAndTypes = new LinkedHashMap<>();
+        entry2ColumnsAndTypes.put("id", "2");
+        entry2ColumnsAndTypes.put("name", "Tomi");
+        entry2ColumnsAndTypes.put("age", "24");
+        final Map<String, String> entry3ColumnsAndTypes = new LinkedHashMap<>();
+        entry3ColumnsAndTypes.put("id", "3");
+        entry3ColumnsAndTypes.put("name", "Ivan");
+        entry3ColumnsAndTypes.put("age", "26");
+        final Map<String, String> entry4ColumnsAndTypes = new LinkedHashMap<>();
+        entry4ColumnsAndTypes.put("id", "4");
+        entry4ColumnsAndTypes.put("name", "Lukas");
+        entry4ColumnsAndTypes.put("age", "34");
+        final List<Entry> returnEntries = List.of(
+            new Entry(entry1ColumnsAndTypes),
+            new Entry(entry2ColumnsAndTypes),
+            new Entry(entry3ColumnsAndTypes),
+            new Entry(entry4ColumnsAndTypes)
+        );
+        final Schema schema = new Schema(String.valueOf(TestUtils.TABLE_XSD_FILE_PATH), returnColumnsAndTypes,
+            notNullColumns);
+        table = new Table("myTable", String.valueOf(TestUtils.TABLE_XML_FILE_PATH), schema, returnEntries);
+        database = new Database(TestUtils.DATABASE_XML_FILE_PATH, List.of(table));
     }
 
     @AfterAll

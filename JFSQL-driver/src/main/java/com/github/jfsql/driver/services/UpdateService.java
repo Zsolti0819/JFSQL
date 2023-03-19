@@ -38,7 +38,7 @@ public class UpdateService {
             .toArray(new String[0]);
 
         if (activeTable.getEntries().isEmpty()) {
-            final List<Entry> entries = reader.readTable(activeTable);
+            final List<Entry> entries = reader.readEntriesFromTable(activeTable);
             activeTable.setEntries(entries);
         }
 
