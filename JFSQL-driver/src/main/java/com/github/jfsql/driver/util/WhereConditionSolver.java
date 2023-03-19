@@ -1,10 +1,10 @@
 package com.github.jfsql.driver.util;
 
 import com.github.jfsql.driver.dto.Entry;
+import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.parser.dto.StatementWithWhere;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -12,7 +12,7 @@ public class WhereConditionSolver {
 
     public List<Entry> getWhereEntries(final Table table, final StatementWithWhere statement) {
         final List<Entry> entries = table.getEntries();
-        final List<String> types = Arrays.asList(table.getTypes());
+        final Schema schema = table.getSchema();
         final List<String> whereColumns = statement.getWhereColumns();
         final List<String> whereValues = statement.getWhereValues();
         final List<String> symbols = statement.getSymbols();
@@ -24,19 +24,20 @@ public class WhereConditionSolver {
         List<Entry> whereEntries = entries;
 
         if (statement.getBinaryOperators().isEmpty()) {
-            whereEntries = getEntries(entries, types, whereColumns.get(0), whereValues.get(0), symbols.get(0));
+            whereEntries = getEntries(entries, schema, whereColumns.get(0), whereValues.get(0), symbols.get(0));
             return whereEntries;
         }
         for (int i = 0; i < statement.getWhereColumns().size(); i++) {
+            final String whereColumn = whereColumns.get(i);
+            final String whereValue = whereValues.get(i);
+            final String symbol = symbols.get(i);
             if (i == 0) {
-                whereEntries = getEntries(whereEntries, types, whereColumns.get(i), whereValues.get(i), symbols.get(i));
+                whereEntries = getEntries(whereEntries, schema, whereColumn, whereValue, symbol);
             } else {
                 if (Objects.equals(statement.getBinaryOperators().get(i - 1), "AND")) {
-                    whereEntries = getEntries(whereEntries, types, whereColumns.get(i), whereValues.get(i),
-                        symbols.get(i));
+                    whereEntries = getEntries(whereEntries, schema, whereColumn, whereValue, symbol);
                 } else if (Objects.equals(statement.getBinaryOperators().get(i - 1), "OR")) {
-                    whereEntries.addAll(
-                        getEntries(entries, types, whereColumns.get(i), whereValues.get(i), symbols.get(i)));
+                    whereEntries.addAll(getEntries(entries, schema, whereColumn, whereValue, symbol));
                 }
             }
         }
@@ -44,15 +45,16 @@ public class WhereConditionSolver {
         return whereEntries;
     }
 
-    private List<Entry> getEntries(final List<Entry> entries, final List<String> types, final String whereColumn,
+    private List<Entry> getEntries(final List<Entry> entries, final Schema schema, final String whereColumn,
         final String whereValue, final String symbol) {
         final List<Entry> entriesFulfillingConditions = new ArrayList<>();
         for (final Entry entry : entries) {
-            for (int i = 0; i < entry.getColumns().length; i++) {
-                if (Objects.equals(entry.getColumns()[i], whereColumn) && Objects.equals(symbol, "LIKE") && likeCompare(
-                    entry.getValues()[i], whereValue, types.get(i))
-                    || Objects.equals(entry.getColumns()[i], whereColumn) && !Objects.equals(symbol, "LIKE")
-                    && compareValues(entry.getValues()[i], whereValue, symbol, types.get(i))) {
+            if (entry.getColumnsAndValues().containsKey(whereColumn)) {
+                final String value = entry.getColumnsAndValues().get(whereColumn);
+                if (Objects.equals(symbol, "LIKE") && likeCompare(value, whereValue,
+                    schema.getColumnsAndTypes().get(whereColumn)) ||
+                    !Objects.equals(symbol, "LIKE") && compareValues(value, whereValue, symbol,
+                        schema.getColumnsAndTypes().get(whereColumn))) {
                     entriesFulfillingConditions.add(entry);
                 }
             }
