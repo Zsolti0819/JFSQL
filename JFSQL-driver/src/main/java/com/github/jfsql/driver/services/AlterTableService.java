@@ -23,7 +23,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 @RequiredArgsConstructor
-class AlterTableService {
+public class AlterTableService {
 
     private static final Logger logger = LogManager.getLogger(AlterTableService.class);
     private final TableFinder tableFinder;
