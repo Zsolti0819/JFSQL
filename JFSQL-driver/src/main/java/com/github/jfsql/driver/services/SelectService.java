@@ -170,41 +170,44 @@ class SelectService {
         return new Table("joinTable", null, schema, commonEntries);
     }
 
-    private Table leftJoin(final Table firstTable, final Table secondTable,
+    private Table leftJoin(final Table leftTable, final Table rightTable,
         final Map<String, String> mergedColumnsAndTypes, final Map<String, Boolean> mergedNotNullColumns,
         final List<String> joinColumns) {
-        final String t1JoinColumn = joinColumns.get(0);
-        final String t2JoinColumn = joinColumns.get(1);
-        final List<Entry> resultEntries = new ArrayList<>();
+        final String leftJoinColumn = joinColumns.get(0);
+        final String rightJoinColumn = joinColumns.get(1);
+        final List<Entry> joinedEntries = new ArrayList<>();
 
-        for (final Entry t1e : firstTable.getEntries()) {
-            boolean t1eMatched = false;
-            for (final Entry t2e : secondTable.getEntries()) {
-                if (Objects.equals(t1e.getColumnsAndValues().get(t1JoinColumn),
-                    t2e.getColumnsAndValues().get(t2JoinColumn))) {
-                    t1eMatched = true;
-                    final Map<String, String> mergedValues = new LinkedHashMap<>(t1e.getColumnsAndValues());
-                    for (final Map.Entry<String, String> t2ColumnAndValue : t2e.getColumnsAndValues().entrySet()) {
-                        final String column = t2ColumnAndValue.getKey();
-                        final String value = t2ColumnAndValue.getValue();
-                        mergedValues.putIfAbsent(column, value);
-                    }
-                    resultEntries.add(new Entry(mergedValues));
+        // create a hash table for the right table
+        final Map<String, List<Entry>> hashTable = new LinkedHashMap<>();
+        for (final Entry rightEntry : rightTable.getEntries()) {
+            final String key = rightEntry.getColumnsAndValues().get(rightJoinColumn);
+            hashTable.computeIfAbsent(key, k -> new ArrayList<>());
+            hashTable.get(key).add(rightEntry);
+        }
+
+        // probe the left table using the hash table
+        for (final Entry leftEntry : leftTable.getEntries()) {
+            final String key = leftEntry.getColumnsAndValues().get(leftJoinColumn);
+            if (hashTable.containsKey(key)) {
+                final List<Entry> matchedEntries = hashTable.get(key);
+                for (final Entry rightEntry : matchedEntries) {
+                    final Map<String, String> joinedColumnsAndValues = new LinkedHashMap<>(
+                        leftEntry.getColumnsAndValues());
+                    joinedColumnsAndValues.putAll(rightEntry.getColumnsAndValues());
+                    joinedEntries.add(new Entry(joinedColumnsAndValues));
                 }
-            }
-            if (!t1eMatched) {
-                final Map<String, String> mergedValues = new LinkedHashMap<>(t1e.getColumnsAndValues());
-                for (final Map.Entry<String, String> t2ColumnAndValue : secondTable.getEntries().get(0)
-                    .getColumnsAndValues().entrySet()) {
-                    final String column = t2ColumnAndValue.getKey();
-                    mergedValues.putIfAbsent(column, null);
+            } else {
+                // add a null entry for the right table columns
+                final Map<String, String> joinedColumnsAndValues = new LinkedHashMap<>(leftEntry.getColumnsAndValues());
+                for (final String columnName : rightTable.getSchema().getColumnsAndTypes().keySet()) {
+                    joinedColumnsAndValues.put(columnName, null);
                 }
-                resultEntries.add(new Entry(mergedValues));
+                joinedEntries.add(new Entry(joinedColumnsAndValues));
             }
         }
 
         final Schema schema = new Schema(null, mergedColumnsAndTypes, mergedNotNullColumns);
-        return new Table("joinTable", null, schema, resultEntries);
+        return new Table("leftJoinTable", null, schema, joinedEntries);
     }
 
     private List<Table> extractTables(final SelectWrapper statement) throws SQLException {
