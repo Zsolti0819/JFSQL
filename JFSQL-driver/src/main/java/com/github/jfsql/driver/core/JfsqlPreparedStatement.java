@@ -1,8 +1,8 @@
 package com.github.jfsql.driver.core;
 
 import com.github.jfsql.driver.services.StatementServiceManager;
-import com.github.jfsql.driver.services.TableFinder;
 import com.github.jfsql.driver.util.PreparedStatementCreator;
+import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.parser.core.Parser;
 import com.github.jfsql.parser.dto.AlterTableWrapper;
 import com.github.jfsql.parser.dto.BaseStatement;

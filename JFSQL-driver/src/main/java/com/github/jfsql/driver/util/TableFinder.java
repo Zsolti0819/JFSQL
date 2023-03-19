@@ -1,4 +1,4 @@
-package com.github.jfsql.driver.services;
+package com.github.jfsql.driver.util;
 
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
