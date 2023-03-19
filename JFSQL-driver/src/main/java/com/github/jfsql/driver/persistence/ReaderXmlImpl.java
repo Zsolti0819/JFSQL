@@ -126,7 +126,6 @@ public class ReaderXmlImpl implements Reader {
                 }
             }
             return new Schema(pathToSchema, columnsAndTypes, notNullColumns);
-
         } catch (final ParserConfigurationException | IOException | SAXException e) {
             throw new SQLException("Failed to read the schema for the table.\n" + e.getMessage());
         }

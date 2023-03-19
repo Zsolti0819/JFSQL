@@ -87,9 +87,9 @@ class ReaderJsonImplTest {
     void testReader_readTablesFromDatabaseFile() throws SQLException {
         final List<Table> tables = reader.readTablesFromDatabaseFile(database);
         // Because we don't read the table's entries at this point
-        final Table tableWithoutEntries = new Table(table.getName(), table.getTableFile(),
-            new Schema(table.getSchema().getSchemaFile(),
-                table.getSchema().getColumnsAndTypes(), table.getSchema().getNotNullColumns()),
+        final Schema schema = new Schema(table.getSchema().getSchemaFile(), table.getSchema().getColumnsAndTypes(),
+            table.getSchema().getNotNullColumns());
+        final Table tableWithoutEntries = new Table(table.getName(), table.getTableFile(), schema,
             Collections.emptyList());
         final List<Table> returnTables = List.of(tableWithoutEntries);
         assertEquals(returnTables, tables);

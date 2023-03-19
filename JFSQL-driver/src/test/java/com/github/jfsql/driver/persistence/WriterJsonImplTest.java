@@ -59,8 +59,8 @@ class WriterJsonImplTest {
             new Entry(entry3ColumnsAndTypes),
             new Entry(entry4ColumnsAndTypes)
         );
-        final Schema schema = new Schema(String.valueOf(TestUtils.TABLE_JSON_SCHEMA_FILE_PATH),
-            returnColumnsAndTypes, notNullColumns);
+        final Schema schema = new Schema(String.valueOf(TestUtils.TABLE_JSON_SCHEMA_FILE_PATH), returnColumnsAndTypes,
+            notNullColumns);
         table = new Table("myTable", String.valueOf(TestUtils.TABLE_JSON_FILE_PATH), schema, returnEntries);
         database = new Database(TestUtils.DATABASE_JSON_FILE_PATH, List.of(table));
     }

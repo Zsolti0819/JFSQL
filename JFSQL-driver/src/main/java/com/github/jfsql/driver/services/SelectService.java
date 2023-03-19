@@ -122,8 +122,8 @@ class SelectService {
         final Map<String, Boolean> notNullColumns = table.getSchema().getNotNullColumns();
 
         final List<Entry> orderedEntries = getEntriesWithSortedColumns(selectedColumns, whereEntries);
-        final Table newTable = new Table(tableName, tableFile, new Schema(schemaFile, columnsAndTypes, notNullColumns),
-            orderedEntries);
+        final Schema newSchema = new Schema(schemaFile, columnsAndTypes, notNullColumns);
+        final Table newTable = new Table(tableName, tableFile, newSchema, orderedEntries);
 
         return new JfsqlResultSet(statement, newTable);
     }
