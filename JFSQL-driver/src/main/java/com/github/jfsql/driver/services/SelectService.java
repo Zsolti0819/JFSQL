@@ -340,14 +340,9 @@ class SelectService {
     private List<Entry> getEntriesWithSortedColumns(final List<String> selectedColumns, final List<Entry> entries) {
         return entries.stream().map(entry -> {
             final Map<String, String> orderedMap = new LinkedHashMap<>();
-            final String[] columns = entry.getColumns();
-            final String[] values = entry.getValues();
-            selectedColumns.forEach(selectedColumn -> {
-                for (int i = 0; i < columns.length; i++) {
-                    if (Objects.equals(columns[i], selectedColumn)) {
-                        orderedMap.put(columns[i], values[i]);
-                    }
-                }
+            selectedColumns.forEach(column -> {
+                final String value = entry.getColumnsAndValues().get(column);
+                orderedMap.put(column, value);
             });
             return new Entry(orderedMap);
         }).collect(Collectors.toList());
