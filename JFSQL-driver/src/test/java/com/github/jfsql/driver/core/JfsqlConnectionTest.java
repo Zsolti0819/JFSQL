@@ -13,7 +13,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -28,9 +28,13 @@ class JfsqlConnectionTest {
         statement = connection.createStatement();
     }
 
-    @AfterAll
-    static void afterAll() throws SQLException {
-        statement.execute("DROP DATABASE [" + TestUtils.DATABASE_PATH + "]");
+    @AfterEach
+    void tearDown() {
+        try {
+            statement.execute("DROP DATABASE [" + TestUtils.DATABASE_PATH + "]");
+        } catch (final SQLException e) {
+            TestUtils.deleteDatabaseDirectory();
+        }
     }
 
     @Test

@@ -15,23 +15,21 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class SelectTest {
 
-    private static Statement statement;
+    private Statement statement;
     private Connection connection;
-
-    @AfterAll
-    static void afterAll() throws SQLException {
-        statement.execute("DROP DATABASE [" + TestUtils.DATABASE_PATH + "]");
-    }
 
     private void setUp(final String format) throws SQLException {
         final Properties properties = new Properties();
         properties.setProperty("persistence", format);
+        properties.setProperty("transaction.versioning", "true");
+        properties.setProperty("statement.caching", "true");
+        properties.setProperty("schema.validation", "true");
         connection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
         statement = connection.createStatement();
         statement.execute("DROP TABLE IF EXISTS myTable");
@@ -42,6 +40,15 @@ class SelectTest {
         statement.execute("CREATE TABLE myTable2 (id INTEGER , name2 TEXT, age2 INTEGER)");
         statement.executeUpdate(
             "INSERT INTO myTable2 (id, name2, age2) VALUES (1, 'Zsolti', 25), (2, 'Tomi', 24), (3, 'Ivan', 26), (4, 'Lukas', 1)");
+    }
+
+    @AfterEach
+    void tearDown() {
+        try {
+            statement.execute("DROP DATABASE [" + TestUtils.DATABASE_PATH + "]");
+        } catch (final SQLException e) {
+            TestUtils.deleteDatabaseDirectory();
+        }
     }
 
     /**

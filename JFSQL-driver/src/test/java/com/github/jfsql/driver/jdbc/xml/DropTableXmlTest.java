@@ -10,27 +10,34 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class DropTableXmlTest {
 
-    private static Statement statement;
-
-    @AfterAll
-    static void afterAll() throws SQLException {
-        statement.execute("DROP DATABASE [" + TestUtils.DATABASE_PATH + "]");
-    }
+    private Statement statement;
 
     @BeforeEach
     void setUp() throws SQLException {
         final Properties properties = new Properties();
         properties.setProperty("persistence", "xml");
+        properties.setProperty("transaction.versioning", "true");
+        properties.setProperty("statement.caching", "true");
+        properties.setProperty("schema.validation", "true");
         final Connection connection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
         statement = connection.createStatement();
         statement.execute("DROP TABLE IF EXISTS myTable");
         statement.execute("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
+    }
+
+    @AfterEach
+    void tearDown() {
+        try {
+            statement.execute("DROP DATABASE [" + TestUtils.DATABASE_PATH + "]");
+        } catch (final SQLException e) {
+            TestUtils.deleteDatabaseDirectory();
+        }
     }
 
     @Test

@@ -11,23 +11,21 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 import org.apache.commons.io.FileUtils;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class DeleteJsonTest {
 
-    private static Statement statement;
-
-    @AfterAll
-    static void afterAll() throws SQLException {
-        statement.execute("DROP DATABASE [" + TestUtils.DATABASE_PATH + "]");
-    }
+    private Statement statement;
 
     @BeforeEach
     void setUp() throws SQLException {
         final Properties properties = new Properties();
         properties.setProperty("persistence", "json");
+        properties.setProperty("transaction.versioning", "true");
+        properties.setProperty("statement.caching", "true");
+        properties.setProperty("schema.validation", "true");
         final Connection connection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
         statement = connection.createStatement();
         statement.execute("DROP TABLE IF EXISTS myTable");
@@ -36,6 +34,15 @@ class DeleteJsonTest {
         statement.executeUpdate("INSERT INTO myTable (id, name, age) VALUES (2, 'Tomi', 24)");
         statement.executeUpdate("INSERT INTO myTable (id, name, age) VALUES (3, 'Ivan', 26)");
         statement.executeUpdate("INSERT INTO myTable (id, name, age) VALUES (4, 'Lukas', 34)");
+    }
+
+    @AfterEach
+    void tearDown() {
+        try {
+            statement.execute("DROP DATABASE [" + TestUtils.DATABASE_PATH + "]");
+        } catch (final SQLException e) {
+            TestUtils.deleteDatabaseDirectory();
+        }
     }
 
     @Test

@@ -20,17 +20,23 @@ class SelectExceptionsTest {
     private Statement statement;
     private Connection connection;
 
-
-    @AfterEach
-    void tearDown() throws SQLException {
-        statement.execute("DROP DATABASE [" + TestUtils.DATABASE_PATH + "]");
-    }
-
     private void setUp(final String format) throws SQLException {
         final Properties properties = new Properties();
         properties.setProperty("persistence", format);
+        properties.setProperty("transaction.versioning", "true");
+        properties.setProperty("statement.caching", "true");
+        properties.setProperty("schema.validation", "true");
         connection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
         statement = connection.createStatement();
+    }
+
+    @AfterEach
+    void tearDown() {
+        try {
+            statement.execute("DROP DATABASE [" + TestUtils.DATABASE_PATH + "]");
+        } catch (final SQLException e) {
+            TestUtils.deleteDatabaseDirectory();
+        }
     }
 
     @ParameterizedTest

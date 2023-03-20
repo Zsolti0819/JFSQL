@@ -15,28 +15,34 @@ import java.sql.Statement;
 import java.util.Properties;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class TransactionManagerXmlTest {
 
-    private static Statement statement;
+    private Statement statement;
     private Connection connection;
-
-    @AfterAll
-    static void afterAll() throws SQLException {
-        statement.execute("DROP DATABASE [" + TestUtils.DATABASE_PATH + "]");
-    }
 
     @BeforeEach
     void setUp() throws SQLException {
         final Properties properties = new Properties();
         properties.setProperty("persistence", "xml");
         properties.setProperty("transaction.versioning", "true");
+        properties.setProperty("statement.caching", "true");
+        properties.setProperty("schema.validation", "true");
         connection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
         statement = connection.createStatement();
         statement.execute("DROP TABLE IF EXISTS myTable");
+    }
+
+    @AfterEach
+    void tearDown() {
+        try {
+            statement.execute("DROP DATABASE [" + TestUtils.DATABASE_PATH + "]");
+        } catch (final SQLException e) {
+            TestUtils.deleteDatabaseDirectory();
+        }
     }
 
     @Test
