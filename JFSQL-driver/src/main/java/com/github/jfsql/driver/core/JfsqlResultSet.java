@@ -83,110 +83,63 @@ public class JfsqlResultSet implements ResultSet {
     }
 
     @Override
-    public boolean getBoolean(final int columnIndex) throws SQLException {
-        if (!Objects.equals(columnTypes.get(columnIndex - 1), "INTEGER")) {
-            throw new SQLException(
-                "Expected INTEGER, but the column had type " + columnTypes.get(columnIndex - 1) + ".");
-        }
-
+    public boolean getBoolean(final int columnIndex) {
         if (getValue(currentEntry - 1, columnIndex - 1) == null) {
             return false;
         }
-
         return Boolean.parseBoolean(getValue(currentEntry - 1, columnIndex - 1));
     }
 
     @Override
     public boolean getBoolean(final String columnLabel) throws SQLException {
         final int columnIndex = getColumnIndex(columnLabel);
-
-        if (!Objects.equals(columnTypes.get(columnIndex), "INTEGER")) {
-            throw new SQLException("Expected INTEGER, but the column had type " + columnTypes.get(columnIndex) + ".");
-        }
-
         return getBoolean(columnIndex + 1);
     }
 
     @Override
-    public int getInt(final int columnIndex) throws SQLException {
-        if (!Objects.equals(columnTypes.get(columnIndex - 1), "INTEGER")) {
-            throw new SQLException(
-                "Expected INTEGER, but the column had type " + columnTypes.get(columnIndex - 1) + ".");
-        }
-
+    public int getInt(final int columnIndex) {
         if (getValue(currentEntry - 1, columnIndex - 1) == null) {
             return 0;
         }
-
         return Integer.parseInt(getValue(currentEntry - 1, columnIndex - 1));
     }
 
     @Override
     public int getInt(final String columnLabel) throws SQLException {
         final int columnIndex = getColumnIndex(columnLabel);
-
-        if (!Objects.equals(columnTypes.get(columnIndex), "INTEGER")) {
-            throw new SQLException("Expected INTEGER, but the column had type " + columnTypes.get(columnIndex) + ".");
-        }
-
         return getInt(columnIndex + 1);
     }
 
     @Override
-    public long getLong(final int columnIndex) throws SQLException {
-        if (!Objects.equals(columnTypes.get(columnIndex - 1), "INTEGER")) {
-            throw new SQLException(
-                "Expected INTEGER, but the column had type " + columnTypes.get(columnIndex - 1) + ".");
-        }
-
+    public long getLong(final int columnIndex) {
         if (getValue(currentEntry - 1, columnIndex - 1) == null) {
             return 0;
         }
-
         return Long.parseLong(getValue(currentEntry - 1, columnIndex - 1));
     }
 
     @Override
     public long getLong(final String columnLabel) throws SQLException {
         final int columnIndex = getColumnIndex(columnLabel);
-
-        if (!Objects.equals(columnTypes.get(columnIndex), "INTEGER")) {
-            throw new SQLException("Expected INTEGER, but the column had type " + columnTypes.get(columnIndex) + ".");
-        }
-
         return getLong(columnIndex + 1);
     }
 
     @Override
-    public double getDouble(final int columnIndex) throws SQLException {
-        if (!Objects.equals(columnTypes.get(columnIndex - 1), "REAL")) {
-            throw new SQLException("Expected REAL, but the column had type " + columnTypes.get(columnIndex - 1) + ".");
-        }
-
+    public double getDouble(final int columnIndex) {
         if (getValue(currentEntry - 1, columnIndex - 1) == null) {
             return 0;
         }
-
         return Double.parseDouble(getValue(currentEntry - 1, columnIndex - 1));
     }
 
     @Override
     public double getDouble(final String columnLabel) throws SQLException {
         final int columnIndex = getColumnIndex(columnLabel);
-
-        if (!Objects.equals(columnTypes.get(columnIndex), "REAL")) {
-            throw new SQLException("Expected REAL, but the column had type " + columnTypes.get(columnIndex) + ".");
-        }
-
         return getDouble(columnIndex + 1);
     }
 
     @Override
-    public byte[] getBytes(final int columnIndex) throws SQLException {
-        if (!Objects.equals(columnTypes.get(columnIndex - 1), "BLOB")) {
-            throw new SQLException("Expected BLOB, but the column had type " + columnTypes.get(columnIndex - 1) + ".");
-        }
-
+    public byte[] getBytes(final int columnIndex) {
         if (getValue(currentEntry - 1, columnIndex - 1) == null) {
             return new byte[0];
         }
@@ -197,35 +150,20 @@ public class JfsqlResultSet implements ResultSet {
     @Override
     public byte[] getBytes(final String columnLabel) throws SQLException {
         final int columnIndex = getColumnIndex(columnLabel);
-
-        if (!Objects.equals(columnTypes.get(columnIndex), "BLOB")) {
-            throw new SQLException("Expected BLOB, but the column had type " + columnTypes.get(columnIndex) + ".");
-        }
-
         return getBytes(columnIndex + 1);
     }
 
     @Override
-    public String getString(final int columnIndex) throws SQLException {
-        if (!Objects.equals(columnTypes.get(columnIndex - 1), "TEXT")) {
-            throw new SQLException("Expected TEXT, but the column had type " + columnTypes.get(columnIndex - 1) + ".");
-        }
-
+    public String getString(final int columnIndex) {
         if (getValue(currentEntry - 1, columnIndex - 1) == null) {
             return null;
         }
-
         return getValue(currentEntry - 1, columnIndex - 1);
     }
 
     @Override
     public String getString(final String columnLabel) throws SQLException {
         final int columnIndex = getColumnIndex(columnLabel);
-
-        if (!Objects.equals(columnTypes.get(columnIndex), "TEXT")) {
-            throw new SQLException("Expected TEXT, but the column had type " + columnTypes.get(columnIndex) + ".");
-        }
-
         return getString(columnIndex + 1);
     }
 
@@ -239,11 +177,7 @@ public class JfsqlResultSet implements ResultSet {
         if (getEntries().isEmpty()) {
             throw new SQLException();
         }
-
-        if ((getColumnIndex(columnLabel)) == -1) {
-            throw new SQLException("Column '" + columnLabel + "' doesn't exist.");
-        }
-
+        
         return (getColumnIndex(columnLabel) + 1);
     }
 
@@ -252,7 +186,6 @@ public class JfsqlResultSet implements ResultSet {
         if (getEntries().isEmpty()) {
             return false;
         }
-
         return currentEntry == 0;
     }
 
@@ -261,7 +194,6 @@ public class JfsqlResultSet implements ResultSet {
         if (getEntries().isEmpty()) {
             return false;
         }
-
         return currentEntry == getEntries().size() + 1;
     }
 
