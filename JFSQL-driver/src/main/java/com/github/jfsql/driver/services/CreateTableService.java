@@ -44,7 +44,7 @@ public class CreateTableService {
         }
 
         if (ifNotExistsIsPresent && semanticValidator.tableExists(statement, database)) {
-            logger.info(
+            logger.debug(
                 "Table '{}' already exists, but 'IF NOT EXISTS' clause was present in the statement, no new table will be created.",
                 tableName);
             return;

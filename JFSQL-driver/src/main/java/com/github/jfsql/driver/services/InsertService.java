@@ -14,10 +14,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @RequiredArgsConstructor
 public class InsertService {
 
+    private static final Logger logger = LogManager.getLogger(InsertService.class);
     private final TableFinder tableFinder;
     private final TransactionManager transactionManager;
     private final SemanticValidator semanticValidator;
@@ -51,6 +54,8 @@ public class InsertService {
         }
 
         final List<Entry> entriesToInsert = getEntriesToInsert(statement, activeTable);
+        logger.debug("entriesToInsert = {}", entriesToInsert);
+
         activeTable.getEntries().addAll(entriesToInsert);
 
         transactionManager.executeDMLOperation(activeTable);

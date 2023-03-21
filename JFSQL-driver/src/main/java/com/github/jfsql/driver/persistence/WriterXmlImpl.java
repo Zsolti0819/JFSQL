@@ -8,7 +8,6 @@ import com.github.jfsql.driver.validation.XmlSchemaValidator;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
@@ -28,12 +27,15 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class WriterXmlImpl extends Writer {
 
+    private static final Logger logger = LogManager.getLogger(WriterXmlImpl.class);
     private static final XmlSchemaValidator XML_SCHEMA_VALIDATOR = XmlSchemaValidator.INSTANCE;
 
     public WriterXmlImpl(final boolean useSchemaValidation) {
@@ -58,10 +60,10 @@ public class WriterXmlImpl extends Writer {
 
     @Override
     public void writeTable(final Table table) throws SQLException {
+        logger.trace("table = {}", table);
+        logger.trace("table entries = {}", table.getEntries());
         final String tableFile = table.getTableFile();
-        try (final FileOutputStream fileOutputStream = new FileOutputStream(tableFile);
-            final FileChannel fileChannel = fileOutputStream.getChannel()) {
-            fileChannel.tryLock();
+        try (final FileOutputStream fileOutputStream = new FileOutputStream(tableFile)) {
             final String tableName = table.getName();
             final List<Entry> entries = table.getEntries();
 
@@ -112,11 +114,10 @@ public class WriterXmlImpl extends Writer {
 
     @Override
     public void writeSchema(final Table table) throws SQLException {
+        logger.trace("table = {}", table);
         final String tableName = table.getName();
         final String schemaFile = table.getSchema().getSchemaFile();
-        try (final FileOutputStream fileOutputStream = new FileOutputStream(schemaFile);
-            final FileChannel fileChannel = fileOutputStream.getChannel()) {
-            fileChannel.tryLock();
+        try (final FileOutputStream fileOutputStream = new FileOutputStream(schemaFile)) {
             final List<String> columnNames = new ArrayList<>(table.getSchema().getColumnsAndTypes().keySet());
             final List<String> columnTypes = new ArrayList<>(table.getSchema().getColumnsAndTypes().values());
             final DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -170,12 +171,12 @@ public class WriterXmlImpl extends Writer {
 
     @Override
     public void writeDatabaseFile(final Database database) throws SQLException {
+        logger.trace("database = {}", database);
+        logger.trace("database tables = {}", database.getTables());
         final Path databaseFilePath = database.getUrl();
         final String databaseFileParentPath = String.valueOf(databaseFilePath.getParent());
         final Path databaseFolderName = Path.of(databaseFileParentPath);
-        try (final FileOutputStream fileOutputStream = new FileOutputStream(databaseFilePath.toFile());
-            final FileChannel fileChannel = fileOutputStream.getChannel()) {
-            fileChannel.tryLock();
+        try (final FileOutputStream fileOutputStream = new FileOutputStream(databaseFilePath.toFile())) {
             final Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
             final Element root = document.createElement("Database");
             root.setAttribute("name", String.valueOf(databaseFolderName.getFileName()));
@@ -207,6 +208,7 @@ public class WriterXmlImpl extends Writer {
 
     @Override
     public String writeBlob(final Table table, final String value) throws SQLException {
+        logger.trace("blob value = {}", value);
         final Path tableParent = Path.of(table.getTableFile()).getParent();
         final Path blobParent = Path.of(tableParent + File.separator + "blob");
         try {
@@ -216,9 +218,7 @@ public class WriterXmlImpl extends Writer {
         }
         final String newBlobName = incrementFileName(blobParent, "xml");
         final Path blobPath = Path.of(blobParent + File.separator + newBlobName);
-        try (final FileOutputStream fileOutputStream = new FileOutputStream(blobPath.toFile());
-            final FileChannel fileChannel = fileOutputStream.getChannel()) {
-            fileChannel.tryLock();
+        try (final FileOutputStream fileOutputStream = new FileOutputStream(blobPath.toFile())) {
             final DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             final Document document = documentBuilder.newDocument();
             final Element root = document.createElement("blob");

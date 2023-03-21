@@ -32,7 +32,7 @@ public class DropTableService {
         } catch (final SQLException e) {
             final String tableName = statement.getTableName();
             if (ifExistsIsPresent) {
-                logger.info(
+                logger.debug(
                     "Table '{}' does not exist, but 'IF EXISTS' clause was present in the statement, will not throw SQLException.",
                     tableName);
                 return 0;
