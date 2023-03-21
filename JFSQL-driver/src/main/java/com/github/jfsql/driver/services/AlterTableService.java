@@ -68,9 +68,9 @@ public class AlterTableService {
             FileUtils.moveFile(FileUtils.getFile(oldTableFile), FileUtils.getFile(newTableFile));
             FileUtils.moveFile(FileUtils.getFile(oldSchemaFile), FileUtils.getFile(newSchemaFile));
         } catch (final IOException e) {
-            if (!transactionManager.getAutoCommit() && transactionManager.getUncommittedTables().contains(table)) {
+            if (transactionManager.getUncommittedTables().contains(table)) {
                 logger.debug(
-                    "The table has not yet been written to files, but is present in the list of uncommitted tables.");
+                    "The table has not yet been written to file, but it is present in the list of uncommitted tables.");
             } else {
                 throw new SQLException("Failed to rename files\n" + e.getMessage());
             }
