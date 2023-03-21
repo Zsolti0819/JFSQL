@@ -43,14 +43,14 @@ class CreateTableJsonTest {
     void testCreateTable_normally() throws SQLException, IOException {
         assertEquals(0, statement.executeUpdate(
             "CREATE TABLE myTable (id INTEGER NOT NULL, name TEXT NOT NULL, age INTEGER NOT NULL)"));
-        final String realTableFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
+        final String realTableFileContent = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedTableFileContent = "" +
             "{\n" +
             "  \"Entry\": []\n" +
             "}";
         assertEquals(expectedTableFileContent, realTableFileContent);
-        final String realSchemaFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_SCHEMA_FILE_PATH.toFile(),
+        final String realSchemaFileContent = FileUtils.readFileToString(TestUtils.JSON_SCHEMA_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedSchemaFileContent = "" +
             "{\n" +

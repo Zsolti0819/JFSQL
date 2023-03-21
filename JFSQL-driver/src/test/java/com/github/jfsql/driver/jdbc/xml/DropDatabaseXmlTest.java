@@ -27,8 +27,8 @@ class DropDatabaseXmlTest {
 
     @Test
     void testDropDatabase() throws SQLException {
-        assertTrue(TestUtils.DATABASE_XML_FILE_PATH.toFile().exists());
+        assertTrue(TestUtils.XML_DATABASE_PATH.toFile().exists());
         assertEquals(1, statement.executeUpdate("DROP DATABASE [" + TestUtils.DATABASE_PATH + "];"));
-        assertFalse(TestUtils.DATABASE_XML_FILE_PATH.toFile().exists());
+        assertFalse(TestUtils.XML_DATABASE_PATH.toFile().exists());
     }
 }

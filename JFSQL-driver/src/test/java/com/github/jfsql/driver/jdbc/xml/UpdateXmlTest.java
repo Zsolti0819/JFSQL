@@ -52,7 +52,7 @@ class UpdateXmlTest {
     void testUpdate_oneEntry1() throws SQLException, IOException {
         assertEquals(1, statement.executeUpdate(
             "UPDATE myTable SET id = 5, name = 'Marian', age=99 WHERE id = 4 AND name = 'Lukas' AND age = 34"));
-        final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "" +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
@@ -92,7 +92,7 @@ class UpdateXmlTest {
         preparedStatement.setString(5, "Lukas");
         preparedStatement.setInt(6, 34);
         preparedStatement.executeUpdate();
-        final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "" +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
@@ -124,7 +124,7 @@ class UpdateXmlTest {
     @Test
     void testUpdate_oneEntry2() throws SQLException, IOException {
         assertEquals(1, statement.executeUpdate("UPDATE myTable SET name = 'TomiEdited' WHERE age <= 24"));
-        final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "" +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +

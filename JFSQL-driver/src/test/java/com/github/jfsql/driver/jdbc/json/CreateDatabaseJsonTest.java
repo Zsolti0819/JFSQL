@@ -43,7 +43,7 @@ class CreateDatabaseJsonTest {
     @Test
     void testCreateDatabase_normally() throws SQLException, IOException {
         assertEquals(0, statement.executeUpdate("CREATE DATABASE [" + TestUtils.DATABASE2_PATH + "];"));
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.DATABASE2_JSON_FILE_PATH.toUri()),
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_DATABASE2_PATH.toUri()),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "" +
             "{\n" +

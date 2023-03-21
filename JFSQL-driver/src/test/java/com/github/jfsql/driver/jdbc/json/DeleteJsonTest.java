@@ -48,7 +48,7 @@ class DeleteJsonTest {
     @Test
     void testDelete_multipleANDs() throws SQLException, IOException {
         assertEquals(1, statement.executeUpdate("DELETE FROM myTable WHERE id > 3 AND age > 25 AND name = 'Lukas'"));
-        final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "" +
             "{\n" +
@@ -76,7 +76,7 @@ class DeleteJsonTest {
     @Test
     void testDelete_multipleORs() throws SQLException, IOException {
         assertEquals(3, statement.executeUpdate("DELETE FROM myTable WHERE name = 'Zsolti' OR age = 24 OR id = 3"));
-        final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "" +
             "{\n"
@@ -94,7 +94,7 @@ class DeleteJsonTest {
     @Test
     void testDelete_multipleANDsSameEntry() throws SQLException, IOException {
         assertEquals(1, statement.executeUpdate("DELETE FROM myTable WHERE id = 1 AND name = 'Zsolti' and age = 25"));
-        final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "" +
             "{\n" +
@@ -123,7 +123,7 @@ class DeleteJsonTest {
     void testDelete_multipleBinaryOperators() throws SQLException, IOException {
         assertEquals(2, statement.executeUpdate(
             "DELETE FROM myTable WHERE id > 3 AND age > 25 AND name = 'Lukas' OR name = 'Zsolti'"));
-        final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "" +
             "{\n" +
@@ -146,7 +146,7 @@ class DeleteJsonTest {
     @Test
     void testDelete_equals() throws SQLException, IOException {
         assertEquals(1, statement.executeUpdate("DELETE FROM myTable WHERE name = 'Tomi'"));
-        final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "" +
             "{\n" +
@@ -174,7 +174,7 @@ class DeleteJsonTest {
     @Test
     void testDelete_withoutWhere() throws SQLException, IOException {
         assertEquals(4, statement.executeUpdate("DELETE FROM myTable"));
-        final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "" +
             "{\n" +

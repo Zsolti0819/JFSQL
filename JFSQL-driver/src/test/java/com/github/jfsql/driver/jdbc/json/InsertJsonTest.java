@@ -51,7 +51,7 @@ class InsertJsonTest {
     void testInsert_simple() throws SQLException, IOException {
         assertEquals(1, statement.executeUpdate(
             "INSERT INTO myTable (id, name, age) VALUES (1, 'Zsolti', 25)"));
-        final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "" +
             "{\n" +
@@ -77,7 +77,7 @@ class InsertJsonTest {
         preparedStatement.setInt(3, 25);
         preparedStatement.setBinaryStream(4, null);
         assertEquals(1, preparedStatement.executeUpdate());
-        final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "" +
             "{\n" +
@@ -102,10 +102,10 @@ class InsertJsonTest {
         preparedStatement.setInt(1, 1);
         preparedStatement.setString(2, "Zsolti");
         preparedStatement.setInt(3, 25);
-        preparedStatement.setBinaryStream(4, new FileInputStream(TestUtils.META_INF_DRIVER_FILE_PATH.toFile()));
+        preparedStatement.setBinaryStream(4, new FileInputStream(TestUtils.META_INF_DRIVER_PATH.toFile()));
         assertEquals(1, preparedStatement.executeUpdate());
 
-        final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "" +
             "{\n" +
@@ -114,7 +114,7 @@ class InsertJsonTest {
             "      \"id\": 1,\n" +
             "      \"name\": \"Zsolti\",\n" +
             "      \"age\": 25,\n" +
-            "      \"file\": \"" + String.valueOf(TestUtils.ENCODED_BLOB_PATH_JSON).replace("\\", "\\\\") + "\"\n" +
+            "      \"file\": \"" + String.valueOf(TestUtils.ENCODED_JSON_BLOB_PATH).replace("\\", "\\\\") + "\"\n" +
             "    }\n" +
             "  ]\n" +
             "}";
@@ -125,19 +125,19 @@ class InsertJsonTest {
         final ResultSet resultSet = selectPreparedStatement.executeQuery();
         while (resultSet.next()) {
             final byte[] bytes = resultSet.getBytes("file");
-            final FileOutputStream fileOutputStream = new FileOutputStream(TestUtils.BLOB_COPY_FILE_PATH.toFile());
+            final FileOutputStream fileOutputStream = new FileOutputStream(TestUtils.BLOB_COPY_PATH.toFile());
             fileOutputStream.write(bytes);
             fileOutputStream.close();
         }
 
-        assertTrue(TestUtils.BLOB_COPY_FILE_PATH.toFile().exists());
+        assertTrue(TestUtils.BLOB_COPY_PATH.toFile().exists());
     }
 
     @Test
     void testInsert_multiRow() throws SQLException, IOException {
         assertEquals(4, statement.executeUpdate(
             "INSERT INTO myTable (id, name, age) VALUES (1, 'Zsolti', 25), (2, 'Tomi', 24), (3, 'Ivan', 26), (4, 'Lukas', 34)"));
-        final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "" +
             "{\n" +
@@ -171,7 +171,7 @@ class InsertJsonTest {
     void testInsert_noExplicitColumns() throws SQLException, IOException {
         assertEquals(4, statement.executeUpdate(
             "INSERT INTO myTable VALUES (1, 'Zsolti', 25), (2, 'Tomi', 24), (3, 'Ivan', 26), (4, 'Lukas', 34)"));
-        final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "" +
             "{\n" +

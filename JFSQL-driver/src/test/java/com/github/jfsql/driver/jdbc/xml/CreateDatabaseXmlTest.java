@@ -44,7 +44,7 @@ class CreateDatabaseXmlTest {
     @Test
     void testCreateDatabase_normally() throws SQLException, IOException {
         assertEquals(0, statement.executeUpdate("CREATE DATABASE [" + TestUtils.DATABASE2_PATH + "];"));
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.DATABASE2_XML_FILE_PATH.toUri()),
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_DATABASE2_PATH.toUri()),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "" +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +

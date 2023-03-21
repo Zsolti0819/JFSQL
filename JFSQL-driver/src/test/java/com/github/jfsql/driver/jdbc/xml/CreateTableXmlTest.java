@@ -44,14 +44,14 @@ class CreateTableXmlTest {
     void testCreateTable_normally() throws SQLException, IOException {
         assertEquals(0, statement.executeUpdate(
             "CREATE TABLE myTable (id INTEGER NOT NULL, name TEXT NOT NULL, age INTEGER NOT NULL)"));
-        final String realTableFileContent = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
+        final String realTableFileContent = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedTableFileContent = "" +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<myTable/>\n";
         assertEquals(StringUtils.deleteWhitespace(expectedTableFileContent),
             StringUtils.deleteWhitespace(realTableFileContent));
-        final String realSchemaFileContent = FileUtils.readFileToString(TestUtils.TABLE_XSD_FILE_PATH.toFile(),
+        final String realSchemaFileContent = FileUtils.readFileToString(TestUtils.XSD_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedSchemaFileContent = "" +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +

@@ -53,7 +53,7 @@ class TransactionManagerJsonTest {
 
         // Inserted, but not yet committed, so the table looks the same
         final String firstCommitRealFileContent = FileUtils.readFileToString(
-            TestUtils.TABLE_JSON_FILE_PATH.toFile(), StandardCharsets.UTF_8);
+            TestUtils.JSON_TABLE_PATH.toFile(), StandardCharsets.UTF_8);
         final String firstCommitExpectedFileContent = "" +
             "{\n" +
             "  \"Entry\": []\n" +
@@ -64,7 +64,7 @@ class TransactionManagerJsonTest {
 
         // After the commit, changes are written to the file
         final String secondCommitRealFileContent = FileUtils.readFileToString(
-            TestUtils.TABLE_JSON_FILE_PATH.toFile(), StandardCharsets.UTF_8);
+            TestUtils.JSON_TABLE_PATH.toFile(), StandardCharsets.UTF_8);
         final String secondCommitExpectedFileContent = "" +
             "{\n" +
             "  \"Entry\": [\n" +
@@ -85,20 +85,20 @@ class TransactionManagerJsonTest {
         connection.setAutoCommit(false);
 
         // Table's files were created
-        assertTrue(TestUtils.TABLE_JSON_FILE_PATH.toFile().exists());
-        assertTrue(TestUtils.TABLE_JSON_SCHEMA_FILE_PATH.toFile().exists());
+        assertTrue(TestUtils.JSON_TABLE_PATH.toFile().exists());
+        assertTrue(TestUtils.JSON_SCHEMA_PATH.toFile().exists());
 
         statement.execute("DROP TABLE myTable;");
 
         // Everything exist, because it wasn't committed
-        assertTrue(TestUtils.TABLE_JSON_FILE_PATH.toFile().exists());
-        assertTrue(TestUtils.TABLE_JSON_SCHEMA_FILE_PATH.toFile().exists());
+        assertTrue(TestUtils.JSON_TABLE_PATH.toFile().exists());
+        assertTrue(TestUtils.JSON_SCHEMA_PATH.toFile().exists());
 
         connection.commit();
 
         // After the commit the files doesn't exist
-        assertFalse(TestUtils.TABLE_JSON_FILE_PATH.toFile().exists());
-        assertFalse(TestUtils.TABLE_JSON_SCHEMA_FILE_PATH.toFile().exists());
+        assertFalse(TestUtils.JSON_TABLE_PATH.toFile().exists());
+        assertFalse(TestUtils.JSON_SCHEMA_PATH.toFile().exists());
 
     }
 
@@ -107,7 +107,7 @@ class TransactionManagerJsonTest {
         statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
         connection.setAutoCommit(false);
 
-        final String realFileContentBefore = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
+        final String realFileContentBefore = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedFileContentBefore = "" +
             "{\n" +
@@ -116,19 +116,19 @@ class TransactionManagerJsonTest {
         assertEquals(StringUtils.deleteWhitespace(expectedFileContentBefore),
             StringUtils.deleteWhitespace(realFileContentBefore));
 
-        final FileWriter fileWriter = new FileWriter(TestUtils.TABLE_JSON_FILE_PATH.toFile(), false);
+        final FileWriter fileWriter = new FileWriter(TestUtils.JSON_TABLE_PATH.toFile(), false);
         fileWriter.write("test");
         fileWriter.close();
 
         final String realFileContentAfterModification = FileUtils.readFileToString(
-            TestUtils.TABLE_JSON_FILE_PATH.toFile(),
+            TestUtils.JSON_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         assertEquals(StringUtils.deleteWhitespace("test"),
             StringUtils.deleteWhitespace(realFileContentAfterModification));
 
         connection.rollback();
 
-        final String realFileContentAfterRollback = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
+        final String realFileContentAfterRollback = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         assertEquals(StringUtils.deleteWhitespace(realFileContentBefore),
             StringUtils.deleteWhitespace(realFileContentAfterRollback));

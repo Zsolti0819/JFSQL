@@ -42,11 +42,11 @@ class DropTableXmlTest {
 
     @Test
     void testDropTable_normally() throws SQLException {
-        assertTrue(TestUtils.TABLE_XML_FILE_PATH.toFile().exists());
-        assertTrue(TestUtils.TABLE_XSD_FILE_PATH.toFile().exists());
+        assertTrue(TestUtils.XML_TABLE_PATH.toFile().exists());
+        assertTrue(TestUtils.XSD_PATH.toFile().exists());
         assertFalse(statement.execute("DROP TABLE myTable"));
-        assertFalse(TestUtils.TABLE_XML_FILE_PATH.toFile().exists());
-        assertFalse(TestUtils.TABLE_XSD_FILE_PATH.toFile().exists());
+        assertFalse(TestUtils.XML_TABLE_PATH.toFile().exists());
+        assertFalse(TestUtils.XSD_PATH.toFile().exists());
     }
 
     @Test

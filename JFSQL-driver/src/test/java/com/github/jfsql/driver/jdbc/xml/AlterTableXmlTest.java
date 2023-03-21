@@ -48,14 +48,14 @@ class AlterTableXmlTest {
     @Test
     void testAlterTable_renameTable() throws SQLException, IOException {
         statement.execute("ALTER TABLE myTable RENAME to myTableEdited;");
-        final String realDatabaseFileContentAfter = FileUtils.readFileToString(
-            TestUtils.DATABASE_XML_FILE_PATH.toFile(), StandardCharsets.UTF_8);
+        final String realDatabaseFileContentAfter = FileUtils.readFileToString(TestUtils.XML_DATABASE_PATH.toFile(),
+            StandardCharsets.UTF_8);
         assertTrue(realDatabaseFileContentAfter.contains("myTableEdited.xml"));
         assertTrue(realDatabaseFileContentAfter.contains("myTableEdited.xsd"));
         assertFalse(realDatabaseFileContentAfter.contains("myTable.xml"));
         assertFalse(realDatabaseFileContentAfter.contains("myTable.xsd"));
         final String realTableFileContentAfter = FileUtils.readFileToString(
-            TestUtils.EDITED_TABLE_XML_FILE_PATH.toFile(), StandardCharsets.UTF_8);
+            TestUtils.EDITED_XML_TABLE_XML_PATH.toFile(), StandardCharsets.UTF_8);
         final String expectedTableFileContentAfter = "" +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<myTableEdited>\n" +
@@ -82,14 +82,14 @@ class AlterTableXmlTest {
             "</myTableEdited>\n";
         assertEquals(StringUtils.deleteWhitespace(expectedTableFileContentAfter),
             StringUtils.deleteWhitespace(realTableFileContentAfter));
-        assertFalse(TestUtils.TABLE_XSD_FILE_PATH.toFile().exists());
-        assertTrue(TestUtils.EDITED_TABLE_XSD_FILE_PATH.toFile().exists());
+        assertFalse(TestUtils.XSD_PATH.toFile().exists());
+        assertTrue(TestUtils.EDITED_XSD_PATH.toFile().exists());
     }
 
     @Test
     void testAlterTable_renameColumn() throws SQLException, IOException {
         statement.execute("ALTER TABLE myTable RENAME COLUMN age TO age_edited;");
-        final String realTableFileContentAfter = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
+        final String realTableFileContentAfter = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedTableFileContentAfter = "" +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
@@ -122,7 +122,7 @@ class AlterTableXmlTest {
     @Test
     void testAlterTable_dropColumn() throws SQLException, IOException {
         statement.execute("ALTER TABLE myTable DROP COLUMN age;");
-        final String realTableFileContentAfter = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
+        final String realTableFileContentAfter = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedTableFileContentAfter = "" +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
@@ -151,7 +151,7 @@ class AlterTableXmlTest {
     @Test
     void testAlterTable_addColumn() throws SQLException, IOException {
         statement.execute("ALTER TABLE myTable ADD COLUMN salary REAL;");
-        final String realTableFileContentAfter = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
+        final String realTableFileContentAfter = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedTableFileContentAfter = "" +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
@@ -184,7 +184,7 @@ class AlterTableXmlTest {
     @Test
     void testAlterTable_addNotNullColumn() throws SQLException, IOException {
         statement.execute("ALTER TABLE myTable ADD COLUMN salary REAL NOT NULL;");
-        final String realTableFileContentAfter = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
+        final String realTableFileContentAfter = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedTableFileContentAfter = "" +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +

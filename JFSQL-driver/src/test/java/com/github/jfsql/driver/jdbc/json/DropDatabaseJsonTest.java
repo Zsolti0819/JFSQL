@@ -27,9 +27,9 @@ class DropDatabaseJsonTest {
 
     @Test
     void testDropDatabase() throws SQLException {
-        assertTrue(TestUtils.DATABASE_JSON_FILE_PATH.toFile().exists());
+        assertTrue(TestUtils.JSON_DATABASE_PATH.toFile().exists());
         assertEquals(1, statement.executeUpdate("DROP DATABASE [" + TestUtils.DATABASE_PATH + "];"));
-        assertFalse(TestUtils.DATABASE_JSON_FILE_PATH.toFile().exists());
+        assertFalse(TestUtils.JSON_DATABASE_PATH.toFile().exists());
     }
 
 }

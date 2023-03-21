@@ -28,7 +28,7 @@ class WriterJsonImplTest {
 
     @BeforeAll
     static void setUp() throws IOException {
-        Files.createDirectories(TestUtils.DATABASE_JSON_FILE_PATH.getParent());
+        Files.createDirectories(TestUtils.JSON_DATABASE_PATH.getParent());
         final Map<String, String> returnColumnsAndTypes = new LinkedHashMap<>();
         returnColumnsAndTypes.put("id", "INTEGER");
         returnColumnsAndTypes.put("name", "TEXT");
@@ -59,10 +59,10 @@ class WriterJsonImplTest {
             new Entry(entry3ColumnsAndTypes),
             new Entry(entry4ColumnsAndTypes)
         );
-        final Schema schema = new Schema(String.valueOf(TestUtils.TABLE_JSON_SCHEMA_FILE_PATH), returnColumnsAndTypes,
+        final Schema schema = new Schema(String.valueOf(TestUtils.JSON_SCHEMA_PATH), returnColumnsAndTypes,
             notNullColumns);
-        table = new Table("myTable", String.valueOf(TestUtils.TABLE_JSON_FILE_PATH), schema, returnEntries);
-        database = new Database(TestUtils.DATABASE_JSON_FILE_PATH, List.of(table));
+        table = new Table("myTable", String.valueOf(TestUtils.JSON_TABLE_PATH), schema, returnEntries);
+        database = new Database(TestUtils.JSON_DATABASE_PATH, List.of(table));
     }
 
     @AfterAll
@@ -73,7 +73,7 @@ class WriterJsonImplTest {
     @Test
     void testWriter_writeSchema() throws SQLException, IOException {
         writer.writeSchema(table);
-        final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_SCHEMA_FILE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(TestUtils.JSON_SCHEMA_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedContent = "" +
             "{\n" +
@@ -119,7 +119,7 @@ class WriterJsonImplTest {
     @Test
     void testWriter_writeTable() throws SQLException, IOException {
         writer.writeTable(table);
-        final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedContent = "" +
             "{\n" +

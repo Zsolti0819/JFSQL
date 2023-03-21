@@ -52,7 +52,7 @@ class InsertXmlTest {
     void testInsert_simple() throws SQLException, IOException {
         assertEquals(1, statement.executeUpdate(
             "INSERT INTO myTable (id, name, age) VALUES (1, 'Zsolti', 25)"));
-        final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "" +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
@@ -77,7 +77,7 @@ class InsertXmlTest {
         preparedStatement.setInt(3, 25);
         preparedStatement.setBinaryStream(4, null);
         assertEquals(1, preparedStatement.executeUpdate());
-        final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "" +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
@@ -100,10 +100,10 @@ class InsertXmlTest {
         preparedStatement.setInt(1, 1);
         preparedStatement.setString(2, "Zsolti");
         preparedStatement.setInt(3, 25);
-        preparedStatement.setBinaryStream(4, new FileInputStream(TestUtils.META_INF_DRIVER_FILE_PATH.toFile()));
+        preparedStatement.setBinaryStream(4, new FileInputStream(TestUtils.META_INF_DRIVER_PATH.toFile()));
         assertEquals(1, preparedStatement.executeUpdate());
 
-        final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "" +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
@@ -112,7 +112,7 @@ class InsertXmlTest {
             "        <id>1</id>\n" +
             "        <name>Zsolti</name>\n" +
             "        <age>25</age>\n" +
-            "        <file>" + TestUtils.ENCODED_BLOB_PATH_XML + "</file>\n" +
+            "        <file>" + TestUtils.ENCODED_XML_BLOB_PATH + "</file>\n" +
             "    </Entry>\n" +
             "</myTable>\n";
         assertEquals(StringUtils.deleteWhitespace(expectedFileContent),
@@ -123,19 +123,19 @@ class InsertXmlTest {
         final ResultSet resultSet = selectPreparedStatement.executeQuery();
         while (resultSet.next()) {
             final byte[] bytes = resultSet.getBytes("file");
-            final FileOutputStream fileOutputStream = new FileOutputStream(TestUtils.BLOB_COPY_FILE_PATH.toFile());
+            final FileOutputStream fileOutputStream = new FileOutputStream(TestUtils.BLOB_COPY_PATH.toFile());
             fileOutputStream.write(bytes);
             fileOutputStream.close();
         }
 
-        assertTrue(TestUtils.BLOB_COPY_FILE_PATH.toFile().exists());
+        assertTrue(TestUtils.BLOB_COPY_PATH.toFile().exists());
     }
 
     @Test
     void testInsert_multiRow() throws SQLException, IOException {
         assertEquals(4, statement.executeUpdate(
             "INSERT INTO myTable (id, name, age) VALUES (1, 'Zsolti', 25), (2, 'Tomi', 24), (3, 'Ivan', 26), (4, 'Lukas', 34)"));
-        final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "" +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
@@ -168,7 +168,7 @@ class InsertXmlTest {
     void testInsert_noExplicitColumns() throws SQLException, IOException {
         assertEquals(4, statement.executeUpdate(
             "INSERT INTO myTable VALUES (1, 'Zsolti', 25), (2, 'Tomi', 24), (3, 'Ivan', 26), (4, 'Lukas', 34)"));
-        final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "" +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +

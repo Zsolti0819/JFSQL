@@ -26,7 +26,7 @@ class ReaderJsonImplTest {
 
     @BeforeAll
     static void beforeAll() throws SQLException, IOException {
-        Files.createDirectories(TestUtils.DATABASE_JSON_FILE_PATH.getParent());
+        Files.createDirectories(TestUtils.JSON_DATABASE_PATH.getParent());
         final Map<String, String> returnColumnsAndTypes = new LinkedHashMap<>();
         returnColumnsAndTypes.put("id", "INTEGER");
         returnColumnsAndTypes.put("name", "TEXT");
@@ -57,10 +57,10 @@ class ReaderJsonImplTest {
             new Entry(entry3ColumnsAndTypes),
             new Entry(entry4ColumnsAndTypes)
         );
-        final Schema schema = new Schema(String.valueOf(TestUtils.TABLE_JSON_SCHEMA_FILE_PATH), returnColumnsAndTypes,
+        final Schema schema = new Schema(String.valueOf(TestUtils.JSON_SCHEMA_PATH), returnColumnsAndTypes,
             notNullColumns);
-        table = new Table("myTable", String.valueOf(TestUtils.TABLE_JSON_FILE_PATH), schema, returnEntries);
-        database = new Database(TestUtils.DATABASE_JSON_FILE_PATH, List.of(table));
+        table = new Table("myTable", String.valueOf(TestUtils.JSON_TABLE_PATH), schema, returnEntries);
+        database = new Database(TestUtils.JSON_DATABASE_PATH, List.of(table));
         new WriterJsonImpl(true).writeSchema(table);
         new WriterJsonImpl(true).writeTable(table);
         new WriterJsonImpl(true).writeDatabaseFile(database);
@@ -79,7 +79,7 @@ class ReaderJsonImplTest {
 
     @Test
     void testReader_readSchema() throws SQLException {
-        final Schema schema = reader.readSchema(String.valueOf(TestUtils.TABLE_JSON_SCHEMA_FILE_PATH));
+        final Schema schema = reader.readSchema(String.valueOf(TestUtils.JSON_SCHEMA_PATH));
         assertEquals(table.getSchema(), schema);
     }
 

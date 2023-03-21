@@ -42,11 +42,11 @@ class DropTableJsonTest {
 
     @Test
     void testDropTable_normally() throws SQLException {
-        assertTrue(TestUtils.TABLE_JSON_FILE_PATH.toFile().exists());
-        assertTrue(TestUtils.TABLE_JSON_SCHEMA_FILE_PATH.toFile().exists());
+        assertTrue(TestUtils.JSON_TABLE_PATH.toFile().exists());
+        assertTrue(TestUtils.JSON_SCHEMA_PATH.toFile().exists());
         assertFalse(statement.execute("DROP TABLE myTable"));
-        assertFalse(TestUtils.TABLE_JSON_FILE_PATH.toFile().exists());
-        assertFalse(TestUtils.TABLE_JSON_SCHEMA_FILE_PATH.toFile().exists());
+        assertFalse(TestUtils.JSON_TABLE_PATH.toFile().exists());
+        assertFalse(TestUtils.JSON_SCHEMA_PATH.toFile().exists());
     }
 
     @Test

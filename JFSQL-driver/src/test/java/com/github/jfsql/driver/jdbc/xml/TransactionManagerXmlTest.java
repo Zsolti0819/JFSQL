@@ -52,7 +52,7 @@ class TransactionManagerXmlTest {
         statement.execute("INSERT INTO myTable VALUES (1, 'a', 25)");
 
         // Inserted, but not yet committed, so the table looks the same
-        final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "" +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
@@ -63,7 +63,7 @@ class TransactionManagerXmlTest {
         connection.commit();
 
         // After the commit, changes are written to the file
-        final String realFileContent2 = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
+        final String realFileContent2 = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedFileContent2 = "" +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
@@ -85,20 +85,20 @@ class TransactionManagerXmlTest {
         connection.setAutoCommit(false);
 
         // Table's files were created
-        assertTrue(TestUtils.TABLE_XML_FILE_PATH.toFile().exists());
-        assertTrue(TestUtils.TABLE_XSD_FILE_PATH.toFile().exists());
+        assertTrue(TestUtils.XML_TABLE_PATH.toFile().exists());
+        assertTrue(TestUtils.XSD_PATH.toFile().exists());
 
         statement.execute("DROP TABLE myTable;");
 
         // Everything exist, because it wasn't committed
-        assertTrue(TestUtils.TABLE_XML_FILE_PATH.toFile().exists());
-        assertTrue(TestUtils.TABLE_XSD_FILE_PATH.toFile().exists());
+        assertTrue(TestUtils.XML_TABLE_PATH.toFile().exists());
+        assertTrue(TestUtils.XSD_PATH.toFile().exists());
 
         connection.commit();
 
         // After the commit the files doesn't exist
-        assertFalse(TestUtils.TABLE_XML_FILE_PATH.toFile().exists());
-        assertFalse(TestUtils.TABLE_XSD_FILE_PATH.toFile().exists());
+        assertFalse(TestUtils.XML_TABLE_PATH.toFile().exists());
+        assertFalse(TestUtils.XSD_PATH.toFile().exists());
 
     }
 
@@ -107,7 +107,7 @@ class TransactionManagerXmlTest {
         statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
         connection.setAutoCommit(false);
 
-        final String realFileContentBefore = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
+        final String realFileContentBefore = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedFileContentBefore = "" +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
@@ -115,19 +115,19 @@ class TransactionManagerXmlTest {
         assertEquals(StringUtils.deleteWhitespace(expectedFileContentBefore),
             StringUtils.deleteWhitespace(realFileContentBefore));
 
-        final FileWriter fileWriter = new FileWriter(TestUtils.TABLE_XML_FILE_PATH.toFile(), false);
+        final FileWriter fileWriter = new FileWriter(TestUtils.XML_TABLE_PATH.toFile(), false);
         fileWriter.write("test");
         fileWriter.close();
 
         final String realFileContentAfterModification = FileUtils.readFileToString(
-            TestUtils.TABLE_XML_FILE_PATH.toFile(),
+            TestUtils.XML_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         assertEquals(StringUtils.deleteWhitespace("test"),
             StringUtils.deleteWhitespace(realFileContentAfterModification));
 
         connection.rollback();
 
-        final String realFileContentAfterRollback = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
+        final String realFileContentAfterRollback = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         assertEquals(StringUtils.deleteWhitespace(realFileContentBefore),
             StringUtils.deleteWhitespace(realFileContentAfterRollback));

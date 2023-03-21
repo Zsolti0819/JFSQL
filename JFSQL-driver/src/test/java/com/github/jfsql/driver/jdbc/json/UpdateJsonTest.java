@@ -51,7 +51,7 @@ class UpdateJsonTest {
     void testUpdate_oneEntry1() throws SQLException, IOException {
         assertEquals(1, statement.executeUpdate(
             "UPDATE myTable SET id = 5, name = 'Marian', age=99 WHERE id = 4 AND name = 'Lukas' AND age = 34"));
-        final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "" +
             "{\n" +
@@ -93,7 +93,7 @@ class UpdateJsonTest {
         preparedStatement.setInt(6, 34);
         preparedStatement.executeUpdate();
 
-        final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "" +
             "{\n" +
@@ -126,7 +126,7 @@ class UpdateJsonTest {
     @Test
     void testUpdate_oneEntry2() throws SQLException, IOException {
         assertEquals(1, statement.executeUpdate("UPDATE myTable SET name = 'TomiEdited' WHERE age <= 24"));
-        final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "" +
             "{\n" +

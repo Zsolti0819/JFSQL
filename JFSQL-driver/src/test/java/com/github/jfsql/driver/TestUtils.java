@@ -16,35 +16,33 @@ public class TestUtils {
     public static final Path DATABASE_PATH = Path.of(
         BASE_PATH + File.separator + "src" + File.separator + "main" + File.separator + "resources" + File.separator
             + "myDatabase" + File.separator);
-    public static final Path DATABASE_XML_FILE_PATH = Path.of(
+    public static final Path XML_DATABASE_PATH = Path.of(
         DATABASE_PATH + File.separator + DATABASE_PATH.getFileName() + ".xml");
-    public static final Path DATABASE_JSON_FILE_PATH = Path.of(
+    public static final Path JSON_DATABASE_PATH = Path.of(
         DATABASE_PATH + File.separator + DATABASE_PATH.getFileName() + ".json");
-    public static final Path TABLE_XML_FILE_PATH = Path.of(DATABASE_PATH + File.separator + "myTable.xml");
-    public static final Path TABLE_JSON_FILE_PATH = Path.of(DATABASE_PATH + File.separator + "myTable.json");
-    public static final Path TABLE_XSD_FILE_PATH = Path.of(DATABASE_PATH + File.separator + "myTable.xsd");
-    public static final Path TABLE_JSON_SCHEMA_FILE_PATH = Path.of(
-        DATABASE_PATH + File.separator + "myTableSchema.json");
-    public static final Path EDITED_TABLE_XML_FILE_PATH = Path.of(DATABASE_PATH + File.separator + "myTableEdited.xml");
-    public static final Path EDITED_TABLE_JSON_FILE_PATH = Path.of(
-        DATABASE_PATH + File.separator + "myTableEdited.json");
-    public static final Path EDITED_TABLE_XSD_FILE_PATH = Path.of(DATABASE_PATH + File.separator + "myTableEdited.xsd");
-    public static final Path EDITED_TABLE_JSON_SCHEMA_FILE_PATH = Path.of(
+    public static final Path XML_TABLE_PATH = Path.of(DATABASE_PATH + File.separator + "myTable.xml");
+    public static final Path JSON_TABLE_PATH = Path.of(DATABASE_PATH + File.separator + "myTable.json");
+    public static final Path XSD_PATH = Path.of(DATABASE_PATH + File.separator + "myTable.xsd");
+    public static final Path JSON_SCHEMA_PATH = Path.of(DATABASE_PATH + File.separator + "myTableSchema.json");
+    public static final Path EDITED_XML_TABLE_XML_PATH = Path.of(DATABASE_PATH + File.separator + "myTableEdited.xml");
+    public static final Path EDITED_JSON_TABLE_PATH = Path.of(DATABASE_PATH + File.separator + "myTableEdited.json");
+    public static final Path EDITED_XSD_PATH = Path.of(DATABASE_PATH + File.separator + "myTableEdited.xsd");
+    public static final Path EDITED_JSON_SCHEMA_PATH = Path.of(
         DATABASE_PATH + File.separator + "myTableEditedSchema.json");
-    public static final Path BLOB_COPY_FILE_PATH = Path.of(DATABASE_PATH + File.separator + "java.sql.Driver");
-    public static final Path ENCODED_BLOB_PATH_JSON = Path.of(
+    public static final Path BLOB_COPY_PATH = Path.of(DATABASE_PATH + File.separator + "java.sql.Driver");
+    public static final Path ENCODED_JSON_BLOB_PATH = Path.of(
         DATABASE_PATH + File.separator + "blob" + File.separator + "blob1.json");
-    public static final Path ENCODED_BLOB_PATH_XML = Path.of(
+    public static final Path ENCODED_XML_BLOB_PATH = Path.of(
         DATABASE_PATH + File.separator + "blob" + File.separator + "blob1.xml");
     public static final Path DATABASE2_PATH = Path.of(
         BASE_PATH + File.separator + "src" + File.separator + "main" + File.separator + "resources" + File.separator
             + "myDatabase2" + File.separator);
-    public static final Path DATABASE2_XML_FILE_PATH = Path.of(
+    public static final Path XML_DATABASE2_PATH = Path.of(
         DATABASE2_PATH + File.separator + DATABASE2_PATH.getFileName() + ".xml");
-    public static final Path DATABASE2_JSON_FILE_PATH = Path.of(
+    public static final Path JSON_DATABASE2_PATH = Path.of(
         DATABASE2_PATH + File.separator + DATABASE2_PATH.getFileName() + ".json");
     public static final Path NOT_DIRECTORY_PATH = Path.of(BASE_PATH + File.separator + "pom.xml");
-    public static final Path META_INF_DRIVER_FILE_PATH = Path.of(
+    public static final Path META_INF_DRIVER_PATH = Path.of(
         BASE_PATH + File.separator + "src" + File.separator + "main" + File.separator + "resources" + File.separator
             + "META-INF" + File.separator + "services" + File.separator + "java.sql.Driver");
 

@@ -29,7 +29,7 @@ class WriterXmlImplTest {
 
     @BeforeAll
     static void setUp() throws IOException {
-        Files.createDirectories(TestUtils.DATABASE_XML_FILE_PATH.getParent());
+        Files.createDirectories(TestUtils.XML_DATABASE_PATH.getParent());
         final Map<String, String> returnColumnsAndTypes = new LinkedHashMap<>();
         returnColumnsAndTypes.put("id", "INTEGER");
         returnColumnsAndTypes.put("name", "TEXT");
@@ -60,10 +60,10 @@ class WriterXmlImplTest {
             new Entry(entry3ColumnsAndTypes),
             new Entry(entry4ColumnsAndTypes)
         );
-        final Schema schema = new Schema(String.valueOf(TestUtils.TABLE_XSD_FILE_PATH), returnColumnsAndTypes,
+        final Schema schema = new Schema(String.valueOf(TestUtils.XSD_PATH), returnColumnsAndTypes,
             notNullColumns);
-        table = new Table("myTable", String.valueOf(TestUtils.TABLE_XML_FILE_PATH), schema, returnEntries);
-        database = new Database(TestUtils.DATABASE_XML_FILE_PATH, List.of(table));
+        table = new Table("myTable", String.valueOf(TestUtils.XML_TABLE_PATH), schema, returnEntries);
+        database = new Database(TestUtils.XML_DATABASE_PATH, List.of(table));
     }
 
     @AfterAll
@@ -74,7 +74,7 @@ class WriterXmlImplTest {
     @Test
     void testWriter_writeSchema() throws SQLException, IOException {
         writer.writeSchema(table);
-        final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_XSD_FILE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(TestUtils.XSD_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "" +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
@@ -102,7 +102,7 @@ class WriterXmlImplTest {
     @Test
     void testWriter_writeTable() throws SQLException, IOException {
         writer.writeTable(table);
-        final String realFileContent = FileUtils.readFileToString(TestUtils.TABLE_XML_FILE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "" +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +

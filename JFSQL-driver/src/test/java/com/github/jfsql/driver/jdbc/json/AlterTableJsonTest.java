@@ -50,14 +50,14 @@ class AlterTableJsonTest {
     @Test
     void testAlterTable_renameTable() throws SQLException, IOException {
         statement.execute("ALTER TABLE myTable RENAME to myTableEdited;");
-        final String realDatabaseFileContentAfter = FileUtils.readFileToString(
-            TestUtils.DATABASE_JSON_FILE_PATH.toFile(), StandardCharsets.UTF_8);
+        final String realDatabaseFileContentAfter = FileUtils.readFileToString(TestUtils.JSON_DATABASE_PATH.toFile(),
+            StandardCharsets.UTF_8);
         assertTrue(realDatabaseFileContentAfter.contains("myTableEdited.json"));
         assertTrue(realDatabaseFileContentAfter.contains("myTableEditedSchema.json"));
         assertFalse(realDatabaseFileContentAfter.contains("myTable.json"));
         assertFalse(realDatabaseFileContentAfter.contains("myTableSchema.json"));
-        final String realTableFileContentAfter = FileUtils.readFileToString(
-            TestUtils.EDITED_TABLE_JSON_FILE_PATH.toFile(), StandardCharsets.UTF_8);
+        final String realTableFileContentAfter = FileUtils.readFileToString(TestUtils.EDITED_JSON_TABLE_PATH.toFile(),
+            StandardCharsets.UTF_8);
         final String expectedTableFileContentAfter = "" +
             "{\n" +
             "  \"Entry\": [\n" +
@@ -84,14 +84,14 @@ class AlterTableJsonTest {
             "  ]\n" +
             "}";
         assertEquals(expectedTableFileContentAfter, realTableFileContentAfter);
-        assertFalse(TestUtils.TABLE_JSON_SCHEMA_FILE_PATH.toFile().exists());
-        assertTrue(TestUtils.EDITED_TABLE_JSON_SCHEMA_FILE_PATH.toFile().exists());
+        assertFalse(TestUtils.JSON_SCHEMA_PATH.toFile().exists());
+        assertTrue(TestUtils.EDITED_JSON_SCHEMA_PATH.toFile().exists());
     }
 
     @Test
     void testAlterTable_renameColumn() throws SQLException, IOException {
         statement.execute("ALTER TABLE myTable RENAME COLUMN age TO age_edited;");
-        final String realTableFileContentAfter = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
+        final String realTableFileContentAfter = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedTableFileContentAfter = "" +
             "{\n" +
@@ -124,7 +124,7 @@ class AlterTableJsonTest {
     @Test
     void testAlterTable_dropColumn() throws SQLException, IOException {
         statement.execute("ALTER TABLE myTable DROP COLUMN age;");
-        final String realTableFileContentAfter = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
+        final String realTableFileContentAfter = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedTableFileContentAfter = "" +
             "{\n" +
@@ -153,7 +153,7 @@ class AlterTableJsonTest {
     @Test
     void testAlterTable_addColumn() throws SQLException, IOException {
         statement.execute("ALTER TABLE myTable ADD COLUMN salary REAL;");
-        final String realTableFileContentAfter = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
+        final String realTableFileContentAfter = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedTableFileContentAfter = "" +
             "{\n" +
@@ -190,7 +190,7 @@ class AlterTableJsonTest {
     @Test
     void testAlterTable_addNotNullColumn() throws SQLException, IOException {
         statement.execute("ALTER TABLE myTable ADD COLUMN salary REAL NOT NULL;");
-        final String realTableFileContentAfter = FileUtils.readFileToString(TestUtils.TABLE_JSON_FILE_PATH.toFile(),
+        final String realTableFileContentAfter = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedTableFileContentAfter = "" +
             "{\n" +

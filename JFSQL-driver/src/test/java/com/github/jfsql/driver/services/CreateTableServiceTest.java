@@ -47,7 +47,7 @@ class CreateTableServiceTest {
     @Test
     void testCreateTable_normally() throws SQLException {
         when(reader.getFileExtension()).thenReturn("xml");
-        when(database.getUrl()).thenReturn(TestUtils.DATABASE_XML_FILE_PATH);
+        when(database.getUrl()).thenReturn(TestUtils.XML_DATABASE_PATH);
         when(semanticValidator.tableExists(createTableStatement, database)).thenReturn(false);
 
         createTableService.createTable(createTableStatement);
