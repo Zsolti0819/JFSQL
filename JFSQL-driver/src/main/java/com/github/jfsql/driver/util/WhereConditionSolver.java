@@ -16,6 +16,7 @@ public class WhereConditionSolver {
         final List<String> whereColumns = statement.getWhereColumns();
         final List<String> whereValues = statement.getWhereValues();
         final List<String> symbols = statement.getSymbols();
+        final List<String> binaryOperators = statement.getBinaryOperators();
 
         if (whereColumns.isEmpty()) {
             return entries;
@@ -23,20 +24,21 @@ public class WhereConditionSolver {
 
         List<Entry> whereEntries = entries;
 
-        if (statement.getBinaryOperators().isEmpty()) {
+        if (binaryOperators.isEmpty()) {
             whereEntries = getEntries(entries, schema, whereColumns.get(0), whereValues.get(0), symbols.get(0));
             return whereEntries;
         }
-        for (int i = 0; i < statement.getWhereColumns().size(); i++) {
+
+        for (int i = 0; i < whereColumns.size(); i++) {
             final String whereColumn = whereColumns.get(i);
             final String whereValue = whereValues.get(i);
             final String symbol = symbols.get(i);
             if (i == 0) {
                 whereEntries = getEntries(whereEntries, schema, whereColumn, whereValue, symbol);
             } else {
-                if (Objects.equals(statement.getBinaryOperators().get(i - 1), "AND")) {
+                if (Objects.equals(binaryOperators.get(i - 1), "AND")) {
                     whereEntries = getEntries(whereEntries, schema, whereColumn, whereValue, symbol);
-                } else if (Objects.equals(statement.getBinaryOperators().get(i - 1), "OR")) {
+                } else if (Objects.equals(binaryOperators.get(i - 1), "OR")) {
                     whereEntries.addAll(getEntries(entries, schema, whereColumn, whereValue, symbol));
                 }
             }
