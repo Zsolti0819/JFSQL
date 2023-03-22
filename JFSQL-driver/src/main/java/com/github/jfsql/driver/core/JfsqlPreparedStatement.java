@@ -50,20 +50,22 @@ public class JfsqlPreparedStatement implements PreparedStatement {
     private final Parser parser;
     private final StatementServiceManager statementServiceManager;
     private final TableFinder tableFinder;
-    private final String preparedStatement;
+    private final String sql;
+    private final PreparedStatementCreator preparedStatementCreator;
     private final Object[] parameters;
     private JfsqlConnection connection;
     private ResultSet resultSet;
     private int updateCount = 0;
 
-    JfsqlPreparedStatement(final JfsqlConnection connection, final String preparedStatement,
+    JfsqlPreparedStatement(final JfsqlConnection connection, final String sql,
         final TableFinder tableFinder, final StatementServiceManager statementServiceManager) throws SQLException {
         this.connection = connection;
-        this.preparedStatement = preparedStatement;
+        this.sql = sql;
+        preparedStatementCreator = new PreparedStatementCreator(this);
         this.tableFinder = tableFinder;
         this.statementServiceManager = statementServiceManager;
         parser = new Parser();
-        parameters = new Object[getParameterCount(preparedStatement)];
+        parameters = new Object[getParameterCount(sql)];
     }
 
     private int getParameterCount(final String sql) throws SQLException {
@@ -106,12 +108,12 @@ public class JfsqlPreparedStatement implements PreparedStatement {
 
     @Override
     public ResultSet executeQuery() throws SQLException {
-        return executeQuery(preparedStatement);
+        return executeQuery(sql);
     }
 
     @Override
     public int executeUpdate() throws SQLException {
-        return executeUpdate(preparedStatement);
+        return executeUpdate(sql);
     }
 
     @Override
@@ -123,7 +125,7 @@ public class JfsqlPreparedStatement implements PreparedStatement {
         if (!(TypeOfStatement.SELECT.equals(statement.getTypeOfStatement()))) {
             throw new SQLException("Cannot execute executeQuery() because statement was not a Select statement.");
         }
-        statement = PreparedStatementCreator.getPreparedSelectStatement((SelectWrapper) statement, this);
+        statement = preparedStatementCreator.getPreparedSelectStatement((SelectWrapper) statement);
         resultSet = statementServiceManager.selectFromTable((SelectWrapper) statement);
         return resultSet;
     }
@@ -145,8 +147,8 @@ public class JfsqlPreparedStatement implements PreparedStatement {
                 statementServiceManager.createTable((CreateTableWrapper) statement);
                 break;
             case DELETE:
-                final DeleteWrapper preparedDeleteStatement = PreparedStatementCreator.getPreparedDeleteStatement(
-                    (DeleteWrapper) statement, this);
+                final DeleteWrapper preparedDeleteStatement = preparedStatementCreator.getPreparedDeleteStatement(
+                    (DeleteWrapper) statement);
                 updateCount = statementServiceManager.deleteFromTable(preparedDeleteStatement);
                 break;
             case DROP_DATABASE:
@@ -156,13 +158,13 @@ public class JfsqlPreparedStatement implements PreparedStatement {
                 updateCount = statementServiceManager.dropTable((DropTableWrapper) statement);
                 break;
             case INSERT:
-                final InsertWrapper preparedInsertStatement = PreparedStatementCreator.getPreparedInsertStatement(
-                    (InsertWrapper) statement, this);
+                final InsertWrapper preparedInsertStatement = preparedStatementCreator.getPreparedInsertStatement(
+                    (InsertWrapper) statement);
                 updateCount = statementServiceManager.insertIntoTable(preparedInsertStatement);
                 break;
             case UPDATE:
-                final UpdateWrapper preparedUpdateStatement = PreparedStatementCreator.getPreparedUpdateStatement(
-                    (UpdateWrapper) statement, this);
+                final UpdateWrapper preparedUpdateStatement = preparedStatementCreator.getPreparedUpdateStatement(
+                    (UpdateWrapper) statement);
                 updateCount = statementServiceManager.updateTable(preparedUpdateStatement);
                 break;
             default:
@@ -172,8 +174,8 @@ public class JfsqlPreparedStatement implements PreparedStatement {
     }
 
     private void executeQuery(final BaseStatement statement) throws SQLException {
-        final SelectWrapper preparedSelectStatement = PreparedStatementCreator.getPreparedSelectStatement(
-            (SelectWrapper) statement, this);
+        final SelectWrapper preparedSelectStatement = preparedStatementCreator.getPreparedSelectStatement(
+            (SelectWrapper) statement);
         resultSet = statementServiceManager.selectFromTable(preparedSelectStatement);
     }
 
@@ -189,8 +191,8 @@ public class JfsqlPreparedStatement implements PreparedStatement {
                 statementServiceManager.createTable((CreateTableWrapper) statement);
                 break;
             case DELETE:
-                final DeleteWrapper preparedDeleteStatement = PreparedStatementCreator.getPreparedDeleteStatement(
-                    (DeleteWrapper) statement, this);
+                final DeleteWrapper preparedDeleteStatement = preparedStatementCreator.getPreparedDeleteStatement(
+                    (DeleteWrapper) statement);
                 statementServiceManager.deleteFromTable(preparedDeleteStatement);
                 break;
             case DROP_DATABASE:
@@ -200,13 +202,13 @@ public class JfsqlPreparedStatement implements PreparedStatement {
                 statementServiceManager.dropTable((DropTableWrapper) statement);
                 break;
             case INSERT:
-                final InsertWrapper preparedInsertStatement = PreparedStatementCreator.getPreparedInsertStatement(
-                    (InsertWrapper) statement, this);
+                final InsertWrapper preparedInsertStatement = preparedStatementCreator.getPreparedInsertStatement(
+                    (InsertWrapper) statement);
                 statementServiceManager.insertIntoTable(preparedInsertStatement);
                 break;
             case UPDATE:
-                final UpdateWrapper preparedUpdateStatement = PreparedStatementCreator.getPreparedUpdateStatement(
-                    (UpdateWrapper) statement, this);
+                final UpdateWrapper preparedUpdateStatement = preparedStatementCreator.getPreparedUpdateStatement(
+                    (UpdateWrapper) statement);
                 statementServiceManager.updateTable(preparedUpdateStatement);
                 break;
             default:
@@ -221,8 +223,8 @@ public class JfsqlPreparedStatement implements PreparedStatement {
             throw new IllegalStateException("The statement couldn't be created.");
         }
         if (TypeOfStatement.SELECT.equals(statement.getTypeOfStatement())) {
-            final SelectWrapper preparedSelectStatement = PreparedStatementCreator.getPreparedSelectStatement(
-                (SelectWrapper) statement, this);
+            final SelectWrapper preparedSelectStatement = preparedStatementCreator.getPreparedSelectStatement(
+                (SelectWrapper) statement);
             executeQuery(preparedSelectStatement);
             return true;
         } else {
@@ -368,7 +370,7 @@ public class JfsqlPreparedStatement implements PreparedStatement {
 
     @Override
     public boolean execute() throws SQLException {
-        return execute(preparedStatement);
+        return execute(sql);
     }
 
     @Override

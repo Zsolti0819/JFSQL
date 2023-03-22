@@ -14,13 +14,14 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import lombok.experimental.UtilityClass;
+import lombok.RequiredArgsConstructor;
 
-@UtilityClass
+@RequiredArgsConstructor
 public class PreparedStatementCreator {
 
-    public DeleteWrapper getPreparedDeleteStatement(final DeleteWrapper statement,
-        final JfsqlPreparedStatement preparedStatement) {
+    private final JfsqlPreparedStatement preparedStatement;
+
+    public DeleteWrapper getPreparedDeleteStatement(final DeleteWrapper statement) {
         final String tableName = statement.getTableName();
         final List<String> whereColumns = statement.getWhereColumns();
         final List<String> whereValues = replacePlaceholders(preparedStatement, whereColumns,
@@ -30,8 +31,7 @@ public class PreparedStatementCreator {
         return new DeleteStatement(tableName, whereColumns, whereValues, symbols, binaryOperators);
     }
 
-    public InsertWrapper getPreparedInsertStatement(final InsertWrapper statement,
-        final JfsqlPreparedStatement preparedStatement) throws SQLException {
+    public InsertWrapper getPreparedInsertStatement(final InsertWrapper statement) throws SQLException {
         final String tableName = statement.getTableName();
         final List<String> columns;
         final List<List<String>> listOfValueLists = new ArrayList<>();
@@ -50,8 +50,7 @@ public class PreparedStatementCreator {
         return new InsertStatement(tableName, columns, listOfValueLists);
     }
 
-    public SelectWrapper getPreparedSelectStatement(final SelectWrapper statement,
-        final JfsqlPreparedStatement preparedStatement) {
+    public SelectWrapper getPreparedSelectStatement(final SelectWrapper statement) {
         final String tableName = statement.getTableName();
         final List<String> joinTableNames = statement.getJoinTableNames();
         final List<JoinType> joinTypes = statement.getJoinTypes();
@@ -66,8 +65,7 @@ public class PreparedStatementCreator {
             whereValues, symbols, binaryOperators);
     }
 
-    public UpdateWrapper getPreparedUpdateStatement(final UpdateWrapper statement,
-        final JfsqlPreparedStatement preparedStatement) {
+    public UpdateWrapper getPreparedUpdateStatement(final UpdateWrapper statement) {
         final String tableName = statement.getTableName();
         final List<String> columns = statement.getColumns();
         final List<String> values = replacePlaceholders(preparedStatement, columns, statement.getWhereValues(), 0);
