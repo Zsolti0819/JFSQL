@@ -17,20 +17,12 @@ import lombok.Getter;
 public class JfsqlDriver implements Driver {
 
     private static final Driver INSTANCE = new JfsqlDriver();
-    private static boolean registered;
 
     static {
-        load();
-    }
-
-    private static synchronized void load() {
-        if (!registered) {
-            registered = true;
-            try {
-                DriverManager.registerDriver(INSTANCE);
-            } catch (final SQLException e) {
-                e.printStackTrace();
-            }
+        try {
+            DriverManager.registerDriver(INSTANCE);
+        } catch (final SQLException e) {
+            e.printStackTrace();
         }
     }
 
@@ -43,20 +35,20 @@ public class JfsqlDriver implements Driver {
     }
 
     @Override
-    public Connection connect(String url, final Properties info) throws SQLException {
-        if (acceptsURL(url)) {
-            url = url.replace("jdbc:jfsql:", "");
-            if (!url.endsWith(File.separator)) {
-                url += File.separator;
-            }
-            final Path urlPath = Path.of(url);
-            if (urlPath.toFile().isFile()) {
-                throw new SQLException("Database is not a directory.");
-            }
-            final PropertiesReader propertiesReader = new PropertiesReader(info);
-            return new JfsqlConnection(urlPath, propertiesReader);
+    public Connection connect(final String url, final Properties info) throws SQLException {
+        if (!acceptsURL(url)) {
+            throw new SQLException("Couldn't establish connection, because wrong connection string format was used.");
         }
-        throw new SQLException("Couldn't establish connection, because wrong connection string format was used.");
+        String urlWithoutPrefix = url.replace("jdbc:jfsql:", "");
+        if (!urlWithoutPrefix.endsWith(File.separator)) {
+            urlWithoutPrefix += File.separator;
+        }
+        final Path urlPath = Path.of(urlWithoutPrefix);
+        if (urlPath.toFile().isFile()) {
+            throw new SQLException("Database is not a directory.");
+        }
+        final PropertiesReader propertiesReader = new PropertiesReader(info);
+        return new JfsqlConnection(urlPath, propertiesReader);
     }
 
     @Override
