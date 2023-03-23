@@ -32,7 +32,7 @@ public class AlterTableService {
     private final SemanticValidator semanticValidator;
     private final Reader reader;
 
-    void alterTable(final AlterTableWrapper statement) throws SQLException {
+    public int alterTable(final AlterTableWrapper statement) throws SQLException {
         final String tableName = statement.getTableName();
         final Table table = tableFinder.getTableByName(tableName);
         if (statement.getNewTableName() != null) {
@@ -45,6 +45,7 @@ public class AlterTableService {
             dropColumn(statement, table);
         }
         transactionManager.executeDDLOperation(table);
+        return 0;
     }
 
     private void renameTable(final AlterTableWrapper statement, final Table table) throws SQLException {

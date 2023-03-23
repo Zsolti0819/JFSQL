@@ -138,13 +138,13 @@ public class JfsqlPreparedStatement implements PreparedStatement {
         }
         switch (statement.getTypeOfStatement()) {
             case ALTER_TABLE:
-                statementServiceManager.alterTable((AlterTableWrapper) statement);
+                updateCount = statementServiceManager.alterTable((AlterTableWrapper) statement);
                 break;
             case CREATE_DATABASE:
-                statementServiceManager.createDatabase((CreateDatabaseWrapper) statement);
+                updateCount = statementServiceManager.createDatabase((CreateDatabaseWrapper) statement);
                 break;
             case CREATE_TABLE:
-                statementServiceManager.createTable((CreateTableWrapper) statement);
+                updateCount = statementServiceManager.createTable((CreateTableWrapper) statement);
                 break;
             case DELETE:
                 final DeleteWrapper preparedDeleteStatement = preparedStatementCreator.getPreparedDeleteStatement(

@@ -30,7 +30,7 @@ public class CreateTableService {
     private final SemanticValidator semanticValidator;
     private final Reader reader;
 
-    public void createTable(final CreateTableWrapper statement) throws SQLException {
+    public int createTable(final CreateTableWrapper statement) throws SQLException {
         final String tableName = statement.getTableName();
 
         if (semanticValidator.tableNameEqualsDatabaseName(statement.getTableName(), database)) {
@@ -47,7 +47,7 @@ public class CreateTableService {
             logger.debug(
                 "Table '{}' already exists, but 'IF NOT EXISTS' clause was present in the statement, no new table will be created.",
                 tableName);
-            return;
+            return 0;
         }
 
         if (semanticValidator.columnsHaveDuplicate(statement)) {
@@ -75,5 +75,6 @@ public class CreateTableService {
         table.setEntries(entries);
         database.getTables().add(table);
         transactionManager.executeDDLOperation(table);
+        return 0;
     }
 }

@@ -18,7 +18,7 @@ public class CreateDatabaseService {
     private final SemanticValidator semanticValidator;
     private final Reader reader;
 
-    public void createDatabase(final CreateDatabaseWrapper statement) throws SQLException {
+    public int createDatabase(final CreateDatabaseWrapper statement) throws SQLException {
         if (semanticValidator.urlIsAnExistingRegularFile(statement)) {
             throw new SQLException("Database is not a directory.");
         }
@@ -33,5 +33,6 @@ public class CreateDatabaseService {
         final Database database = new Database(databaseFilePath, new LinkedList<>());
 
         transactionManager.executeCreateDatabaseOperation(database);
+        return 0;
     }
 }

@@ -42,21 +42,21 @@ public class StatementServiceManager {
         whereConditionSolver = new WhereConditionSolver();
     }
 
-    public void alterTable(final AlterTableWrapper statement) throws SQLException {
-        new AlterTableService(tableFinder, database, transactionManager, semanticValidator, reader).alterTable(
+    public int alterTable(final AlterTableWrapper statement) throws SQLException {
+        return new AlterTableService(tableFinder, database, transactionManager, semanticValidator, reader).alterTable(
             statement);
     }
 
-    public void createDatabase(final CreateDatabaseWrapper statement) throws SQLException {
-        new CreateDatabaseService(transactionManager, semanticValidator, reader).createDatabase(statement);
+    public int createDatabase(final CreateDatabaseWrapper statement) throws SQLException {
+        return new CreateDatabaseService(transactionManager, semanticValidator, reader).createDatabase(statement);
     }
 
     public int dropDatabase(final DropDatabaseWrapper statement) throws SQLException {
         return new DropDatabaseService(transactionManager, semanticValidator, reader).dropDatabase(statement);
     }
 
-    public void createTable(final CreateTableWrapper statement) throws SQLException {
-        new CreateTableService(database, transactionManager, semanticValidator, reader).createTable(statement);
+    public int createTable(final CreateTableWrapper statement) throws SQLException {
+        return new CreateTableService(database, transactionManager, semanticValidator, reader).createTable(statement);
     }
 
     public int insertIntoTable(final InsertWrapper statement) throws SQLException {
