@@ -5,6 +5,7 @@ import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.util.DatatypeConverter;
+import com.github.jfsql.driver.validation.SchemaValidationException;
 import com.github.jfsql.driver.validation.XmlSchemaValidator;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -59,7 +60,7 @@ public class WriterXmlImpl extends Writer {
     }
 
     @Override
-    public void writeTable(final Table table) throws IOException {
+    public void writeTable(final Table table) throws IOException, SchemaValidationException {
         logger.trace("table = {}", table);
         logger.trace("table entries = {}", table.getEntries());
         final String tableFile = table.getTableFile();
@@ -91,7 +92,7 @@ public class WriterXmlImpl extends Writer {
             final String schemaFile = table.getSchema().getSchemaFile();
             final boolean isValid = XML_SCHEMA_VALIDATOR.schemaIsValid(schemaFile, tableFile);
             if (!isValid) {
-                throw new IOException("\"" + tableFile + "\" is not valid against \"" + schemaFile + "\"");
+                throw new SchemaValidationException("'" + tableFile + "' is not valid against '" + schemaFile + "'");
             }
         }
     }

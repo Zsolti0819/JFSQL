@@ -56,7 +56,7 @@ public class JGitTransactionManagerImpl extends TransactionManager {
         }
     }
 
-    private Collection<File> getFilesThatShouldNotBePresent() throws SQLException {
+    private Collection<File> getFilesThatShouldNotBePresent() throws IOException {
         final Path databaseUrl = database.getUrl();
         final String fileExtension = reader.getFileExtension();
         final String schemaExtension = reader.getSchemaFileExtension();

@@ -4,7 +4,7 @@ import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
-import java.sql.SQLException;
+import java.io.IOException;
 import java.util.List;
 
 public interface Reader {
@@ -13,14 +13,14 @@ public interface Reader {
 
     String getSchemaFileExtension();
 
-    List<Entry> readEntriesFromTable(final Table table) throws SQLException;
+    List<Entry> readEntriesFromTable(final Table table) throws IOException;
 
-    Schema readSchema(final String pathToSchema) throws SQLException;
+    Schema readSchema(final String pathToSchema) throws IOException;
 
-    List<Table> readTablesFromDatabaseFile(final Database database) throws SQLException;
+    List<Table> readTablesFromDatabaseFile(final Database database) throws IOException;
 
-    String readBlob(final String pathToBlob) throws SQLException;
+    String readBlob(final String pathToBlob) throws IOException;
 
-    boolean pathIsPresentInDatabaseFile(final Database database, final String pathToCheck) throws SQLException;
+    boolean pathIsPresentInDatabaseFile(final Database database, final String pathToCheck) throws IOException;
 
 }

@@ -9,7 +9,6 @@ import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.sql.SQLException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -57,7 +56,7 @@ class ReaderJsonImplTest {
             new Entry(entry3ColumnsAndTypes),
             new Entry(entry4ColumnsAndTypes)
         );
-        Schema schema = new Schema(String.valueOf(TestUtils.JSON_SCHEMA_PATH), returnColumnsAndTypes,
+        final Schema schema = new Schema(String.valueOf(TestUtils.JSON_SCHEMA_PATH), returnColumnsAndTypes,
             notNullColumns);
         table = new Table("myTable", String.valueOf(TestUtils.JSON_TABLE_PATH), schema, returnEntries);
         database = new Database(TestUtils.JSON_DATABASE_PATH, List.of(table));
@@ -72,19 +71,19 @@ class ReaderJsonImplTest {
     }
 
     @Test
-    void testReader_readEntriesFromTable() throws SQLException {
+    void testReader_readEntriesFromTable() throws IOException {
         final List<Entry> entries = reader.readEntriesFromTable(table);
         assertEquals(table.getEntries(), entries);
     }
 
     @Test
-    void testReader_readSchema() throws SQLException {
+    void testReader_readSchema() throws IOException {
         final Schema schema = reader.readSchema(String.valueOf(TestUtils.JSON_SCHEMA_PATH));
         assertEquals(table.getSchema(), schema);
     }
 
     @Test
-    void testReader_readTablesFromDatabaseFile() throws SQLException {
+    void testReader_readTablesFromDatabaseFile() throws IOException {
         final List<Table> tables = reader.readTablesFromDatabaseFile(database);
         // Because we don't read the table's entries at this point
         final Schema schema = new Schema(table.getSchema().getSchemaFile(), table.getSchema().getColumnsAndTypes(),

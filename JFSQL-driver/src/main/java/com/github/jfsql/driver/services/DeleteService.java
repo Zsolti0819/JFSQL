@@ -8,6 +8,7 @@ import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.driver.util.WhereConditionSolver;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.DeleteWrapper;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +26,12 @@ public class DeleteService {
         final List<String> whereColumns = statement.getWhereColumns();
         final Table activeTable = tableFinder.getTableByName(statement.getTableName());
         if (activeTable.getEntries().isEmpty()) {
-            final List<Entry> entries = reader.readEntriesFromTable(activeTable);
-            activeTable.setEntries(entries);
+            try {
+                final List<Entry> entries = reader.readEntriesFromTable(activeTable);
+                activeTable.setEntries(entries);
+            } catch (final IOException e) {
+                throw new SQLException("Failed to read entries from the table.\n" + e.getMessage());
+            }
         }
 
         final int deleteCount;

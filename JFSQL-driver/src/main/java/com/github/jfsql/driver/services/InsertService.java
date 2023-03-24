@@ -7,6 +7,7 @@ import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.InsertWrapper;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -49,8 +50,12 @@ public class InsertService {
         }
 
         if (activeTable.getEntries().isEmpty()) {
-            final List<Entry> entries = reader.readEntriesFromTable(activeTable);
-            activeTable.setEntries(entries);
+            try {
+                final List<Entry> entries = reader.readEntriesFromTable(activeTable);
+                activeTable.setEntries(entries);
+            } catch (final IOException e) {
+                throw new SQLException("Failed to read entries from the table.\n" + e.getMessage());
+            }
         }
 
         final List<Entry> entriesToInsert = getEntriesToInsert(statement, activeTable);

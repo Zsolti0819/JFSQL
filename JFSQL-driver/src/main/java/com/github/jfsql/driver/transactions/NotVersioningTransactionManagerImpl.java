@@ -35,8 +35,12 @@ public class NotVersioningTransactionManagerImpl extends TransactionManager {
 
     @Override
     public void openDatabase() throws SQLException {
-        final List<Table> tables = reader.readTablesFromDatabaseFile(database);
-        database.setTables(tables);
+        try {
+            final List<Table> tables = reader.readTablesFromDatabaseFile(database);
+            database.setTables(tables);
+        } catch (final IOException e) {
+            throw new SQLException("Failed to read the tables from the database file.\n" + e.getMessage());
+        }
     }
 
     @Override

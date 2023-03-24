@@ -6,6 +6,7 @@ import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.util.DatatypeConverter;
 import com.github.jfsql.driver.validation.JsonSchemaValidator;
+import com.github.jfsql.driver.validation.SchemaValidationException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -44,7 +45,7 @@ public class WriterJsonImpl extends Writer {
     }
 
     @Override
-    public void writeTable(final Table table) throws IOException {
+    public void writeTable(final Table table) throws IOException, SchemaValidationException {
         logger.trace("table = {}", table);
         logger.trace("table entries = {}", table.getEntries());
         final String tableFile = table.getTableFile();
@@ -72,7 +73,7 @@ public class WriterJsonImpl extends Writer {
             final String schemaFile = table.getSchema().getSchemaFile();
             final boolean isValid = JSON_SCHEMA_VALIDATOR.schemaIsValid(schemaFile, tableFile);
             if (!isValid) {
-                throw new IOException("\"" + tableFile + "\" is not valid against \"" + schemaFile + "\"");
+                throw new SchemaValidationException("'" + tableFile + "' is not valid against '" + schemaFile + "'");
             }
         }
     }

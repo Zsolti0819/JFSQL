@@ -11,23 +11,27 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import lombok.Data;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @Data
 public abstract class TransactionManager {
 
-    protected final Reader reader;
-    protected final Writer writer;
-    private static final Map<String, Long> FILE_THREADID_MAP = new HashMap<>();
+    private static final Logger logger = LogManager.getLogger(TransactionManager.class);
+    private static final Map<String, Long> FILE_TO_THREAD_ID_MAP = new HashMap<>();
+    final Reader reader;
+    final Writer writer;
     final Set<Table> uncommittedTables;
     final Set<Schema> uncommittedSchemas;
     final Set<Database> uncommittedDatabases;
-    protected Database database;
+    Database database;
     boolean autoCommit;
 
     protected TransactionManager(final Path url, final Reader reader, final Writer writer) throws SQLException {
@@ -79,11 +83,7 @@ public abstract class TransactionManager {
 
     public void executeDMLOperation(final Table table) throws SQLException {
         if (!autoCommit) {
-            try {
-                addTableToUncommittedObjects(table);
-            } catch (final PessimisticLockException e) {
-                removeCurrentThreadChangesFromMap();
-            }
+            addTableToUncommittedObjects(table);
         } else {
             try {
                 writer.writeTable(table);
@@ -97,13 +97,9 @@ public abstract class TransactionManager {
 
     public void executeDDLOperation(final Table table, final Schema schema) throws SQLException {
         if (!autoCommit) {
-            try {
-                addDatabaseToUncommittedObjects(database);
-                addSchemaToUncommittedObjects(schema);
-                addTableToUncommittedObjects(table);
-            } catch (final PessimisticLockException e) {
-                removeCurrentThreadChangesFromMap();
-            }
+            addDatabaseToUncommittedObjects(database);
+            addSchemaToUncommittedObjects(schema);
+            addTableToUncommittedObjects(table);
         } else {
             try {
                 writer.writeDatabaseFile(database);
@@ -119,11 +115,7 @@ public abstract class TransactionManager {
 
     public void executeDropTableOperation() throws SQLException {
         if (!autoCommit) {
-            try {
-                addDatabaseToUncommittedObjects(database);
-            } catch (final PessimisticLockException e) {
-                removeCurrentThreadChangesFromMap();
-            }
+            addDatabaseToUncommittedObjects(database);
         } else {
             try {
                 writer.writeDatabaseFile(database);
@@ -140,49 +132,60 @@ public abstract class TransactionManager {
     }
 
     public void addTableToUncommittedObjects(final Table table) {
-        if (FILE_THREADID_MAP.containsKey(table.getTableFile())) {
-            if (!Objects.equals(FILE_THREADID_MAP.get(table.getTableFile()), Thread.currentThread().getId())) {
-                throw new PessimisticLockException("Pessimistic lock exception, the file '" + table.getTableFile()
-                    + "' is currently modified by another thread.");
+        if (FILE_TO_THREAD_ID_MAP.containsKey(table.getTableFile())) {
+            if (!Objects.equals(FILE_TO_THREAD_ID_MAP.get(table.getTableFile()), Thread.currentThread().getId())) {
+                // remove all entries from the shared map, where the value was the thread's id
+                removeCurrentThreadChangesFromMap();
+                throw new PessimisticLockException(
+                    "The file '" + table.getTableFile() + "' is currently modified by another thread.");
             }
         } else {
-            FILE_THREADID_MAP.put(table.getTableFile(), Thread.currentThread().getId());
+            FILE_TO_THREAD_ID_MAP.put(table.getTableFile(), Thread.currentThread().getId());
         }
         uncommittedTables.add(table);
     }
 
     public void addSchemaToUncommittedObjects(final Schema schema) {
-        if (FILE_THREADID_MAP.containsKey(schema.getSchemaFile())) {
-            if (!Objects.equals(FILE_THREADID_MAP.get(schema.getSchemaFile()),
+        if (FILE_TO_THREAD_ID_MAP.containsKey(schema.getSchemaFile())) {
+            if (!Objects.equals(FILE_TO_THREAD_ID_MAP.get(schema.getSchemaFile()),
                 Thread.currentThread().getId())) {
-                throw new PessimisticLockException("Pessimistic lock exception, the file '" + schema.getSchemaFile()
-                    + "' is currently modified by another thread.");
+                // remove all entries from the shared map, where the value was the thread's id
+                removeCurrentThreadChangesFromMap();
+                throw new PessimisticLockException(
+                    "The file '" + schema.getSchemaFile() + "' is currently modified by another thread.");
             }
         } else {
-            FILE_THREADID_MAP.put(schema.getSchemaFile(), Thread.currentThread().getId());
+            FILE_TO_THREAD_ID_MAP.put(schema.getSchemaFile(), Thread.currentThread().getId());
         }
         uncommittedSchemas.add(schema);
     }
 
     public void addDatabaseToUncommittedObjects(final Database database) {
-        if (FILE_THREADID_MAP.containsKey(String.valueOf(database.getUrl()))) {
-            if (!Objects.equals(FILE_THREADID_MAP.get(String.valueOf(database.getUrl())),
+        if (FILE_TO_THREAD_ID_MAP.containsKey(String.valueOf(database.getUrl()))) {
+            if (!Objects.equals(FILE_TO_THREAD_ID_MAP.get(String.valueOf(database.getUrl())),
                 Thread.currentThread().getId())) {
-                throw new PessimisticLockException("Pessimistic lock exception, the file '" + database.getUrl()
-                    + "' is currently modified by another thread.");
+                // remove all entries from the shared map, where the value was the thread's id
+                removeCurrentThreadChangesFromMap();
+                throw new PessimisticLockException(
+                    "The file '" + database.getUrl() + "' is currently modified by another thread.");
             }
         } else {
-            FILE_THREADID_MAP.put(String.valueOf(database.getUrl()), Thread.currentThread().getId());
+            FILE_TO_THREAD_ID_MAP.put(String.valueOf(database.getUrl()), Thread.currentThread().getId());
         }
         uncommittedDatabases.add(database);
     }
 
     private void removeCurrentThreadChangesFromMap() {
-        for (final Map.Entry<String, Long> entry : FILE_THREADID_MAP.entrySet()) {
-            final String key = entry.getKey();
-            final Long value = entry.getValue();
-            if (Objects.equals(value, Thread.currentThread().getId())) {
-                FILE_THREADID_MAP.remove(key);
+        logger.debug("shared map = {}", FILE_TO_THREAD_ID_MAP);
+        synchronized (FILE_TO_THREAD_ID_MAP) {
+            final Iterator<Map.Entry<String, Long>> iterator = FILE_TO_THREAD_ID_MAP.entrySet().iterator();
+            while (iterator.hasNext()) {
+                final Map.Entry<String, Long> entry = iterator.next();
+                final Long value = entry.getValue();
+                if (Objects.equals(value, Thread.currentThread().getId())) {
+                    logger.debug("key to remove = {}", entry.getKey());
+                    iterator.remove();
+                }
             }
         }
     }

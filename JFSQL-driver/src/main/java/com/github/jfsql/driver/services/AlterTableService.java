@@ -81,8 +81,12 @@ public class AlterTableService {
         table.setTableFile(newTableFile);
         table.getSchema().setSchemaFile(newSchemaFile);
         if (table.getEntries().isEmpty()) {
-            final List<Entry> entries = reader.readEntriesFromTable(table);
-            table.setEntries(entries);
+            try {
+                final List<Entry> entries = reader.readEntriesFromTable(table);
+                table.setEntries(entries);
+            } catch (final IOException e) {
+                throw new SQLException("Failed to read entries from the table.\n" + e.getMessage());
+            }
         }
     }
 
@@ -100,8 +104,12 @@ public class AlterTableService {
         table.getSchema().setNotNullColumns(modifiedNotNullColumns);
 
         if (table.getEntries().isEmpty()) {
-            final List<Entry> entries = reader.readEntriesFromTable(table);
-            table.setEntries(entries);
+            try {
+                final List<Entry> entries = reader.readEntriesFromTable(table);
+                table.setEntries(entries);
+            } catch (final IOException e) {
+                throw new SQLException("Failed to read entries from the table.\n" + e.getMessage());
+            }
         }
 
         // Modify the column name for every entry in the table
@@ -158,8 +166,12 @@ public class AlterTableService {
         }
 
         if (table.getEntries().isEmpty()) {
-            final List<Entry> entries = reader.readEntriesFromTable(table);
-            table.setEntries(entries);
+            try {
+                final List<Entry> entries = reader.readEntriesFromTable(table);
+                table.setEntries(entries);
+            } catch (final IOException e) {
+                throw new SQLException("Failed to read entries from the table.\n" + e.getMessage());
+            }
         }
 
         // Add the column to every entry in the table
@@ -195,8 +207,12 @@ public class AlterTableService {
         table.getSchema().getNotNullColumns().remove(statement.getColumnToDrop());
 
         if (table.getEntries().isEmpty()) {
-            final List<Entry> entries = reader.readEntriesFromTable(table);
-            table.setEntries(entries);
+            try {
+                final List<Entry> entries = reader.readEntriesFromTable(table);
+                table.setEntries(entries);
+            } catch (final IOException e) {
+                throw new SQLException("Failed to read entries from the table.\n" + e.getMessage());
+            }
         }
 
         // Remove the columns from every entry in the table

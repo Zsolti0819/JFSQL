@@ -3,6 +3,7 @@ package com.github.jfsql.driver.persistence;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
+import com.github.jfsql.driver.validation.SchemaValidationException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -21,7 +22,7 @@ public abstract class Writer {
         this.useSchemaValidation = useSchemaValidation;
     }
 
-    public abstract void writeTable(final Table table) throws IOException;
+    public abstract void writeTable(final Table table) throws IOException, SchemaValidationException;
 
     public abstract void writeSchema(final Schema schema) throws IOException;
 

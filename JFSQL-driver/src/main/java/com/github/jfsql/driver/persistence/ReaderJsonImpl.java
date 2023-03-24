@@ -12,7 +12,6 @@ import com.google.gson.JsonParser;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -36,7 +35,7 @@ public class ReaderJsonImpl implements Reader {
     }
 
     @Override
-    public List<Entry> readEntriesFromTable(final Table table) throws SQLException {
+    public List<Entry> readEntriesFromTable(final Table table) throws IOException {
         final String tableFile = table.getTableFile();
         final List<Entry> entries = new ArrayList<>();
 
@@ -60,14 +59,11 @@ public class ReaderJsonImpl implements Reader {
                 }
                 entries.add(new Entry(columnsAndValues));
             }
-        } catch (final IOException e) {
-            throw new SQLException("Failed to read the table.\n" + e.getMessage());
         }
         return entries;
     }
 
-    private String getValue(final Table table, final String column, final JsonObject entryObject)
-        throws SQLException {
+    private String getValue(final Table table, final String column, final JsonObject entryObject) throws IOException {
         if (entryObject.get(column).isJsonNull()) {
             return null;
         } else {
@@ -80,7 +76,7 @@ public class ReaderJsonImpl implements Reader {
     }
 
     @Override
-    public Schema readSchema(final String pathToSchema) throws SQLException {
+    public Schema readSchema(final String pathToSchema) throws IOException {
         final Map<String, String> columnsAndTypes = new LinkedHashMap<>();
         final Map<String, Boolean> notNullColumns = new LinkedHashMap<>();
         try (final FileReader fileReader = new FileReader(pathToSchema)) {
@@ -109,13 +105,11 @@ public class ReaderJsonImpl implements Reader {
                 }
             }
             return new Schema(pathToSchema, columnsAndTypes, notNullColumns);
-        } catch (final IOException e) {
-            throw new SQLException("Failed to read the schema for the table.\n" + e.getMessage());
         }
     }
 
     @Override
-    public List<Table> readTablesFromDatabaseFile(final Database database) throws SQLException {
+    public List<Table> readTablesFromDatabaseFile(final Database database) throws IOException {
         final List<Table> tables = new ArrayList<>();
         final String url = String.valueOf(database.getUrl());
         try (final FileReader fileReader = new FileReader(url)) {
@@ -132,47 +126,40 @@ public class ReaderJsonImpl implements Reader {
                 final Table table = new Table(tableName, tablePath, schema, new ArrayList<>());
                 tables.add(table);
             }
-        } catch (final IOException | SQLException e) {
-            throw new SQLException("Failed to read the database file.\n" + e.getMessage());
         }
         return tables;
     }
 
     @Override
-    public String readBlob(final String pathToBlob) throws SQLException {
+    public String readBlob(final String pathToBlob) throws IOException {
         try (final FileReader fileReader = new FileReader(pathToBlob)) {
             final JsonElement json = JsonParser.parseReader(fileReader);
             final JsonObject jsonObject = json.getAsJsonObject();
             return jsonObject.get("blob").getAsString();
-        } catch (final IOException e) {
-            throw new SQLException("Failed to read blob.\n" + e.getMessage());
         }
     }
 
     @Override
-    public boolean pathIsPresentInDatabaseFile(final Database database, final String pathToCheck) throws SQLException {
+    public boolean pathIsPresentInDatabaseFile(final Database database, final String pathToCheck) throws IOException {
         final String jsonFilePath = String.valueOf(database.getUrl());
-        try {
-            final FileReader fileReader = new FileReader(jsonFilePath);
-            final JsonElement jsonElement = JsonParser.parseReader(fileReader);
-            if (jsonElement.isJsonObject()) {
-                final JsonObject rootObject = jsonElement.getAsJsonObject();
-                final JsonArray tableArray = rootObject.getAsJsonArray("Table");
-                for (final JsonElement tableElement : tableArray) {
-                    final JsonObject tableObject = tableElement.getAsJsonObject();
-                    final String pathToTable = tableObject.get("pathToTable").getAsString();
-                    final String pathToSchema = tableObject.get("pathToSchema").getAsString();
-                    if (pathToTable.equals(pathToCheck) || pathToSchema.equals(pathToCheck)) {
-                        fileReader.close();
-                        return true;
-                    }
+        final FileReader fileReader = new FileReader(jsonFilePath);
+        final JsonElement jsonElement = JsonParser.parseReader(fileReader);
+        if (jsonElement.isJsonObject()) {
+            final JsonObject rootObject = jsonElement.getAsJsonObject();
+            final JsonArray tableArray = rootObject.getAsJsonArray("Table");
+            for (final JsonElement tableElement : tableArray) {
+                final JsonObject tableObject = tableElement.getAsJsonObject();
+                final String pathToTable = tableObject.get("pathToTable").getAsString();
+                final String pathToSchema = tableObject.get("pathToSchema").getAsString();
+                if (pathToTable.equals(pathToCheck) || pathToSchema.equals(pathToCheck)) {
+                    fileReader.close();
+                    return true;
                 }
             }
-            fileReader.close();
-            return false;
-        } catch (final IOException e) {
-            throw new SQLException("Failed to verify the presence of the files in the folder.\n" + e.getMessage());
         }
+        fileReader.close();
+        return false;
+
     }
 
 }

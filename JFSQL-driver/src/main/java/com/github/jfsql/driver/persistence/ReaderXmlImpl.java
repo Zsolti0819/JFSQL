@@ -7,7 +7,6 @@ import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.util.DatatypeConverter;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -44,7 +43,7 @@ public class ReaderXmlImpl implements Reader {
     }
 
     @Override
-    public List<Entry> readEntriesFromTable(final Table table) throws SQLException {
+    public List<Entry> readEntriesFromTable(final Table table) throws IOException {
         final String tableFile = table.getTableFile();
         final List<Entry> entries = new ArrayList<>();
 
@@ -71,14 +70,13 @@ public class ReaderXmlImpl implements Reader {
                 }
                 entries.add(new Entry(columnsAndValues));
             }
-        } catch (final ParserConfigurationException | SAXException | IOException e) {
-            throw new SQLException("Failed to read the table.\n" + e.getMessage());
+        } catch (final ParserConfigurationException | SAXException e) {
+            throw new IOException(e);
         }
         return entries;
     }
 
-    private String getValue(final Table table, final String column, final Element entry)
-        throws SQLException {
+    private String getValue(final Table table, final String column, final Element entry) throws IOException {
         if (entry.getElementsByTagName(column).item(0) == null) {
             return null;
         }
@@ -90,7 +88,7 @@ public class ReaderXmlImpl implements Reader {
     }
 
     @Override
-    public Schema readSchema(final String pathToSchema) throws SQLException {
+    public Schema readSchema(final String pathToSchema) throws IOException {
         final Map<String, String> columnsAndTypes = new LinkedHashMap<>();
         final Map<String, Boolean> notNullColumns = new LinkedHashMap<>();
         try {
@@ -124,13 +122,13 @@ public class ReaderXmlImpl implements Reader {
                 }
             }
             return new Schema(pathToSchema, columnsAndTypes, notNullColumns);
-        } catch (final ParserConfigurationException | IOException | SAXException e) {
-            throw new SQLException("Failed to read the schema for the table.\n" + e.getMessage());
+        } catch (final ParserConfigurationException | SAXException e) {
+            throw new IOException(e);
         }
     }
 
     @Override
-    public List<Table> readTablesFromDatabaseFile(final Database database) throws SQLException {
+    public List<Table> readTablesFromDatabaseFile(final Database database) throws IOException {
         final List<Table> tables = new ArrayList<>();
         try {
             final String url = String.valueOf(database.getUrl());
@@ -154,15 +152,14 @@ public class ReaderXmlImpl implements Reader {
                 final Table table = new Table(tableName, xmlPath, schema, new ArrayList<>());
                 tables.add(table);
             }
-        } catch (final ParserConfigurationException | SAXException | IOException | XPathExpressionException |
-                       SQLException e) {
-            throw new SQLException("Failed to read the database file.\n" + e.getMessage());
+        } catch (final ParserConfigurationException | SAXException | XPathExpressionException e) {
+            throw new IOException(e);
         }
         return tables;
     }
 
     @Override
-    public String readBlob(final String pathToBlob) throws SQLException {
+    public String readBlob(final String pathToBlob) throws IOException {
         try {
             final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
@@ -170,13 +167,13 @@ public class ReaderXmlImpl implements Reader {
             final Document document = builder.parse(pathToBlob);
             return document.getElementsByTagName("blob").item(0).getTextContent();
 
-        } catch (final ParserConfigurationException | IOException | SAXException e) {
-            throw new SQLException("Failed to read blob.\n" + e.getMessage());
+        } catch (final ParserConfigurationException | SAXException e) {
+            throw new IOException(e);
         }
     }
 
     @Override
-    public boolean pathIsPresentInDatabaseFile(final Database database, final String pathToCheck) throws SQLException {
+    public boolean pathIsPresentInDatabaseFile(final Database database, final String pathToCheck) throws IOException {
         final String xmlFilePath = String.valueOf(database.getUrl());
         try {
             final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -200,8 +197,8 @@ public class ReaderXmlImpl implements Reader {
                 }
             }
             return false;
-        } catch (final ParserConfigurationException | IOException | SAXException e) {
-            throw new SQLException("Failed to verify the presence of the files in the folder.\n" + e.getMessage());
+        } catch (final ParserConfigurationException | SAXException e) {
+            throw new IOException(e);
         }
     }
 }
