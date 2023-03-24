@@ -39,11 +39,12 @@ public class PropertiesReader {
                     statementCachingString, statementCaching);
             } catch (final IllegalArgumentException e) {
                 logger.info(
-                    "Failed to parse the value '{}' for the key for 'statement.caching', the default value (true) will be used",
-                    statementCachingString);
+                    "Failed to parse the value '{}' for the key for 'statement.caching', the default value '{}' will be used",
+                    statementCachingString, statementCaching);
             }
         } else {
-            logger.info("No value was found for key 'statement.caching', the default value (true) will be used");
+            logger.info("No value was found for key 'statement.caching', the default value '{}' will be used",
+                statementCaching);
         }
     }
 
@@ -56,11 +57,12 @@ public class PropertiesReader {
                     schemaValidationString, schemaValidation);
             } catch (final IllegalArgumentException e) {
                 logger.info(
-                    "Failed to parse the value '{}' for the key 'schema.validation', the default value (true) will be used",
-                    schemaValidationString);
+                    "Failed to parse the value '{}' for the key 'schema.validation', the default value '{}' will be used",
+                    schemaValidationString, schemaValidation);
             }
         } else {
-            logger.info("No value was found for key 'schema.validation', the default value (true) will be used");
+            logger.info("No value was found for key 'schema.validation', the default value '{}' will be used",
+                schemaValidation);
         }
     }
 
@@ -73,11 +75,12 @@ public class PropertiesReader {
                     transactionVersioningString, transactionVersioning);
             } catch (final IllegalArgumentException e) {
                 logger.info(
-                    "Failed to parse the value '{}' for the key 'transaction.versioning', the default value (true) will be used",
-                    transactionVersioningString);
+                    "Failed to parse the value '{}' for the key 'transaction.versioning', the default value '{}' will be used",
+                    transactionVersioningString, transactionVersioning);
             }
         } else {
-            logger.info("No value was found for key 'transaction.versioning', the default value (true) will be used");
+            logger.info("No value was found for key 'transaction.versioning', the default value '{}' will be used",
+                transactionVersioning);
         }
     }
 
@@ -91,11 +94,12 @@ public class PropertiesReader {
                     persistenceString, persistence);
             } else {
                 logger.info(
-                    "Failed to parse the value '{}' for the key 'persistence', will use the default value (xml)",
-                    persistenceString);
+                    "Failed to parse the value '{}' for the key 'persistence', will use the default value '{}'",
+                    persistenceString, persistence);
             }
         } else {
-            logger.info("No value was found for key 'persistence', the default value (xml) will be used");
+            logger.info("No value was found for key 'persistence', the default value '{}' will be used",
+                persistence);
         }
     }
 
