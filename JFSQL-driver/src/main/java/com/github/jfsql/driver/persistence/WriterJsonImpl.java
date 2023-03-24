@@ -2,6 +2,7 @@ package com.github.jfsql.driver.persistence;
 
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
+import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.util.DatatypeConverter;
 import com.github.jfsql.driver.validation.JsonSchemaValidator;
@@ -14,9 +15,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -43,11 +44,13 @@ public class WriterJsonImpl extends Writer {
     }
 
     @Override
-    public void writeTable(final Table table) throws SQLException {
+    public void writeTable(final Table table) throws IOException {
         logger.trace("table = {}", table);
         logger.trace("table entries = {}", table.getEntries());
         final String tableFile = table.getTableFile();
-        try (final FileOutputStream fileOutputStream = new FileOutputStream(tableFile)) {
+        try (final FileOutputStream fileOutputStream = new FileOutputStream(tableFile);
+            final FileChannel fileChannel = fileOutputStream.getChannel()) {
+            fileChannel.tryLock();
             final List<Entry> entries = table.getEntries();
             final JsonObject root = new JsonObject();
 
@@ -64,21 +67,18 @@ public class WriterJsonImpl extends Writer {
 
             final String jsonString = beautify(root);
             fileOutputStream.write(jsonString.getBytes());
-        } catch (final IOException e) {
-            throw new SQLException("Failed to write the table." + e.getMessage());
         }
-
         if (useSchemaValidation) {
             final String schemaFile = table.getSchema().getSchemaFile();
             final boolean isValid = JSON_SCHEMA_VALIDATOR.schemaIsValid(schemaFile, tableFile);
             if (!isValid) {
-                throw new SQLException("\"" + tableFile + "\" is not valid against \"" + schemaFile + "\"");
+                throw new IOException("\"" + tableFile + "\" is not valid against \"" + schemaFile + "\"");
             }
         }
     }
 
     private void checkTypeAndValueThenAddProperty(final Table table, final Entry entry, final String column,
-        final JsonObject entryObject) throws SQLException {
+        final JsonObject entryObject) throws IOException {
         final String value = entry.getColumnsAndValues().get(column);
         final String type = table.getSchema().getColumnsAndTypes().get(column);
         if (value == null || Objects.equals(value, "null")) {
@@ -97,12 +97,14 @@ public class WriterJsonImpl extends Writer {
     }
 
     @Override
-    public void writeSchema(final Table table) throws SQLException {
-        logger.trace("table = {}", table);
-        final String schemaFile = table.getSchema().getSchemaFile();
-        try (final FileOutputStream fileOutputStream = new FileOutputStream(schemaFile)) {
-            final List<String> columnNames = new ArrayList<>(table.getSchema().getColumnsAndTypes().keySet());
-            final List<String> columnTypes = new ArrayList<>(table.getSchema().getColumnsAndTypes().values());
+    public void writeSchema(final Schema schema) throws IOException {
+        logger.trace("table = {}", schema);
+        final String schemaFile = schema.getSchemaFile();
+        try (final FileOutputStream fileOutputStream = new FileOutputStream(schemaFile);
+            final FileChannel fileChannel = fileOutputStream.getChannel()) {
+            fileChannel.tryLock();
+            final List<String> columnNames = new ArrayList<>(schema.getColumnsAndTypes().keySet());
+            final List<String> columnTypes = new ArrayList<>(schema.getColumnsAndTypes().values());
 
             final JsonObject root = new JsonObject();
             root.addProperty("$schema", "http://json-schema.org/draft-06/schema#");
@@ -125,7 +127,7 @@ public class WriterJsonImpl extends Writer {
             final JsonArray requiredColumns = new JsonArray();
             items.add("required", requiredColumns);
             for (final String columnName : columnNames) {
-                if (Boolean.TRUE.equals(table.getSchema().getNotNullColumns().get(columnName))) {
+                if (Boolean.TRUE.equals(schema.getNotNullColumns().get(columnName))) {
                     requiredColumns.add(columnName);
                 }
             }
@@ -137,9 +139,9 @@ public class WriterJsonImpl extends Writer {
                 thirdProperties.add(columnNames.get(i), columnName);
                 final JsonArray columns = new JsonArray();
                 final String jsonDatatype = DatatypeConverter.convertFromSqlToJson(columnTypes.get(i));
-                if (Boolean.TRUE.equals(table.getSchema().getNotNullColumns().get(columnNames.get(i)))) {
+                if (Boolean.TRUE.equals(schema.getNotNullColumns().get(columnNames.get(i)))) {
                     columns.add(jsonDatatype);
-                } else if (Boolean.FALSE.equals(table.getSchema().getNotNullColumns().get(columnNames.get(i)))) {
+                } else if (Boolean.FALSE.equals(schema.getNotNullColumns().get(columnNames.get(i)))) {
                     columns.add(jsonDatatype);
                     columns.add("null");
                 }
@@ -151,19 +153,19 @@ public class WriterJsonImpl extends Writer {
 
             final String jsonString = beautify(root);
             fileOutputStream.write(jsonString.getBytes());
-        } catch (final IOException e) {
-            throw new SQLException("Failed to write the schema.\n" + e.getMessage());
         }
     }
 
     @Override
-    public void writeDatabaseFile(final Database database) throws SQLException {
+    public void writeDatabaseFile(final Database database) throws IOException {
         logger.trace("database = {}", database);
         logger.trace("database tables = {}", database.getTables());
         final Path databaseFilePath = database.getUrl();
         final String databaseFileParentPath = String.valueOf(databaseFilePath.getParent());
         final Path databaseFolderName = Path.of(databaseFileParentPath);
-        try (final FileOutputStream fileOutputStream = new FileOutputStream(String.valueOf(databaseFilePath))) {
+        try (final FileOutputStream fileOutputStream = new FileOutputStream(String.valueOf(databaseFilePath));
+            final FileChannel fileChannel = fileOutputStream.getChannel()) {
+            fileChannel.tryLock();
             final JsonObject root = new JsonObject();
             root.addProperty("Database", String.valueOf(databaseFolderName.getFileName()));
             final List<Table> tables = database.getTables();
@@ -181,33 +183,26 @@ public class WriterJsonImpl extends Writer {
 
             final String jsonString = beautify(root);
             fileOutputStream.write(jsonString.getBytes());
-        } catch (final IOException e) {
-            throw new SQLException("Failed to write the database file." + e.getMessage());
         }
     }
 
     @Override
-    public String writeBlob(final Table table, final String value) throws SQLException {
+    public String writeBlob(final Table table, final String value) throws IOException {
         logger.trace("blob value = {}", value);
         final Path tableParent = Path.of(table.getTableFile()).getParent();
         final Path blobParent = Path.of(tableParent + File.separator + "blob");
-        try {
-            Files.createDirectories(blobParent);
-        } catch (final IOException e) {
-            throw new SQLException("Failed to create directory for BLOBs.\n" + e.getMessage());
-        }
+        Files.createDirectories(blobParent);
         final String newBlobName = incrementFileName(blobParent, "json");
         final Path blobPath = Path.of(blobParent + File.separator + newBlobName);
-        try (final FileOutputStream fileOutputStream = new FileOutputStream(blobPath.toFile())) {
+        try (final FileOutputStream fileOutputStream = new FileOutputStream(blobPath.toFile());
+            final FileChannel fileChannel = fileOutputStream.getChannel()) {
+            fileChannel.tryLock();
             final JsonObject root = new JsonObject();
             root.addProperty("blob", value);
             final String jsonString = beautify(root);
             fileOutputStream.write(jsonString.getBytes());
-
-        } catch (final IOException e) {
-            throw new SQLException("Failed to write the blob\n" + e.getMessage());
+            return String.valueOf(blobPath);
         }
-        return String.valueOf(blobPath);
     }
 
 }

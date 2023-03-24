@@ -2,15 +2,16 @@ package com.github.jfsql.driver.persistence;
 
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
+import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.util.DatatypeConverter;
 import com.github.jfsql.driver.validation.XmlSchemaValidator;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -42,8 +43,7 @@ public class WriterXmlImpl extends Writer {
         super(useSchemaValidation);
     }
 
-    private void beautifyAndWrite(final FileOutputStream fileOutputStream, final Document document)
-        throws SQLException {
+    private void beautifyAndWrite(final FileOutputStream fileOutputStream, final Document document) throws IOException {
         try {
             final TransformerFactory transformerFactory = TransformerFactory.newInstance();
             transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
@@ -54,16 +54,18 @@ public class WriterXmlImpl extends Writer {
             final Result result = new StreamResult(fileOutputStream);
             transformer.transform(source, result);
         } catch (final TransformerException e) {
-            throw new SQLException("Failed to transform the document.\n" + e.getMessage());
+            throw new IOException("Failed to configure the parser.");
         }
     }
 
     @Override
-    public void writeTable(final Table table) throws SQLException {
+    public void writeTable(final Table table) throws IOException {
         logger.trace("table = {}", table);
         logger.trace("table entries = {}", table.getEntries());
         final String tableFile = table.getTableFile();
-        try (final FileOutputStream fileOutputStream = new FileOutputStream(tableFile)) {
+        try (final FileOutputStream fileOutputStream = new FileOutputStream(tableFile);
+            final FileChannel fileChannel = fileOutputStream.getChannel()) {
+            fileChannel.tryLock();
             final String tableName = table.getName();
             final List<Entry> entries = table.getEntries();
 
@@ -81,21 +83,21 @@ public class WriterXmlImpl extends Writer {
             }
             document.appendChild(root);
             beautifyAndWrite(fileOutputStream, document);
-        } catch (final IOException | ParserConfigurationException e) {
-            throw new SQLException("Failed to write the table\n" + e.getMessage());
+        } catch (final ParserConfigurationException e) {
+            throw new IOException("Failed to configure the parser");
         }
 
         if (useSchemaValidation) {
             final String schemaFile = table.getSchema().getSchemaFile();
             final boolean isValid = XML_SCHEMA_VALIDATOR.schemaIsValid(schemaFile, tableFile);
             if (!isValid) {
-                throw new SQLException("\"" + tableFile + "\" is not valid against \"" + schemaFile + "\"");
+                throw new IOException("\"" + tableFile + "\" is not valid against \"" + schemaFile + "\"");
             }
         }
     }
 
     private void checkTypeAndValueThenAddProperty(final Table table, final Entry entry, final String column,
-        final Document document, final Element element) throws SQLException {
+        final Document document, final Element element) throws IOException {
         final String value = entry.getColumnsAndValues().get(column);
         final String type = table.getSchema().getColumnsAndTypes().get(column);
         if (value == null || Objects.equals(value, "null")) {
@@ -113,13 +115,15 @@ public class WriterXmlImpl extends Writer {
     }
 
     @Override
-    public void writeSchema(final Table table) throws SQLException {
-        logger.trace("table = {}", table);
-        final String tableName = table.getName();
-        final String schemaFile = table.getSchema().getSchemaFile();
-        try (final FileOutputStream fileOutputStream = new FileOutputStream(schemaFile)) {
-            final List<String> columnNames = new ArrayList<>(table.getSchema().getColumnsAndTypes().keySet());
-            final List<String> columnTypes = new ArrayList<>(table.getSchema().getColumnsAndTypes().values());
+    public void writeSchema(final Schema schema) throws IOException {
+        logger.trace("table = {}", schema);
+        final String tableName = String.valueOf(Path.of(schema.getSchemaFile()).getFileName()).replace(".xsd", "");
+        final String schemaFile = schema.getSchemaFile();
+        try (final FileOutputStream fileOutputStream = new FileOutputStream(schemaFile);
+            final FileChannel fileChannel = fileOutputStream.getChannel()) {
+            fileChannel.tryLock();
+            final List<String> columnNames = new ArrayList<>(schema.getColumnsAndTypes().keySet());
+            final List<String> columnTypes = new ArrayList<>(schema.getColumnsAndTypes().values());
             final DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             final Document document = documentBuilder.newDocument();
 
@@ -155,7 +159,7 @@ public class WriterXmlImpl extends Writer {
                 final Attr columnType = document.createAttribute("type");
                 columnType.setValue(DatatypeConverter.convertFromSqlToXs(columnTypes.get(i)));
                 final Attr columnName = document.createAttribute("name");
-                if (Boolean.FALSE.equals(table.getSchema().getNotNullColumns().get(columnNames.get(i)))) {
+                if (Boolean.FALSE.equals(schema.getNotNullColumns().get(columnNames.get(i)))) {
                     column.setAttribute("minOccurs", "0");
                 }
                 columnName.setValue(columnNames.get(i));
@@ -164,19 +168,21 @@ public class WriterXmlImpl extends Writer {
                 sequenceElement2.appendChild(column);
             }
             beautifyAndWrite(fileOutputStream, document);
-        } catch (final IOException | ParserConfigurationException e) {
-            throw new SQLException("Failed to write the schema.\n" + e.getMessage());
+        } catch (final ParserConfigurationException e) {
+            throw new IOException("Failed to configure the parser.");
         }
     }
 
     @Override
-    public void writeDatabaseFile(final Database database) throws SQLException {
+    public void writeDatabaseFile(final Database database) throws IOException {
         logger.trace("database = {}", database);
         logger.trace("database tables = {}", database.getTables());
         final Path databaseFilePath = database.getUrl();
         final String databaseFileParentPath = String.valueOf(databaseFilePath.getParent());
         final Path databaseFolderName = Path.of(databaseFileParentPath);
-        try (final FileOutputStream fileOutputStream = new FileOutputStream(databaseFilePath.toFile())) {
+        try (final FileOutputStream fileOutputStream = new FileOutputStream(databaseFilePath.toFile());
+            final FileChannel fileChannel = fileOutputStream.getChannel()) {
+            fileChannel.tryLock();
             final Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
             final Element root = document.createElement("Database");
             root.setAttribute("name", String.valueOf(databaseFolderName.getFileName()));
@@ -201,32 +207,31 @@ public class WriterXmlImpl extends Writer {
             }
 
             beautifyAndWrite(fileOutputStream, document);
-        } catch (final IOException | ParserConfigurationException e) {
-            throw new SQLException("Failed to write the database file.\n" + e.getMessage());
+        } catch (final ParserConfigurationException e) {
+            throw new IOException("Failed to configure the parser.");
         }
     }
 
     @Override
-    public String writeBlob(final Table table, final String value) throws SQLException {
+    public String writeBlob(final Table table, final String value) throws IOException {
         logger.trace("blob value = {}", value);
         final Path tableParent = Path.of(table.getTableFile()).getParent();
         final Path blobParent = Path.of(tableParent + File.separator + "blob");
-        try {
-            Files.createDirectories(blobParent);
-        } catch (final IOException e) {
-            throw new SQLException("Failed to create directory for BLOBs.\n" + e.getMessage());
-        }
+        Files.createDirectories(blobParent);
         final String newBlobName = incrementFileName(blobParent, "xml");
         final Path blobPath = Path.of(blobParent + File.separator + newBlobName);
-        try (final FileOutputStream fileOutputStream = new FileOutputStream(blobPath.toFile())) {
-            final DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        try (final FileOutputStream fileOutputStream = new FileOutputStream(blobPath.toFile());
+            final FileChannel fileChannel = fileOutputStream.getChannel()) {
+            fileChannel.tryLock();
+            final DocumentBuilder documentBuilder;
+            documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             final Document document = documentBuilder.newDocument();
             final Element root = document.createElement("blob");
             root.setTextContent(value);
             document.appendChild(root);
             beautifyAndWrite(fileOutputStream, document);
-        } catch (final IOException | ParserConfigurationException e) {
-            throw new SQLException("Failed to write the blob\n" + e.getMessage());
+        } catch (final ParserConfigurationException e) {
+            throw new IOException("Failed to configure the parser.");
         }
         return String.valueOf(blobPath);
     }

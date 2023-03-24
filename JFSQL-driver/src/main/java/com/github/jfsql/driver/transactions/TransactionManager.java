@@ -1,15 +1,21 @@
 package com.github.jfsql.driver.transactions;
 
 import com.github.jfsql.driver.dto.Database;
+import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
+import com.github.jfsql.driver.persistence.PessimisticLockException;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
-import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import lombok.Data;
 
 @Data
@@ -17,9 +23,10 @@ public abstract class TransactionManager {
 
     protected final Reader reader;
     protected final Writer writer;
-    private final List<Table> uncommittedTables;
-    private final List<Table> uncommittedSchemas;
-    private final List<Database> uncommittedDatabases;
+    private static final Map<String, Long> FILE_THREADID_MAP = new HashMap<>();
+    final Set<Table> uncommittedTables;
+    final Set<Schema> uncommittedSchemas;
+    final Set<Database> uncommittedDatabases;
     protected Database database;
     boolean autoCommit;
 
@@ -34,9 +41,9 @@ public abstract class TransactionManager {
         } else {
             openDatabase();
         }
-        uncommittedTables = new ArrayList<>();
-        uncommittedSchemas = new ArrayList<>();
-        uncommittedDatabases = new ArrayList<>();
+        uncommittedTables = new LinkedHashSet<>();
+        uncommittedSchemas = new LinkedHashSet<>();
+        uncommittedDatabases = new LinkedHashSet<>();
     }
 
     public abstract void initDatabase(final Database database) throws SQLException;
@@ -55,53 +62,55 @@ public abstract class TransactionManager {
         this.autoCommit = autoCommit;
     }
 
-    void writeUncommittedObjects() throws SQLException {
-        try {
-            for (final Database db : uncommittedDatabases) {
-                writer.writeDatabaseFile(db);
-            }
-            for (final Table table : uncommittedSchemas) {
-                writer.writeSchema(table);
-            }
-            for (final Table table : uncommittedTables) {
-                writer.writeTable(table);
-            }
-        } catch (final SQLException e) {
-            e.printStackTrace();
-            rollback();
-        } finally {
-            uncommittedDatabases.clear();
-            uncommittedSchemas.clear();
-            uncommittedTables.clear();
+    void writeUncommittedObjects() throws IOException {
+        for (final Database db : uncommittedDatabases) {
+            writer.writeDatabaseFile(db);
         }
+        for (final Schema schema : uncommittedSchemas) {
+            writer.writeSchema(schema);
+        }
+        for (final Table table : uncommittedTables) {
+            writer.writeTable(table);
+        }
+        uncommittedDatabases.clear();
+        uncommittedSchemas.clear();
+        uncommittedTables.clear();
     }
 
     public void executeDMLOperation(final Table table) throws SQLException {
         if (!autoCommit) {
-            addTableToUncommittedObjects(table);
+            try {
+                addTableToUncommittedObjects(table);
+            } catch (final PessimisticLockException e) {
+                removeCurrentThreadChangesFromMap();
+            }
         } else {
             try {
                 writer.writeTable(table);
                 commit();
-            } catch (final SQLException e) {
+            } catch (final IOException e) {
                 e.printStackTrace();
                 rollback();
             }
         }
     }
 
-    public void executeDDLOperation(final Table table) throws SQLException {
+    public void executeDDLOperation(final Table table, final Schema schema) throws SQLException {
         if (!autoCommit) {
-            addSchemaToUncommittedObjects(table);
-            addTableToUncommittedObjects(table);
-            addDatabaseToUncommittedObjects(database);
+            try {
+                addDatabaseToUncommittedObjects(database);
+                addSchemaToUncommittedObjects(schema);
+                addTableToUncommittedObjects(table);
+            } catch (final PessimisticLockException e) {
+                removeCurrentThreadChangesFromMap();
+            }
         } else {
             try {
-                writer.writeSchema(table);
-                writer.writeTable(table);
                 writer.writeDatabaseFile(database);
+                writer.writeSchema(schema);
+                writer.writeTable(table);
                 commit();
-            } catch (final SQLException e) {
+            } catch (final IOException e) {
                 e.printStackTrace();
                 rollback();
             }
@@ -110,12 +119,16 @@ public abstract class TransactionManager {
 
     public void executeDropTableOperation() throws SQLException {
         if (!autoCommit) {
-            addDatabaseToUncommittedObjects(database);
+            try {
+                addDatabaseToUncommittedObjects(database);
+            } catch (final PessimisticLockException e) {
+                removeCurrentThreadChangesFromMap();
+            }
         } else {
             try {
                 writer.writeDatabaseFile(database);
                 commit();
-            } catch (final SQLException e) {
+            } catch (final IOException e) {
                 e.printStackTrace();
                 rollback();
             }
@@ -127,20 +140,50 @@ public abstract class TransactionManager {
     }
 
     public void addTableToUncommittedObjects(final Table table) {
-        if (!uncommittedTables.contains(table)) {
-            uncommittedTables.add(table);
+        if (FILE_THREADID_MAP.containsKey(table.getTableFile())) {
+            if (!Objects.equals(FILE_THREADID_MAP.get(table.getTableFile()), Thread.currentThread().getId())) {
+                throw new PessimisticLockException("Pessimistic lock exception, the file '" + table.getTableFile()
+                    + "' is currently modified by another thread.");
+            }
+        } else {
+            FILE_THREADID_MAP.put(table.getTableFile(), Thread.currentThread().getId());
         }
+        uncommittedTables.add(table);
     }
 
-    public void addSchemaToUncommittedObjects(final Table table) {
-        if (!uncommittedSchemas.contains(table)) {
-            uncommittedSchemas.add(table);
+    public void addSchemaToUncommittedObjects(final Schema schema) {
+        if (FILE_THREADID_MAP.containsKey(schema.getSchemaFile())) {
+            if (!Objects.equals(FILE_THREADID_MAP.get(schema.getSchemaFile()),
+                Thread.currentThread().getId())) {
+                throw new PessimisticLockException("Pessimistic lock exception, the file '" + schema.getSchemaFile()
+                    + "' is currently modified by another thread.");
+            }
+        } else {
+            FILE_THREADID_MAP.put(schema.getSchemaFile(), Thread.currentThread().getId());
         }
+        uncommittedSchemas.add(schema);
     }
 
     public void addDatabaseToUncommittedObjects(final Database database) {
-        if (!uncommittedDatabases.contains(database)) {
-            uncommittedDatabases.add(database);
+        if (FILE_THREADID_MAP.containsKey(String.valueOf(database.getUrl()))) {
+            if (!Objects.equals(FILE_THREADID_MAP.get(String.valueOf(database.getUrl())),
+                Thread.currentThread().getId())) {
+                throw new PessimisticLockException("Pessimistic lock exception, the file '" + database.getUrl()
+                    + "' is currently modified by another thread.");
+            }
+        } else {
+            FILE_THREADID_MAP.put(String.valueOf(database.getUrl()), Thread.currentThread().getId());
+        }
+        uncommittedDatabases.add(database);
+    }
+
+    private void removeCurrentThreadChangesFromMap() {
+        for (final Map.Entry<String, Long> entry : FILE_THREADID_MAP.entrySet()) {
+            final String key = entry.getKey();
+            final Long value = entry.getValue();
+            if (Objects.equals(value, Thread.currentThread().getId())) {
+                FILE_THREADID_MAP.remove(key);
+            }
         }
     }
 

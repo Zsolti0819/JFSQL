@@ -21,7 +21,11 @@ public class NotVersioningTransactionManagerImpl extends TransactionManager {
 
     @Override
     public void commit() throws SQLException {
-        writeUncommittedObjects();
+        try {
+            writeUncommittedObjects();
+        } catch (final IOException e) {
+            throw new SQLException("commit failed");
+        }
     }
 
     @Override
@@ -44,6 +48,10 @@ public class NotVersioningTransactionManagerImpl extends TransactionManager {
         }
         final List<Table> tables = new ArrayList<>();
         database.setTables(tables);
-        writer.writeDatabaseFile(database);
+        try {
+            writer.writeDatabaseFile(database);
+        } catch (final IOException e) {
+            throw new SQLException("Failed to write the database file.");
+        }
     }
 }

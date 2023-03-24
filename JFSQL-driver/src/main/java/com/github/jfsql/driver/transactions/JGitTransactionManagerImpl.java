@@ -38,15 +38,14 @@ public class JGitTransactionManagerImpl extends TransactionManager {
             }
             git.add().addFilepattern(".").call();
             git.commit().setMessage("Commit").call();
-        } catch (final IOException | GitAPIException e) {
-            e.printStackTrace();
-            rollback();
+        } catch (final GitAPIException | IOException e) {
+            throw new SQLException("commit failed.\n " + e.getMessage());
         }
     }
 
     @Override
     public void rollback() throws SQLException {
-        logger.warn("TransactionManager rollback...");
+        logger.warn("transaction rollback...");
         try (final Git git = Git.open(database.getUrl().getParent().toFile())) {
             final ResetCommand resetCommand = git.reset().setMode(ResetCommand.ResetType.HARD);
             resetCommand.call();
@@ -58,12 +57,13 @@ public class JGitTransactionManagerImpl extends TransactionManager {
     }
 
     private Collection<File> getFilesThatShouldNotBePresent() throws SQLException {
+        final Path databaseUrl = database.getUrl();
         final String fileExtension = reader.getFileExtension();
         final String schemaExtension = reader.getSchemaFileExtension();
         final String[] extensions = new String[]{fileExtension, schemaExtension};
-        final Collection<File> files = FileUtils.listFiles(database.getUrl().getParent().toFile(), extensions, false);
+        final Collection<File> files = FileUtils.listFiles(databaseUrl.getParent().toFile(), extensions, false);
         final Collection<File> filesToDelete = new ArrayList<>();
-        files.removeIf(file -> Objects.equals(Path.of(file.getAbsolutePath()), database.getUrl()));
+        files.removeIf(file -> Objects.equals(Path.of(file.getAbsolutePath()), databaseUrl));
         for (final File file : files) {
             if (!reader.pathIsPresentInDatabaseFile(database, file.getAbsolutePath())) {
                 filesToDelete.add(file);
@@ -92,6 +92,8 @@ public class JGitTransactionManagerImpl extends TransactionManager {
             git.commit().setMessage("Initial commit").call();
         } catch (final GitAPIException e) {
             throw new SQLException("Couldn't init git repository.\n" + e.getMessage());
+        } catch (final IOException e) {
+            throw new SQLException("Couldn't write database file.\n" + e.getMessage());
         }
     }
 }

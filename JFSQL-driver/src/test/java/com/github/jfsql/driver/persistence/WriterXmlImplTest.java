@@ -11,7 +11,6 @@ import com.github.jfsql.driver.dto.Table;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +24,7 @@ class WriterXmlImplTest {
 
     private static final Writer writer = new WriterXmlImpl(true);
     private static Table table;
+    private static Schema schema;
     private static Database database;
 
     @BeforeAll
@@ -60,7 +60,7 @@ class WriterXmlImplTest {
             new Entry(entry3ColumnsAndTypes),
             new Entry(entry4ColumnsAndTypes)
         );
-        final Schema schema = new Schema(String.valueOf(TestUtils.XSD_PATH), returnColumnsAndTypes,
+        schema = new Schema(String.valueOf(TestUtils.XSD_PATH), returnColumnsAndTypes,
             notNullColumns);
         table = new Table("myTable", String.valueOf(TestUtils.XML_TABLE_PATH), schema, returnEntries);
         database = new Database(TestUtils.XML_DATABASE_PATH, List.of(table));
@@ -72,8 +72,8 @@ class WriterXmlImplTest {
     }
 
     @Test
-    void testWriter_writeSchema() throws SQLException, IOException {
-        writer.writeSchema(table);
+    void testWriter_writeSchema() throws IOException {
+        writer.writeSchema(schema);
         final String realFileContent = FileUtils.readFileToString(TestUtils.XSD_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "" +
@@ -100,7 +100,7 @@ class WriterXmlImplTest {
     }
 
     @Test
-    void testWriter_writeTable() throws SQLException, IOException {
+    void testWriter_writeTable() throws IOException {
         writer.writeTable(table);
         final String realFileContent = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);

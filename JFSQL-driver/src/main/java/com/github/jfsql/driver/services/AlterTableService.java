@@ -44,7 +44,7 @@ public class AlterTableService {
         } else if (statement.getColumnToDrop() != null) {
             dropColumn(statement, table);
         }
-        transactionManager.executeDDLOperation(table);
+        transactionManager.executeDDLOperation(table, table.getSchema());
         return 0;
     }
 

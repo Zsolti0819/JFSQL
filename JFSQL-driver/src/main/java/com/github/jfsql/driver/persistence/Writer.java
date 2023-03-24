@@ -1,10 +1,11 @@
 package com.github.jfsql.driver.persistence;
 
 import com.github.jfsql.driver.dto.Database;
+import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -20,13 +21,13 @@ public abstract class Writer {
         this.useSchemaValidation = useSchemaValidation;
     }
 
-    public abstract void writeTable(final Table table) throws SQLException;
+    public abstract void writeTable(final Table table) throws IOException;
 
-    public abstract void writeSchema(final Table table) throws SQLException;
+    public abstract void writeSchema(final Schema schema) throws IOException;
 
-    public abstract void writeDatabaseFile(final Database database) throws SQLException;
+    public abstract void writeDatabaseFile(final Database database) throws IOException;
 
-    abstract String writeBlob(final Table table, final String value) throws SQLException;
+    abstract String writeBlob(final Table table, final String value) throws IOException;
 
     String incrementFileName(final Path folderPath, final String fileExtension) {
         final List<Integer> fileNumbers = new ArrayList<>();
