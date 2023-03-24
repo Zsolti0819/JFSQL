@@ -96,7 +96,7 @@ class TransactionManagerXmlTest {
 
         connection.commit();
 
-        // After the commit the files doesn't exist
+        // After the commit the files don't exist
         assertFalse(TestUtils.XML_TABLE_PATH.toFile().exists());
         assertFalse(TestUtils.XSD_PATH.toFile().exists());
 

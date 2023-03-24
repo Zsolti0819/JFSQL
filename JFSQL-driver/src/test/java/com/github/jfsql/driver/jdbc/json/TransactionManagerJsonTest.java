@@ -96,7 +96,7 @@ class TransactionManagerJsonTest {
 
         connection.commit();
 
-        // After the commit the files doesn't exist
+        // After the commit the files don't exist
         assertFalse(TestUtils.JSON_TABLE_PATH.toFile().exists());
         assertFalse(TestUtils.JSON_SCHEMA_PATH.toFile().exists());
 
