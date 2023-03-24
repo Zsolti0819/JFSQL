@@ -13,6 +13,6 @@ public class ThrowingErrorListener extends BaseErrorListener {
     public void syntaxError(final Recognizer<?, ?> recognizer, final Object offendingSymbol, final int line,
         final int charPositionInLine, final String msg, final RecognitionException e)
         throws ParseCancellationException {
-        throw new ParseCancellationException("line " + line + ":" + charPositionInLine + " " + msg);
+        throw new ParseCancellationException(line + ":" + charPositionInLine + " " + msg);
     }
 }

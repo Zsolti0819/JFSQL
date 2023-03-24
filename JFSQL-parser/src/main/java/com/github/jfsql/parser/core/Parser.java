@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -287,8 +286,8 @@ public class Parser extends JFSQLBaseVisitor<BaseStatement> implements JFSQLVisi
         try {
             final JFSQLParser.RootContext parseContext = parser.root();
             statement = visitRoot(parseContext);
-        } catch (final RecognitionException | ParseCancellationException e) {
-            System.err.println("The statement '" + sql + "' is invalid. Please check the syntax.\n" + e.getMessage());
+        } catch (final ParseCancellationException e) {
+            System.err.println("The statement '" + sql + "' is invalid, at " + e.getMessage());
             return null;
         }
 
