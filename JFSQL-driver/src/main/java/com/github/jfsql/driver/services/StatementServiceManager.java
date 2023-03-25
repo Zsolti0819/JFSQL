@@ -28,6 +28,7 @@ import lombok.Data;
 @Data
 public class StatementServiceManager {
 
+    static final Object lock = new Object();
     private final DatabaseManager databaseManager;
     private final TransactionManager transactionManager;
     private final Cache cache;
@@ -103,11 +104,13 @@ public class StatementServiceManager {
     // Statements
 
     public ResultSet executeQuery(final String sql) throws SQLException {
-        final BaseStatement statement = getFromCacheOrParseStatement(sql);
-        if (!(TypeOfStatement.SELECT.equals(statement.getTypeOfStatement()))) {
-            throw new SQLException("Cannot execute executeQuery() because statement was not a Select statement.");
+        synchronized (lock) {
+            final BaseStatement statement = getFromCacheOrParseStatement(sql);
+            if (!(TypeOfStatement.SELECT.equals(statement.getTypeOfStatement()))) {
+                throw new SQLException("Cannot execute executeQuery() because statement was not a Select statement.");
+            }
+            return selectService.selectFromTable((SelectWrapper) statement);
         }
-        return selectService.selectFromTable((SelectWrapper) statement);
     }
 
     private void executeQuery(final BaseStatement statement) throws SQLException {
@@ -115,39 +118,41 @@ public class StatementServiceManager {
     }
 
     public int executeUpdate(final String arg0) throws SQLException {
-        final BaseStatement statement = getFromCacheOrParseStatement(arg0);
-        switch (statement.getTypeOfStatement()) {
-            case ALTER_TABLE:
-                updateCount = alterTableService.alterTable((AlterTableWrapper) statement);
-                break;
-            case CREATE_DATABASE:
-                updateCount = createDatabaseService.createDatabase((CreateDatabaseWrapper) statement);
-                break;
-            case CREATE_TABLE:
-                updateCount = createTableService.createTable((CreateTableWrapper) statement);
-                break;
-            case DELETE:
-                updateCount = deleteService.deleteFromTable((DeleteWrapper) statement);
-                break;
-            case DROP_DATABASE:
-                updateCount = dropDatabaseService.dropDatabase((DropDatabaseWrapper) statement);
-                break;
-            case DROP_TABLE:
-                updateCount = dropTableService.dropTable((DropTableWrapper) statement);
-                break;
-            case INSERT:
-                updateCount = insertService.insertIntoTable((InsertWrapper) statement);
-                break;
-            case SELECT:
-                resultSet = selectService.selectFromTable((SelectWrapper) statement);
-                break;
-            case UPDATE:
-                updateCount = updateService.updateTable((UpdateWrapper) statement);
-                break;
-            default:
-                throw new SQLException("This statement type is not supported.");
+        synchronized (lock) {
+            final BaseStatement statement = getFromCacheOrParseStatement(arg0);
+            switch (statement.getTypeOfStatement()) {
+                case ALTER_TABLE:
+                    updateCount = alterTableService.alterTable((AlterTableWrapper) statement);
+                    break;
+                case CREATE_DATABASE:
+                    updateCount = createDatabaseService.createDatabase((CreateDatabaseWrapper) statement);
+                    break;
+                case CREATE_TABLE:
+                    updateCount = createTableService.createTable((CreateTableWrapper) statement);
+                    break;
+                case DELETE:
+                    updateCount = deleteService.deleteFromTable((DeleteWrapper) statement);
+                    break;
+                case DROP_DATABASE:
+                    updateCount = dropDatabaseService.dropDatabase((DropDatabaseWrapper) statement);
+                    break;
+                case DROP_TABLE:
+                    updateCount = dropTableService.dropTable((DropTableWrapper) statement);
+                    break;
+                case INSERT:
+                    updateCount = insertService.insertIntoTable((InsertWrapper) statement);
+                    break;
+                case SELECT:
+                    resultSet = selectService.selectFromTable((SelectWrapper) statement);
+                    break;
+                case UPDATE:
+                    updateCount = updateService.updateTable((UpdateWrapper) statement);
+                    break;
+                default:
+                    throw new SQLException("This statement type is not supported.");
+            }
+            return updateCount;
         }
-        return updateCount;
     }
 
     private void executeUpdate(final BaseStatement statement) throws SQLException {
@@ -182,29 +187,33 @@ public class StatementServiceManager {
     }
 
     public boolean execute(final String sql) throws SQLException {
-        final BaseStatement statement = getFromCacheOrParseStatement(sql);
-        if (TypeOfStatement.SELECT.equals(statement.getTypeOfStatement())) {
-            executeQuery(statement);
-            return true;
-        } else {
-            executeUpdate(statement);
-            return false;
+        synchronized (lock) {
+            final BaseStatement statement = getFromCacheOrParseStatement(sql);
+            if (TypeOfStatement.SELECT.equals(statement.getTypeOfStatement())) {
+                executeQuery(statement);
+                return true;
+            } else {
+                executeUpdate(statement);
+                return false;
+            }
         }
     }
 
     // Prepared Statements
 
     public ResultSet executeQueryPreparedStatement(final String sql) throws SQLException {
-        BaseStatement statement = parser.parse(sql);
-        if (statement == null) {
-            throw new IllegalStateException("The statement couldn't be created.");
+        synchronized (lock) {
+            BaseStatement statement = parser.parse(sql);
+            if (statement == null) {
+                throw new IllegalStateException("The statement couldn't be created.");
+            }
+            if (!(TypeOfStatement.SELECT.equals(statement.getTypeOfStatement()))) {
+                throw new SQLException("Cannot execute executeQuery() because statement was not a Select statement.");
+            }
+            statement = preparedStatementCreator.getPreparedSelectStatement((SelectWrapper) statement);
+            resultSet = selectService.selectFromTable((SelectWrapper) statement);
+            return resultSet;
         }
-        if (!(TypeOfStatement.SELECT.equals(statement.getTypeOfStatement()))) {
-            throw new SQLException("Cannot execute executeQuery() because statement was not a Select statement.");
-        }
-        statement = preparedStatementCreator.getPreparedSelectStatement((SelectWrapper) statement);
-        resultSet = selectService.selectFromTable((SelectWrapper) statement);
-        return resultSet;
     }
 
     private void executeQueryPreparedStatement(final BaseStatement statement) throws SQLException {
@@ -214,45 +223,47 @@ public class StatementServiceManager {
     }
 
     public int executeUpdatePreparedStatement(final String sql) throws SQLException {
-        final BaseStatement statement = parser.parse(sql);
-        if (statement == null) {
-            throw new IllegalStateException("The statement couldn't be created.");
+        synchronized (lock) {
+            final BaseStatement statement = parser.parse(sql);
+            if (statement == null) {
+                throw new IllegalStateException("The statement couldn't be created.");
+            }
+            switch (statement.getTypeOfStatement()) {
+                case ALTER_TABLE:
+                    updateCount = alterTableService.alterTable((AlterTableWrapper) statement);
+                    break;
+                case CREATE_DATABASE:
+                    updateCount = createDatabaseService.createDatabase((CreateDatabaseWrapper) statement);
+                    break;
+                case CREATE_TABLE:
+                    updateCount = createTableService.createTable((CreateTableWrapper) statement);
+                    break;
+                case DELETE:
+                    final DeleteWrapper preparedDeleteStatement = preparedStatementCreator.getPreparedDeleteStatement(
+                        (DeleteWrapper) statement);
+                    updateCount = deleteService.deleteFromTable(preparedDeleteStatement);
+                    break;
+                case DROP_DATABASE:
+                    updateCount = dropDatabaseService.dropDatabase((DropDatabaseWrapper) statement);
+                    break;
+                case DROP_TABLE:
+                    updateCount = dropTableService.dropTable((DropTableWrapper) statement);
+                    break;
+                case INSERT:
+                    final InsertWrapper preparedInsertStatement = preparedStatementCreator.getPreparedInsertStatement(
+                        (InsertWrapper) statement);
+                    updateCount = insertService.insertIntoTable(preparedInsertStatement);
+                    break;
+                case UPDATE:
+                    final UpdateWrapper preparedUpdateStatement = preparedStatementCreator.getPreparedUpdateStatement(
+                        (UpdateWrapper) statement);
+                    updateCount = updateService.updateTable(preparedUpdateStatement);
+                    break;
+                default:
+                    throw new SQLException("This statement type is not supported.");
+            }
+            return updateCount;
         }
-        switch (statement.getTypeOfStatement()) {
-            case ALTER_TABLE:
-                updateCount = alterTableService.alterTable((AlterTableWrapper) statement);
-                break;
-            case CREATE_DATABASE:
-                updateCount = createDatabaseService.createDatabase((CreateDatabaseWrapper) statement);
-                break;
-            case CREATE_TABLE:
-                updateCount = createTableService.createTable((CreateTableWrapper) statement);
-                break;
-            case DELETE:
-                final DeleteWrapper preparedDeleteStatement = preparedStatementCreator.getPreparedDeleteStatement(
-                    (DeleteWrapper) statement);
-                updateCount = deleteService.deleteFromTable(preparedDeleteStatement);
-                break;
-            case DROP_DATABASE:
-                updateCount = dropDatabaseService.dropDatabase((DropDatabaseWrapper) statement);
-                break;
-            case DROP_TABLE:
-                updateCount = dropTableService.dropTable((DropTableWrapper) statement);
-                break;
-            case INSERT:
-                final InsertWrapper preparedInsertStatement = preparedStatementCreator.getPreparedInsertStatement(
-                    (InsertWrapper) statement);
-                updateCount = insertService.insertIntoTable(preparedInsertStatement);
-                break;
-            case UPDATE:
-                final UpdateWrapper preparedUpdateStatement = preparedStatementCreator.getPreparedUpdateStatement(
-                    (UpdateWrapper) statement);
-                updateCount = updateService.updateTable(preparedUpdateStatement);
-                break;
-            default:
-                throw new SQLException("This statement type is not supported.");
-        }
-        return updateCount;
     }
 
     private void executeUpdatePreparedStatement(final BaseStatement statement) throws SQLException {
@@ -293,52 +304,56 @@ public class StatementServiceManager {
     }
 
     public boolean executePreparedStatement(final String sql) throws SQLException {
-        final BaseStatement statement = parser.parse(sql);
-        if (statement == null) {
-            throw new IllegalStateException("The statement couldn't be created.");
-        }
-        if (TypeOfStatement.SELECT.equals(statement.getTypeOfStatement())) {
-            final SelectWrapper preparedSelectStatement = preparedStatementCreator.getPreparedSelectStatement(
-                (SelectWrapper) statement);
-            executeQueryPreparedStatement(preparedSelectStatement);
-            return true;
-        } else {
-            executeUpdatePreparedStatement(statement);
-            return false;
+        synchronized (lock) {
+            final BaseStatement statement = parser.parse(sql);
+            if (statement == null) {
+                throw new IllegalStateException("The statement couldn't be created.");
+            }
+            if (TypeOfStatement.SELECT.equals(statement.getTypeOfStatement())) {
+                final SelectWrapper preparedSelectStatement = preparedStatementCreator.getPreparedSelectStatement(
+                    (SelectWrapper) statement);
+                executeQueryPreparedStatement(preparedSelectStatement);
+                return true;
+            } else {
+                executeUpdatePreparedStatement(statement);
+                return false;
+            }
         }
     }
 
     public int getParameterCount(final String sql) throws SQLException {
-        final int parameterCount;
-        final BaseStatement statement = parser.parse(sql);
-        if (statement == null) {
-            throw new IllegalStateException("The statement couldn't be created.");
+        synchronized (lock) {
+            final int parameterCount;
+            final BaseStatement statement = parser.parse(sql);
+            if (statement == null) {
+                throw new IllegalStateException("The statement couldn't be created.");
+            }
+            switch (statement.getTypeOfStatement()) {
+                case ALTER_TABLE:
+                case CREATE_DATABASE:
+                case CREATE_TABLE:
+                case DROP_DATABASE:
+                case DROP_TABLE:
+                    parameterCount = 0;
+                    break;
+                case DELETE:
+                    parameterCount = ((DeleteWrapper) statement).getWhereValues().size();
+                    break;
+                case INSERT:
+                    parameterCount = ((InsertWrapper) statement).getValues().get(0).size();
+                    break;
+                case SELECT:
+                    parameterCount = ((SelectWrapper) statement).getWhereValues().size();
+                    break;
+                case UPDATE:
+                    parameterCount = ((UpdateWrapper) statement).getValues().size()
+                        + ((UpdateWrapper) statement).getWhereValues().size();
+                    break;
+                default:
+                    throw new SQLException("Cannot determine the type of the statement.");
+            }
+            return parameterCount;
         }
-        switch (statement.getTypeOfStatement()) {
-            case ALTER_TABLE:
-            case CREATE_DATABASE:
-            case CREATE_TABLE:
-            case DROP_DATABASE:
-            case DROP_TABLE:
-                parameterCount = 0;
-                break;
-            case DELETE:
-                parameterCount = ((DeleteWrapper) statement).getWhereValues().size();
-                break;
-            case INSERT:
-                parameterCount = ((InsertWrapper) statement).getValues().get(0).size();
-                break;
-            case SELECT:
-                parameterCount = ((SelectWrapper) statement).getWhereValues().size();
-                break;
-            case UPDATE:
-                parameterCount = ((UpdateWrapper) statement).getValues().size()
-                    + ((UpdateWrapper) statement).getWhereValues().size();
-                break;
-            default:
-                throw new SQLException("Cannot determine the type of the statement.");
-        }
-        return parameterCount;
     }
-
+    
 }
