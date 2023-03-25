@@ -88,9 +88,8 @@ public abstract class TransactionManager {
         }
     }
 
-    public void executeDDLOperation(final Table table, final Schema schema) throws SQLException {
+    public void executeDDLOperation(final Database database, final Table table, final Schema schema) throws SQLException {
         synchronized (lock) {
-            final Database database = databaseManager.getDatabase();
             if (!autoCommit) {
                 addDatabaseToUncommittedObjects(database);
                 addSchemaToUncommittedObjects(schema);
@@ -126,10 +125,6 @@ public abstract class TransactionManager {
                 }
             }
         }
-    }
-
-    public void executeCreateDatabaseOperation(final Database database) throws SQLException {
-        databaseManager.initDatabase(database);
     }
 
     private void addTableToUncommittedObjects(final Table table) {

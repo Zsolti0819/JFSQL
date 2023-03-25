@@ -34,10 +34,11 @@ public class AlterTableService {
     private final Reader reader;
 
     public int alterTable(final AlterTableWrapper statement) throws SQLException {
+        final Database database = databaseManager.getDatabase();
         final String tableName = statement.getTableName();
         final Table table = tableFinder.getTableByName(tableName);
         if (statement.getNewTableName() != null) {
-            renameTable(statement, table);
+            renameTable(statement, database, table);
         } else if (statement.getOldColumnName() != null) {
             renameColumn(statement, table);
         } else if (statement.getColumnNameToAdd() != null) {
@@ -45,12 +46,13 @@ public class AlterTableService {
         } else if (statement.getColumnToDrop() != null) {
             dropColumn(statement, table);
         }
-        transactionManager.executeDDLOperation(table, table.getSchema());
+        transactionManager.executeDDLOperation(database, table, table.getSchema());
         return 0;
     }
 
-    private void renameTable(final AlterTableWrapper statement, final Table table) throws SQLException {
-        final Database database = databaseManager.getDatabase();
+    private void renameTable(final AlterTableWrapper statement, final Database database, final Table table)
+        throws SQLException {
+
         final String parentDirectory = String.valueOf(database.getUrl().getParent());
         final String newTableName = statement.getNewTableName();
 

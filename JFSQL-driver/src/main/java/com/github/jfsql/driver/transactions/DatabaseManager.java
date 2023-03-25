@@ -10,7 +10,6 @@ import java.util.LinkedList;
 import lombok.Getter;
 import lombok.Setter;
 
-
 public abstract class DatabaseManager {
 
     @Getter
@@ -34,5 +33,9 @@ public abstract class DatabaseManager {
     public abstract void initDatabase(final Database database) throws SQLException;
 
     public abstract void openDatabase() throws SQLException;
+
+    public void executeCreateDatabaseOperation(final Database database) throws SQLException {
+        initDatabase(database);
+    }
 
 }

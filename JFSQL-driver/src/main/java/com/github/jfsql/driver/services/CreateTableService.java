@@ -76,7 +76,7 @@ public class CreateTableService {
         final List<Entry> entries = new ArrayList<>();
         table.setEntries(entries);
         database.getTables().add(table);
-        transactionManager.executeDDLOperation(table, table.getSchema());
+        transactionManager.executeDDLOperation(database, table, table.getSchema());
         return 0;
     }
 }

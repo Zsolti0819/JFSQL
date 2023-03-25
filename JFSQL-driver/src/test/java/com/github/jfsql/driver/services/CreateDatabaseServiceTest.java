@@ -10,7 +10,7 @@ import static org.mockito.Mockito.when;
 
 import com.github.jfsql.driver.TestUtils;
 import com.github.jfsql.driver.persistence.Reader;
-import com.github.jfsql.driver.transactions.TransactionManager;
+import com.github.jfsql.driver.transactions.DatabaseManager;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.CreateDatabaseWrapper;
 import java.sql.SQLException;
@@ -27,7 +27,7 @@ class CreateDatabaseServiceTest {
     private SemanticValidator semanticValidator;
 
     @Mock
-    private TransactionManager transactionManager;
+    private DatabaseManager databaseManager;
 
     @Mock
     private Reader reader;
@@ -44,7 +44,7 @@ class CreateDatabaseServiceTest {
         when(semanticValidator.urlIsAnExistingRegularFile(createDatabaseStatement)).thenReturn(false);
         when(semanticValidator.databaseExist(createDatabaseStatement, reader.getFileExtension())).thenReturn(false);
         createDatabaseService.createDatabase(createDatabaseStatement);
-        verify(transactionManager, times(1)).executeCreateDatabaseOperation(any());
+        verify(databaseManager, times(1)).executeCreateDatabaseOperation(any());
     }
 
     @Test
@@ -55,7 +55,7 @@ class CreateDatabaseServiceTest {
             () -> createDatabaseService.createDatabase(createDatabaseStatement));
         assertEquals("Database is not a directory.", thrown.getMessage());
 
-        verify(transactionManager, never()).executeCreateDatabaseOperation(any());
+        verify(databaseManager, never()).executeCreateDatabaseOperation(any());
     }
 
     @Test
@@ -67,6 +67,6 @@ class CreateDatabaseServiceTest {
             () -> createDatabaseService.createDatabase(createDatabaseStatement));
         assertEquals("Database already exists, will not create another one.", thrown.getMessage());
 
-        verify(transactionManager, never()).executeCreateDatabaseOperation(any());
+        verify(databaseManager, never()).executeCreateDatabaseOperation(any());
     }
 }

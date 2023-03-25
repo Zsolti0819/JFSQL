@@ -68,7 +68,7 @@ public class StatementServiceManager {
         preparedStatementCreator = new PreparedStatementCreator(tableFinder, this);
         alterTableService = new AlterTableService(tableFinder, databaseManager, transactionManager,
             semanticValidator, reader);
-        createDatabaseService = new CreateDatabaseService(transactionManager, semanticValidator, reader);
+        createDatabaseService = new CreateDatabaseService(databaseManager, semanticValidator, reader);
         dropDatabaseService = new DropDatabaseService(databaseManager, semanticValidator, reader);
         createTableService = new CreateTableService(databaseManager, transactionManager, semanticValidator, reader);
         insertService = new InsertService(tableFinder, transactionManager, semanticValidator, reader);
