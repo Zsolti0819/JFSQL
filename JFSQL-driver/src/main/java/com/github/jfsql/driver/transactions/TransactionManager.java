@@ -88,7 +88,8 @@ public abstract class TransactionManager {
         }
     }
 
-    public void executeDDLOperation(final Database database, final Table table, final Schema schema) throws SQLException {
+    public void executeDDLOperation(final Database database, final Table table, final Schema schema)
+        throws SQLException {
         synchronized (lock) {
             if (!autoCommit) {
                 addDatabaseToUncommittedObjects(database);
@@ -133,7 +134,7 @@ public abstract class TransactionManager {
                 // remove all entries from the shared map, where the value was the thread's id
                 removeCurrentThreadChangesFromMap();
                 throw new PessimisticLockException(
-                    "The file '" + table.getTableFile() + "' is currently modified by another thread.");
+                    "The file '" + table.getTableFile() + "' is currently being modified by another thread.");
             }
         } else {
             FILE_TO_THREAD_ID_MAP.put(table.getTableFile(), Thread.currentThread().getId());
@@ -148,7 +149,7 @@ public abstract class TransactionManager {
                 // remove all entries from the shared map, where the value was the thread's id
                 removeCurrentThreadChangesFromMap();
                 throw new PessimisticLockException(
-                    "The file '" + schema.getSchemaFile() + "' is currently modified by another thread.");
+                    "The file '" + schema.getSchemaFile() + "' is currently being modified by another thread.");
             }
         } else {
             FILE_TO_THREAD_ID_MAP.put(schema.getSchemaFile(), Thread.currentThread().getId());
@@ -163,7 +164,7 @@ public abstract class TransactionManager {
                 // remove all entries from the shared map, where the value was the thread's id
                 removeCurrentThreadChangesFromMap();
                 throw new PessimisticLockException(
-                    "The file '" + database.getUrl() + "' is currently modified by another thread.");
+                    "The file '" + database.getUrl() + "' is currently being modified by another thread.");
             }
         } else {
             FILE_TO_THREAD_ID_MAP.put(String.valueOf(database.getUrl()), Thread.currentThread().getId());
