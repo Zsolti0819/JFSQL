@@ -1,7 +1,6 @@
 package com.github.jfsql.driver.core;
 
 import com.github.jfsql.driver.cache.Cache;
-import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.factories.CacheFactory;
 import com.github.jfsql.driver.factories.ReaderFactory;
 import com.github.jfsql.driver.factories.TransactionManagerFactory;
@@ -48,7 +47,6 @@ public class JfsqlConnection implements Connection {
     private JfsqlStatement statement;
     private JfsqlPreparedStatement preparedStatement;
     private DatabaseMetaData metaData;
-    private int transactionIsolation;
     private boolean readOnly;
 
     public JfsqlConnection(final Path url, final PropertiesReader propertiesReader) throws SQLException {
@@ -56,22 +54,24 @@ public class JfsqlConnection implements Connection {
         cache = CacheFactory.createCache(propertiesReader);
         reader = ReaderFactory.createReader(propertiesReader);
         writer = WriterFactory.createWriter(propertiesReader);
-        transactionManager = TransactionManagerFactory.createTransactionManager(propertiesReader, url, reader, writer);
-        final Database database = transactionManager.getDatabase();
-        tableFinder = new TableFinder(database);
-        statementServiceManager = new StatementServiceManager(database, tableFinder, transactionManager, reader);
+        transactionManager = TransactionManagerFactory.createTransactionManager(propertiesReader, url, reader,
+            writer);
+        tableFinder = new TableFinder(transactionManager.getDatabase());
+        statementServiceManager = new StatementServiceManager(transactionManager.getDatabase(), cache,
+            tableFinder,
+            transactionManager, reader);
         metaData = new JfsqlDatabaseMetaData(this);
     }
 
     @Override
     public Statement createStatement() {
-        statement = new JfsqlStatement(this, statementServiceManager, cache);
+        statement = new JfsqlStatement(this, statementServiceManager);
         return statement;
     }
 
     @Override
     public PreparedStatement prepareStatement(final String sql) throws SQLException {
-        preparedStatement = new JfsqlPreparedStatement(this, sql, tableFinder, statementServiceManager);
+        preparedStatement = new JfsqlPreparedStatement(this, statementServiceManager, sql);
         return preparedStatement;
     }
 
@@ -83,12 +83,7 @@ public class JfsqlConnection implements Connection {
 
     @Override
     public int getTransactionIsolation() {
-        return transactionIsolation;
-    }
-
-    @Override
-    public void setTransactionIsolation(final int level) {
-        transactionIsolation = TRANSACTION_READ_COMMITTED;
+        return Connection.TRANSACTION_READ_COMMITTED;
     }
 
     @Override
@@ -132,6 +127,11 @@ public class JfsqlConnection implements Connection {
     }
 
     // Unsupported operations
+
+    @Override
+    public void setTransactionIsolation(final int level) throws SQLFeatureNotSupportedException {
+        throw new SQLFeatureNotSupportedException();
+    }
 
     @Override
     public CallableStatement prepareCall(final String sql) throws SQLFeatureNotSupportedException {

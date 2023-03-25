@@ -1,20 +1,6 @@
 package com.github.jfsql.driver.core;
 
 import com.github.jfsql.driver.services.StatementServiceManager;
-import com.github.jfsql.driver.util.PreparedStatementCreator;
-import com.github.jfsql.driver.util.TableFinder;
-import com.github.jfsql.parser.core.Parser;
-import com.github.jfsql.parser.dto.AlterTableWrapper;
-import com.github.jfsql.parser.dto.BaseStatement;
-import com.github.jfsql.parser.dto.CreateDatabaseWrapper;
-import com.github.jfsql.parser.dto.CreateTableWrapper;
-import com.github.jfsql.parser.dto.DeleteWrapper;
-import com.github.jfsql.parser.dto.DropDatabaseWrapper;
-import com.github.jfsql.parser.dto.DropTableWrapper;
-import com.github.jfsql.parser.dto.InsertWrapper;
-import com.github.jfsql.parser.dto.SelectWrapper;
-import com.github.jfsql.parser.dto.TypeOfStatement;
-import com.github.jfsql.parser.dto.UpdateWrapper;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,58 +33,17 @@ import lombok.Data;
 @Data
 public class JfsqlPreparedStatement implements PreparedStatement {
 
-    private final Parser parser;
-    private final StatementServiceManager statementServiceManager;
-    private final TableFinder tableFinder;
-    private final String sql;
-    private final PreparedStatementCreator preparedStatementCreator;
-    private final Object[] parameters;
     private JfsqlConnection connection;
-    private ResultSet resultSet;
-    private int updateCount = 0;
+    private final StatementServiceManager statementServiceManager;
+    private final String sql;
 
-    JfsqlPreparedStatement(final JfsqlConnection connection, final String sql,
-        final TableFinder tableFinder, final StatementServiceManager statementServiceManager) throws SQLException {
+
+    JfsqlPreparedStatement(final JfsqlConnection connection, final StatementServiceManager statementServiceManager,
+        final String sql) throws SQLException {
         this.connection = connection;
-        this.sql = sql;
-        preparedStatementCreator = new PreparedStatementCreator(this);
-        this.tableFinder = tableFinder;
         this.statementServiceManager = statementServiceManager;
-        parser = new Parser();
-        parameters = new Object[getParameterCount(sql)];
-    }
-
-    private int getParameterCount(final String sql) throws SQLException {
-        final int parameterCount;
-        final BaseStatement statement = parser.parse(sql);
-        if (statement == null) {
-            throw new IllegalStateException("The statement couldn't be created.");
-        }
-        switch (statement.getTypeOfStatement()) {
-            case ALTER_TABLE:
-            case CREATE_DATABASE:
-            case CREATE_TABLE:
-            case DROP_DATABASE:
-            case DROP_TABLE:
-                parameterCount = 0;
-                break;
-            case DELETE:
-                parameterCount = ((DeleteWrapper) statement).getWhereValues().size();
-                break;
-            case INSERT:
-                parameterCount = ((InsertWrapper) statement).getValues().get(0).size();
-                break;
-            case SELECT:
-                parameterCount = ((SelectWrapper) statement).getWhereValues().size();
-                break;
-            case UPDATE:
-                parameterCount = ((UpdateWrapper) statement).getValues().size()
-                    + ((UpdateWrapper) statement).getWhereValues().size();
-                break;
-            default:
-                throw new SQLException("Cannot determine the type of the statement.");
-        }
-        return parameterCount;
+        this.sql = sql;
+        statementServiceManager.setParameters(new Object[statementServiceManager.getParameterCount(sql)]);
     }
 
     @Override
@@ -118,219 +63,122 @@ public class JfsqlPreparedStatement implements PreparedStatement {
 
     @Override
     public ResultSet executeQuery(final String sql) throws SQLException {
-        BaseStatement statement = parser.parse(sql);
-        if (statement == null) {
-            throw new IllegalStateException("The statement couldn't be created.");
-        }
-        if (!(TypeOfStatement.SELECT.equals(statement.getTypeOfStatement()))) {
-            throw new SQLException("Cannot execute executeQuery() because statement was not a Select statement.");
-        }
-        statement = preparedStatementCreator.getPreparedSelectStatement((SelectWrapper) statement);
-        resultSet = statementServiceManager.selectFromTable((SelectWrapper) statement);
-        return resultSet;
+        return statementServiceManager.executeQueryPreparedStatement(sql);
     }
 
     @Override
     public int executeUpdate(final String sql) throws SQLException {
-        final BaseStatement statement = parser.parse(sql);
-        if (statement == null) {
-            throw new IllegalStateException("The statement couldn't be created.");
-        }
-        switch (statement.getTypeOfStatement()) {
-            case ALTER_TABLE:
-                updateCount = statementServiceManager.alterTable((AlterTableWrapper) statement);
-                break;
-            case CREATE_DATABASE:
-                updateCount = statementServiceManager.createDatabase((CreateDatabaseWrapper) statement);
-                break;
-            case CREATE_TABLE:
-                updateCount = statementServiceManager.createTable((CreateTableWrapper) statement);
-                break;
-            case DELETE:
-                final DeleteWrapper preparedDeleteStatement = preparedStatementCreator.getPreparedDeleteStatement(
-                    (DeleteWrapper) statement);
-                updateCount = statementServiceManager.deleteFromTable(preparedDeleteStatement);
-                break;
-            case DROP_DATABASE:
-                updateCount = statementServiceManager.dropDatabase((DropDatabaseWrapper) statement);
-                break;
-            case DROP_TABLE:
-                updateCount = statementServiceManager.dropTable((DropTableWrapper) statement);
-                break;
-            case INSERT:
-                final InsertWrapper preparedInsertStatement = preparedStatementCreator.getPreparedInsertStatement(
-                    (InsertWrapper) statement);
-                updateCount = statementServiceManager.insertIntoTable(preparedInsertStatement);
-                break;
-            case UPDATE:
-                final UpdateWrapper preparedUpdateStatement = preparedStatementCreator.getPreparedUpdateStatement(
-                    (UpdateWrapper) statement);
-                updateCount = statementServiceManager.updateTable(preparedUpdateStatement);
-                break;
-            default:
-                throw new SQLException("This statement type is not supported.");
-        }
-        return updateCount;
-    }
-
-    private void executeQuery(final BaseStatement statement) throws SQLException {
-        final SelectWrapper preparedSelectStatement = preparedStatementCreator.getPreparedSelectStatement(
-            (SelectWrapper) statement);
-        resultSet = statementServiceManager.selectFromTable(preparedSelectStatement);
-    }
-
-    private void executeUpdate(final BaseStatement statement) throws SQLException {
-        switch (statement.getTypeOfStatement()) {
-            case ALTER_TABLE:
-                statementServiceManager.alterTable((AlterTableWrapper) statement);
-                break;
-            case CREATE_DATABASE:
-                statementServiceManager.createDatabase((CreateDatabaseWrapper) statement);
-                break;
-            case CREATE_TABLE:
-                statementServiceManager.createTable((CreateTableWrapper) statement);
-                break;
-            case DELETE:
-                final DeleteWrapper preparedDeleteStatement = preparedStatementCreator.getPreparedDeleteStatement(
-                    (DeleteWrapper) statement);
-                statementServiceManager.deleteFromTable(preparedDeleteStatement);
-                break;
-            case DROP_DATABASE:
-                statementServiceManager.dropDatabase((DropDatabaseWrapper) statement);
-                break;
-            case DROP_TABLE:
-                statementServiceManager.dropTable((DropTableWrapper) statement);
-                break;
-            case INSERT:
-                final InsertWrapper preparedInsertStatement = preparedStatementCreator.getPreparedInsertStatement(
-                    (InsertWrapper) statement);
-                statementServiceManager.insertIntoTable(preparedInsertStatement);
-                break;
-            case UPDATE:
-                final UpdateWrapper preparedUpdateStatement = preparedStatementCreator.getPreparedUpdateStatement(
-                    (UpdateWrapper) statement);
-                statementServiceManager.updateTable(preparedUpdateStatement);
-                break;
-            default:
-                throw new SQLException("This statement type is not supported.");
-        }
+        return statementServiceManager.executeUpdatePreparedStatement(sql);
     }
 
     @Override
     public boolean execute(final String sql) throws SQLException {
-        final BaseStatement statement = parser.parse(sql);
-        if (statement == null) {
-            throw new IllegalStateException("The statement couldn't be created.");
-        }
-        if (TypeOfStatement.SELECT.equals(statement.getTypeOfStatement())) {
-            final SelectWrapper preparedSelectStatement = preparedStatementCreator.getPreparedSelectStatement(
-                (SelectWrapper) statement);
-            executeQuery(preparedSelectStatement);
-            return true;
-        } else {
-            executeUpdate(statement);
-            return false;
-        }
+        return statementServiceManager.executePreparedStatement(sql);
     }
 
     @Override
     public void setNull(final int parameterIndex, final int sqlType) {
-        parameters[parameterIndex] = null;
+        statementServiceManager.getParameters()[parameterIndex] = null;
     }
 
     @Override
     public void setBoolean(final int parameterIndex, final boolean x) {
-        parameters[parameterIndex - 1] = x;
+        statementServiceManager.getParameters()[parameterIndex - 1] = x;
     }
 
     @Override
     public void setByte(final int parameterIndex, final byte x) {
-        parameters[parameterIndex - 1] = x;
+        statementServiceManager.getParameters()[parameterIndex - 1] = x;
     }
 
     @Override
     public void setShort(final int parameterIndex, final short x) {
-        parameters[parameterIndex - 1] = x;
+        statementServiceManager.getParameters()[parameterIndex - 1] = x;
     }
 
     @Override
     public void setInt(final int parameterIndex, final int x) {
-        parameters[parameterIndex - 1] = x;
+        statementServiceManager.getParameters()[parameterIndex - 1] = x;
     }
 
     @Override
     public void setLong(final int parameterIndex, final long x) {
-        parameters[parameterIndex - 1] = x;
+        statementServiceManager.getParameters()[parameterIndex - 1] = x;
     }
 
     @Override
     public void setFloat(final int parameterIndex, final float x) {
-        parameters[parameterIndex - 1] = x;
+        statementServiceManager.getParameters()[parameterIndex - 1] = x;
     }
 
     @Override
     public void setDouble(final int parameterIndex, final double x) {
-        parameters[parameterIndex - 1] = x;
+        statementServiceManager.getParameters()[parameterIndex - 1] = x;
     }
 
     @Override
     public void setBigDecimal(final int parameterIndex, final BigDecimal x) {
-        parameters[parameterIndex - 1] = x;
+        statementServiceManager.getParameters()[parameterIndex - 1] = x;
     }
 
     @Override
     public void setString(final int parameterIndex, final String x) {
-        parameters[parameterIndex - 1] = x;
+        statementServiceManager.getParameters()[parameterIndex - 1] = x;
     }
 
     @Override
     public void setBytes(final int parameterIndex, final byte[] x) {
-        parameters[parameterIndex - 1] = Base64.getEncoder().encodeToString(x);
+        statementServiceManager.getParameters()[parameterIndex - 1] = Base64.getEncoder().encodeToString(x);
     }
 
     @Override
     public void setDate(final int parameterIndex, final Date x) {
-        parameters[parameterIndex - 1] = x;
+        statementServiceManager.getParameters()[parameterIndex - 1] = x;
     }
 
     @Override
     public void setTime(final int parameterIndex, final Time x) {
-        parameters[parameterIndex - 1] = x;
+        statementServiceManager.getParameters()[parameterIndex - 1] = x;
     }
 
     @Override
     public void setTimestamp(final int parameterIndex, final Timestamp x) {
-        parameters[parameterIndex - 1] = x;
+        statementServiceManager.getParameters()[parameterIndex - 1] = x;
     }
 
     @Override
     public void setObject(final int parameterIndex, final Object x) {
-        parameters[parameterIndex - 1] = x;
+        statementServiceManager.getParameters()[parameterIndex - 1] = x;
     }
 
     @Override
     public void setRef(final int parameterIndex, final Ref x) {
-        parameters[parameterIndex - 1] = x;
+        statementServiceManager.getParameters()[parameterIndex - 1] = x;
     }
 
     @Override
     public void setClob(final int parameterIndex, final Clob x) {
-        parameters[parameterIndex - 1] = x;
+        statementServiceManager.getParameters()[parameterIndex - 1] = x;
     }
 
     @Override
     public void setArray(final int parameterIndex, final Array x) {
-        parameters[parameterIndex - 1] = x;
+        statementServiceManager.getParameters()[parameterIndex - 1] = x;
     }
 
     @Override
     public void setURL(final int parameterIndex, final URL x) {
-        parameters[parameterIndex - 1] = x;
+        statementServiceManager.getParameters()[parameterIndex - 1] = x;
+    }
+
+    @Override
+    public int getUpdateCount() {
+        return statementServiceManager.getUpdateCount();
     }
 
     private void setInputStream(final int parameterIndex, final InputStream x) throws SQLException {
         if (x == null) {
-            parameters[parameterIndex - 1] = null;
+            statementServiceManager.getParameters()[parameterIndex - 1] = null;
             return;
         }
         try {
@@ -342,7 +190,7 @@ public class JfsqlPreparedStatement implements PreparedStatement {
             final byte[] byteArray = byteArrayOutputStream.toByteArray();
             x.close();
             byteArrayOutputStream.close();
-            parameters[parameterIndex - 1] = Base64.getEncoder().encodeToString(byteArray);
+            statementServiceManager.getParameters()[parameterIndex - 1] = Base64.getEncoder().encodeToString(byteArray);
         } catch (final IOException e) {
             throw new SQLException("Couldn't set InputStream. \n" + e.getMessage());
         }
@@ -360,12 +208,12 @@ public class JfsqlPreparedStatement implements PreparedStatement {
 
     @Override
     public void clearParameters() {
-        Arrays.fill(parameters, null);
+        Arrays.fill(statementServiceManager.getParameters(), null);
     }
 
     @Override
     public ResultSet getResultSet() {
-        return resultSet;
+        return statementServiceManager.getResultSet();
     }
 
     @Override
@@ -375,7 +223,7 @@ public class JfsqlPreparedStatement implements PreparedStatement {
 
     @Override
     public ResultSetMetaData getMetaData() {
-        return new JfsqlResultSetMetaData((JfsqlResultSet) resultSet);
+        return new JfsqlResultSetMetaData((JfsqlResultSet) statementServiceManager.getResultSet());
     }
 
     @Override

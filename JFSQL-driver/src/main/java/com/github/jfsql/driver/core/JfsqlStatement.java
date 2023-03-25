@@ -1,19 +1,6 @@
 package com.github.jfsql.driver.core;
 
-import com.github.jfsql.driver.cache.Cache;
 import com.github.jfsql.driver.services.StatementServiceManager;
-import com.github.jfsql.parser.core.Parser;
-import com.github.jfsql.parser.dto.AlterTableWrapper;
-import com.github.jfsql.parser.dto.BaseStatement;
-import com.github.jfsql.parser.dto.CreateDatabaseWrapper;
-import com.github.jfsql.parser.dto.CreateTableWrapper;
-import com.github.jfsql.parser.dto.DeleteWrapper;
-import com.github.jfsql.parser.dto.DropDatabaseWrapper;
-import com.github.jfsql.parser.dto.DropTableWrapper;
-import com.github.jfsql.parser.dto.InsertWrapper;
-import com.github.jfsql.parser.dto.SelectWrapper;
-import com.github.jfsql.parser.dto.TypeOfStatement;
-import com.github.jfsql.parser.dto.UpdateWrapper;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -25,128 +12,29 @@ import java.util.List;
 
 public class JfsqlStatement implements Statement {
 
-    private final Parser parser;
     private final StatementServiceManager statementServiceManager;
-    private final Cache cache;
     private final List<String> batch;
     private Connection connection;
-    private ResultSet resultSet;
 
-    JfsqlStatement(final Connection connection, final StatementServiceManager statementServiceManager,
-        final Cache cache) {
+    JfsqlStatement(final Connection connection, final StatementServiceManager statementServiceManager) {
         this.connection = connection;
         this.statementServiceManager = statementServiceManager;
-        this.cache = cache;
         batch = new ArrayList<>();
-        parser = new Parser();
     }
 
     @Override
     public boolean execute(final String sql) throws SQLException {
-        final BaseStatement statement = getFromCacheOrParseStatement(sql);
-        if (TypeOfStatement.SELECT.equals(statement.getTypeOfStatement())) {
-            executeQuery(statement);
-            return true;
-        } else {
-            executeUpdate(statement);
-            return false;
-        }
-    }
-
-    private void executeQuery(final BaseStatement statement) throws SQLException {
-        resultSet = statementServiceManager.selectFromTable((SelectWrapper) statement);
-    }
-
-    private void executeUpdate(final BaseStatement statement) throws SQLException {
-        switch (statement.getTypeOfStatement()) {
-            case ALTER_TABLE:
-                statementServiceManager.alterTable((AlterTableWrapper) statement);
-                break;
-            case CREATE_DATABASE:
-                statementServiceManager.createDatabase((CreateDatabaseWrapper) statement);
-                break;
-            case CREATE_TABLE:
-                statementServiceManager.createTable((CreateTableWrapper) statement);
-                break;
-            case DELETE:
-                statementServiceManager.deleteFromTable((DeleteWrapper) statement);
-                break;
-            case DROP_DATABASE:
-                statementServiceManager.dropDatabase((DropDatabaseWrapper) statement);
-                break;
-            case DROP_TABLE:
-                statementServiceManager.dropTable((DropTableWrapper) statement);
-                break;
-            case INSERT:
-                statementServiceManager.insertIntoTable((InsertWrapper) statement);
-                break;
-            case UPDATE:
-                statementServiceManager.updateTable((UpdateWrapper) statement);
-                break;
-            default:
-                throw new SQLException("This statement type is not supported.");
-        }
+        return statementServiceManager.execute(sql);
     }
 
     @Override
     public ResultSet executeQuery(final String sql) throws SQLException {
-        final BaseStatement statement = getFromCacheOrParseStatement(sql);
-        if (!(TypeOfStatement.SELECT.equals(statement.getTypeOfStatement()))) {
-            throw new SQLException("Cannot execute executeQuery() because statement was not a Select statement.");
-        }
-        return statementServiceManager.selectFromTable((SelectWrapper) statement);
+        return statementServiceManager.executeQuery(sql);
     }
 
     @Override
     public int executeUpdate(final String arg0) throws SQLException {
-        int updateCount = 0;
-        final BaseStatement statement = getFromCacheOrParseStatement(arg0);
-        switch (statement.getTypeOfStatement()) {
-            case ALTER_TABLE:
-                updateCount = statementServiceManager.alterTable((AlterTableWrapper) statement);
-                break;
-            case CREATE_DATABASE:
-                updateCount = statementServiceManager.createDatabase((CreateDatabaseWrapper) statement);
-                break;
-            case CREATE_TABLE:
-                updateCount = statementServiceManager.createTable((CreateTableWrapper) statement);
-                break;
-            case DELETE:
-                updateCount = statementServiceManager.deleteFromTable((DeleteWrapper) statement);
-                break;
-            case DROP_DATABASE:
-                updateCount = statementServiceManager.dropDatabase((DropDatabaseWrapper) statement);
-                break;
-            case DROP_TABLE:
-                updateCount = statementServiceManager.dropTable((DropTableWrapper) statement);
-                break;
-            case INSERT:
-                updateCount = statementServiceManager.insertIntoTable((InsertWrapper) statement);
-                break;
-            case SELECT:
-                resultSet = statementServiceManager.selectFromTable((SelectWrapper) statement);
-                break;
-            case UPDATE:
-                updateCount = statementServiceManager.updateTable((UpdateWrapper) statement);
-                break;
-            default:
-                throw new SQLException("This statement type is not supported.");
-        }
-        return updateCount;
-    }
-
-    private BaseStatement getFromCacheOrParseStatement(final String sql) {
-        final BaseStatement statement;
-        if (cache.getCachedStatements().containsKey(sql)) {
-            statement = cache.getCachedStatements().get(sql);
-        } else {
-            statement = parser.parse(sql);
-            cache.getCachedStatements().put(sql, statement);
-        }
-        if (statement == null) {
-            throw new IllegalStateException("The statement couldn't be created.");
-        }
-        return statement;
+        return statementServiceManager.executeUpdate(arg0);
     }
 
     @Override
@@ -156,7 +44,7 @@ public class JfsqlStatement implements Statement {
 
     @Override
     public ResultSet getResultSet() {
-        return resultSet;
+        return statementServiceManager.getResultSet();
     }
 
     @Override
