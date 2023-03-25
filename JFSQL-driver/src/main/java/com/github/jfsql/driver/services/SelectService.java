@@ -131,7 +131,7 @@ class SelectService {
         final Schema newSchema = new Schema(schemaFile, columnsAndTypes, notNullColumns);
         final Table newTable = new Table(tableName, tableFile, newSchema, orderedEntries);
 
-        return new JfsqlResultSet(statement, newTable);
+        return new JfsqlResultSet(newTable);
     }
 
     private ResultSet simpleSelect(final SelectWrapper statement) throws SQLException {

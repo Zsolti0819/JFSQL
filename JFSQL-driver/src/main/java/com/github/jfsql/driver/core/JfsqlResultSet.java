@@ -2,7 +2,6 @@ package com.github.jfsql.driver.core;
 
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
-import com.github.jfsql.parser.dto.SelectWrapper;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -34,18 +33,16 @@ import lombok.Data;
 @Data
 public class JfsqlResultSet implements ResultSet {
 
-    private final String parentTableName;
+    private Table table;
+    private final String tableName;
+    private List<Entry> entries;
     private final List<String> columnNames;
     private final List<String> columnTypes;
-    private SelectWrapper selectStatement;
-    private Table table;
-    private List<Entry> entries;
     private int currentEntry = 0;
 
-    public JfsqlResultSet(final SelectWrapper selectStatement, final Table table) {
-        this.selectStatement = selectStatement;
+    public JfsqlResultSet(final Table table) {
         this.table = table;
-        parentTableName = table.getName();
+        tableName = table.getName();
         entries = table.getEntries();
         columnNames = new ArrayList<>(table.getSchema().getColumnsAndTypes().keySet());
         columnTypes = new ArrayList<>(table.getSchema().getColumnsAndTypes().values());
@@ -73,7 +70,6 @@ public class JfsqlResultSet implements ResultSet {
 
     @Override
     public void close() {
-        selectStatement = null;
         table = null;
     }
 

@@ -24,7 +24,7 @@ public class JfsqlResultSetMetaData implements ResultSetMetaData {
 
     @Override
     public String getTableName(final int arg0) {
-        return resultSet.getParentTableName();
+        return resultSet.getTableName();
     }
 
     @Override
