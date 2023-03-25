@@ -31,32 +31,25 @@ import java.sql.Struct;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 public class JfsqlConnection implements Connection {
 
     private final Path url;
-    private final Reader reader;
-    private final Writer writer;
     private final TransactionManager transactionManager;
-    private final DatabaseManager databaseManager;
     private final StatementServiceManager statementServiceManager;
-    private final Cache cache;
     private JfsqlStatement statement;
     private JfsqlPreparedStatement preparedStatement;
     private DatabaseMetaData metaData;
-    private boolean readOnly;
 
     public JfsqlConnection(final Path url, final PropertiesReader propertiesReader) throws SQLException {
         this.url = url;
-        cache = CacheFactory.createCache(propertiesReader);
-        reader = ReaderFactory.createReader(propertiesReader);
-        writer = WriterFactory.createWriter(propertiesReader);
-        databaseManager = DatabaseManagerFactory.createTransactionManager(propertiesReader, url, reader,
-            writer);
+        final Cache cache = CacheFactory.createCache(propertiesReader);
+        final Reader reader = ReaderFactory.createReader(propertiesReader);
+        final Writer writer = WriterFactory.createWriter(propertiesReader);
+        final DatabaseManager databaseManager = DatabaseManagerFactory.createTransactionManager(propertiesReader, url,
+            reader, writer);
         transactionManager = TransactionManagerFactory.createTransactionManager(propertiesReader,
             databaseManager,
             reader, writer);
@@ -129,6 +122,16 @@ public class JfsqlConnection implements Connection {
     }
 
     // Unsupported operations
+
+    @Override
+    public void setReadOnly(final boolean readOnly) throws SQLException {
+        throw new SQLFeatureNotSupportedException();
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        return false;
+    }
 
     @Override
     public void setTransactionIsolation(final int level) throws SQLFeatureNotSupportedException {
