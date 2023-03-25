@@ -25,6 +25,7 @@ import org.apache.logging.log4j.Logger;
 public abstract class TransactionManager {
 
     private static final Logger logger = LogManager.getLogger(TransactionManager.class);
+    static final Object lock = new Object();
     private static final Map<String, Long> FILE_TO_THREAD_ID_MAP = new HashMap<>();
     final Reader reader;
     final Writer writer;
@@ -54,7 +55,7 @@ public abstract class TransactionManager {
 
     public abstract void openDatabase() throws SQLException;
 
-    public abstract void commit() throws SQLException;
+    public abstract void commit(String... args) throws SQLException;
 
     public abstract void rollback() throws SQLException;
 
@@ -67,30 +68,34 @@ public abstract class TransactionManager {
     }
 
     void writeUncommittedObjects() throws IOException {
-        for (final Database db : uncommittedDatabases) {
-            writer.writeDatabaseFile(db);
+        synchronized (lock) {
+            for (final Database db : uncommittedDatabases) {
+                writer.writeDatabaseFile(db);
+            }
+            for (final Schema schema : uncommittedSchemas) {
+                writer.writeSchema(schema);
+            }
+            for (final Table table : uncommittedTables) {
+                writer.writeTable(table);
+            }
+            uncommittedDatabases.clear();
+            uncommittedSchemas.clear();
+            uncommittedTables.clear();
         }
-        for (final Schema schema : uncommittedSchemas) {
-            writer.writeSchema(schema);
-        }
-        for (final Table table : uncommittedTables) {
-            writer.writeTable(table);
-        }
-        uncommittedDatabases.clear();
-        uncommittedSchemas.clear();
-        uncommittedTables.clear();
     }
 
     public void executeDMLOperation(final Table table) throws SQLException {
         if (!autoCommit) {
             addTableToUncommittedObjects(table);
         } else {
-            try {
-                writer.writeTable(table);
-                commit();
-            } catch (final IOException e) {
-                e.printStackTrace();
-                rollback();
+            synchronized (lock) {
+                try {
+                    writer.writeTable(table);
+                    commit(String.valueOf(Path.of(table.getTableFile()).getFileName()));
+                } catch (final IOException e) {
+                    e.printStackTrace();
+                    rollback();
+                }
             }
         }
     }
@@ -101,28 +106,34 @@ public abstract class TransactionManager {
             addSchemaToUncommittedObjects(schema);
             addTableToUncommittedObjects(table);
         } else {
-            try {
-                writer.writeDatabaseFile(database);
-                writer.writeSchema(schema);
-                writer.writeTable(table);
-                commit();
-            } catch (final IOException e) {
-                e.printStackTrace();
-                rollback();
+            synchronized (lock) {
+                try {
+                    writer.writeDatabaseFile(database);
+                    writer.writeSchema(schema);
+                    writer.writeTable(table);
+                    commit(String.valueOf(database.getUrl().getFileName()),
+                        String.valueOf(Path.of(schema.getSchemaFile()).getFileName()),
+                        String.valueOf(Path.of(table.getTableFile()).getFileName()));
+                } catch (final IOException e) {
+                    e.printStackTrace();
+                    rollback();
+                }
             }
         }
     }
 
     public void executeDropTableOperation() throws SQLException {
-        if (!autoCommit) {
-            addDatabaseToUncommittedObjects(database);
-        } else {
-            try {
-                writer.writeDatabaseFile(database);
-                commit();
-            } catch (final IOException e) {
-                e.printStackTrace();
-                rollback();
+        synchronized (lock) {
+            if (!autoCommit) {
+                addDatabaseToUncommittedObjects(database);
+            } else {
+                try {
+                    writer.writeDatabaseFile(database);
+                    commit(String.valueOf(database.getUrl().getFileName()));
+                } catch (final IOException e) {
+                    e.printStackTrace();
+                    rollback();
+                }
             }
         }
     }
@@ -131,7 +142,7 @@ public abstract class TransactionManager {
         initDatabase(database);
     }
 
-    public void addTableToUncommittedObjects(final Table table) {
+    private void addTableToUncommittedObjects(final Table table) {
         if (FILE_TO_THREAD_ID_MAP.containsKey(table.getTableFile())) {
             if (!Objects.equals(FILE_TO_THREAD_ID_MAP.get(table.getTableFile()), Thread.currentThread().getId())) {
                 // remove all entries from the shared map, where the value was the thread's id
@@ -145,7 +156,7 @@ public abstract class TransactionManager {
         uncommittedTables.add(table);
     }
 
-    public void addSchemaToUncommittedObjects(final Schema schema) {
+    private void addSchemaToUncommittedObjects(final Schema schema) {
         if (FILE_TO_THREAD_ID_MAP.containsKey(schema.getSchemaFile())) {
             if (!Objects.equals(FILE_TO_THREAD_ID_MAP.get(schema.getSchemaFile()),
                 Thread.currentThread().getId())) {
@@ -160,7 +171,7 @@ public abstract class TransactionManager {
         uncommittedSchemas.add(schema);
     }
 
-    public void addDatabaseToUncommittedObjects(final Database database) {
+    private void addDatabaseToUncommittedObjects(final Database database) {
         if (FILE_TO_THREAD_ID_MAP.containsKey(String.valueOf(database.getUrl()))) {
             if (!Objects.equals(FILE_TO_THREAD_ID_MAP.get(String.valueOf(database.getUrl())),
                 Thread.currentThread().getId())) {
@@ -175,15 +186,13 @@ public abstract class TransactionManager {
         uncommittedDatabases.add(database);
     }
 
-    private void removeCurrentThreadChangesFromMap() {
-        logger.debug("shared map = {}", FILE_TO_THREAD_ID_MAP);
+    void removeCurrentThreadChangesFromMap() {
         synchronized (FILE_TO_THREAD_ID_MAP) {
             final Iterator<Map.Entry<String, Long>> iterator = FILE_TO_THREAD_ID_MAP.entrySet().iterator();
             while (iterator.hasNext()) {
                 final Map.Entry<String, Long> entry = iterator.next();
                 final Long value = entry.getValue();
                 if (Objects.equals(value, Thread.currentThread().getId())) {
-                    logger.debug("key to remove = {}", entry.getKey());
                     iterator.remove();
                 }
             }

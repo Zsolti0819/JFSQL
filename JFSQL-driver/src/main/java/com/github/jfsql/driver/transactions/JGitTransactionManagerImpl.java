@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -28,14 +29,12 @@ public class JGitTransactionManagerImpl extends TransactionManager {
         super(url, reader, writer);
     }
 
-    private static final Object lock = new Object();
-
     @Override
     public void commit(final String... args) throws SQLException {
         synchronized (lock) {
             final File databaseDirectoryPath = database.getUrl().getParent().toFile();
             try (final Git git = Git.open(databaseDirectoryPath)) {
-                deleteGitLockFile();
+                deleteGitIndexFile();
                 writeUncommittedObjects();
                 final Collection<File> filesToDelete = getFilesThatShouldNotBePresent();
                 for (final File file : filesToDelete) {
@@ -43,12 +42,19 @@ public class JGitTransactionManagerImpl extends TransactionManager {
                     Files.delete(file.toPath());
                 }
                 git.add().addFilepattern(".").call();
-                git.commit().setMessage("Commit").call();
+                // no args, the commit() was called explicitly through the connection object
+                if (args.length == 0) {
+                    git.commit().setMessage("Explicit commit").call();
+                } else {
+                    git.commit().setMessage("Auto committing: " + Arrays.toString(args)).call();
+                }
             } catch (final GitAPIException | IOException e) {
                 throw new SQLException("commit failed.\n " + e.getMessage());
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw new SQLException("Failed to delete the index file.\n" + e.getMessage());
+            } finally {
+                removeCurrentThreadChangesFromMap();
             }
         }
     }
@@ -66,15 +72,15 @@ public class JGitTransactionManagerImpl extends TransactionManager {
         }
     }
 
-    public void deleteGitLockFile() throws InterruptedException, IOException {
-        final Path lockFile = Path.of(
-            database.getUrl().getParent() + File.separator + ".git" + File.separator + "index");
+    private void deleteGitIndexFile() throws InterruptedException, IOException {
+        final Path databaseDirectory = database.getUrl().getParent();
+        final Path lockFile = Path.of(databaseDirectory + File.separator + ".git" + File.separator + "index");
 
         if (!Files.exists(lockFile)) {
             return; // Lock file doesn't exist, nothing to do
         }
 
-        int attempts = 100;
+        int attempts = 10;
         boolean deleted = false;
         while (!deleted && attempts > 0) {
             deleted = Files.deleteIfExists(lockFile);
@@ -89,7 +95,6 @@ public class JGitTransactionManagerImpl extends TransactionManager {
             throw new IOException("Failed to delete lock file: " + lockFile);
         }
     }
-
 
     private Collection<File> getFilesThatShouldNotBePresent() throws IOException {
         final Path databaseUrl = database.getUrl();

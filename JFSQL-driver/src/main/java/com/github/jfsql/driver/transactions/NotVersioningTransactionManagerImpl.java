@@ -20,12 +20,13 @@ public class NotVersioningTransactionManagerImpl extends TransactionManager {
     }
 
     @Override
-    public void commit() throws SQLException {
+    public void commit(final String... args) throws SQLException {
         try {
             writeUncommittedObjects();
         } catch (final IOException e) {
             throw new SQLException("commit failed");
         }
+        removeCurrentThreadChangesFromMap();
     }
 
     @Override
