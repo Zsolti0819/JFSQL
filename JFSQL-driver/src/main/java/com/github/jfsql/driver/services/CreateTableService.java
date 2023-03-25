@@ -6,6 +6,7 @@ import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.ReaderJsonImpl;
+import com.github.jfsql.driver.transactions.DatabaseManager;
 import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.CreateTableWrapper;
@@ -25,12 +26,13 @@ import org.apache.logging.log4j.Logger;
 public class CreateTableService {
 
     private static final Logger logger = LogManager.getLogger(CreateTableService.class);
-    private final Database database;
+    private final DatabaseManager databaseManager;
     private final TransactionManager transactionManager;
     private final SemanticValidator semanticValidator;
     private final Reader reader;
 
     public int createTable(final CreateTableWrapper statement) throws SQLException {
+        final Database database = databaseManager.getDatabase();
         final String tableName = statement.getTableName();
 
         if (semanticValidator.tableNameEqualsDatabaseName(statement.getTableName(), database)) {

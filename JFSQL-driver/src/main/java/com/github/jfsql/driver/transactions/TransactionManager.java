@@ -6,14 +6,12 @@ import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.PessimisticLockException;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -32,28 +30,18 @@ public abstract class TransactionManager {
     final Set<Table> uncommittedTables;
     final Set<Schema> uncommittedSchemas;
     final Set<Database> uncommittedDatabases;
-    Database database;
+    final DatabaseManager databaseManager;
     boolean autoCommit;
 
-    protected TransactionManager(final Path url, final Reader reader, final Writer writer) throws SQLException {
+    protected TransactionManager(final DatabaseManager databaseManager, final Reader reader, final Writer writer) {
         autoCommit = true;
+        this.databaseManager = databaseManager;
         this.reader = reader;
         this.writer = writer;
-        final Path databaseFile = Path.of(url + File.separator + url.getFileName() + "." + reader.getFileExtension());
-        database = new Database(databaseFile, new LinkedList<>());
-        if (!database.getUrl().toFile().exists()) {
-            initDatabase(database);
-        } else {
-            openDatabase();
-        }
         uncommittedTables = new LinkedHashSet<>();
         uncommittedSchemas = new LinkedHashSet<>();
         uncommittedDatabases = new LinkedHashSet<>();
     }
-
-    public abstract void initDatabase(final Database database) throws SQLException;
-
-    public abstract void openDatabase() throws SQLException;
 
     public abstract void commit(String... args) throws SQLException;
 
@@ -85,10 +73,10 @@ public abstract class TransactionManager {
     }
 
     public void executeDMLOperation(final Table table) throws SQLException {
-        if (!autoCommit) {
-            addTableToUncommittedObjects(table);
-        } else {
-            synchronized (lock) {
+        synchronized (lock) {
+            if (!autoCommit) {
+                addTableToUncommittedObjects(table);
+            } else {
                 try {
                     writer.writeTable(table);
                     commit(String.valueOf(Path.of(table.getTableFile()).getFileName()));
@@ -101,12 +89,13 @@ public abstract class TransactionManager {
     }
 
     public void executeDDLOperation(final Table table, final Schema schema) throws SQLException {
-        if (!autoCommit) {
-            addDatabaseToUncommittedObjects(database);
-            addSchemaToUncommittedObjects(schema);
-            addTableToUncommittedObjects(table);
-        } else {
-            synchronized (lock) {
+        synchronized (lock) {
+            final Database database = databaseManager.getDatabase();
+            if (!autoCommit) {
+                addDatabaseToUncommittedObjects(database);
+                addSchemaToUncommittedObjects(schema);
+                addTableToUncommittedObjects(table);
+            } else {
                 try {
                     writer.writeDatabaseFile(database);
                     writer.writeSchema(schema);
@@ -124,6 +113,7 @@ public abstract class TransactionManager {
 
     public void executeDropTableOperation() throws SQLException {
         synchronized (lock) {
+            final Database database = databaseManager.getDatabase();
             if (!autoCommit) {
                 addDatabaseToUncommittedObjects(database);
             } else {
@@ -139,7 +129,7 @@ public abstract class TransactionManager {
     }
 
     public void executeCreateDatabaseOperation(final Database database) throws SQLException {
-        initDatabase(database);
+        databaseManager.initDatabase(database);
     }
 
     private void addTableToUncommittedObjects(final Table table) {

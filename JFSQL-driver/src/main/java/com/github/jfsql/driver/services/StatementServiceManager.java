@@ -1,8 +1,8 @@
 package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.cache.Cache;
-import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.persistence.Reader;
+import com.github.jfsql.driver.transactions.DatabaseManager;
 import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.util.ColumnToTypeMapper;
 import com.github.jfsql.driver.util.PreparedStatementCreator;
@@ -28,6 +28,7 @@ import lombok.Data;
 @Data
 public class StatementServiceManager {
 
+    private final DatabaseManager databaseManager;
     private final TransactionManager transactionManager;
     private final Cache cache;
     private final TableFinder tableFinder;
@@ -35,7 +36,6 @@ public class StatementServiceManager {
     private final ColumnToTypeMapper columnToTypeMapper;
     private final WhereConditionSolver whereConditionSolver;
     private final Reader reader;
-    private final Database database;
     private final Parser parser;
 
     private final AlterTableService alterTableService;
@@ -53,24 +53,24 @@ public class StatementServiceManager {
     private int updateCount = 0;
     private Object[] parameters;
 
-    public StatementServiceManager(final Database database, final Cache cache, final TableFinder tableFinder,
+    public StatementServiceManager(final DatabaseManager databaseManager, final Cache cache,
         final TransactionManager transactionManager, final Reader reader) {
-        this.database = database;
-        this.cache = cache;
-        this.tableFinder = tableFinder;
+        this.databaseManager = databaseManager;
         this.transactionManager = transactionManager;
+        this.cache = cache;
         this.reader = reader;
 
         parser = new Parser();
+        tableFinder = new TableFinder(databaseManager);
         semanticValidator = new SemanticValidator();
         columnToTypeMapper = new ColumnToTypeMapper();
         whereConditionSolver = new WhereConditionSolver();
         preparedStatementCreator = new PreparedStatementCreator(tableFinder, this);
-        alterTableService = new AlterTableService(tableFinder, database, transactionManager,
+        alterTableService = new AlterTableService(tableFinder, databaseManager, transactionManager,
             semanticValidator, reader);
         createDatabaseService = new CreateDatabaseService(transactionManager, semanticValidator, reader);
-        dropDatabaseService = new DropDatabaseService(transactionManager, semanticValidator, reader);
-        createTableService = new CreateTableService(database, transactionManager, semanticValidator, reader);
+        dropDatabaseService = new DropDatabaseService(databaseManager, semanticValidator, reader);
+        createTableService = new CreateTableService(databaseManager, transactionManager, semanticValidator, reader);
         insertService = new InsertService(tableFinder, transactionManager, semanticValidator, reader);
         selectService = new SelectService(tableFinder, semanticValidator, columnToTypeMapper,
             whereConditionSolver,
@@ -81,7 +81,8 @@ public class StatementServiceManager {
         deleteService = new DeleteService(tableFinder, transactionManager, semanticValidator,
             whereConditionSolver,
             reader);
-        dropTableService = new DropTableService(tableFinder, database, transactionManager, semanticValidator,
+        dropTableService = new DropTableService(tableFinder, databaseManager, transactionManager,
+            semanticValidator,
             reader);
     }
 

@@ -2,15 +2,16 @@ package com.github.jfsql.driver.core;
 
 import com.github.jfsql.driver.cache.Cache;
 import com.github.jfsql.driver.factories.CacheFactory;
+import com.github.jfsql.driver.factories.DatabaseManagerFactory;
 import com.github.jfsql.driver.factories.ReaderFactory;
 import com.github.jfsql.driver.factories.TransactionManagerFactory;
 import com.github.jfsql.driver.factories.WriterFactory;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
 import com.github.jfsql.driver.services.StatementServiceManager;
+import com.github.jfsql.driver.transactions.DatabaseManager;
 import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.util.PropertiesReader;
-import com.github.jfsql.driver.util.TableFinder;
 import java.nio.file.Path;
 import java.sql.Array;
 import java.sql.Blob;
@@ -41,8 +42,8 @@ public class JfsqlConnection implements Connection {
     private final Reader reader;
     private final Writer writer;
     private final TransactionManager transactionManager;
+    private final DatabaseManager databaseManager;
     private final StatementServiceManager statementServiceManager;
-    private final TableFinder tableFinder;
     private final Cache cache;
     private JfsqlStatement statement;
     private JfsqlPreparedStatement preparedStatement;
@@ -54,11 +55,12 @@ public class JfsqlConnection implements Connection {
         cache = CacheFactory.createCache(propertiesReader);
         reader = ReaderFactory.createReader(propertiesReader);
         writer = WriterFactory.createWriter(propertiesReader);
-        transactionManager = TransactionManagerFactory.createTransactionManager(propertiesReader, url, reader,
+        databaseManager = DatabaseManagerFactory.createTransactionManager(propertiesReader, url, reader,
             writer);
-        tableFinder = new TableFinder(transactionManager.getDatabase());
-        statementServiceManager = new StatementServiceManager(transactionManager.getDatabase(), cache,
-            tableFinder,
+        transactionManager = TransactionManagerFactory.createTransactionManager(propertiesReader,
+            databaseManager,
+            reader, writer);
+        statementServiceManager = new StatementServiceManager(databaseManager, cache,
             transactionManager, reader);
         metaData = new JfsqlDatabaseMetaData(this);
     }

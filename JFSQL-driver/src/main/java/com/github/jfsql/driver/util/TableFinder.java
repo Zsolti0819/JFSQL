@@ -2,6 +2,7 @@ package com.github.jfsql.driver.util;
 
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
+import com.github.jfsql.driver.transactions.DatabaseManager;
 import java.sql.SQLException;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -9,9 +10,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TableFinder {
 
-    private final Database database;
+    private final DatabaseManager databaseManager;
 
     public Table getTableByName(final String tableName) throws SQLException {
+        final Database database = databaseManager.getDatabase();
         return database.getTables().stream()
             .filter(t -> Objects.equals(tableName, t.getName()))
             .findFirst()

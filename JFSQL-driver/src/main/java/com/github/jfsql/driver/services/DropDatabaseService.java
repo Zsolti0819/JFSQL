@@ -1,7 +1,7 @@
 package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.persistence.Reader;
-import com.github.jfsql.driver.transactions.TransactionManager;
+import com.github.jfsql.driver.transactions.DatabaseManager;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.DropDatabaseWrapper;
 import java.io.File;
@@ -12,7 +12,7 @@ import org.apache.commons.io.FileUtils;
 @RequiredArgsConstructor
 class DropDatabaseService {
 
-    private final TransactionManager transactionManager;
+    private final DatabaseManager databaseManager;
     private final SemanticValidator semanticValidator;
     private final Reader reader;
 
@@ -25,7 +25,7 @@ class DropDatabaseService {
             throw new SQLException("Couldn't drop database.");
         }
 
-        transactionManager.setDatabase(null);
+        databaseManager.setDatabase(null);
         return 1;
     }
 }

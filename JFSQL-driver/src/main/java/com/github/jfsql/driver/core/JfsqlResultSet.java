@@ -177,7 +177,6 @@ public class JfsqlResultSet implements ResultSet {
         if (getEntries().isEmpty()) {
             throw new SQLException();
         }
-        
         return (getColumnIndex(columnLabel) + 1);
     }
 

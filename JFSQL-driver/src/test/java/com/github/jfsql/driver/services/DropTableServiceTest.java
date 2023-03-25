@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
+import com.github.jfsql.driver.transactions.DatabaseManager;
 import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.driver.validation.SemanticValidator;
@@ -28,6 +29,9 @@ class DropTableServiceTest {
 
     @Mock
     private TableFinder tableFinder;
+
+    @Mock
+    private DatabaseManager databaseManager;
 
     @Mock
     private TransactionManager transactionManager;
@@ -52,6 +56,7 @@ class DropTableServiceTest {
 
     @Test
     void testDropTable_normally() throws SQLException {
+        when(databaseManager.getDatabase()).thenReturn(database);
         when(tableFinder.getTableByName(dropTableStatement.getTableName())).thenReturn(table);
         when(dropTableStatement.isIfExistsPresent()).thenReturn(false);
         when(semanticValidator.tableExists(dropTableStatement, database)).thenReturn(true);

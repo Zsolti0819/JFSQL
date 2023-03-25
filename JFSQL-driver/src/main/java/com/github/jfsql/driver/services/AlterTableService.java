@@ -5,6 +5,7 @@ import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.ReaderJsonImpl;
+import com.github.jfsql.driver.transactions.DatabaseManager;
 import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.driver.validation.SemanticValidator;
@@ -27,7 +28,7 @@ public class AlterTableService {
 
     private static final Logger logger = LogManager.getLogger(AlterTableService.class);
     private final TableFinder tableFinder;
-    private final Database database;
+    private final DatabaseManager databaseManager;
     private final TransactionManager transactionManager;
     private final SemanticValidator semanticValidator;
     private final Reader reader;
@@ -49,6 +50,7 @@ public class AlterTableService {
     }
 
     private void renameTable(final AlterTableWrapper statement, final Table table) throws SQLException {
+        final Database database = databaseManager.getDatabase();
         final String parentDirectory = String.valueOf(database.getUrl().getParent());
         final String newTableName = statement.getNewTableName();
 

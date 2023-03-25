@@ -4,6 +4,7 @@ import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
+import com.github.jfsql.driver.transactions.DatabaseManager;
 import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.driver.validation.SemanticValidator;
@@ -20,12 +21,13 @@ public class DropTableService {
 
     private static final Logger logger = LogManager.getLogger(DropTableService.class);
     private final TableFinder tableFinder;
-    private final Database database;
+    private final DatabaseManager databaseManager;
     private final TransactionManager transactionManager;
     private final SemanticValidator semanticValidator;
     private final Reader reader;
 
     public int dropTable(final DropTableWrapper statement) throws SQLException {
+        final Database database = databaseManager.getDatabase();
         final boolean ifExistsIsPresent = statement.isIfExistsPresent();
 
         try {

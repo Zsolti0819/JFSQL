@@ -25,13 +25,14 @@ public class JGitTransactionManagerImpl extends TransactionManager {
 
     private static final Logger logger = LogManager.getLogger(JGitTransactionManagerImpl.class);
 
-    public JGitTransactionManagerImpl(final Path url, final Reader reader, final Writer writer) throws SQLException {
-        super(url, reader, writer);
+    public JGitTransactionManagerImpl(final DatabaseManager databaseManager, final Reader reader, final Writer writer) {
+        super(databaseManager, reader, writer);
     }
 
     @Override
     public void commit(final String... args) throws SQLException {
         synchronized (lock) {
+            final Database database = databaseManager.database;
             final File databaseDirectoryPath = database.getUrl().getParent().toFile();
             try (final Git git = Git.open(databaseDirectoryPath)) {
                 deleteGitIndexFile();
@@ -62,6 +63,7 @@ public class JGitTransactionManagerImpl extends TransactionManager {
     @Override
     public void rollback() throws SQLException {
         logger.warn("transaction rollback...");
+        final Database database = databaseManager.database;
         try (final Git git = Git.open(database.getUrl().getParent().toFile())) {
             final ResetCommand resetCommand = git.reset().setMode(ResetCommand.ResetType.HARD);
             resetCommand.call();
@@ -73,6 +75,7 @@ public class JGitTransactionManagerImpl extends TransactionManager {
     }
 
     private void deleteGitIndexFile() throws InterruptedException, IOException {
+        final Database database = databaseManager.database;
         final Path databaseDirectory = database.getUrl().getParent();
         final Path lockFile = Path.of(databaseDirectory + File.separator + ".git" + File.separator + "index");
 
@@ -97,6 +100,7 @@ public class JGitTransactionManagerImpl extends TransactionManager {
     }
 
     private Collection<File> getFilesThatShouldNotBePresent() throws IOException {
+        final Database database = databaseManager.database;
         final Path databaseUrl = database.getUrl();
         final String fileExtension = reader.getFileExtension();
         final String schemaExtension = reader.getSchemaFileExtension();
@@ -112,28 +116,4 @@ public class JGitTransactionManagerImpl extends TransactionManager {
         return filesToDelete;
     }
 
-    @Override
-    public void openDatabase() throws SQLException {
-        try (final Git ignored = Git.open(database.getUrl().getParent().toFile())) {
-            final List<Table> tables = reader.readTablesFromDatabaseFile(database);
-            database.setTables(tables);
-        } catch (final IOException e) {
-            throw new SQLException("Couldn't open git repository.\n" + e.getMessage());
-        }
-    }
-
-    @Override
-    public void initDatabase(final Database database) throws SQLException {
-        try (final Git git = Git.init().setDirectory(database.getUrl().getParent().toFile()).call()) {
-            final List<Table> tables = new ArrayList<>();
-            database.setTables(tables);
-            writer.writeDatabaseFile(database);
-            git.add().addFilepattern(".").call();
-            git.commit().setMessage("Initial commit").call();
-        } catch (final GitAPIException e) {
-            throw new SQLException("Couldn't init git repository.\n" + e.getMessage());
-        } catch (final IOException e) {
-            throw new SQLException("Couldn't write database file.\n" + e.getMessage());
-        }
-    }
 }
