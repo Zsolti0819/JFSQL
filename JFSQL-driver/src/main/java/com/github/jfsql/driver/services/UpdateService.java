@@ -40,7 +40,8 @@ public class UpdateService {
             throw new SQLException("Some columns entered doesn't exist in \"" + activeTable.getName() + "\".");
         }
 
-        if (activeTable.getEntries().isEmpty()) {
+        // When autoCommit is true, it should be safe to read the entries from the file
+        if (activeTable.getEntries().isEmpty() || transactionManager.getAutoCommit()) {
             try {
                 final List<Entry> entries = reader.readEntriesFromTable(activeTable);
                 activeTable.setEntries(entries);

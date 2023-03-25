@@ -49,7 +49,8 @@ public class InsertService {
                 "Some value's type didn't match the type of the column, to which it was intended to be inserted.");
         }
 
-        if (activeTable.getEntries().isEmpty()) {
+        // When autoCommit is true, it should be safe to read the entries from the file
+        if (activeTable.getEntries().isEmpty() || transactionManager.getAutoCommit()) {
             try {
                 final List<Entry> entries = reader.readEntriesFromTable(activeTable);
                 activeTable.setEntries(entries);

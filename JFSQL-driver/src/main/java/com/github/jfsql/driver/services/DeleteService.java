@@ -25,7 +25,9 @@ public class DeleteService {
     public int deleteFromTable(final DeleteWrapper statement) throws SQLException {
         final List<String> whereColumns = statement.getWhereColumns();
         final Table activeTable = tableFinder.getTableByName(statement.getTableName());
-        if (activeTable.getEntries().isEmpty()) {
+
+        // When autoCommit is true, it should be safe to read the entries from the file
+        if (activeTable.getEntries().isEmpty() || transactionManager.getAutoCommit()) {
             try {
                 final List<Entry> entries = reader.readEntriesFromTable(activeTable);
                 activeTable.setEntries(entries);
