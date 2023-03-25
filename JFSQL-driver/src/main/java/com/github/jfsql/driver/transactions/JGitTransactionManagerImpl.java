@@ -9,10 +9,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
@@ -35,14 +36,19 @@ public class JGitTransactionManagerImpl extends TransactionManager {
             final Database database = databaseManager.database;
             final File databaseDirectoryPath = database.getUrl().getParent().toFile();
             try (final Git git = Git.open(databaseDirectoryPath)) {
-                deleteGitIndexFile();
                 writeUncommittedObjects();
-                final Collection<File> filesToDelete = getFilesThatShouldNotBePresent();
-                for (final File file : filesToDelete) {
-                    git.rm().addFilepattern(file.getName()).call();
-                    Files.delete(file.toPath());
+
+                final Map<File, Boolean> filesToAdd = getFilesToAdd();
+                for (final Map.Entry<File, Boolean> entry : filesToAdd.entrySet()) {
+                    final File file = entry.getKey();
+                    if (Boolean.TRUE.equals(entry.getValue())) {
+                        git.add().addFilepattern(file.getName()).call();
+                    } else {
+                        git.rm().addFilepattern(file.getName());
+                        Files.delete(file.toPath());
+                    }
                 }
-                git.add().addFilepattern(".").call();
+
                 // no args, the commit() was called explicitly through the connection object
                 if (args.length == 0) {
                     git.commit().setMessage("Explicit commit").call();
@@ -50,10 +56,7 @@ public class JGitTransactionManagerImpl extends TransactionManager {
                     git.commit().setMessage("Auto committing: " + Arrays.toString(args)).call();
                 }
             } catch (final GitAPIException | IOException e) {
-                throw new SQLException("commit failed.\n " + e.getMessage());
-            } catch (final InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new SQLException("Failed to delete the index file.\n" + e.getMessage());
+                throw new SQLException(e);
             } finally {
                 removeCurrentThreadChangesFromMap();
             }
@@ -74,46 +77,28 @@ public class JGitTransactionManagerImpl extends TransactionManager {
         }
     }
 
-    private void deleteGitIndexFile() throws InterruptedException, IOException {
-        final Database database = databaseManager.database;
-        final Path databaseDirectory = database.getUrl().getParent();
-        final Path lockFile = Path.of(databaseDirectory + File.separator + ".git" + File.separator + "index");
-
-        if (!Files.exists(lockFile)) {
-            return; // Lock file doesn't exist, nothing to do
-        }
-
-        int attempts = 10;
-        boolean deleted = false;
-        while (!deleted && attempts > 0) {
-            deleted = Files.deleteIfExists(lockFile);
-            if (!deleted) {
-                // If the lock file couldn't be deleted, wait and try again
-                Thread.sleep(500);
-                attempts--;
-            }
-        }
-
-        if (!deleted) {
-            throw new IOException("Failed to delete lock file: " + lockFile);
-        }
-    }
-
-    private Collection<File> getFilesThatShouldNotBePresent() throws IOException {
+    /**
+     * The method searches for files in the database directory, and returns a map with each file as a key and a boolean
+     * value indicating whether the file should be added in the next commit, or removed. The value for the database file
+     * itself is set to true.
+     */
+    private Map<File, Boolean> getFilesToAdd() throws IOException {
         final Database database = databaseManager.database;
         final Path databaseUrl = database.getUrl();
         final String fileExtension = reader.getFileExtension();
         final String schemaExtension = reader.getSchemaFileExtension();
         final String[] extensions = new String[]{fileExtension, schemaExtension};
         final Collection<File> files = FileUtils.listFiles(databaseUrl.getParent().toFile(), extensions, false);
-        final Collection<File> filesToDelete = new ArrayList<>();
-        files.removeIf(file -> Objects.equals(Path.of(file.getAbsolutePath()), databaseUrl));
+        final Map<File, Boolean> filesToAdd = new HashMap<>();
         for (final File file : files) {
-            if (!reader.pathIsPresentInDatabaseFile(database, file.getAbsolutePath())) {
-                filesToDelete.add(file);
+            if (Objects.equals(Path.of(file.getAbsolutePath()), databaseUrl)) {
+                filesToAdd.put(databaseUrl.toFile(), true);
+                continue;
             }
+            final boolean addFile = reader.pathIsPresentInDatabaseFile(database, file.getAbsolutePath());
+            filesToAdd.put(file, addFile);
         }
-        return filesToDelete;
+        return filesToAdd;
     }
 
 }
