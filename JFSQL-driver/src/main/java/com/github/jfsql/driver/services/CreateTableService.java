@@ -1,7 +1,6 @@
 package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.dto.Database;
-import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
@@ -73,8 +72,6 @@ public class CreateTableService {
 
         final Schema schema = new Schema(schemaFile, columnsAndTypes, notNulLColumns);
         final Table table = new Table(tableName, tableFile, schema, new ArrayList<>());
-        final List<Entry> entries = new ArrayList<>();
-        table.setEntries(entries);
         database.getTables().add(table);
         transactionManager.executeDDLOperation(database, table, table.getSchema());
         return 0;
