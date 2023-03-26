@@ -4,8 +4,10 @@ import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 public interface Reader {
 
@@ -21,6 +23,6 @@ public interface Reader {
 
     String readBlob(final String pathToBlob) throws IOException;
 
-    boolean pathIsPresentInDatabaseFile(final Database database, final String pathToCheck) throws IOException;
+    Set<File> getFilesInDatabaseFile(final Database database) throws IOException;
 
 }

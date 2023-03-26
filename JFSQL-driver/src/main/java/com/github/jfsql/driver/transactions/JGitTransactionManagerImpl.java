@@ -14,7 +14,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -77,27 +77,23 @@ public class JGitTransactionManagerImpl extends TransactionManager {
         }
     }
 
-    /**
-     * The method searches for files in the database directory, and returns a map with each file as a key and a boolean
-     * value indicating whether the file should be added in the next commit, or removed. The value for the database file
-     * itself is set to true.
-     */
     private Map<File, Boolean> getFilesToAdd() throws IOException {
+        final Map<File, Boolean> filesToAdd = new HashMap<>();
         final Database database = databaseManager.database;
         final Path databaseUrl = database.getUrl();
         final String fileExtension = reader.getFileExtension();
         final String schemaExtension = reader.getSchemaFileExtension();
         final String[] extensions = new String[]{fileExtension, schemaExtension};
-        final Collection<File> files = FileUtils.listFiles(databaseUrl.getParent().toFile(), extensions, false);
-        final Map<File, Boolean> filesToAdd = new HashMap<>();
-        for (final File file : files) {
-            if (Objects.equals(Path.of(file.getAbsolutePath()), databaseUrl)) {
-                filesToAdd.put(databaseUrl.toFile(), true);
-                continue;
-            }
-            final boolean addFile = reader.pathIsPresentInDatabaseFile(database, file.getAbsolutePath());
-            filesToAdd.put(file, addFile);
-        }
+
+        final Collection<File> allFiles = FileUtils.listFiles(databaseUrl.getParent().toFile(), extensions, false);
+        final Set<File> filesInDatabaseFile = reader.getFilesInDatabaseFile(database);
+
+        allFiles.removeAll(filesInDatabaseFile);
+        allFiles.forEach(file -> filesToAdd.put(file, false));
+
+        filesInDatabaseFile.forEach(file -> filesToAdd.put(file, true));
+        filesToAdd.put(databaseUrl.toFile(), true);
+
         return filesToAdd;
     }
 

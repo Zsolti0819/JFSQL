@@ -9,14 +9,17 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -140,10 +143,11 @@ public class ReaderJsonImpl implements Reader {
     }
 
     @Override
-    public boolean pathIsPresentInDatabaseFile(final Database database, final String pathToCheck) throws IOException {
+    public Set<File> getFilesInDatabaseFile(final Database database) throws IOException {
         final String jsonFilePath = String.valueOf(database.getUrl());
         final FileReader fileReader = new FileReader(jsonFilePath);
         final JsonElement jsonElement = JsonParser.parseReader(fileReader);
+        final Set<File> files = new HashSet<>();
         if (jsonElement.isJsonObject()) {
             final JsonObject rootObject = jsonElement.getAsJsonObject();
             final JsonArray tableArray = rootObject.getAsJsonArray("Table");
@@ -151,15 +155,12 @@ public class ReaderJsonImpl implements Reader {
                 final JsonObject tableObject = tableElement.getAsJsonObject();
                 final String pathToTable = tableObject.get("pathToTable").getAsString();
                 final String pathToSchema = tableObject.get("pathToSchema").getAsString();
-                if (pathToTable.equals(pathToCheck) || pathToSchema.equals(pathToCheck)) {
-                    fileReader.close();
-                    return true;
-                }
+                files.add(new File(pathToTable));
+                files.add(new File(pathToSchema));
             }
         }
         fileReader.close();
-        return false;
-
+        return files;
     }
 
 }

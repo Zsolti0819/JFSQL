@@ -5,13 +5,16 @@ import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.util.DatatypeConverter;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -173,7 +176,7 @@ public class ReaderXmlImpl implements Reader {
     }
 
     @Override
-    public boolean pathIsPresentInDatabaseFile(final Database database, final String pathToCheck) throws IOException {
+    public Set<File> getFilesInDatabaseFile(final Database database) throws IOException {
         final String xmlFilePath = String.valueOf(database.getUrl());
         try {
             final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -181,24 +184,24 @@ public class ReaderXmlImpl implements Reader {
             final DocumentBuilder builder = factory.newDocumentBuilder();
             final Document doc = builder.parse(xmlFilePath);
 
+            final Set<File> fileSet = new HashSet<>();
+
             NodeList pathList = doc.getElementsByTagName("pathToTable");
             for (int i = 0; i < pathList.getLength(); i++) {
                 final String path = pathList.item(i).getTextContent();
-                if (path.equals(pathToCheck)) {
-                    return true;
-                }
+                fileSet.add(new File(path));
             }
 
             pathList = doc.getElementsByTagName("pathToSchema");
             for (int i = 0; i < pathList.getLength(); i++) {
                 final String path = pathList.item(i).getTextContent();
-                if (path.equals(pathToCheck)) {
-                    return true;
-                }
+                fileSet.add(new File(path));
             }
-            return false;
+
+            return fileSet;
         } catch (final ParserConfigurationException | SAXException e) {
             throw new IOException(e);
         }
     }
+
 }
