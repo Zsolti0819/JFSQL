@@ -67,6 +67,25 @@ class InsertJsonTest {
     }
 
     @Test
+    void testInsert_differentColumnOrder() throws SQLException, IOException {
+        assertEquals(1, statement.executeUpdate(
+            "INSERT INTO myTable (name, id, age) VALUES ('Zsolti', 1, 25)"));
+        final String realFileContent = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
+            StandardCharsets.UTF_8);
+        final String expectedFileContent = "" +
+            "{\n" +
+            "  \"Entry\": [\n" +
+            "    {\n" +
+            "      \"id\": 1,\n" +
+            "      \"name\": \"Zsolti\",\n" +
+            "      \"age\": 25\n" +
+            "    }\n" +
+            "  ]\n" +
+            "}";
+        assertEquals(expectedFileContent, realFileContent);
+    }
+
+    @Test
     void testInsert_preparedStatement_simple() throws SQLException, IOException {
         statement.execute("DROP TABLE IF EXISTS myTable");
         statement.execute("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER, file BLOB)");
@@ -74,6 +93,33 @@ class InsertJsonTest {
             "INSERT INTO myTable (id, name, age, file) VALUES (?, ?, ?, ?)");
         preparedStatement.setInt(1, 1);
         preparedStatement.setString(2, "Zsolti");
+        preparedStatement.setInt(3, 25);
+        preparedStatement.setBinaryStream(4, null);
+        assertEquals(1, preparedStatement.executeUpdate());
+        final String realFileContent = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
+            StandardCharsets.UTF_8);
+        final String expectedFileContent = "" +
+            "{\n" +
+            "  \"Entry\": [\n" +
+            "    {\n" +
+            "      \"id\": 1,\n" +
+            "      \"name\": \"Zsolti\",\n" +
+            "      \"age\": 25,\n" +
+            "      \"file\": null\n" +
+            "    }\n" +
+            "  ]\n" +
+            "}";
+        assertEquals(expectedFileContent, realFileContent);
+    }
+
+    @Test
+    void testInsert_preparedStatement_differentColumnOrder() throws SQLException, IOException {
+        statement.execute("DROP TABLE IF EXISTS myTable");
+        statement.execute("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER, file BLOB)");
+        final PreparedStatement preparedStatement = connection.prepareStatement(
+            "INSERT INTO myTable (name, id, age, file) VALUES (?, ?, ?, ?)");
+        preparedStatement.setString(1, "Zsolti");
+        preparedStatement.setInt(2, 1);
         preparedStatement.setInt(3, 25);
         preparedStatement.setBinaryStream(4, null);
         assertEquals(1, preparedStatement.executeUpdate());

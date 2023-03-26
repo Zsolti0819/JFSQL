@@ -82,11 +82,15 @@ public class SemanticValidator {
     }
 
     public boolean allInsertValuesAreValid(final Table activeTable, final InsertWrapper statement) {
-        final List<String> types = new ArrayList<>(activeTable.getSchema().getColumnsAndTypes().values());
+        final List<String> statementColumns = statement.getColumns();
+        final Map<String, String> columnsAndTypes = activeTable.getSchema().getColumnsAndTypes();
+        final List<String> tableColumns = new ArrayList<>(columnsAndTypes.keySet());
+        final List<String> columnsToUse = statementColumns.isEmpty() ? tableColumns : statementColumns;
         for (int i = 0; i < statement.getValues().size(); i++) {
             for (int j = 0; j < statement.getValues().get(i).size(); j++) {
+                final String column = columnsToUse.get(j);
                 final String value = statement.getValues().get(i).get(j);
-                final String type = types.get(j);
+                final String type = columnsAndTypes.get(column);
                 if (!isValid(value, type)) {
                     return false;
                 }

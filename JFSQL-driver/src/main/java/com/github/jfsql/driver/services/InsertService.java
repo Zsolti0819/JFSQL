@@ -71,6 +71,7 @@ public class InsertService {
 
     private List<Entry> getEntriesToInsert(final InsertWrapper insertStatement, final Table activeTable) {
         final List<String> tableColumns = new ArrayList<>(activeTable.getSchema().getColumnsAndTypes().keySet());
+        final List<String> statementColumns = insertStatement.getColumns();
         final List<Entry> insertEntries = new ArrayList<>();
         for (int i = 0; i < insertStatement.getValues().size(); i++) {
             final Map<String, String> columnsAndValues = new LinkedHashMap<>();
@@ -80,12 +81,20 @@ public class InsertService {
                     .forEach(j -> columnsAndValues.put(tableColumns.get(j),
                         insertStatement.getValues().get(finalI).get(j)));
             } else {
-                IntStream.range(0, insertStatement.getColumns().size())
-                    .forEach(j -> columnsAndValues.put(insertStatement.getColumns().get(j),
-                        insertStatement.getValues().get(finalI).get(j)));
+                for (final String columnName : tableColumns) {
+                    if (statementColumns.contains(columnName)) {
+                        final int index = statementColumns.indexOf(columnName);
+                        final String value = insertStatement.getValues().get(i).get(index);
+                        columnsAndValues.put(columnName, value);
+                    } else {
+                        throw new IllegalStateException(
+                            "The column '" + columnName + "' was not present in the statement.");
+                    }
+                }
             }
             insertEntries.add(new Entry(columnsAndValues));
         }
         return insertEntries;
     }
+
 }

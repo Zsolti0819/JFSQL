@@ -25,7 +25,7 @@ public class PreparedStatementCreator {
     public DeleteWrapper getPreparedDeleteStatement(final DeleteWrapper statement) {
         final String tableName = statement.getTableName();
         final List<String> whereColumns = statement.getWhereColumns();
-        final List<String> whereValues = replacePlaceholders(whereColumns, statement.getWhereValues(), 0);
+        final List<String> whereValues = replaceQuestionmarks(whereColumns, statement.getWhereValues(), 0);
         final List<String> symbols = statement.getSymbols();
         final List<String> binaryOperators = statement.getBinaryOperators();
         return new DeleteStatement(tableName, whereColumns, whereValues, symbols, binaryOperators);
@@ -42,7 +42,7 @@ public class PreparedStatementCreator {
             columns = statement.getColumns();
         }
         for (int i = 0; i < statement.getValues().size(); i++) {
-            final List<String> values = replacePlaceholders(columns, new ArrayList<>(statement.getValues().get(i)), 0);
+            final List<String> values = replaceQuestionmarks(columns, new ArrayList<>(statement.getValues().get(i)), 0);
             listOfValueLists.add(values);
         }
         return new InsertStatement(tableName, columns, listOfValueLists);
@@ -55,7 +55,7 @@ public class PreparedStatementCreator {
         final List<String> columns = statement.getColumns();
         final List<List<String>> listOfJoinColumns = statement.getListOfJoinColumns();
         final List<String> whereColumns = statement.getWhereColumns();
-        final List<String> whereValues = replacePlaceholders(whereColumns, statement.getWhereValues(), 0);
+        final List<String> whereValues = replaceQuestionmarks(whereColumns, statement.getWhereValues(), 0);
         final List<String> symbols = statement.getSymbols();
         final List<String> binaryOperators = statement.getBinaryOperators();
         return new SelectStatement(tableName, joinTableNames, joinTypes, columns, listOfJoinColumns, whereColumns,
@@ -65,16 +65,15 @@ public class PreparedStatementCreator {
     public UpdateWrapper getPreparedUpdateStatement(final UpdateWrapper statement) {
         final String tableName = statement.getTableName();
         final List<String> columns = statement.getColumns();
-        final List<String> values = replacePlaceholders(columns, statement.getWhereValues(), 0);
+        final List<String> values = replaceQuestionmarks(columns, statement.getWhereValues(), 0);
         final List<String> whereColumns = statement.getWhereColumns();
-        final List<String> whereValues = replacePlaceholders(whereColumns, statement.getWhereValues(), columns.size());
+        final List<String> whereValues = replaceQuestionmarks(whereColumns, statement.getWhereValues(), columns.size());
         final List<String> symbols = statement.getSymbols();
         final List<String> binaryOperators = statement.getBinaryOperators();
         return new UpdateStatement(tableName, columns, values, whereColumns, whereValues, symbols, binaryOperators);
     }
 
-    private List<String> replacePlaceholders(final List<String> columns,
-        final List<String> values, final int offset) {
+    private List<String> replaceQuestionmarks(final List<String> columns, final List<String> values, final int offset) {
         final List<String> modifiedList = new ArrayList<>();
         for (int i = 0; i < columns.size(); i++) {
             if (Objects.equals(values.get(i), "?")) {
