@@ -105,14 +105,13 @@ public class StatementServiceManager {
 
     public ResultSet executeQuery(final String sql, final boolean isPreparedStatement) throws SQLException {
         synchronized (lock) {
-            BaseStatement statement = getFromCacheOrParseStatement(sql);
+            final BaseStatement statement = getFromCacheOrParseStatement(sql);
             if (!(TypeOfStatement.SELECT.equals(statement.getTypeOfStatement()))) {
                 throw new SQLException("Method not supported for this statement.");
             }
-            if (isPreparedStatement) {
-                statement = preparedStatementCreator.getPreparedSelectStatement((SelectWrapper) statement);
-            }
-            resultSet = selectService.selectFromTable((SelectWrapper) statement);
+            resultSet = selectService.selectFromTable(isPreparedStatement ?
+                preparedStatementCreator.getPreparedSelectStatement((SelectWrapper) statement) :
+                (SelectWrapper) statement);
             return resultSet;
         }
     }
@@ -160,7 +159,6 @@ public class StatementServiceManager {
             return updateCount;
         }
     }
-
 
     public boolean execute(final String sql, final boolean isPreparedStatement) throws SQLException {
         synchronized (lock) {
