@@ -33,11 +33,11 @@ public class UpdateService {
         final Table activeTable = tableFinder.getTableByName(tableName);
 
         if (!semanticValidator.allColumnsExist(activeTable, statement)) {
-            throw new SQLException("Some columns entered doesn't exist in \"" + activeTable.getName() + "\".");
+            throw new SQLException("Some columns entered doesn't exist in '" + activeTable.getName() + "'.");
         }
 
         if (!semanticValidator.allWhereColumnsExist(activeTable, statement)) {
-            throw new SQLException("Some columns entered doesn't exist in \"" + activeTable.getName() + "\".");
+            throw new SQLException("Some columns entered doesn't exist in '" + activeTable.getName() + "'.");
         }
 
         // When autoCommit is true, it should be safe to read the entries from the file
@@ -65,8 +65,7 @@ public class UpdateService {
                     entry.getColumnsAndValues().put(columns.get(i), values.get(i));
                 } else {
                     throw new SQLException(
-                        "Not valid update. Value '" + values.get(i) + "' cannot be converted to '" + types.get(i)
-                            + "'.");
+                        "Value '" + values.get(i) + "' cannot be converted to '" + types.get(i) + "'.");
                 }
             }
         }

@@ -83,7 +83,7 @@ class CreateTableServiceTest {
 
         final SQLException thrown = assertThrows(SQLException.class,
             () -> createTableService.createTable(createTableStatement));
-        Assertions.assertEquals("Table \"" + createTableStatement.getTableName() + "\" already exists.",
+        Assertions.assertEquals("Table '" + createTableStatement.getTableName() + "' already exists.",
             thrown.getMessage());
         verify(transactionManager, never()).executeDDLOperation(any(), any(), any());
     }

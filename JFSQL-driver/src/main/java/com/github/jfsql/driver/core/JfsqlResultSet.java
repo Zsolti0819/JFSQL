@@ -170,9 +170,6 @@ public class JfsqlResultSet implements ResultSet {
 
     @Override
     public int findColumn(final String columnLabel) throws SQLException {
-        if (getEntries().isEmpty()) {
-            throw new SQLException();
-        }
         return (getColumnIndex(columnLabel) + 1);
     }
 

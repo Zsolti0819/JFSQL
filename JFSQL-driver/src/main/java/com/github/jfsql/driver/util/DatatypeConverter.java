@@ -39,7 +39,7 @@ public class DatatypeConverter {
     public String convertFromSqlToXs(final String sqlDatatype) {
         final String xsEquivalent = SQL_TO_XS_MAP.get(sqlDatatype);
         if (xsEquivalent == null) {
-            throw new IllegalStateException("Unknown SQL datatype \"" + sqlDatatype + "\"");
+            throw new IllegalStateException("Unknown SQL datatype '" + sqlDatatype + "'.");
         }
         return xsEquivalent;
     }
@@ -47,7 +47,7 @@ public class DatatypeConverter {
     public String convertFromXsToSql(final String xsDatatype) {
         final String sqlEquivalent = XS_TO_SQL_MAP.get(xsDatatype);
         if (sqlEquivalent == null) {
-            throw new IllegalStateException("Unknown xs datatype \"" + xsDatatype + "\"");
+            throw new IllegalStateException("Unknown xs datatype '" + xsDatatype + "'.");
         }
         return sqlEquivalent;
     }
@@ -55,7 +55,7 @@ public class DatatypeConverter {
     public String convertFromJsonToSql(final String jsonDatatype) {
         final String sqlEquivalent = JSON_TO_SQL_MAP.get(jsonDatatype);
         if (sqlEquivalent == null) {
-            throw new IllegalStateException("Unknown json datatype \"" + jsonDatatype + "\"");
+            throw new IllegalStateException("Unknown json datatype '" + jsonDatatype + "'.");
         }
         return sqlEquivalent;
     }
@@ -63,7 +63,7 @@ public class DatatypeConverter {
     public String convertFromSqlToJson(final String sqlDatatype) {
         final String jsonEquivalent = SQL_TO_JSON_MAP.get(sqlDatatype);
         if (jsonEquivalent == null) {
-            throw new IllegalStateException("Unknown SQL datatype \"" + sqlDatatype + "\"");
+            throw new IllegalStateException("Unknown SQL datatype '" + sqlDatatype + "'.");
         }
         return jsonEquivalent;
     }
@@ -71,7 +71,7 @@ public class DatatypeConverter {
     String convertFromSqlToJava(final String sqlDatatype) {
         final String javaEquivalent = SQL_TO_JAVA_MAP.get(sqlDatatype);
         if (javaEquivalent == null) {
-            throw new IllegalStateException("Unknown SQL datatype \"" + sqlDatatype + "\"");
+            throw new IllegalStateException("Unknown SQL datatype '" + sqlDatatype + "'.");
         }
         return javaEquivalent;
     }

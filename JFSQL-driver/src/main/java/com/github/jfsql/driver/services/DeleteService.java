@@ -43,7 +43,7 @@ public class DeleteService {
             deleteCount = entriesSizeBefore;
         } else {
             if (!semanticValidator.allWhereColumnsExist(activeTable, statement)) {
-                throw new SQLException("Some columns entered doesn't exist in \"" + activeTable.getName() + "\".");
+                throw new SQLException("Some columns entered doesn't exist in '" + activeTable.getName() + "'.");
             }
             final List<Entry> whereEntries = whereConditionSolver.getWhereEntries(activeTable, statement);
             activeTable.getEntries().removeAll(whereEntries);

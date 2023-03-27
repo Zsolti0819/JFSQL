@@ -46,7 +46,7 @@ class DeleteExceptionsTest {
         statement.executeUpdate("INSERT INTO myTable (id, name, age) VALUES (1, 'Zsolti', 25)");
         final SQLException thrown = assertThrows(SQLException.class,
             () -> statement.execute("DELETE FROM myTable WHERE lol > 3 AND age > 25 AND name = 'Lukas'"));
-        assertEquals("Some columns entered doesn't exist in \"myTable\".", thrown.getMessage());
+        assertEquals("Some columns entered doesn't exist in 'myTable'.", thrown.getMessage());
     }
 
 }

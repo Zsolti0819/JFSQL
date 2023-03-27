@@ -89,7 +89,7 @@ class DeleteServiceTest {
 
         final SQLException thrown = assertThrows(SQLException.class,
             () -> deleteService.deleteFromTable(deleteStatement));
-        assertEquals("Some columns entered doesn't exist in \"" + table.getName() + "\".", thrown.getMessage());
+        assertEquals("Some columns entered doesn't exist in '" + table.getName() + "'.", thrown.getMessage());
 
         verify(transactionManager, never()).executeDMLOperation(table);
         verifyNoInteractions(whereConditionSolver);

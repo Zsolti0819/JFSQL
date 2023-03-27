@@ -41,7 +41,7 @@ public class CreateTableService {
         final boolean ifNotExistsIsPresent = statement.isIfNotExistsPresent();
 
         if (!ifNotExistsIsPresent && semanticValidator.tableExists(statement, database)) {
-            throw new SQLException("Table \"" + tableName + "\" already exists.");
+            throw new SQLException("Table '" + tableName + "' already exists.");
         }
 
         if (ifNotExistsIsPresent && semanticValidator.tableExists(statement, database)) {

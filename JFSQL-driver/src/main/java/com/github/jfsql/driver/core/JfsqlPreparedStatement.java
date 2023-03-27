@@ -192,7 +192,7 @@ public class JfsqlPreparedStatement implements PreparedStatement {
             byteArrayOutputStream.close();
             statementServiceManager.getParameters()[parameterIndex - 1] = Base64.getEncoder().encodeToString(byteArray);
         } catch (final IOException e) {
-            throw new SQLException("Couldn't set InputStream. \n" + e.getMessage());
+            throw new SQLException("Couldn't set InputStream.\n" + e.getMessage());
         }
     }
 

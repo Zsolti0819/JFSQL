@@ -24,14 +24,14 @@ public class NotVersioningDatabaseManagerImpl extends DatabaseManager {
         try {
             Files.createDirectories(database.getUrl().getParent());
         } catch (final IOException e) {
-            throw new SQLException("Failed to create directory for the database.");
+            throw new SQLException("Failed to create directory for the database.\n" + e.getMessage());
         }
         final List<Table> tables = new ArrayList<>();
         database.setTables(tables);
         try {
             writer.writeDatabaseFile(database);
         } catch (final IOException e) {
-            throw new SQLException("Failed to write the database file.");
+            throw new SQLException("Failed to write the database file.\n" + e.getMessage());
         }
     }
 

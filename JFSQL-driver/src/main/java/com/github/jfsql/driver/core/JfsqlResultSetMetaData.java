@@ -1,7 +1,6 @@
 package com.github.jfsql.driver.core;
 
 import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 
 public class JfsqlResultSetMetaData implements ResultSetMetaData {
@@ -33,11 +32,8 @@ public class JfsqlResultSetMetaData implements ResultSetMetaData {
     }
 
     @Override
-    public boolean isSearchable(final int arg0) throws SQLException {
-        if (arg0 <= 0 || arg0 > getColumnCount()) {
-            throw new SQLException();
-        }
-        return true;
+    public boolean isSearchable(final int arg0) {
+        return arg0 > 0 && arg0 <= getColumnCount();
     }
 
     // Unsupported operations

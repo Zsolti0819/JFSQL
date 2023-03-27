@@ -41,7 +41,7 @@ public class InsertService {
         }
 
         if (!semanticValidator.allColumnsExist(activeTable, statement)) {
-            throw new SQLException("Some columns entered doesn't exist in \"" + activeTable.getName() + "\".");
+            throw new SQLException("Some columns entered doesn't exist in '" + activeTable.getName() + "'.");
         }
 
         if (!semanticValidator.allInsertValuesAreValid(activeTable, statement)) {

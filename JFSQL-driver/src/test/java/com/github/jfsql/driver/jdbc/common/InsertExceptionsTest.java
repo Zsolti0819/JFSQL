@@ -58,7 +58,7 @@ class InsertExceptionsTest {
         statement.execute("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
         final SQLException thrown = assertThrows(SQLException.class, () -> statement.executeUpdate(
             "INSERT INTO myTable (lol, name, age) VALUES (1, 'Zsolti', 25), (2, 'Tomi', 24), (3, 'Ivan', 24), (4, 'Lukas', 34)"));
-        assertEquals("Some columns entered doesn't exist in \"myTable\".", thrown.getMessage());
+        assertEquals("Some columns entered doesn't exist in 'myTable'.", thrown.getMessage());
     }
 
 }

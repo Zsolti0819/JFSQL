@@ -77,7 +77,7 @@ public class AlterTableService {
                 logger.debug(
                     "The table has not yet been written to file, but it is present in the list of uncommitted tables.");
             } else {
-                throw new SQLException("Failed to rename files\n" + e.getMessage());
+                throw new SQLException("Failed to rename files.\n" + e.getMessage());
             }
         }
 
@@ -159,7 +159,7 @@ public class AlterTableService {
         final String columnTypeToAdd = statement.getColumnTypeToAdd();
 
         if (table.getSchema().getColumnsAndTypes().containsKey(columnNameToAdd)) {
-            throw new SQLException("The column '" + columnNameToAdd + "' already exists in '" + table.getName() + "'");
+            throw new SQLException("The column '" + columnNameToAdd + "' already exists in '" + table.getName() + "'.");
         }
 
         table.getSchema().getColumnsAndTypes().put(columnNameToAdd, columnTypeToAdd);

@@ -90,7 +90,7 @@ public class WhereConditionSolver {
                 comparisonResult = String.CASE_INSENSITIVE_ORDER.compare(originalValue, whereValue);
                 break;
             default:
-                throw new IllegalStateException("Cannot compare " + javaType + "datatype");
+                throw new IllegalStateException("Cannot compare " + javaType + "datatype.");
         }
 
         return (Objects.equals("=", compareSymbol) && comparisonResult == 0)

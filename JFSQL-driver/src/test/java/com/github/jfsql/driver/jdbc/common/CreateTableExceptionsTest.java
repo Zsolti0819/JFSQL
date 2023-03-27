@@ -55,7 +55,7 @@ class CreateTableExceptionsTest {
         statement.execute("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
         final SQLException thrown = assertThrows(SQLException.class,
             () -> statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)"));
-        assertEquals("Table \"myTable\" already exists.", thrown.getMessage());
+        assertEquals("Table 'myTable' already exists.", thrown.getMessage());
     }
 
     @ParameterizedTest

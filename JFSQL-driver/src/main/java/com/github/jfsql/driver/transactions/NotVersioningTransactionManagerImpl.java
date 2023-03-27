@@ -18,7 +18,7 @@ public class NotVersioningTransactionManagerImpl extends TransactionManager {
         try {
             writeUncommittedObjects();
         } catch (final IOException e) {
-            throw new SQLException("commit failed");
+            throw new SQLException("commit failed.\n" + e.getMessage());
         }
         removeCurrentThreadChangesFromMap();
     }

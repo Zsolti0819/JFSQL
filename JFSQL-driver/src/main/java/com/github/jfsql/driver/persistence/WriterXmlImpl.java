@@ -55,7 +55,7 @@ public class WriterXmlImpl extends Writer {
             final Result result = new StreamResult(fileOutputStream);
             transformer.transform(source, result);
         } catch (final TransformerException e) {
-            throw new IOException("Failed to configure the parser.");
+            throw new IOException(e);
         }
     }
 
@@ -85,7 +85,7 @@ public class WriterXmlImpl extends Writer {
             document.appendChild(root);
             beautifyAndWrite(fileOutputStream, document);
         } catch (final ParserConfigurationException e) {
-            throw new IOException("Failed to configure the parser");
+            throw new IOException(e);
         }
 
         if (useSchemaValidation) {

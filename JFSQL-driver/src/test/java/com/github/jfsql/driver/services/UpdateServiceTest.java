@@ -66,7 +66,8 @@ class UpdateServiceTest {
         when(tableFinder.getTableByName(updateStatement.getTableName())).thenReturn(table);
         when(semanticValidator.allColumnsExist(table, updateStatement)).thenReturn(true);
         when(semanticValidator.allWhereColumnsExist(table, updateStatement)).thenReturn(true);
-        when(columnToTypeMapper.mapColumnsToTypes(updateStatement, table)).thenReturn(mappedColumnsAndTypes);
+        when(columnToTypeMapper.mapColumnsToTypes(updateStatement, table)).thenReturn(
+            mappedColumnsAndTypes);
         when(whereConditionSolver.getWhereEntries(table, updateStatement)).thenReturn(Collections.emptyList());
         when(table.getEntries()).thenReturn(entries);
 
@@ -83,7 +84,7 @@ class UpdateServiceTest {
 
         final SQLException thrown = assertThrows(SQLException.class,
             () -> updateService.updateTable(updateStatement));
-        assertEquals("Some columns entered doesn't exist in \"" + table.getName() + "\".", thrown.getMessage());
+        assertEquals("Some columns entered doesn't exist in '" + table.getName() + "'.", thrown.getMessage());
 
         verifyNoInteractions(whereConditionSolver);
         verifyNoInteractions(columnToTypeMapper);
@@ -99,7 +100,7 @@ class UpdateServiceTest {
 
         final SQLException thrown = assertThrows(SQLException.class,
             () -> updateService.updateTable(updateStatement));
-        assertEquals("Some columns entered doesn't exist in \"" + table.getName() + "\".", thrown.getMessage());
+        assertEquals("Some columns entered doesn't exist in '" + table.getName() + "'.", thrown.getMessage());
 
         verifyNoInteractions(whereConditionSolver);
         verifyNoInteractions(columnToTypeMapper);
