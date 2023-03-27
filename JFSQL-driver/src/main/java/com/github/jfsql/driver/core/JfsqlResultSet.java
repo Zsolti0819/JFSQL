@@ -232,8 +232,8 @@ public class JfsqlResultSet implements ResultSet {
     }
 
     @Override
-    public Statement getStatement() throws SQLFeatureNotSupportedException {
-        throw new SQLFeatureNotSupportedException();
+    public Statement getStatement() {
+        return null;
     }
 
     @Override
