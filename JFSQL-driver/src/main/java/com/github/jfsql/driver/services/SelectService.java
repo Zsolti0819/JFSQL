@@ -48,7 +48,7 @@ class SelectService {
 
         for (final JoinType joinType : joinTypes) {
             if (!Objects.equals(joinType, JoinType.INNER_JOIN) && !Objects.equals(joinType, JoinType.LEFT_JOIN)) {
-                throw new IllegalStateException("Unsupported join type.\n" + statement);
+                throw new IllegalStateException("Unsupported join type '" + joinType + "'.");
             }
         }
 
