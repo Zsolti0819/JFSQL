@@ -41,6 +41,11 @@ class JfsqlDatabaseMetaDataTest {
     }
 
     @Test
+    void getUrl() {
+        assertEquals(metaData.getURL(), String.valueOf(TestUtils.DATABASE_PATH));
+    }
+
+    @Test
     void getUserName() {
         assertNull(metaData.getUserName());
     }
