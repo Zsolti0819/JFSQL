@@ -63,17 +63,17 @@ public class JfsqlPreparedStatement implements PreparedStatement {
 
     @Override
     public ResultSet executeQuery(final String sql) throws SQLException {
-        return statementServiceManager.executeQueryPreparedStatement(sql);
+        return statementServiceManager.executeQuery(sql, true);
     }
 
     @Override
     public int executeUpdate(final String sql) throws SQLException {
-        return statementServiceManager.executeUpdatePreparedStatement(sql);
+        return statementServiceManager.executeUpdate(sql, true);
     }
 
     @Override
     public boolean execute(final String sql) throws SQLException {
-        return statementServiceManager.executePreparedStatement(sql);
+        return statementServiceManager.execute(sql, true);
     }
 
     @Override

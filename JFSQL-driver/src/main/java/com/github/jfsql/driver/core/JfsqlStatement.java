@@ -24,17 +24,17 @@ public class JfsqlStatement implements Statement {
 
     @Override
     public boolean execute(final String sql) throws SQLException {
-        return statementServiceManager.execute(sql);
+        return statementServiceManager.execute(sql, false);
     }
 
     @Override
     public ResultSet executeQuery(final String sql) throws SQLException {
-        return statementServiceManager.executeQuery(sql);
+        return statementServiceManager.executeQuery(sql, false);
     }
 
     @Override
     public int executeUpdate(final String arg0) throws SQLException {
-        return statementServiceManager.executeUpdate(arg0);
+        return statementServiceManager.executeUpdate(arg0, false);
     }
 
     @Override
