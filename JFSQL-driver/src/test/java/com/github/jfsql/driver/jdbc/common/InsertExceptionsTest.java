@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.github.jfsql.driver.TestUtils;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
@@ -16,6 +17,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 class InsertExceptionsTest {
 
     private Statement statement;
+    private Connection connection;
 
     private void setUp(final String format) throws SQLException {
         final Properties properties = new Properties();
@@ -23,7 +25,7 @@ class InsertExceptionsTest {
         properties.setProperty("transaction.versioning", "true");
         properties.setProperty("statement.caching", "true");
         properties.setProperty("schema.validation", "true");
-        final Connection connection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
+        connection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
         statement = connection.createStatement();
     }
 
@@ -61,4 +63,20 @@ class InsertExceptionsTest {
         assertEquals("Some columns entered doesn't exist in 'myTable'.", thrown.getMessage());
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"json", "xml"})
+    void testInsert_preparedStatement_insertNullIntoNotNullColumn(final String format) throws SQLException {
+        setUp(format);
+
+        statement.execute("DROP TABLE IF EXISTS myTable");
+        statement.execute("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER, file BLOB NOT NULL)");
+        final PreparedStatement preparedStatement = connection.prepareStatement(
+            "INSERT INTO myTable (id, name, age, file) VALUES (?, ?, ?, ?)");
+        preparedStatement.setInt(1, 1);
+        preparedStatement.setString(2, "Zsolti");
+        preparedStatement.setInt(3, 25);
+        preparedStatement.setBinaryStream(4, null);
+        final SQLException thrown = assertThrows(SQLException.class, preparedStatement::executeUpdate);
+        assertEquals("Inserting null value into a NOT NULL column.", thrown.getMessage());
+    }
 }

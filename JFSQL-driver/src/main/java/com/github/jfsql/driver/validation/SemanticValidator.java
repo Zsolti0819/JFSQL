@@ -114,6 +114,22 @@ public class SemanticValidator {
         return false;
     }
 
+    public boolean nullInsertIntoNotNullColumn(final InsertWrapper statement, final Table activeTable) {
+        final List<String> statementColumns = statement.getColumns();
+        final List<List<String>> valueLists = statement.getValues();
+        for (final List<String> statementValues : valueLists) {
+            for (int i = 0; i < statementColumns.size(); i++) {
+                final String column = statementColumns.get(i);
+                final String value = statementValues.get(i);
+                if ((value == null || Objects.equals(value, "null")) &&
+                    Boolean.TRUE.equals(activeTable.getSchema().getNotNullColumns().get(column))) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public boolean urlIsAnExistingRegularFile(final StatementWithUrl statementWithUrl) {
         return Path.of(statementWithUrl.getDatabaseUrl()).toFile().isFile();
     }
