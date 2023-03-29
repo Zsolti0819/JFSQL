@@ -5,6 +5,7 @@ import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.transactions.DatabaseManager;
 import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.util.ColumnToTypeMapper;
+import com.github.jfsql.driver.util.IoOperationHandler;
 import com.github.jfsql.driver.util.PreparedStatementCreator;
 import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.driver.util.WhereConditionSolver;
@@ -36,6 +37,7 @@ public class StatementServiceManager {
     private final SemanticValidator semanticValidator;
     private final ColumnToTypeMapper columnToTypeMapper;
     private final WhereConditionSolver whereConditionSolver;
+    private final IoOperationHandler ioOperationHandler;
     private final Reader reader;
     private final Parser parser;
 
@@ -62,13 +64,14 @@ public class StatementServiceManager {
         this.reader = reader;
 
         parser = new Parser();
+        ioOperationHandler = new IoOperationHandler();
         tableFinder = new TableFinder(databaseManager);
         semanticValidator = new SemanticValidator();
         columnToTypeMapper = new ColumnToTypeMapper();
         whereConditionSolver = new WhereConditionSolver();
         preparedStatementCreator = new PreparedStatementCreator(tableFinder, this);
         alterTableService = new AlterTableService(tableFinder, databaseManager, transactionManager,
-            semanticValidator, reader);
+            semanticValidator, ioOperationHandler, reader);
         createDatabaseService = new CreateDatabaseService(databaseManager, semanticValidator, reader);
         dropDatabaseService = new DropDatabaseService(databaseManager, semanticValidator, reader);
         createTableService = new CreateTableService(databaseManager, transactionManager, semanticValidator, reader);

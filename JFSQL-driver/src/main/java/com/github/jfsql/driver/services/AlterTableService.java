@@ -7,6 +7,7 @@ import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.ReaderJsonImpl;
 import com.github.jfsql.driver.transactions.DatabaseManager;
 import com.github.jfsql.driver.transactions.TransactionManager;
+import com.github.jfsql.driver.util.IoOperationHandler;
 import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.AlterTableWrapper;
@@ -18,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,6 +31,7 @@ public class AlterTableService {
     private final DatabaseManager databaseManager;
     private final TransactionManager transactionManager;
     private final SemanticValidator semanticValidator;
+    private final IoOperationHandler ioOperationHandler;
     private final Reader reader;
 
     public int alterTable(final AlterTableWrapper statement) throws SQLException {
@@ -50,16 +51,16 @@ public class AlterTableService {
         return 0;
     }
 
-    private void renameTable(final AlterTableWrapper statement, final Database database, final Table table)
+    void renameTable(final AlterTableWrapper statement, final Database database, final Table table)
         throws SQLException {
 
-        final String parentDirectory = String.valueOf(database.getUrl().getParent());
         final String newTableName = statement.getNewTableName();
 
         if (semanticValidator.tableNameEqualsDatabaseName(newTableName, database)) {
             throw new SQLException("Table name cannot be the same as database name.");
         }
 
+        final String parentDirectory = String.valueOf(database.getUrl().getParent());
         final String newTableFile = parentDirectory + File.separator + newTableName + "." + reader.getFileExtension();
         final String newSchemaFile =
             reader instanceof ReaderJsonImpl ? parentDirectory + File.separator + newTableName + "Schema."
@@ -70,8 +71,8 @@ public class AlterTableService {
         final String oldSchemaFile = table.getSchema().getSchemaFile();
 
         try {
-            FileUtils.moveFile(FileUtils.getFile(oldTableFile), FileUtils.getFile(newTableFile));
-            FileUtils.moveFile(FileUtils.getFile(oldSchemaFile), FileUtils.getFile(newSchemaFile));
+            ioOperationHandler.renameFile(oldTableFile, newTableFile);
+            ioOperationHandler.renameFile(oldSchemaFile, newSchemaFile);
         } catch (final IOException e) {
             if (transactionManager.getUncommittedTables().contains(table)) {
                 logger.debug(
