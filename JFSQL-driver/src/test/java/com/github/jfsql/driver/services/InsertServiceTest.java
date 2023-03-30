@@ -25,25 +25,18 @@ class InsertServiceTest {
 
     @Mock
     private TableFinder tableFinder;
-
     @Mock
     private TransactionManager transactionManager;
-
     @Mock
     private SemanticValidator semanticValidator;
-
     @Mock
     private Table table;
-
     @Mock
     private Schema schema;
-
     @Mock
     private List<Entry> entries;
-
     @Mock
     private InsertWrapper insertStatement;
-
     @InjectMocks
     private InsertService insertService;
 

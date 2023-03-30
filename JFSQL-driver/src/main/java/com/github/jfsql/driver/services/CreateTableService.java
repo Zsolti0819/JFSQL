@@ -3,13 +3,11 @@ package com.github.jfsql.driver.services;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
-import com.github.jfsql.driver.persistence.Reader;
-import com.github.jfsql.driver.persistence.ReaderJsonImpl;
 import com.github.jfsql.driver.transactions.DatabaseManager;
 import com.github.jfsql.driver.transactions.TransactionManager;
+import com.github.jfsql.driver.util.FileNameCreator;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.CreateTableWrapper;
-import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -28,9 +26,9 @@ public class CreateTableService {
     private final DatabaseManager databaseManager;
     private final TransactionManager transactionManager;
     private final SemanticValidator semanticValidator;
-    private final Reader reader;
+    private final FileNameCreator fileNameCreator;
 
-    public int createTable(final CreateTableWrapper statement) throws SQLException {
+    int createTable(final CreateTableWrapper statement) throws SQLException {
         final Database database = databaseManager.getDatabase();
         final String tableName = statement.getTableName();
 
@@ -63,12 +61,8 @@ public class CreateTableService {
                 LinkedHashMap::new));
 
         final Map<String, Boolean> notNulLColumns = statement.getNotNullColumns();
-        final String parentDirectory = String.valueOf(database.getUrl().getParent());
-        final String tableFile = parentDirectory + File.separator + tableName + "." + reader.getFileExtension();
-        final String schemaFile =
-            reader instanceof ReaderJsonImpl ? parentDirectory + File.separator + tableName + "Schema."
-                + reader.getSchemaFileExtension()
-                : parentDirectory + File.separator + tableName + "." + reader.getSchemaFileExtension();
+        final String tableFile = fileNameCreator.createTableFileName(tableName, database);
+        final String schemaFile = fileNameCreator.createSchemaFileName(tableName, database);
 
         final Schema schema = new Schema(schemaFile, columnsAndTypes, notNulLColumns);
         final Table table = new Table(tableName, tableFile, schema, new ArrayList<>());

@@ -11,7 +11,6 @@ import com.github.jfsql.driver.util.WhereConditionSolver;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.JoinType;
 import com.github.jfsql.parser.dto.SelectWrapper;
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -56,12 +55,8 @@ class SelectService {
         // Now we can load the entries into memory
         for (final Table table : extractedTables) {
             if (table.getEntries().isEmpty()) {
-                try {
-                    final List<Entry> entries = reader.readEntriesFromTable(table);
-                    table.setEntries(entries);
-                } catch (final IOException e) {
-                    throw new SQLException("Failed to read entries from the table.\n" + e.getMessage());
-                }
+                final List<Entry> entries = reader.readEntriesFromTable(table);
+                table.setEntries(entries);
             }
         }
         logger.debug("tables extracted from the statement = {}", extractedTables);
@@ -137,12 +132,8 @@ class SelectService {
     private ResultSet simpleSelect(final SelectWrapper statement) throws SQLException {
         final Table activeTable = tableFinder.getTableByName(statement.getTableName());
         if (activeTable.getEntries().isEmpty()) {
-            try {
-                final List<Entry> entries = reader.readEntriesFromTable(activeTable);
-                activeTable.setEntries(entries);
-            } catch (final IOException e) {
-                throw new SQLException("Failed to read entries from the table.\n" + e.getMessage());
-            }
+            final List<Entry> entries = reader.readEntriesFromTable(activeTable);
+            activeTable.setEntries(entries);
         }
         return baseSelect(statement, activeTable);
     }
@@ -250,7 +241,7 @@ class SelectService {
                 final String tableName = getTableName(joinColumn);
                 final String columnName = getColumnName(joinColumn);
                 final Table table = tables.get(tableName);
-                if (!semanticValidator.columnIsPresentInTable(tableName, columnName, table)) {
+                if (!semanticValidator.columnIsPresentInTable(table, columnName)) {
                     throw new SQLException("Column '" + columnName + "' not found in table '" + tableName + "'");
                 }
             }

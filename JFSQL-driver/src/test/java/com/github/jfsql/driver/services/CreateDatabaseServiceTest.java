@@ -8,9 +8,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.github.jfsql.driver.TestUtils;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.transactions.DatabaseManager;
+import com.github.jfsql.driver.util.FileNameCreator;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.CreateDatabaseWrapper;
 import java.sql.SQLException;
@@ -25,22 +25,19 @@ class CreateDatabaseServiceTest {
 
     @Mock
     private SemanticValidator semanticValidator;
-
     @Mock
     private DatabaseManager databaseManager;
-
     @Mock
     private Reader reader;
-
+    @Mock
+    private FileNameCreator fileNameCreator;
     @Mock
     private CreateDatabaseWrapper createDatabaseStatement;
-
     @InjectMocks
     private CreateDatabaseService createDatabaseService;
 
     @Test
     void testCreateDatabase_normally() throws SQLException {
-        when(createDatabaseStatement.getDatabaseUrl()).thenReturn(String.valueOf(TestUtils.DATABASE_PATH));
         when(semanticValidator.urlIsAnExistingRegularFile(createDatabaseStatement)).thenReturn(false);
         when(semanticValidator.databaseExist(createDatabaseStatement, reader.getFileExtension())).thenReturn(false);
         createDatabaseService.createDatabase(createDatabaseStatement);
@@ -65,7 +62,7 @@ class CreateDatabaseServiceTest {
 
         final SQLException thrown = assertThrows(SQLException.class,
             () -> createDatabaseService.createDatabase(createDatabaseStatement));
-        assertEquals("Database already exists, will not create another one.", thrown.getMessage());
+        assertEquals("Database already exists.", thrown.getMessage());
 
         verify(databaseManager, never()).executeCreateDatabaseOperation(any());
     }

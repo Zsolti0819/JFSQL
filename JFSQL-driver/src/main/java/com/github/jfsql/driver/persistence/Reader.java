@@ -5,7 +5,7 @@ import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import java.io.File;
-import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
 
@@ -15,14 +15,14 @@ public interface Reader {
 
     String getSchemaFileExtension();
 
-    List<Entry> readEntriesFromTable(final Table table) throws IOException;
+    List<Entry> readEntriesFromTable(final Table table) throws SQLException;
 
-    Schema readSchema(final String pathToSchema) throws IOException;
+    Schema readSchema(final String pathToSchema) throws SQLException;
 
-    List<Table> readTablesFromDatabaseFile(final Database database) throws IOException;
+    List<Table> readTablesFromDatabaseFile(final Database database) throws SQLException;
 
-    String readBlob(final String pathToBlob) throws IOException;
+    String readBlob(final String pathToBlob) throws SQLException;
 
-    Set<File> getFilesInDatabaseFile(final Database database) throws IOException;
+    Set<File> getFilesInDatabaseFile(final Database database) throws SQLException;
 
 }

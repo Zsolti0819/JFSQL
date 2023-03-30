@@ -53,7 +53,7 @@ class CreateDatabaseExceptionsTest {
 
         final SQLException thrown = assertThrows(SQLException.class,
             () -> statement.executeUpdate("CREATE DATABASE [" + TestUtils.DATABASE_PATH + "];"));
-        assertEquals("Database already exists, will not create another one.", thrown.getMessage());
+        assertEquals("Database already exists.", thrown.getMessage());
     }
 
 }

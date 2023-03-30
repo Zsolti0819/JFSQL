@@ -5,6 +5,7 @@ import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.transactions.DatabaseManager;
 import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.util.ColumnToTypeMapper;
+import com.github.jfsql.driver.util.FileNameCreator;
 import com.github.jfsql.driver.util.IoOperationHandler;
 import com.github.jfsql.driver.util.PreparedStatementCreator;
 import com.github.jfsql.driver.util.TableFinder;
@@ -30,16 +31,9 @@ import lombok.Data;
 public class StatementServiceManager {
 
     static final Object lock = new Object();
-    private final DatabaseManager databaseManager;
-    private final TransactionManager transactionManager;
     private final Cache cache;
-    private final TableFinder tableFinder;
-    private final SemanticValidator semanticValidator;
-    private final ColumnToTypeMapper columnToTypeMapper;
-    private final WhereConditionSolver whereConditionSolver;
-    private final IoOperationHandler ioOperationHandler;
-    private final Reader reader;
     private final Parser parser;
+    private final PreparedStatementCreator preparedStatementCreator;
 
     private final AlterTableService alterTableService;
     private final CreateDatabaseService createDatabaseService;
@@ -51,30 +45,30 @@ public class StatementServiceManager {
     private final DeleteService deleteService;
     private final DropTableService dropTableService;
 
-    private final PreparedStatementCreator preparedStatementCreator;
     private ResultSet resultSet;
     private int updateCount = 0;
     private Object[] parameters;
 
     public StatementServiceManager(final DatabaseManager databaseManager, final Cache cache,
         final TransactionManager transactionManager, final Reader reader) {
-        this.databaseManager = databaseManager;
-        this.transactionManager = transactionManager;
         this.cache = cache;
-        this.reader = reader;
+
+        final IoOperationHandler ioOperationHandler = new IoOperationHandler();
+        final FileNameCreator fileNameCreator = new FileNameCreator(reader);
+        final TableFinder tableFinder = new TableFinder(databaseManager);
+        final SemanticValidator semanticValidator = new SemanticValidator();
+        final ColumnToTypeMapper columnToTypeMapper = new ColumnToTypeMapper();
+        final WhereConditionSolver whereConditionSolver = new WhereConditionSolver();
 
         parser = new Parser();
-        ioOperationHandler = new IoOperationHandler();
-        tableFinder = new TableFinder(databaseManager);
-        semanticValidator = new SemanticValidator();
-        columnToTypeMapper = new ColumnToTypeMapper();
-        whereConditionSolver = new WhereConditionSolver();
         preparedStatementCreator = new PreparedStatementCreator(tableFinder, this);
-        alterTableService = new AlterTableService(tableFinder, databaseManager, transactionManager,
-            semanticValidator, ioOperationHandler, reader);
-        createDatabaseService = new CreateDatabaseService(databaseManager, semanticValidator, reader);
+
+        alterTableService = new AlterTableService(tableFinder, databaseManager, transactionManager, semanticValidator,
+            ioOperationHandler, fileNameCreator, reader);
+        createDatabaseService = new CreateDatabaseService(databaseManager, semanticValidator, fileNameCreator, reader);
         dropDatabaseService = new DropDatabaseService(databaseManager, semanticValidator, reader);
-        createTableService = new CreateTableService(databaseManager, transactionManager, semanticValidator, reader);
+        createTableService = new CreateTableService(databaseManager, transactionManager, semanticValidator,
+            fileNameCreator);
         insertService = new InsertService(tableFinder, transactionManager, semanticValidator, reader);
         selectService = new SelectService(tableFinder, semanticValidator, columnToTypeMapper,
             whereConditionSolver,

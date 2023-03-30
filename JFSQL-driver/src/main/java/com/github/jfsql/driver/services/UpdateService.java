@@ -9,7 +9,6 @@ import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.driver.util.WhereConditionSolver;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.UpdateWrapper;
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,50 +27,46 @@ public class UpdateService {
     private final WhereConditionSolver whereConditionSolver;
     private final Reader reader;
 
-    public int updateTable(final UpdateWrapper statement) throws SQLException {
+    int updateTable(final UpdateWrapper statement) throws SQLException {
         final String tableName = statement.getTableName();
-        final Table activeTable = tableFinder.getTableByName(tableName);
+        final Table table = tableFinder.getTableByName(tableName);
 
-        if (!semanticValidator.allColumnsExist(activeTable, statement)) {
-            throw new SQLException("Some columns entered doesn't exist in '" + activeTable.getName() + "'.");
+        if (!semanticValidator.allColumnsExist(table, statement)) {
+            throw new SQLException("Some columns entered doesn't exist in '" + table.getName() + "'.");
         }
 
-        if (!semanticValidator.allWhereColumnsExist(activeTable, statement)) {
-            throw new SQLException("Some columns entered doesn't exist in '" + activeTable.getName() + "'.");
+        if (!semanticValidator.allWhereColumnsExist(table, statement)) {
+            throw new SQLException("Some columns entered doesn't exist in '" + table.getName() + "'.");
         }
 
         // When autoCommit is true, it should be safe to read the entries from the file
-        if (activeTable.getEntries().isEmpty() || transactionManager.getAutoCommit()) {
-            try {
-                final List<Entry> entries = reader.readEntriesFromTable(activeTable);
-                activeTable.setEntries(entries);
-            } catch (final IOException e) {
-                throw new SQLException("Failed to read entries from the table.\n" + e.getMessage());
-            }
+        if (table.getEntries().isEmpty() || transactionManager.getAutoCommit()) {
+            final List<Entry> entries = reader.readEntriesFromTable(table);
+            table.setEntries(entries);
         }
 
-        final List<Entry> whereEntries = whereConditionSolver.getWhereEntries(activeTable, statement);
+        final List<Entry> whereEntries = whereConditionSolver.getWhereEntries(table, statement);
 
         logger.debug("whereEntries = {}", whereEntries);
 
         final List<String> columns = statement.getColumns();
         final List<String> values = statement.getValues();
-        final List<String> types = new ArrayList<>(
-            columnToTypeMapper.mapColumnsToTypes(statement, activeTable).values());
+        final List<String> types = new ArrayList<>(columnToTypeMapper.mapColumnsToTypes(statement, table).values());
 
         for (final Entry entry : whereEntries) {
             for (int i = 0; i < columns.size(); i++) {
-                if (semanticValidator.isValid(values.get(i), types.get(i))) {
-                    entry.getColumnsAndValues().put(columns.get(i), values.get(i));
+                final String column = columns.get(i);
+                final String value = values.get(i);
+                final String type = types.get(i);
+                if (semanticValidator.isValid(value, type)) {
+                    entry.getColumnsAndValues().put(column, value);
                 } else {
-                    throw new SQLException(
-                        "Value '" + values.get(i) + "' cannot be converted to '" + types.get(i) + "'.");
+                    throw new SQLException("Value " + value + " cannot be converted to '" + type + "'.");
                 }
             }
         }
 
-        transactionManager.executeDMLOperation(activeTable);
-
+        transactionManager.executeDMLOperation(table);
         return whereEntries.size();
     }
 }

@@ -77,7 +77,7 @@ public class JGitTransactionManagerImpl extends TransactionManager {
         }
     }
 
-    private Map<File, Boolean> getFilesToAdd() throws IOException {
+    private Map<File, Boolean> getFilesToAdd() throws SQLException {
         final Map<File, Boolean> filesToAdd = new HashMap<>();
         final Database database = databaseManager.database;
         final Path databaseUrl = database.getUrl();

@@ -9,6 +9,7 @@ import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -71,19 +72,19 @@ class ReaderJsonImplTest {
     }
 
     @Test
-    void testReader_readEntriesFromTable() throws IOException {
+    void testReader_readEntriesFromTable() throws SQLException {
         final List<Entry> entries = reader.readEntriesFromTable(table);
         assertEquals(table.getEntries(), entries);
     }
 
     @Test
-    void testReader_readSchema() throws IOException {
+    void testReader_readSchema() throws SQLException {
         final Schema schema = reader.readSchema(String.valueOf(TestUtils.JSON_SCHEMA_PATH));
         assertEquals(table.getSchema(), schema);
     }
 
     @Test
-    void testReader_readTablesFromDatabaseFile() throws IOException {
+    void testReader_readTablesFromDatabaseFile() throws SQLException {
         final List<Table> tables = reader.readTablesFromDatabaseFile(database);
         // Because we don't read the table's entries at this point
         final Schema schema = new Schema(table.getSchema().getSchemaFile(), table.getSchema().getColumnsAndTypes(),

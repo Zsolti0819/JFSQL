@@ -31,31 +31,22 @@ class UpdateServiceTest {
 
     @Mock
     private Map<String, String> mappedColumnsAndTypes;
-
     @Mock
     private List<Entry> entries;
-
     @Mock
     private TableFinder tableFinder;
-
     @Mock
     private TransactionManager transactionManager;
-
     @Mock
     private SemanticValidator semanticValidator;
-
     @Mock
     private ColumnToTypeMapper columnToTypeMapper;
-
     @Mock
     private WhereConditionSolver whereConditionSolver;
-
     @Mock
     private Table table;
-
     @Mock
     private UpdateWrapper updateStatement;
-
     @InjectMocks
     private UpdateService updateService;
 

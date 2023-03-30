@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -38,7 +39,7 @@ public class ReaderJsonImpl implements Reader {
     }
 
     @Override
-    public List<Entry> readEntriesFromTable(final Table table) throws IOException {
+    public List<Entry> readEntriesFromTable(final Table table) throws SQLException {
         final String tableFile = table.getTableFile();
         final List<Entry> entries = new ArrayList<>();
 
@@ -62,11 +63,13 @@ public class ReaderJsonImpl implements Reader {
                 }
                 entries.add(new Entry(columnsAndValues));
             }
+        } catch (IOException e) {
+            throw new SQLException(e);
         }
         return entries;
     }
 
-    private String getValue(final Table table, final String column, final JsonObject entryObject) throws IOException {
+    private String getValue(final Table table, final String column, final JsonObject entryObject) throws SQLException {
         if (entryObject.get(column).isJsonNull()) {
             return null;
         } else {
@@ -79,7 +82,7 @@ public class ReaderJsonImpl implements Reader {
     }
 
     @Override
-    public Schema readSchema(final String pathToSchema) throws IOException {
+    public Schema readSchema(final String pathToSchema) throws SQLException {
         final Map<String, String> columnsAndTypes = new LinkedHashMap<>();
         final Map<String, Boolean> notNullColumns = new LinkedHashMap<>();
         try (final FileReader fileReader = new FileReader(pathToSchema)) {
@@ -108,11 +111,13 @@ public class ReaderJsonImpl implements Reader {
                 }
             }
             return new Schema(pathToSchema, columnsAndTypes, notNullColumns);
+        } catch (IOException e) {
+            throw new SQLException(e);
         }
     }
 
     @Override
-    public List<Table> readTablesFromDatabaseFile(final Database database) throws IOException {
+    public List<Table> readTablesFromDatabaseFile(final Database database) throws SQLException {
         final List<Table> tables = new ArrayList<>();
         final String url = String.valueOf(database.getUrl());
         try (final FileReader fileReader = new FileReader(url)) {
@@ -129,38 +134,45 @@ public class ReaderJsonImpl implements Reader {
                 final Table table = new Table(tableName, tablePath, schema, new ArrayList<>());
                 tables.add(table);
             }
+        } catch (IOException e) {
+            throw new SQLException(e);
         }
         return tables;
     }
 
     @Override
-    public String readBlob(final String pathToBlob) throws IOException {
+    public String readBlob(final String pathToBlob) throws SQLException {
         try (final FileReader fileReader = new FileReader(pathToBlob)) {
             final JsonElement json = JsonParser.parseReader(fileReader);
             final JsonObject jsonObject = json.getAsJsonObject();
             return jsonObject.get("blob").getAsString();
+        } catch (IOException e) {
+            throw new SQLException(e);
         }
     }
 
     @Override
-    public Set<File> getFilesInDatabaseFile(final Database database) throws IOException {
+    public Set<File> getFilesInDatabaseFile(final Database database) throws SQLException {
         final String jsonFilePath = String.valueOf(database.getUrl());
-        final FileReader fileReader = new FileReader(jsonFilePath);
-        final JsonElement jsonElement = JsonParser.parseReader(fileReader);
-        final Set<File> files = new HashSet<>();
-        if (jsonElement.isJsonObject()) {
-            final JsonObject rootObject = jsonElement.getAsJsonObject();
-            final JsonArray tableArray = rootObject.getAsJsonArray("Table");
-            for (final JsonElement tableElement : tableArray) {
-                final JsonObject tableObject = tableElement.getAsJsonObject();
-                final String pathToTable = tableObject.get("pathToTable").getAsString();
-                final String pathToSchema = tableObject.get("pathToSchema").getAsString();
-                files.add(new File(pathToTable));
-                files.add(new File(pathToSchema));
+        try (FileReader fileReader = new FileReader(jsonFilePath)) {
+            final JsonElement jsonElement = JsonParser.parseReader(fileReader);
+            final Set<File> files = new HashSet<>();
+            if (jsonElement.isJsonObject()) {
+                final JsonObject rootObject = jsonElement.getAsJsonObject();
+                final JsonArray tableArray = rootObject.getAsJsonArray("Table");
+                for (final JsonElement tableElement : tableArray) {
+                    final JsonObject tableObject = tableElement.getAsJsonObject();
+                    final String pathToTable = tableObject.get("pathToTable").getAsString();
+                    final String pathToSchema = tableObject.get("pathToSchema").getAsString();
+                    files.add(new File(pathToTable));
+                    files.add(new File(pathToSchema));
+                }
             }
+            return files;
+        } catch (IOException e) {
+            throw new SQLException(e);
         }
-        fileReader.close();
-        return files;
+
     }
 
 }

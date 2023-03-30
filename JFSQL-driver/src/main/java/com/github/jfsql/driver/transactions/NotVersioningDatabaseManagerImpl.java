@@ -37,11 +37,7 @@ public class NotVersioningDatabaseManagerImpl extends DatabaseManager {
 
     @Override
     public void openDatabase() throws SQLException {
-        try {
-            final List<Table> tables = reader.readTablesFromDatabaseFile(database);
-            database.setTables(tables);
-        } catch (final IOException e) {
-            throw new SQLException("Failed to read the tables from the database file.\n" + e.getMessage());
-        }
+        final List<Table> tables = reader.readTablesFromDatabaseFile(database);
+        database.setTables(tables);
     }
 }

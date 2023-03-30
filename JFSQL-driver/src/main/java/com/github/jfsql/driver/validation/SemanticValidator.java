@@ -1,6 +1,7 @@
 package com.github.jfsql.driver.validation;
 
 import com.github.jfsql.driver.dto.Database;
+import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.parser.dto.CreateTableWrapper;
 import com.github.jfsql.parser.dto.InsertWrapper;
@@ -105,13 +106,11 @@ public class SemanticValidator {
         return Objects.equals(tableNamesSet, tableNamesFromJoinClauseSet);
     }
 
-    public boolean columnIsPresentInTable(final String tableName, final String columnName, final Table table) {
-        for (final String key : table.getSchema().getColumnsAndTypes().keySet()) {
-            if (Objects.equals(key, columnName) || Objects.equals(key, tableName + "." + columnName)) {
-                return true;
-            }
-        }
-        return false;
+    public boolean columnIsPresentInTable(final Table table, final String columnName) {
+        final String tableName = table.getName();
+        final Schema schema = table.getSchema();
+        return schema.getColumnsAndTypes().containsKey(columnName) ||
+            schema.getColumnsAndTypes().containsKey(tableName + "." + columnName);
     }
 
     public boolean nullInsertIntoNotNullColumn(final InsertWrapper statement, final Table activeTable) {

@@ -9,11 +9,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.github.jfsql.driver.TestUtils;
 import com.github.jfsql.driver.dto.Database;
-import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.transactions.DatabaseManager;
 import com.github.jfsql.driver.transactions.TransactionManager;
+import com.github.jfsql.driver.util.FileNameCreator;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.CreateTableWrapper;
 import java.sql.SQLException;
@@ -29,30 +28,22 @@ class CreateTableServiceTest {
 
     @Mock
     private DatabaseManager databaseManager;
-
     @Mock
     private TransactionManager transactionManager;
-
     @Mock
     private SemanticValidator semanticValidator;
-
-    @Mock
-    private Reader reader;
-
     @Mock
     private Database database;
-
+    @Mock
+    private FileNameCreator fileNameCreator;
     @Mock
     private CreateTableWrapper createTableStatement;
-
     @InjectMocks
     private CreateTableService createTableService;
 
     @Test
     void testCreateTable_normally() throws SQLException {
-        when(reader.getFileExtension()).thenReturn("xml");
         when(databaseManager.getDatabase()).thenReturn(database);
-        when(database.getUrl()).thenReturn(TestUtils.XML_DATABASE_PATH);
         when(semanticValidator.tableExists(createTableStatement, database)).thenReturn(false);
 
         createTableService.createTable(createTableStatement);
