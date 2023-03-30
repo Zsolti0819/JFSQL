@@ -67,6 +67,9 @@ public class AlterTableService {
         final String oldTableFile = table.getTableFile();
         final String oldSchemaFile = table.getSchema().getSchemaFile();
 
+        final List<Entry> entries = reader.readEntriesFromTable(table);
+        table.setEntries(entries);
+
         try {
             ioOperationHandler.renameFile(oldTableFile, newTableFile);
             ioOperationHandler.renameFile(oldSchemaFile, newSchemaFile);
@@ -84,31 +87,26 @@ public class AlterTableService {
         table.setTableFile(newTableFile);
         table.getSchema().setSchemaFile(newSchemaFile);
 
-        if (table.getEntries().isEmpty()) {
-            final List<Entry> entries = reader.readEntriesFromTable(table);
-            table.setEntries(entries);
-        }
         transactionManager.executeDDLOperation(database, table, table.getSchema());
     }
 
-    void renameColumn(final AlterTableWrapper statement, Database database, final Table table)
+    void renameColumn(final AlterTableWrapper statement, final Database database, final Table table)
         throws SQLException {
+
         final String newColumnName = statement.getNewColumnName();
+
         if (semanticValidator.columnIsPresentInTable(table, newColumnName)) {
             throw new SQLException("The column '" + newColumnName + "' already exists in '" + table.getName() + "'");
         }
 
+        final List<Entry> entries = reader.readEntriesFromTable(table);
+        table.setEntries(entries);
+
         final Schema schema = table.getSchema();
         final Map<String, String> modifiedColumnsAndTypes = getModifiedColumnsAndTypes(statement, table);
         schema.setColumnsAndTypes(modifiedColumnsAndTypes);
-
         final Map<String, Boolean> modifiedNotNullColumns = getModifiedNotNullColumns(statement, table);
         schema.setNotNullColumns(modifiedNotNullColumns);
-
-        if (table.getEntries().isEmpty()) {
-            final List<Entry> entries = reader.readEntriesFromTable(table);
-            table.setEntries(entries);
-        }
 
         // Modify the column name for every entry in the table
         for (final Entry entry : table.getEntries()) {
@@ -122,7 +120,7 @@ public class AlterTableService {
             }
             entry.setColumnsAndValues(modifiedColumnsAndValues);
         }
-        transactionManager.executeDDLOperation(database, table, table.getSchema());
+        transactionManager.executeDDLOperation(database, table, schema);
     }
 
     private Map<String, Boolean> getModifiedNotNullColumns(final AlterTableWrapper statement, final Table table) {
@@ -153,7 +151,7 @@ public class AlterTableService {
         return modifiedColumnsAndTypes;
     }
 
-    void addColumn(final AlterTableWrapper statement, Database database, final Table table) throws SQLException {
+    void addColumn(final AlterTableWrapper statement, final Database database, final Table table) throws SQLException {
         final String columnNameToAdd = statement.getColumnNameToAdd();
         final String columnTypeToAdd = statement.getColumnTypeToAdd();
 
@@ -164,16 +162,14 @@ public class AlterTableService {
             throw new SQLException("The column '" + columnNameToAdd + "' already exists in '" + table.getName() + "'.");
         }
 
+        final List<Entry> entries = reader.readEntriesFromTable(table);
+        table.setEntries(entries);
+
         columnsAndTypes.put(columnNameToAdd, columnTypeToAdd);
         if (Boolean.TRUE.equals(statement.getColumnToAddCannotBeNull())) {
             notNullColumns.put(columnNameToAdd, true);
         } else if (Boolean.FALSE.equals(statement.getColumnToAddCannotBeNull())) {
             notNullColumns.put(columnNameToAdd, false);
-        }
-
-        if (table.getEntries().isEmpty()) {
-            final List<Entry> entries = reader.readEntriesFromTable(table);
-            table.setEntries(entries);
         }
 
         // Add the column to every entry in the table
@@ -200,7 +196,7 @@ public class AlterTableService {
         transactionManager.executeDDLOperation(database, table, table.getSchema());
     }
 
-    void dropColumn(final AlterTableWrapper statement, Database database, final Table table) throws SQLException {
+    void dropColumn(final AlterTableWrapper statement, final Database database, final Table table) throws SQLException {
         final String columnNameToDrop = statement.getColumnToDrop();
 
         if (!semanticValidator.columnIsPresentInTable(table, columnNameToDrop)) {
@@ -211,10 +207,8 @@ public class AlterTableService {
         schema.getColumnsAndTypes().remove(columnNameToDrop);
         schema.getNotNullColumns().remove(columnNameToDrop);
 
-        if (table.getEntries().isEmpty()) {
-            final List<Entry> entries = reader.readEntriesFromTable(table);
-            table.setEntries(entries);
-        }
+        final List<Entry> entries = reader.readEntriesFromTable(table);
+        table.setEntries(entries);
 
         // Remove the columns from every entry in the table
         for (final Entry entry : table.getEntries()) {
