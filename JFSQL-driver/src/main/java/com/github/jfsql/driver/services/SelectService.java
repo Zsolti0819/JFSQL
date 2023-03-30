@@ -54,10 +54,8 @@ class SelectService {
         final List<Table> extractedTables = extractTables(statement);
         // Now we can load the entries into memory
         for (final Table table : extractedTables) {
-            if (table.getEntries().isEmpty()) {
-                final List<Entry> entries = reader.readEntriesFromTable(table);
-                table.setEntries(entries);
-            }
+            final List<Entry> entries = reader.readEntriesFromTable(table);
+            table.setEntries(entries);
         }
         logger.debug("tables extracted from the statement = {}", extractedTables);
         final List<Table> modifiedTables = createModifiedTables(extractedTables);
@@ -131,10 +129,8 @@ class SelectService {
 
     private ResultSet simpleSelect(final SelectWrapper statement) throws SQLException {
         final Table activeTable = tableFinder.getTableByName(statement.getTableName());
-        if (activeTable.getEntries().isEmpty()) {
-            final List<Entry> entries = reader.readEntriesFromTable(activeTable);
-            activeTable.setEntries(entries);
-        }
+        final List<Entry> entries = reader.readEntriesFromTable(activeTable);
+        activeTable.setEntries(entries);
         return baseSelect(statement, activeTable);
     }
 
