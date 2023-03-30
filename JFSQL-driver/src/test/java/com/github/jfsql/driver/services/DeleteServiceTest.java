@@ -42,19 +42,19 @@ class DeleteServiceTest {
     @Mock
     private List<Entry> whereEntries;
     @Mock
-    private DeleteWrapper deleteStatement;
+    private DeleteWrapper statement;
     @InjectMocks
     private DeleteService deleteService;
 
     @Test
     void testDelete_normally() throws SQLException {
-        when(deleteStatement.getWhereColumns()).thenReturn(List.of("column1", "column2", "column3"));
-        when(tableFinder.getTableByName(deleteStatement.getTableName())).thenReturn(table);
+        when(statement.getWhereColumns()).thenReturn(List.of("column1", "column2", "column3"));
+        when(tableFinder.getTableByName(statement.getTableName())).thenReturn(table);
         when(table.getEntries()).thenReturn(entries);
-        when(semanticValidator.allWhereColumnsExist(table, deleteStatement)).thenReturn(true);
-        when(whereConditionSolver.getWhereEntries(table, deleteStatement)).thenReturn(whereEntries);
+        when(semanticValidator.allWhereColumnsExist(table, statement)).thenReturn(true);
+        when(whereConditionSolver.getWhereEntries(table, statement)).thenReturn(whereEntries);
 
-        deleteService.deleteFromTable(deleteStatement);
+        deleteService.deleteFromTable(statement);
 
         verify(entries, times(1)).removeAll(whereEntries);
         verify(transactionManager, times(1)).executeDMLOperation(table);
@@ -62,11 +62,11 @@ class DeleteServiceTest {
 
     @Test
     void testDelete_whereColumnIsEmpty() throws SQLException {
-        when(deleteStatement.getWhereColumns()).thenReturn(Collections.emptyList());
-        when(tableFinder.getTableByName(deleteStatement.getTableName())).thenReturn(table);
+        when(statement.getWhereColumns()).thenReturn(Collections.emptyList());
+        when(tableFinder.getTableByName(statement.getTableName())).thenReturn(table);
         when(table.getEntries()).thenReturn(entries);
 
-        deleteService.deleteFromTable(deleteStatement);
+        deleteService.deleteFromTable(statement);
 
         verify(entries, times(1)).clear();
         verify(transactionManager, times(1)).executeDMLOperation(table);
@@ -74,13 +74,13 @@ class DeleteServiceTest {
 
     @Test
     void testDelete_columnsNotExists() throws SQLException {
-        when(tableFinder.getTableByName(deleteStatement.getTableName())).thenReturn(table);
-        when(deleteStatement.getWhereColumns()).thenReturn(List.of("column1", "column2", "column3"));
-        when(semanticValidator.allWhereColumnsExist(table, deleteStatement)).thenReturn(false);
+        when(tableFinder.getTableByName(statement.getTableName())).thenReturn(table);
+        when(statement.getWhereColumns()).thenReturn(List.of("column1", "column2", "column3"));
+        when(semanticValidator.allWhereColumnsExist(table, statement)).thenReturn(false);
         when(table.getEntries()).thenReturn(entries);
 
         final SQLException thrown = assertThrows(SQLException.class,
-            () -> deleteService.deleteFromTable(deleteStatement));
+            () -> deleteService.deleteFromTable(statement));
         assertEquals("Some columns entered doesn't exist in '" + table.getName() + "'.", thrown.getMessage());
 
         verify(transactionManager, never()).executeDMLOperation(table);

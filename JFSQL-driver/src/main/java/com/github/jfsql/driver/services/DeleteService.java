@@ -23,30 +23,30 @@ public class DeleteService {
 
     int deleteFromTable(final DeleteWrapper statement) throws SQLException {
         final List<String> whereColumns = statement.getWhereColumns();
-        final Table activeTable = tableFinder.getTableByName(statement.getTableName());
+        final Table table = tableFinder.getTableByName(statement.getTableName());
 
         // When autoCommit is true, it should be safe to read the entries from the file
-        if (activeTable.getEntries().isEmpty() || transactionManager.getAutoCommit()) {
-            final List<Entry> entries = reader.readEntriesFromTable(activeTable);
-            activeTable.setEntries(entries);
+        if (transactionManager.getAutoCommit()) {
+            final List<Entry> entries = reader.readEntriesFromTable(table);
+            table.setEntries(entries);
         }
 
         final int deleteCount;
-        final int entriesSizeBefore = activeTable.getEntries().size();
+        final int entriesSizeBefore = table.getEntries().size();
         if (whereColumns.isEmpty()) {
-            activeTable.getEntries().clear();
+            table.getEntries().clear();
             deleteCount = entriesSizeBefore;
         } else {
-            if (!semanticValidator.allWhereColumnsExist(activeTable, statement)) {
-                throw new SQLException("Some columns entered doesn't exist in '" + activeTable.getName() + "'.");
+            if (!semanticValidator.allWhereColumnsExist(table, statement)) {
+                throw new SQLException("Some columns entered doesn't exist in '" + table.getName() + "'.");
             }
-            final List<Entry> whereEntries = whereConditionSolver.getWhereEntries(activeTable, statement);
-            activeTable.getEntries().removeAll(whereEntries);
-            final int entriesSizeAfter = activeTable.getEntries().size();
+            final List<Entry> whereEntries = whereConditionSolver.getWhereEntries(table, statement);
+            table.getEntries().removeAll(whereEntries);
+            final int entriesSizeAfter = table.getEntries().size();
             deleteCount = entriesSizeBefore - entriesSizeAfter;
         }
 
-        transactionManager.executeDMLOperation(activeTable);
+        transactionManager.executeDMLOperation(table);
         return deleteCount;
     }
 }
