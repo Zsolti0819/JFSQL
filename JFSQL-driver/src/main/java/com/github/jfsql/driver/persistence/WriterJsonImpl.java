@@ -85,14 +85,21 @@ public class WriterJsonImpl extends Writer {
         if (value == null || Objects.equals(value, "null")) {
             entryObject.add(column, null);
         } else {
-            if (Objects.equals("INTEGER", type)) {
-                entryObject.addProperty(column, Integer.parseInt(value));
-            } else if (Objects.equals("REAL", type)) {
-                entryObject.addProperty(column, Double.parseDouble(value));
-            } else if (Objects.equals("TEXT", type)) {
-                entryObject.addProperty(column, value);
-            } else if (Objects.equals("BLOB", type)) {
-                entryObject.addProperty(column, writeBlob(table, value));
+            switch (type) {
+                case "INTEGER":
+                    entryObject.addProperty(column, Integer.parseInt(value));
+                    break;
+                case "REAL":
+                    entryObject.addProperty(column, Double.parseDouble(value));
+                    break;
+                case "TEXT":
+                    entryObject.addProperty(column, value);
+                    break;
+                case "BLOB":
+                    entryObject.addProperty(column, writeBlob(table, value));
+                    break;
+                default:
+                    throw new IllegalStateException("Unsupported data type '" + type + "'.");
             }
         }
     }
