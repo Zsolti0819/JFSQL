@@ -7,7 +7,6 @@ import java.sql.SQLException;
 
 public class NotVersioningTransactionManagerImpl extends TransactionManager {
 
-
     public NotVersioningTransactionManagerImpl(final DatabaseManager databaseManager, final Reader reader,
         final Writer writer) {
         super(databaseManager, reader, writer);
