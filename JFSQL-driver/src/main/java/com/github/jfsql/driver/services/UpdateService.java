@@ -40,7 +40,7 @@ public class UpdateService {
         }
 
         // When autoCommit is true, it should be safe to read the entries from the file
-        if (table.getEntries().isEmpty() || transactionManager.getAutoCommit()) {
+        if (transactionManager.getAutoCommit()) {
             final List<Entry> entries = reader.readEntriesFromTable(table);
             table.setEntries(entries);
         }

@@ -8,7 +8,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.util.ColumnToTypeMapper;
@@ -32,8 +31,6 @@ class UpdateServiceTest {
     @Mock
     private Map<String, String> mappedColumnsAndTypes;
     @Mock
-    private List<Entry> entries;
-    @Mock
     private TableFinder tableFinder;
     @Mock
     private TransactionManager transactionManager;
@@ -46,23 +43,22 @@ class UpdateServiceTest {
     @Mock
     private Table table;
     @Mock
-    private UpdateWrapper updateStatement;
+    private UpdateWrapper statement;
     @InjectMocks
     private UpdateService updateService;
 
     @Test
     void testUpdate_normally() throws SQLException {
-        when(updateStatement.getColumns()).thenReturn(List.of("column1", "column2", "column3"));
-        when(updateStatement.getValues()).thenReturn(List.of("1", "a", "2.5"));
-        when(tableFinder.getTableByName(updateStatement.getTableName())).thenReturn(table);
-        when(semanticValidator.allColumnsExist(table, updateStatement)).thenReturn(true);
-        when(semanticValidator.allWhereColumnsExist(table, updateStatement)).thenReturn(true);
-        when(columnToTypeMapper.mapColumnsToTypes(updateStatement, table)).thenReturn(
+        when(statement.getColumns()).thenReturn(List.of("column1", "column2", "column3"));
+        when(statement.getValues()).thenReturn(List.of("1", "a", "2.5"));
+        when(tableFinder.getTableByName(statement.getTableName())).thenReturn(table);
+        when(semanticValidator.allColumnsExist(table, statement)).thenReturn(true);
+        when(semanticValidator.allWhereColumnsExist(table, statement)).thenReturn(true);
+        when(columnToTypeMapper.mapColumnsToTypes(statement, table)).thenReturn(
             mappedColumnsAndTypes);
-        when(whereConditionSolver.getWhereEntries(table, updateStatement)).thenReturn(Collections.emptyList());
-        when(table.getEntries()).thenReturn(entries);
+        when(whereConditionSolver.getWhereEntries(table, statement)).thenReturn(Collections.emptyList());
 
-        updateService.updateTable(updateStatement);
+        updateService.updateTable(statement);
 
         verify(transactionManager, times(1)).executeDMLOperation(table);
     }
@@ -70,11 +66,11 @@ class UpdateServiceTest {
     @Test
     void testUpdate_columnsNotExists() throws SQLException {
         when(table.getName()).thenReturn("myTable");
-        when(tableFinder.getTableByName(updateStatement.getTableName())).thenReturn(table);
-        when(semanticValidator.allColumnsExist(table, updateStatement)).thenReturn(false);
+        when(tableFinder.getTableByName(statement.getTableName())).thenReturn(table);
+        when(semanticValidator.allColumnsExist(table, statement)).thenReturn(false);
 
-        final SQLException thrown = assertThrows(SQLException.class,
-            () -> updateService.updateTable(updateStatement));
+        final SQLException thrown = assertThrows(SQLException.class, () -> updateService.updateTable(
+            statement));
         assertEquals("Some columns entered doesn't exist in '" + table.getName() + "'.", thrown.getMessage());
 
         verifyNoInteractions(whereConditionSolver);
@@ -85,12 +81,12 @@ class UpdateServiceTest {
     @Test
     void testUpdate_whereColumnsNotExist() throws SQLException {
         when(table.getName()).thenReturn("myTable");
-        when(tableFinder.getTableByName(updateStatement.getTableName())).thenReturn(table);
-        when(semanticValidator.allColumnsExist(table, updateStatement)).thenReturn(true);
-        when(semanticValidator.allWhereColumnsExist(table, updateStatement)).thenReturn(false);
+        when(tableFinder.getTableByName(statement.getTableName())).thenReturn(table);
+        when(semanticValidator.allColumnsExist(table, statement)).thenReturn(true);
+        when(semanticValidator.allWhereColumnsExist(table, statement)).thenReturn(false);
 
-        final SQLException thrown = assertThrows(SQLException.class,
-            () -> updateService.updateTable(updateStatement));
+        final SQLException thrown = assertThrows(SQLException.class, () -> updateService.updateTable(
+            statement));
         assertEquals("Some columns entered doesn't exist in '" + table.getName() + "'.", thrown.getMessage());
 
         verifyNoInteractions(whereConditionSolver);
