@@ -42,21 +42,21 @@ class DropTableServiceTest {
     @Mock
     private List<Entry> entries;
     @Mock
-    private DropTableWrapper dropTableStatement;
+    private DropTableWrapper statement;
     @InjectMocks
     private DropTableService dropTableService;
 
     @Test
     void testDropTable_normally() throws SQLException {
         when(databaseManager.getDatabase()).thenReturn(database);
-        when(tableFinder.getTableByName(dropTableStatement.getTableName())).thenReturn(table);
-        when(dropTableStatement.isIfExistsPresent()).thenReturn(false);
-        when(semanticValidator.tableExists(dropTableStatement, database)).thenReturn(true);
+        when(tableFinder.getTableByName(statement.getTableName())).thenReturn(table);
+        when(statement.isIfExistsPresent()).thenReturn(false);
+        when(semanticValidator.tableExists(statement, database)).thenReturn(true);
 
         when(table.getEntries()).thenReturn(entries);
         when(table.getEntries().size()).thenReturn(2);
 
-        dropTableService.dropTable(dropTableStatement);
+        dropTableService.dropTable(statement);
 
         verify(transactionManager, times(1)).executeDropTableOperation();
 
@@ -64,14 +64,12 @@ class DropTableServiceTest {
 
     @Test
     void testDropTable_tableFileNotExists() throws SQLException {
-        when(tableFinder.getTableByName(dropTableStatement.getTableName())).thenReturn(table);
-        when(dropTableStatement.isIfExistsPresent()).thenReturn(false);
-        when(table.getEntries()).thenReturn(entries);
-
+        when(tableFinder.getTableByName(statement.getTableName())).thenReturn(table);
+        when(statement.isIfExistsPresent()).thenReturn(false);
         final SQLException thrown = assertThrows(SQLException.class,
-            () -> dropTableService.dropTable(dropTableStatement));
+            () -> dropTableService.dropTable(statement));
         assertEquals(
-            "Cannot DROP " + dropTableStatement.getTableName() + " because the table's file or schema doesn't exist.",
+            "Cannot DROP " + statement.getTableName() + " because the table's file or schema doesn't exist.",
             thrown.getMessage());
 
         verify(transactionManager, never()).executeDropTableOperation();
@@ -80,11 +78,11 @@ class DropTableServiceTest {
 
     @Test
     void testDropTable_ifExists_doesNotThrowException() throws SQLException {
-        when(dropTableStatement.isIfExistsPresent()).thenReturn(true);
-        when(dropTableStatement.getTableName()).thenReturn("myTable");
-        when(tableFinder.getTableByName(dropTableStatement.getTableName())).thenThrow(SQLException.class);
+        when(statement.isIfExistsPresent()).thenReturn(true);
+        when(statement.getTableName()).thenReturn("myTable");
+        when(tableFinder.getTableByName(statement.getTableName())).thenThrow(SQLException.class);
 
-        assertDoesNotThrow(() -> dropTableService.dropTable(dropTableStatement));
+        assertDoesNotThrow(() -> dropTableService.dropTable(statement));
         verify(transactionManager, never()).executeDropTableOperation();
     }
 
