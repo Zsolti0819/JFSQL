@@ -32,38 +32,41 @@ class CreateDatabaseServiceTest {
     @Mock
     private FileNameCreator fileNameCreator;
     @Mock
-    private CreateDatabaseWrapper createDatabaseStatement;
+    private CreateDatabaseWrapper statement;
     @InjectMocks
     private CreateDatabaseService createDatabaseService;
 
     @Test
     void testCreateDatabase_normally() throws SQLException {
-        when(semanticValidator.urlIsAnExistingRegularFile(createDatabaseStatement)).thenReturn(false);
-        when(semanticValidator.databaseExist(createDatabaseStatement, reader.getFileExtension())).thenReturn(false);
-        createDatabaseService.createDatabase(createDatabaseStatement);
+        when(semanticValidator.urlIsAnExistingRegularFile(statement)).thenReturn(false);
+        when(semanticValidator.databaseExist(statement, reader.getFileExtension())).thenReturn(false);
+        createDatabaseService.createDatabase(statement);
+        verify(fileNameCreator, times(1)).createDatabaseFileName(any());
         verify(databaseManager, times(1)).executeCreateDatabaseOperation(any());
     }
 
     @Test
     void testCreateDatabase_databaseIsNotDirectory() throws SQLException {
-        when(semanticValidator.urlIsAnExistingRegularFile(createDatabaseStatement)).thenReturn(true);
+        when(semanticValidator.urlIsAnExistingRegularFile(statement)).thenReturn(true);
 
         final SQLException thrown = assertThrows(SQLException.class,
-            () -> createDatabaseService.createDatabase(createDatabaseStatement));
+            () -> createDatabaseService.createDatabase(statement));
         assertEquals("Database is not a directory.", thrown.getMessage());
 
+        verify(fileNameCreator, never()).createDatabaseFileName(any());
         verify(databaseManager, never()).executeCreateDatabaseOperation(any());
     }
 
     @Test
     void testCreateDatabase_databaseExists() throws SQLException {
-        when(semanticValidator.urlIsAnExistingRegularFile(createDatabaseStatement)).thenReturn(false);
-        when(semanticValidator.databaseExist(createDatabaseStatement, reader.getFileExtension())).thenReturn(true);
+        when(semanticValidator.urlIsAnExistingRegularFile(statement)).thenReturn(false);
+        when(semanticValidator.databaseExist(statement, reader.getFileExtension())).thenReturn(true);
 
         final SQLException thrown = assertThrows(SQLException.class,
-            () -> createDatabaseService.createDatabase(createDatabaseStatement));
+            () -> createDatabaseService.createDatabase(statement));
         assertEquals("Database already exists.", thrown.getMessage());
 
+        verify(fileNameCreator, never()).createDatabaseFileName(any());
         verify(databaseManager, never()).executeCreateDatabaseOperation(any());
     }
 }
