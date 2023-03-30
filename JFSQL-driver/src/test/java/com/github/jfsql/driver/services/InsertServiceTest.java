@@ -36,21 +36,21 @@ class InsertServiceTest {
     @Mock
     private List<Entry> entries;
     @Mock
-    private InsertWrapper insertStatement;
+    private InsertWrapper statement;
     @InjectMocks
     private InsertService insertService;
 
     @Test
     void testInsert_noExplicitColumns() throws SQLException {
-        when(semanticValidator.allInsertValuesAreEqualLength(insertStatement)).thenReturn(true);
-        when(tableFinder.getTableByName(insertStatement.getTableName())).thenReturn(table);
-        when(semanticValidator.valueCountIsEqualToTableColumnCount(table, insertStatement)).thenReturn(true);
-        when(semanticValidator.allColumnsExist(table, insertStatement)).thenReturn(true);
-        when(semanticValidator.allInsertValuesAreValid(table, insertStatement)).thenReturn(true);
+        when(semanticValidator.allInsertValuesAreEqualLength(statement)).thenReturn(true);
+        when(tableFinder.getTableByName(statement.getTableName())).thenReturn(table);
+        when(semanticValidator.valueCountIsEqualToTableColumnCount(table, statement)).thenReturn(true);
+        when(semanticValidator.allColumnsExist(table, statement)).thenReturn(true);
+        when(semanticValidator.allInsertValuesAreValid(table, statement)).thenReturn(true);
         when(table.getEntries()).thenReturn(entries);
         when(table.getSchema()).thenReturn(schema);
 
-        insertService.insertIntoTable(insertStatement);
+        insertService.insertIntoTable(statement);
 
         verify(entries, times(1)).addAll(any());
         verify(transactionManager, times(1)).executeDMLOperation(table);

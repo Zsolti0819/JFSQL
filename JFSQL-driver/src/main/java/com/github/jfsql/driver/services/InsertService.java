@@ -32,38 +32,36 @@ public class InsertService {
         }
 
         final String tableName = statement.getTableName();
-        final Table activeTable = tableFinder.getTableByName(tableName);
+        final Table table = tableFinder.getTableByName(tableName);
 
-        if (!semanticValidator.valueCountIsEqualToTableColumnCount(activeTable, statement)) {
+        if (!semanticValidator.valueCountIsEqualToTableColumnCount(table, statement)) {
             throw new SQLException(
                 "The values in the parentheses were lower or greater than the table's column count.");
         }
 
-        if (!semanticValidator.allColumnsExist(activeTable, statement)) {
-            throw new SQLException("Some columns entered doesn't exist in '" + activeTable.getName() + "'.");
+        if (!semanticValidator.allColumnsExist(table, statement)) {
+            throw new SQLException("Some columns entered doesn't exist in '" + table.getName() + "'.");
         }
 
-        if (!semanticValidator.allInsertValuesAreValid(activeTable, statement)) {
+        if (!semanticValidator.allInsertValuesAreValid(table, statement)) {
             throw new SQLException(
                 "Some value's type didn't match the type of the column, to which it was intended to be inserted.");
         }
 
-        if (semanticValidator.nullInsertIntoNotNullColumn(statement, activeTable)) {
+        if (semanticValidator.nullInsertIntoNotNullColumn(statement, table)) {
             throw new SQLException("Inserting null value into a NOT NULL column.");
         }
 
         // When autoCommit is true, it should be safe to read the entries from the file
-        if (activeTable.getEntries().isEmpty() || transactionManager.getAutoCommit()) {
-            final List<Entry> entries = reader.readEntriesFromTable(activeTable);
-            activeTable.setEntries(entries);
+        if (transactionManager.getAutoCommit()) {
+            final List<Entry> entries = reader.readEntriesFromTable(table);
+            table.setEntries(entries);
         }
 
-        final List<Entry> entriesToInsert = getEntriesToInsert(statement, activeTable);
-        logger.debug("entriesToInsert = {}", entriesToInsert);
+        final List<Entry> entriesToInsert = getEntriesToInsert(statement, table);
+        table.getEntries().addAll(entriesToInsert);
 
-        activeTable.getEntries().addAll(entriesToInsert);
-
-        transactionManager.executeDMLOperation(activeTable);
+        transactionManager.executeDMLOperation(table);
 
         return statement.getValues().size();
     }
@@ -93,6 +91,7 @@ public class InsertService {
             }
             insertEntries.add(new Entry(columnsAndValues));
         }
+        logger.debug("insertEntries = {}", insertEntries);
         return insertEntries;
     }
 
