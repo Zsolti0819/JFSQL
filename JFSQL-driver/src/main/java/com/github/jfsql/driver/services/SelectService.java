@@ -45,19 +45,15 @@ class SelectService {
             return simpleSelect(statement);
         }
 
-        for (final JoinType joinType : joinTypes) {
-            if (!Objects.equals(joinType, JoinType.INNER_JOIN) && !Objects.equals(joinType, JoinType.LEFT_JOIN)) {
-                throw new IllegalStateException("Unsupported join type '" + joinType + "'.");
-            }
-        }
-
         final List<Table> extractedTables = extractTables(statement);
+        logger.debug("tables extracted from the statement = {}", extractedTables);
+
         // Now we can load the entries into memory
         for (final Table table : extractedTables) {
             final List<Entry> entries = reader.readEntriesFromTable(table);
             table.setEntries(entries);
         }
-        logger.debug("tables extracted from the statement = {}", extractedTables);
+
         final List<Table> modifiedTables = createModifiedTables(extractedTables);
         logger.debug("tables after the modifications = {}", modifiedTables);
 
@@ -70,6 +66,7 @@ class SelectService {
 
             final List<String> pairedJoinColumns = pairJoinColumns(listOfJoinColumns.get(i), modifiedTables);
             logger.debug("pairedJoinColumns = {}", pairedJoinColumns);
+
             final List<String> modifiedJoinColumns = modifyJoinColumns(leftTable, rightTable, pairedJoinColumns);
             logger.debug("modifiedJoinColumns = {}", modifiedJoinColumns);
 
@@ -83,15 +80,21 @@ class SelectService {
             mergedNotNullColumns.putAll(rightTable.getSchema().getNotNullColumns());
             logger.debug("mergedNotNullColumns = {}", mergedNotNullColumns);
 
-            Table joinTable = null;
-            if (Objects.equals(joinTypes.get(i), JoinType.INNER_JOIN)) {
-                joinTable = innerJoin(leftTable, rightTable, mergedColumnsAndTypes, mergedNotNullColumns,
-                    modifiedJoinColumns);
-                logger.debug("table created by inner join = {}", joinTable);
-            } else if (Objects.equals(joinTypes.get(i), JoinType.LEFT_JOIN)) {
-                joinTable = leftJoin(leftTable, rightTable, mergedColumnsAndTypes, mergedNotNullColumns,
-                    modifiedJoinColumns);
-                logger.debug("table created by left join = {}", joinTable);
+            final Table joinTable;
+            final JoinType joinType = joinTypes.get(i);
+            switch (joinType) {
+                case INNER_JOIN:
+                    joinTable = innerJoin(leftTable, rightTable, mergedColumnsAndTypes, mergedNotNullColumns,
+                        modifiedJoinColumns);
+                    logger.debug("table created by inner join = {}", joinTable);
+                    break;
+                case LEFT_JOIN:
+                    joinTable = leftJoin(leftTable, rightTable, mergedColumnsAndTypes, mergedNotNullColumns,
+                        modifiedJoinColumns);
+                    logger.debug("table created by left join = {}", joinTable);
+                    break;
+                default:
+                    throw new IllegalStateException("Unsupported join type '" + joinType + "'.");
             }
             modifiedTables.remove(leftTable);
             modifiedTables.remove(rightTable);
@@ -113,44 +116,40 @@ class SelectService {
             columnsAndTypes = columnToTypeMapper.mapColumnsToTypes(statement, table);
         }
 
-        final List<Entry> whereEntries = whereConditionSolver.getWhereEntries(table, statement);
-
         final String tableName = table.getName();
         final String tableFile = table.getTableFile();
         final String schemaFile = table.getSchema().getSchemaFile();
         final Map<String, Boolean> notNullColumns = table.getSchema().getNotNullColumns();
-
+        final List<Entry> whereEntries = whereConditionSolver.getWhereEntries(table, statement);
         final List<Entry> orderedEntries = getEntriesWithSortedColumns(selectedColumns, whereEntries);
         final Schema newSchema = new Schema(schemaFile, columnsAndTypes, notNullColumns);
         final Table newTable = new Table(tableName, tableFile, newSchema, orderedEntries);
-
         return new JfsqlResultSet(newTable);
     }
 
     private ResultSet simpleSelect(final SelectWrapper statement) throws SQLException {
-        final Table activeTable = tableFinder.getTableByName(statement.getTableName());
-        final List<Entry> entries = reader.readEntriesFromTable(activeTable);
-        activeTable.setEntries(entries);
-        return baseSelect(statement, activeTable);
+        final Table table = tableFinder.getTableByName(statement.getTableName());
+        final List<Entry> entries = reader.readEntriesFromTable(table);
+        table.setEntries(entries);
+        return baseSelect(statement, table);
     }
 
-    private Table innerJoin(final Table firstTable, final Table secondTable,
-        final Map<String, String> mergedColumnsAndTypes, final Map<String, Boolean> mergedNotNullColumns,
-        final List<String> joinColumns) {
+    private Table innerJoin(final Table t1, final Table t2, final Map<String, String> mergedColumnsAndTypes,
+        final Map<String, Boolean> mergedNotNullColumns, final List<String> joinColumns) {
         final String t1JoinColumn = joinColumns.get(0);
         final String t2JoinColumn = joinColumns.get(1);
         final List<Entry> commonEntries = new ArrayList<>();
 
         // create a hash table for the first table
         final Map<String, List<Entry>> hashTable = new LinkedHashMap<>();
-        for (final Entry t1e : firstTable.getEntries()) {
+        for (final Entry t1e : t1.getEntries()) {
             final String key = t1e.getColumnsAndValues().get(t1JoinColumn);
             hashTable.computeIfAbsent(key, k -> new ArrayList<>());
             hashTable.get(key).add(t1e);
         }
 
         // probe the second table using the hash table
-        for (final Entry t2e : secondTable.getEntries()) {
+        for (final Entry t2e : t2.getEntries()) {
             final String key = t2e.getColumnsAndValues().get(t2JoinColumn);
             if (hashTable.containsKey(key)) {
                 final List<Entry> matchedEntries = hashTable.get(key);
@@ -166,23 +165,22 @@ class SelectService {
         return new Table("joinTable", null, schema, commonEntries);
     }
 
-    private Table leftJoin(final Table leftTable, final Table rightTable,
-        final Map<String, String> mergedColumnsAndTypes, final Map<String, Boolean> mergedNotNullColumns,
-        final List<String> joinColumns) {
+    private Table leftJoin(final Table t1, final Table t2, final Map<String, String> mergedColumnsAndTypes,
+        final Map<String, Boolean> mergedNotNullColumns, final List<String> joinColumns) {
         final String leftJoinColumn = joinColumns.get(0);
         final String rightJoinColumn = joinColumns.get(1);
         final List<Entry> joinedEntries = new ArrayList<>();
 
         // create a hash table for the right table
         final Map<String, List<Entry>> hashTable = new LinkedHashMap<>();
-        for (final Entry rightEntry : rightTable.getEntries()) {
+        for (final Entry rightEntry : t2.getEntries()) {
             final String key = rightEntry.getColumnsAndValues().get(rightJoinColumn);
             hashTable.computeIfAbsent(key, k -> new ArrayList<>());
             hashTable.get(key).add(rightEntry);
         }
 
         // probe the left table using the hash table
-        for (final Entry leftEntry : leftTable.getEntries()) {
+        for (final Entry leftEntry : t1.getEntries()) {
             final String key = leftEntry.getColumnsAndValues().get(leftJoinColumn);
             if (hashTable.containsKey(key)) {
                 final List<Entry> matchedEntries = hashTable.get(key);
@@ -195,7 +193,7 @@ class SelectService {
             } else {
                 // add a null entry for the right table columns
                 final Map<String, String> joinedColumnsAndValues = new LinkedHashMap<>(leftEntry.getColumnsAndValues());
-                for (final String columnName : rightTable.getSchema().getColumnsAndTypes().keySet()) {
+                for (final String columnName : t2.getSchema().getColumnsAndTypes().keySet()) {
                     joinedColumnsAndValues.put(columnName, null);
                 }
                 joinedEntries.add(new Entry(joinedColumnsAndValues));
@@ -316,15 +314,14 @@ class SelectService {
         return pairedJoinColumns;
     }
 
-    private List<String> modifyJoinColumns(final Table firstTable, final Table secondTable,
-        final List<String> joinColumns) {
-        final Stream<String> firstTableColumns = firstTable.getSchema().getColumnsAndTypes().keySet().stream();
-        if (firstTableColumns.noneMatch(joinColumns.get(0)::equals)) {
+    private List<String> modifyJoinColumns(final Table t1, final Table t2, final List<String> joinColumns) {
+        final Stream<String> t1Columns = t1.getSchema().getColumnsAndTypes().keySet().stream();
+        if (t1Columns.noneMatch(joinColumns.get(0)::equals)) {
             joinColumns.set(0, getColumnName(joinColumns.get(0)));
         }
 
-        final Stream<String> secondTableColumns = secondTable.getSchema().getColumnsAndTypes().keySet().stream();
-        if (secondTableColumns.noneMatch(joinColumns.get(1)::equals)) {
+        final Stream<String> t2Columns = t2.getSchema().getColumnsAndTypes().keySet().stream();
+        if (t2Columns.noneMatch(joinColumns.get(1)::equals)) {
             joinColumns.set(1, getColumnName(joinColumns.get(1)));
         }
 

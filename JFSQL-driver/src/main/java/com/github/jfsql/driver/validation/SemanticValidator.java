@@ -82,9 +82,9 @@ public class SemanticValidator {
         return listOfValueLists.get(0).size() == table.getSchema().getColumnsAndTypes().size();
     }
 
-    public boolean allInsertValuesAreValid(final Table activeTable, final InsertWrapper statement) {
+    public boolean allInsertValuesAreValid(final Table table, final InsertWrapper statement) {
         final List<String> statementColumns = statement.getColumns();
-        final Map<String, String> columnsAndTypes = activeTable.getSchema().getColumnsAndTypes();
+        final Map<String, String> columnsAndTypes = table.getSchema().getColumnsAndTypes();
         final List<String> tableColumns = new ArrayList<>(columnsAndTypes.keySet());
         final List<String> columnsToUse = statementColumns.isEmpty() ? tableColumns : statementColumns;
         for (int i = 0; i < statement.getValues().size(); i++) {
@@ -113,7 +113,7 @@ public class SemanticValidator {
             schema.getColumnsAndTypes().containsKey(tableName + "." + columnName);
     }
 
-    public boolean nullInsertIntoNotNullColumn(final InsertWrapper statement, final Table activeTable) {
+    public boolean nullInsertIntoNotNullColumn(final InsertWrapper statement, final Table table) {
         final List<String> statementColumns = statement.getColumns();
         final List<List<String>> valueLists = statement.getValues();
         for (final List<String> statementValues : valueLists) {
@@ -121,7 +121,7 @@ public class SemanticValidator {
                 final String column = statementColumns.get(i);
                 final String value = statementValues.get(i);
                 if ((value == null || Objects.equals(value, "null")) &&
-                    Boolean.TRUE.equals(activeTable.getSchema().getNotNullColumns().get(column))) {
+                    Boolean.TRUE.equals(table.getSchema().getNotNullColumns().get(column))) {
                     return true;
                 }
             }
