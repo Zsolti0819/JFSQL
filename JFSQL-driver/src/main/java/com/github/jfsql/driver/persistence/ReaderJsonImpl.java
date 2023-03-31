@@ -62,7 +62,7 @@ public class ReaderJsonImpl implements Reader {
                 }
                 entries.add(new Entry(columnsAndValues));
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new SQLException(e);
         }
         return entries;
@@ -114,7 +114,7 @@ public class ReaderJsonImpl implements Reader {
                 .columnsAndTypes(columnsAndTypes)
                 .notNullColumns(notNullColumns)
                 .build();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new SQLException(e);
         }
     }
@@ -143,7 +143,7 @@ public class ReaderJsonImpl implements Reader {
                     .build();
                 tables.add(table);
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new SQLException(e);
         }
         return tables;
@@ -155,7 +155,7 @@ public class ReaderJsonImpl implements Reader {
             final JsonElement json = JsonParser.parseReader(fileReader);
             final JsonObject jsonObject = json.getAsJsonObject();
             return jsonObject.get("blob").getAsString();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new SQLException(e);
         }
     }
@@ -163,7 +163,7 @@ public class ReaderJsonImpl implements Reader {
     @Override
     public Set<File> getFilesInDatabaseFile(final Database database) throws SQLException {
         final String jsonFilePath = String.valueOf(database.getUrl());
-        try (FileReader fileReader = new FileReader(jsonFilePath)) {
+        try (final FileReader fileReader = new FileReader(jsonFilePath)) {
             final JsonElement jsonElement = JsonParser.parseReader(fileReader);
             final Set<File> files = new HashSet<>();
             if (jsonElement.isJsonObject()) {
@@ -178,7 +178,7 @@ public class ReaderJsonImpl implements Reader {
                 }
             }
             return files;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new SQLException(e);
         }
 
