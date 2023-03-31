@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.github.jfsql.driver.TestUtils;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
-import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -57,11 +56,16 @@ class ReaderJsonImplTest {
             new Entry(entry3ColumnsAndTypes),
             new Entry(entry4ColumnsAndTypes)
         );
-        final Schema schema = new Schema(String.valueOf(TestUtils.JSON_SCHEMA_PATH), returnColumnsAndTypes,
-            notNullColumns);
-        table = new Table("myTable", String.valueOf(TestUtils.JSON_TABLE_PATH), schema, returnEntries);
+        table = Table.builder()
+            .name("myTable")
+            .tableFile(String.valueOf(TestUtils.JSON_TABLE_PATH))
+            .schemaFile(String.valueOf(TestUtils.JSON_SCHEMA_PATH))
+            .columnsAndTypes(returnColumnsAndTypes)
+            .notNullColumns(notNullColumns)
+            .entries(returnEntries)
+            .build();
         database = new Database(TestUtils.JSON_DATABASE_PATH, List.of(table));
-        new WriterJsonImpl(true).writeSchema(schema);
+        new WriterJsonImpl(true).writeSchema(table);
         new WriterJsonImpl(true).writeTable(table);
         new WriterJsonImpl(true).writeDatabaseFile(database);
     }
@@ -79,18 +83,29 @@ class ReaderJsonImplTest {
 
     @Test
     void testReader_readSchema() throws SQLException {
-        final Schema schema = reader.readSchema(String.valueOf(TestUtils.JSON_SCHEMA_PATH));
-        assertEquals(table.getSchema(), schema);
+        final Table schema = reader.readSchema(String.valueOf(TestUtils.JSON_SCHEMA_PATH));
+        assertEquals(table.getColumnsAndTypes(), schema.getColumnsAndTypes());
+        assertEquals(table.getNotNullColumns(), schema.getNotNullColumns());
+        assertEquals(table.getSchemaFile(), schema.getSchemaFile());
     }
 
     @Test
     void testReader_readTablesFromDatabaseFile() throws SQLException {
         final List<Table> tables = reader.readTablesFromDatabaseFile(database);
         // Because we don't read the table's entries at this point
-        final Schema schema = new Schema(table.getSchema().getSchemaFile(), table.getSchema().getColumnsAndTypes(),
-            table.getSchema().getNotNullColumns());
-        final Table tableWithoutEntries = new Table(table.getName(), table.getTableFile(), schema,
-            Collections.emptyList());
+        final Table schema = Table.builder()
+            .schemaFile(table.getSchemaFile())
+            .columnsAndTypes(table.getColumnsAndTypes())
+            .notNullColumns(table.getNotNullColumns())
+            .build();
+        final Table tableWithoutEntries = Table.builder()
+            .name(table.getName())
+            .tableFile(table.getTableFile())
+            .schemaFile(schema.getSchemaFile())
+            .columnsAndTypes(schema.getColumnsAndTypes())
+            .notNullColumns(schema.getNotNullColumns())
+            .entries(Collections.emptyList())
+            .build();
         final List<Table> returnTables = List.of(tableWithoutEntries);
         assertEquals(returnTables, tables);
     }

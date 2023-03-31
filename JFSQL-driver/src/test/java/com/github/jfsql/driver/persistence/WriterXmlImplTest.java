@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.github.jfsql.driver.TestUtils;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
-import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -24,7 +23,6 @@ class WriterXmlImplTest {
 
     private static final Writer writer = new WriterXmlImpl(true);
     private static Table table;
-    private static Schema schema;
     private static Database database;
 
     @BeforeAll
@@ -60,9 +58,14 @@ class WriterXmlImplTest {
             new Entry(entry3ColumnsAndTypes),
             new Entry(entry4ColumnsAndTypes)
         );
-        schema = new Schema(String.valueOf(TestUtils.XSD_PATH), returnColumnsAndTypes,
-            notNullColumns);
-        table = new Table("myTable", String.valueOf(TestUtils.XML_TABLE_PATH), schema, returnEntries);
+        table = Table.builder()
+            .name("myTable")
+            .tableFile(String.valueOf(TestUtils.XML_TABLE_PATH))
+            .schemaFile(String.valueOf(TestUtils.XSD_PATH))
+            .columnsAndTypes(returnColumnsAndTypes)
+            .notNullColumns(notNullColumns)
+            .entries(returnEntries)
+            .build();
         database = new Database(TestUtils.XML_DATABASE_PATH, List.of(table));
     }
 
@@ -73,11 +76,10 @@ class WriterXmlImplTest {
 
     @Test
     void testWriter_writeSchema() throws IOException {
-        writer.writeSchema(schema);
+        writer.writeSchema(table);
         final String realFileContent = FileUtils.readFileToString(TestUtils.XSD_PATH.toFile(),
             StandardCharsets.UTF_8);
-        final String expectedFileContent = "" +
-            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
+        final String expectedFileContent = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\">\n" +
             "    <xs:element name=\"myTable\">\n" +
             "        <xs:complexType>\n" +
@@ -104,8 +106,7 @@ class WriterXmlImplTest {
         writer.writeTable(table);
         final String realFileContent = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
-        final String expectedFileContent = "" +
-            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
+        final String expectedFileContent = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<myTable>\n" +
             "    <Entry>\n" +
             "        <id>1</id>\n" +

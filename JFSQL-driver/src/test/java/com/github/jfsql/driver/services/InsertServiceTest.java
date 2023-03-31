@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 
 import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.dto.Entry;
-import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.driver.validation.SemanticValidator;
@@ -32,8 +31,6 @@ class InsertServiceTest {
     @Mock
     private Table table;
     @Mock
-    private Schema schema;
-    @Mock
     private List<Entry> entries;
     @Mock
     private InsertWrapper statement;
@@ -48,7 +45,6 @@ class InsertServiceTest {
         when(semanticValidator.allColumnsExist(table, statement)).thenReturn(true);
         when(semanticValidator.allInsertValuesAreValid(table, statement)).thenReturn(true);
         when(table.getEntries()).thenReturn(entries);
-        when(table.getSchema()).thenReturn(schema);
 
         insertService.insertIntoTable(statement);
 

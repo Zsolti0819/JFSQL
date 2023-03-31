@@ -2,7 +2,6 @@ package com.github.jfsql.driver.persistence;
 
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
-import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.util.DatatypeConverter;
 import com.github.jfsql.driver.validation.JsonSchemaValidator;
@@ -70,7 +69,7 @@ public class WriterJsonImpl extends Writer {
             fileOutputStream.write(jsonString.getBytes());
         }
         if (useSchemaValidation) {
-            final String schemaFile = table.getSchema().getSchemaFile();
+            final String schemaFile = table.getSchemaFile();
             final boolean isValid = JSON_SCHEMA_VALIDATOR.schemaIsValid(schemaFile, tableFile);
             if (!isValid) {
                 throw new SchemaValidationException("'" + tableFile + "' is not valid against '" + schemaFile + "'");
@@ -81,7 +80,7 @@ public class WriterJsonImpl extends Writer {
     private void checkTypeAndValueThenAddProperty(final Table table, final Entry entry, final String column,
         final JsonObject entryObject) throws IOException {
         final String value = entry.getColumnsAndValues().get(column);
-        final String type = table.getSchema().getColumnsAndTypes().get(column);
+        final String type = table.getColumnsAndTypes().get(column);
         if (value == null || Objects.equals(value, "null")) {
             entryObject.add(column, null);
         } else {
@@ -105,7 +104,7 @@ public class WriterJsonImpl extends Writer {
     }
 
     @Override
-    public void writeSchema(final Schema schema) throws IOException {
+    public void writeSchema(final Table schema) throws IOException {
         logger.trace("table = {}", schema);
         final String schemaFile = schema.getSchemaFile();
         try (final FileOutputStream fileOutputStream = new FileOutputStream(schemaFile);
@@ -184,7 +183,7 @@ public class WriterJsonImpl extends Writer {
                 final JsonObject tableJsonObject = new JsonObject();
                 tableJsonObject.addProperty("name", tables.get(i).getName());
                 tableJsonObject.addProperty("pathToTable", tables.get(i).getTableFile());
-                tableJsonObject.addProperty("pathToSchema", tables.get(i).getSchema().getSchemaFile());
+                tableJsonObject.addProperty("pathToSchema", tables.get(i).getSchemaFile());
                 tablesArray[i] = tableJsonObject;
             }
             root.add("Table", gson.toJsonTree(tablesArray));

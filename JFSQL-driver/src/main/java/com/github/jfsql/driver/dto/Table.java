@@ -1,24 +1,28 @@
 package com.github.jfsql.driver.dto;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
-import lombok.AllArgsConstructor;
+import java.util.Map;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NonNull;
 import lombok.ToString;
 
 @Data
-@AllArgsConstructor
+@Builder
 public class Table {
 
     private String name;
     private String tableFile;
-    @NonNull
-    private Schema schema;
-
+    private String schemaFile;
+    @Builder.Default
+    private Map<String, String> columnsAndTypes = new LinkedHashMap<>();
+    @Builder.Default
+    private Map<String, Boolean> notNullColumns = new LinkedHashMap<>();
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @NonNull
-    private List<Entry> entries;
+    @Builder.Default
+    private List<Entry> entries = new ArrayList<>();
 
 }

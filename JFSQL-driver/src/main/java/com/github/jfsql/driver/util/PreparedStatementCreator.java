@@ -38,7 +38,7 @@ public class PreparedStatementCreator {
         final List<List<String>> listOfValueLists = new ArrayList<>();
         if (statement.getColumns().isEmpty()) {
             final Table table = tableFinder.getTableByName(statement.getTableName());
-            columns = new ArrayList<>(table.getSchema().getColumnsAndTypes().keySet());
+            columns = new ArrayList<>(table.getColumnsAndTypes().keySet());
         } else {
             columns = statement.getColumns();
         }

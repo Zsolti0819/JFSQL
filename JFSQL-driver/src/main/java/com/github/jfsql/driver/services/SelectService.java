@@ -2,7 +2,6 @@ package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.core.JfsqlResultSet;
 import com.github.jfsql.driver.dto.Entry;
-import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.util.ColumnToTypeMapper;
@@ -70,14 +69,12 @@ class SelectService {
             final List<String> modifiedJoinColumns = modifyJoinColumns(leftTable, rightTable, pairedJoinColumns);
             logger.debug("modifiedJoinColumns = {}", modifiedJoinColumns);
 
-            final Map<String, String> mergedColumnsAndTypes = new LinkedHashMap<>(
-                leftTable.getSchema().getColumnsAndTypes());
-            mergedColumnsAndTypes.putAll(rightTable.getSchema().getColumnsAndTypes());
+            final Map<String, String> mergedColumnsAndTypes = new LinkedHashMap<>(leftTable.getColumnsAndTypes());
+            mergedColumnsAndTypes.putAll(rightTable.getColumnsAndTypes());
             logger.debug("mergedColumnsAndTypes = {}", mergedColumnsAndTypes);
 
-            final Map<String, Boolean> mergedNotNullColumns = new LinkedHashMap<>(
-                leftTable.getSchema().getNotNullColumns());
-            mergedNotNullColumns.putAll(rightTable.getSchema().getNotNullColumns());
+            final Map<String, Boolean> mergedNotNullColumns = new LinkedHashMap<>(leftTable.getNotNullColumns());
+            mergedNotNullColumns.putAll(rightTable.getNotNullColumns());
             logger.debug("mergedNotNullColumns = {}", mergedNotNullColumns);
 
             final Table joinTable;
@@ -110,20 +107,26 @@ class SelectService {
 
         List<String> selectedColumns = statement.getColumns();
         if (selectedColumns.size() == 1 && Objects.equals(selectedColumns.get(0), "*")) {
-            selectedColumns = new ArrayList<>(table.getSchema().getColumnsAndTypes().keySet());
-            columnsAndTypes = table.getSchema().getColumnsAndTypes();
+            selectedColumns = new ArrayList<>(table.getColumnsAndTypes().keySet());
+            columnsAndTypes = table.getColumnsAndTypes();
         } else {
             columnsAndTypes = columnToTypeMapper.mapColumnsToTypes(statement, table);
         }
 
         final String tableName = table.getName();
         final String tableFile = table.getTableFile();
-        final String schemaFile = table.getSchema().getSchemaFile();
-        final Map<String, Boolean> notNullColumns = table.getSchema().getNotNullColumns();
+        final String schemaFile = table.getSchemaFile();
+        final Map<String, Boolean> notNullColumns = table.getNotNullColumns();
         final List<Entry> whereEntries = whereConditionSolver.getWhereEntries(table, statement);
         final List<Entry> orderedEntries = getEntriesWithSortedColumns(selectedColumns, whereEntries);
-        final Schema newSchema = new Schema(schemaFile, columnsAndTypes, notNullColumns);
-        final Table newTable = new Table(tableName, tableFile, newSchema, orderedEntries);
+        final Table newTable = Table.builder()
+            .name(tableName)
+            .tableFile(tableFile)
+            .schemaFile(schemaFile)
+            .columnsAndTypes(columnsAndTypes)
+            .notNullColumns(notNullColumns)
+            .entries(orderedEntries)
+            .build();
         return new JfsqlResultSet(newTable);
     }
 
@@ -161,8 +164,12 @@ class SelectService {
             }
         }
 
-        final Schema schema = new Schema(null, mergedColumnsAndTypes, mergedNotNullColumns);
-        return new Table("joinTable", null, schema, commonEntries);
+        return Table.builder()
+            .name("joinTable")
+            .columnsAndTypes(mergedColumnsAndTypes)
+            .notNullColumns(mergedNotNullColumns)
+            .entries(commonEntries)
+            .build();
     }
 
     private Table leftJoin(final Table t1, final Table t2, final Map<String, String> mergedColumnsAndTypes,
@@ -193,15 +200,19 @@ class SelectService {
             } else {
                 // add a null entry for the right table columns
                 final Map<String, String> joinedColumnsAndValues = new LinkedHashMap<>(leftEntry.getColumnsAndValues());
-                for (final String columnName : t2.getSchema().getColumnsAndTypes().keySet()) {
+                for (final String columnName : t2.getColumnsAndTypes().keySet()) {
                     joinedColumnsAndValues.put(columnName, null);
                 }
                 joinedEntries.add(new Entry(joinedColumnsAndValues));
             }
         }
 
-        final Schema schema = new Schema(null, mergedColumnsAndTypes, mergedNotNullColumns);
-        return new Table("leftJoinTable", null, schema, joinedEntries);
+        return Table.builder()
+            .name("leftJoinTable")
+            .columnsAndTypes(mergedColumnsAndTypes)
+            .notNullColumns(mergedNotNullColumns)
+            .entries(joinedEntries)
+            .build();
     }
 
     private List<Table> extractTables(final SelectWrapper statement) throws SQLException {
@@ -255,7 +266,7 @@ class SelectService {
             final Map<String, Boolean> modifiedNotNullColumns = new LinkedHashMap<>();
 
             // Modify column names in columnsAndTypes map
-            for (final Map.Entry<String, String> entry : table.getSchema().getColumnsAndTypes().entrySet()) {
+            for (final Map.Entry<String, String> entry : table.getColumnsAndTypes().entrySet()) {
                 final String column = entry.getKey();
                 final Set<String> tableNames = commonColumns.get(column);
 
@@ -263,19 +274,23 @@ class SelectService {
                     // Column found in multiple tables
                     final String modifiedColumnName = table.getName() + "." + column;
                     modifiedColumnsAndTypes.put(modifiedColumnName, entry.getValue());
-                    modifiedNotNullColumns.put(modifiedColumnName, table.getSchema().getNotNullColumns().get(column));
+                    modifiedNotNullColumns.put(modifiedColumnName, table.getNotNullColumns().get(column));
                     tableNameMap.put(column, table.getName());
                 } else {
                     // Column unique to this table
                     modifiedColumnsAndTypes.put(column, entry.getValue());
-                    modifiedNotNullColumns.put(column, table.getSchema().getNotNullColumns().get(column));
+                    modifiedNotNullColumns.put(column, table.getNotNullColumns().get(column));
                 }
             }
 
             final List<Entry> modifiedEntries = createModifiedEntries(tableNameMap, table);
 
-            final Schema schema = new Schema(null, modifiedColumnsAndTypes, modifiedNotNullColumns);
-            final Table modifiedTable = new Table(table.getName(), null, schema, modifiedEntries);
+            final Table modifiedTable = Table.builder()
+                .name(table.getName())
+                .columnsAndTypes(modifiedColumnsAndTypes)
+                .notNullColumns(modifiedNotNullColumns)
+                .entries(modifiedEntries)
+                .build();
             modifiedTables.add(modifiedTable);
         }
         return modifiedTables;
@@ -315,12 +330,12 @@ class SelectService {
     }
 
     private List<String> modifyJoinColumns(final Table t1, final Table t2, final List<String> joinColumns) {
-        final Stream<String> t1Columns = t1.getSchema().getColumnsAndTypes().keySet().stream();
+        final Stream<String> t1Columns = t1.getColumnsAndTypes().keySet().stream();
         if (t1Columns.noneMatch(joinColumns.get(0)::equals)) {
             joinColumns.set(0, getColumnName(joinColumns.get(0)));
         }
 
-        final Stream<String> t2Columns = t2.getSchema().getColumnsAndTypes().keySet().stream();
+        final Stream<String> t2Columns = t2.getColumnsAndTypes().keySet().stream();
         if (t2Columns.noneMatch(joinColumns.get(1)::equals)) {
             joinColumns.set(1, getColumnName(joinColumns.get(1)));
         }
@@ -333,7 +348,7 @@ class SelectService {
         // Find common columns and create table name mapping
         for (final Table table : tables) {
             final String tableName = table.getName();
-            for (final String column : table.getSchema().getColumnsAndTypes().keySet()) {
+            for (final String column : table.getColumnsAndTypes().keySet()) {
                 if (commonColumns.containsKey(column)) {
                     // Column already found in another table
                     commonColumns.get(column).add(tableName);

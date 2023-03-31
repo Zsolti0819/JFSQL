@@ -2,7 +2,6 @@ package com.github.jfsql.driver.persistence;
 
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
-import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.util.DatatypeConverter;
 import java.io.File;
@@ -64,7 +63,7 @@ public class ReaderXmlImpl implements Reader {
             document.getDocumentElement().normalize();
             final NodeList entryList = document.getElementsByTagName("Entry");
 
-            final Map<String, String> columnsAndTypes = table.getSchema().getColumnsAndTypes();
+            final Map<String, String> columnsAndTypes = table.getColumnsAndTypes();
             for (int i = 0; i < entryList.getLength(); i++) {
                 final Element entry = (Element) entryList.item(i);
                 final LinkedHashMap<String, String> columnsAndValues = new LinkedHashMap<>();
@@ -84,7 +83,7 @@ public class ReaderXmlImpl implements Reader {
         if (entry.getElementsByTagName(column).item(0) == null) {
             return null;
         }
-        if (Objects.equals(table.getSchema().getColumnsAndTypes().get(column), "BLOB")) {
+        if (Objects.equals(table.getColumnsAndTypes().get(column), "BLOB")) {
             return readBlob(entry.getElementsByTagName(column).item(0).getTextContent());
         } else {
             return entry.getElementsByTagName(column).item(0).getTextContent();
@@ -92,7 +91,7 @@ public class ReaderXmlImpl implements Reader {
     }
 
     @Override
-    public Schema readSchema(final String pathToSchema) throws SQLException {
+    public Table readSchema(final String pathToSchema) throws SQLException {
         final Map<String, String> columnsAndTypes = new LinkedHashMap<>();
         final Map<String, Boolean> notNullColumns = new LinkedHashMap<>();
         try {
@@ -125,7 +124,11 @@ public class ReaderXmlImpl implements Reader {
                     notNullColumns.put(columnNames[i], false);
                 }
             }
-            return new Schema(pathToSchema, columnsAndTypes, notNullColumns);
+            return Table.builder()
+                .schemaFile(pathToSchema)
+                .columnsAndTypes(columnsAndTypes)
+                .notNullColumns(notNullColumns)
+                .build();
         } catch (final ParserConfigurationException | SAXException | IOException e) {
             throw new SQLException(e);
         }
@@ -152,8 +155,14 @@ public class ReaderXmlImpl implements Reader {
                     XPathConstants.STRING);
                 final String xsdPath = (String) xpath.evaluate("pathToSchema/text()", nodeList.item(i),
                     XPathConstants.STRING);
-                final Schema schema = readSchema(xsdPath);
-                final Table table = new Table(tableName, xmlPath, schema, new ArrayList<>());
+                final Table schema = readSchema(xsdPath);
+                final Table table = Table.builder()
+                    .name(tableName)
+                    .tableFile(xmlPath)
+                    .schemaFile(schema.getSchemaFile())
+                    .columnsAndTypes(schema.getColumnsAndTypes())
+                    .notNullColumns(schema.getNotNullColumns())
+                    .build();
                 tables.add(table);
             }
         } catch (final ParserConfigurationException | SAXException | XPathExpressionException | IOException e) {

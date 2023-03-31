@@ -3,13 +3,11 @@ package com.github.jfsql.driver.services;
 import com.github.jfsql.driver.db.DatabaseManager;
 import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.dto.Database;
-import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.util.FileNameCreator;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.CreateTableWrapper;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,10 +62,15 @@ public class CreateTableService {
         final String tableFile = fileNameCreator.createTableFileName(tableName, database);
         final String schemaFile = fileNameCreator.createSchemaFileName(tableName, database);
 
-        final Schema schema = new Schema(schemaFile, columnsAndTypes, notNulLColumns);
-        final Table table = new Table(tableName, tableFile, schema, new ArrayList<>());
+        final Table table = Table.builder()
+            .name(tableName)
+            .tableFile(tableFile)
+            .schemaFile(schemaFile)
+            .columnsAndTypes(columnsAndTypes)
+            .notNullColumns(notNulLColumns)
+            .build();
         database.getTables().add(table);
-        transactionManager.executeDDLOperation(database, table, table.getSchema());
+        transactionManager.executeDDLOperation(database, table);
         return 0;
     }
 }

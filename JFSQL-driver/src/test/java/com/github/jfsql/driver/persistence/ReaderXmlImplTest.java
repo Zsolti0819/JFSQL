@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.github.jfsql.driver.TestUtils;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
-import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -57,10 +56,16 @@ class ReaderXmlImplTest {
             new Entry(entry3ColumnsAndTypes),
             new Entry(entry4ColumnsAndTypes)
         );
-        final Schema schema = new Schema(String.valueOf(TestUtils.XSD_PATH), returnColumnsAndTypes, notNullColumns);
-        table = new Table("myTable", String.valueOf(TestUtils.XML_TABLE_PATH), schema, returnEntries);
+        table = Table.builder()
+            .name("myTable")
+            .tableFile(String.valueOf(TestUtils.XML_TABLE_PATH))
+            .schemaFile(String.valueOf(TestUtils.XSD_PATH))
+            .columnsAndTypes(returnColumnsAndTypes)
+            .notNullColumns(notNullColumns)
+            .entries(returnEntries)
+            .build();
         database = new Database(TestUtils.XML_DATABASE_PATH, List.of(table));
-        new WriterJsonImpl(true).writeSchema(schema);
+        new WriterJsonImpl(true).writeSchema(table);
         new WriterJsonImpl(true).writeTable(table);
         new WriterJsonImpl(true).writeDatabaseFile(database);
     }
@@ -78,18 +83,24 @@ class ReaderXmlImplTest {
 
     @Test
     void testReader_readSchema() throws SQLException {
-        final Schema schema = reader.readSchema(String.valueOf(TestUtils.XSD_PATH));
-        assertEquals(table.getSchema(), schema);
+        final Table schema = reader.readSchema(String.valueOf(TestUtils.XSD_PATH));
+        assertEquals(table.getColumnsAndTypes(), schema.getColumnsAndTypes());
+        assertEquals(table.getNotNullColumns(), schema.getNotNullColumns());
+        assertEquals(table.getSchemaFile(), schema.getSchemaFile());
     }
 
     @Test
     void testReader_readTablesFromDatabaseFile() throws SQLException {
         final List<Table> tables = reader.readTablesFromDatabaseFile(database);
         // Because we don't read the table's entries at this point
-        final Schema schema = new Schema(table.getSchema().getSchemaFile(), table.getSchema().getColumnsAndTypes(),
-            table.getSchema().getNotNullColumns());
-        final Table tableWithoutEntries = new Table(table.getName(), table.getTableFile(), schema,
-            Collections.emptyList());
+        final Table tableWithoutEntries = Table.builder()
+            .name(table.getName())
+            .tableFile(table.getTableFile())
+            .schemaFile(table.getSchemaFile())
+            .columnsAndTypes(table.getColumnsAndTypes())
+            .notNullColumns(table.getNotNullColumns())
+            .entries(Collections.emptyList())
+            .build();
         final List<Table> returnTables = List.of(tableWithoutEntries);
         assertEquals(returnTables, tables);
     }

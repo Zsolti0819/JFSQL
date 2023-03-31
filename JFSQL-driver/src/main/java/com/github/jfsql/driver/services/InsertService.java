@@ -67,14 +67,14 @@ public class InsertService {
     }
 
     private List<Entry> getEntriesToInsert(final InsertWrapper insertStatement, final Table table) {
-        final List<String> tableColumns = new ArrayList<>(table.getSchema().getColumnsAndTypes().keySet());
+        final List<String> tableColumns = new ArrayList<>(table.getColumnsAndTypes().keySet());
         final List<String> statementColumns = insertStatement.getColumns();
         final List<Entry> insertEntries = new ArrayList<>();
         for (int i = 0; i < insertStatement.getValues().size(); i++) {
             final Map<String, String> columnsAndValues = new LinkedHashMap<>();
             final int finalI = i;
             if (insertStatement.getColumns().isEmpty()) {
-                IntStream.range(0, table.getSchema().getColumnsAndTypes().size())
+                IntStream.range(0, table.getColumnsAndTypes().size())
                     .forEach(j -> columnsAndValues.put(tableColumns.get(j),
                         insertStatement.getValues().get(finalI).get(j)));
             } else {

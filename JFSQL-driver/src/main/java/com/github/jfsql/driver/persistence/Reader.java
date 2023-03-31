@@ -2,7 +2,6 @@ package com.github.jfsql.driver.persistence;
 
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
-import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import java.io.File;
 import java.sql.SQLException;
@@ -17,7 +16,7 @@ public interface Reader {
 
     List<Entry> readEntriesFromTable(final Table table) throws SQLException;
 
-    Schema readSchema(final String pathToSchema) throws SQLException;
+    Table readSchema(final String pathToSchema) throws SQLException;
 
     List<Table> readTablesFromDatabaseFile(final Database database) throws SQLException;
 

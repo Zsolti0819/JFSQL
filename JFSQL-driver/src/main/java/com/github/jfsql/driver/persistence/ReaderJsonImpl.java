@@ -2,7 +2,6 @@ package com.github.jfsql.driver.persistence;
 
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
-import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.util.DatatypeConverter;
 import com.google.gson.JsonArray;
@@ -53,7 +52,7 @@ public class ReaderJsonImpl implements Reader {
             final JsonObject jsonObject = json.getAsJsonObject();
             final JsonArray entryList = jsonObject.getAsJsonArray("Entry");
 
-            final Map<String, String> columnsAndTypes = table.getSchema().getColumnsAndTypes();
+            final Map<String, String> columnsAndTypes = table.getColumnsAndTypes();
             for (int i = 0; i < entryList.size(); i++) {
                 final JsonObject entryObject = entryList.get(i).getAsJsonObject();
                 final LinkedHashMap<String, String> columnsAndValues = new LinkedHashMap<>();
@@ -73,7 +72,7 @@ public class ReaderJsonImpl implements Reader {
         if (entryObject.get(column).isJsonNull()) {
             return null;
         } else {
-            if (Objects.equals(table.getSchema().getColumnsAndTypes().get(column), "BLOB")) {
+            if (Objects.equals(table.getColumnsAndTypes().get(column), "BLOB")) {
                 return readBlob(entryObject.get(column).getAsString());
             } else {
                 return entryObject.get(column).getAsString();
@@ -82,7 +81,7 @@ public class ReaderJsonImpl implements Reader {
     }
 
     @Override
-    public Schema readSchema(final String pathToSchema) throws SQLException {
+    public Table readSchema(final String pathToSchema) throws SQLException {
         final Map<String, String> columnsAndTypes = new LinkedHashMap<>();
         final Map<String, Boolean> notNullColumns = new LinkedHashMap<>();
         try (final FileReader fileReader = new FileReader(pathToSchema)) {
@@ -110,7 +109,11 @@ public class ReaderJsonImpl implements Reader {
                     notNullColumns.put(columnName, true);
                 }
             }
-            return new Schema(pathToSchema, columnsAndTypes, notNullColumns);
+            return Table.builder()
+                .schemaFile(pathToSchema)
+                .columnsAndTypes(columnsAndTypes)
+                .notNullColumns(notNullColumns)
+                .build();
         } catch (IOException e) {
             throw new SQLException(e);
         }
@@ -130,8 +133,14 @@ public class ReaderJsonImpl implements Reader {
                 final String tableName = jsonTableObject.get("name").getAsString();
                 final String tablePath = jsonTableObject.get("pathToTable").getAsString();
                 final String schemaPath = jsonTableObject.get("pathToSchema").getAsString();
-                final Schema schema = readSchema(schemaPath);
-                final Table table = new Table(tableName, tablePath, schema, new ArrayList<>());
+                final Table schema = readSchema(schemaPath);
+                final Table table = Table.builder()
+                    .name(tableName)
+                    .tableFile(tablePath)
+                    .schemaFile(schema.getSchemaFile())
+                    .columnsAndTypes(schema.getColumnsAndTypes())
+                    .notNullColumns(schema.getNotNullColumns())
+                    .build();
                 tables.add(table);
             }
         } catch (IOException e) {

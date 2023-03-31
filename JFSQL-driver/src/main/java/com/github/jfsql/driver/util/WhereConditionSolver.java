@@ -1,7 +1,6 @@
 package com.github.jfsql.driver.util;
 
 import com.github.jfsql.driver.dto.Entry;
-import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.parser.dto.StatementWithWhere;
 import java.util.ArrayList;
@@ -12,7 +11,6 @@ public class WhereConditionSolver {
 
     public List<Entry> getWhereEntries(final Table table, final StatementWithWhere statement) {
         final List<Entry> entries = table.getEntries();
-        final Schema schema = table.getSchema();
         final List<String> whereColumns = statement.getWhereColumns();
         final List<String> whereValues = statement.getWhereValues();
         final List<String> symbols = statement.getSymbols();
@@ -25,7 +23,7 @@ public class WhereConditionSolver {
         List<Entry> whereEntries = entries;
 
         if (binaryOperators.isEmpty()) {
-            whereEntries = getEntries(entries, schema, whereColumns.get(0), whereValues.get(0), symbols.get(0));
+            whereEntries = getEntries(entries, table, whereColumns.get(0), whereValues.get(0), symbols.get(0));
             return whereEntries;
         }
 
@@ -34,12 +32,12 @@ public class WhereConditionSolver {
             final String whereValue = whereValues.get(i);
             final String symbol = symbols.get(i);
             if (i == 0) {
-                whereEntries = getEntries(whereEntries, schema, whereColumn, whereValue, symbol);
+                whereEntries = getEntries(whereEntries, table, whereColumn, whereValue, symbol);
             } else {
                 if (Objects.equals(binaryOperators.get(i - 1), "AND")) {
-                    whereEntries = getEntries(whereEntries, schema, whereColumn, whereValue, symbol);
+                    whereEntries = getEntries(whereEntries, table, whereColumn, whereValue, symbol);
                 } else if (Objects.equals(binaryOperators.get(i - 1), "OR")) {
-                    whereEntries.addAll(getEntries(entries, schema, whereColumn, whereValue, symbol));
+                    whereEntries.addAll(getEntries(entries, table, whereColumn, whereValue, symbol));
                 }
             }
         }
@@ -47,16 +45,16 @@ public class WhereConditionSolver {
         return whereEntries;
     }
 
-    private List<Entry> getEntries(final List<Entry> entries, final Schema schema, final String whereColumn,
+    private List<Entry> getEntries(final List<Entry> entries, final Table table, final String whereColumn,
         final String whereValue, final String symbol) {
         final List<Entry> entriesFulfillingConditions = new ArrayList<>();
         for (final Entry entry : entries) {
             if (entry.getColumnsAndValues().containsKey(whereColumn)) {
                 final String value = entry.getColumnsAndValues().get(whereColumn);
                 if (Objects.equals(symbol, "LIKE") && likeCompare(value, whereValue,
-                    schema.getColumnsAndTypes().get(whereColumn)) ||
+                    table.getColumnsAndTypes().get(whereColumn)) ||
                     !Objects.equals(symbol, "LIKE") && compareValues(value, whereValue, symbol,
-                        schema.getColumnsAndTypes().get(whereColumn))) {
+                        table.getColumnsAndTypes().get(whereColumn))) {
                     entriesFulfillingConditions.add(entry);
                 }
             }

@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.github.jfsql.driver.TestUtils;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
-import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -23,7 +22,6 @@ class WriterJsonImplTest {
 
     private static final Writer writer = new WriterJsonImpl(true);
     private static Table table;
-    private static Schema schema;
     private static Database database;
 
     @BeforeAll
@@ -59,9 +57,14 @@ class WriterJsonImplTest {
             new Entry(entry3ColumnsAndTypes),
             new Entry(entry4ColumnsAndTypes)
         );
-        schema = new Schema(String.valueOf(TestUtils.JSON_SCHEMA_PATH), returnColumnsAndTypes,
-            notNullColumns);
-        table = new Table("myTable", String.valueOf(TestUtils.JSON_TABLE_PATH), schema, returnEntries);
+        table = Table.builder()
+            .name("myTable")
+            .tableFile(String.valueOf(TestUtils.JSON_TABLE_PATH))
+            .schemaFile(String.valueOf(TestUtils.JSON_SCHEMA_PATH))
+            .columnsAndTypes(returnColumnsAndTypes)
+            .notNullColumns(notNullColumns)
+            .entries(returnEntries)
+            .build();
         database = new Database(TestUtils.JSON_DATABASE_PATH, List.of(table));
     }
 
@@ -72,11 +75,10 @@ class WriterJsonImplTest {
 
     @Test
     void testWriter_writeSchema() throws IOException {
-        writer.writeSchema(schema);
+        writer.writeSchema(table);
         final String realFileContent = FileUtils.readFileToString(TestUtils.JSON_SCHEMA_PATH.toFile(),
             StandardCharsets.UTF_8);
-        final String expectedContent = "" +
-            "{\n" +
+        final String expectedContent = "{\n" +
             "  \"$schema\": \"http://json-schema.org/draft-06/schema#\",\n" +
             "  \"type\": \"object\",\n" +
             "  \"required\": [\n" +
@@ -121,8 +123,7 @@ class WriterJsonImplTest {
         writer.writeTable(table);
         final String realFileContent = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
-        final String expectedContent = "" +
-            "{\n" +
+        final String expectedContent = "{\n" +
             "  \"Entry\": [\n" +
             "    {\n" +
             "      \"id\": 1,\n" +

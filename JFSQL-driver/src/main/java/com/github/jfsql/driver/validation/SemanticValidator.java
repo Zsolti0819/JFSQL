@@ -1,7 +1,6 @@
 package com.github.jfsql.driver.validation;
 
 import com.github.jfsql.driver.dto.Database;
-import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.parser.dto.CreateTableWrapper;
 import com.github.jfsql.parser.dto.InsertWrapper;
@@ -33,7 +32,7 @@ public class SemanticValidator {
         for (final Table table : tables) {
             if (Objects.equals(table.getName(), tableName)) {
                 final File tableFile = new File(table.getTableFile());
-                final File schemaFile = new File(table.getSchema().getSchemaFile());
+                final File schemaFile = new File(table.getSchemaFile());
                 if (tableFile.exists() && schemaFile.exists()) {
                     return true;
                 }
@@ -44,12 +43,12 @@ public class SemanticValidator {
     }
 
     public boolean allColumnsExist(final Table table, final StatementWithColumns statement) {
-        final Map<String, String> columnsAndTypes = table.getSchema().getColumnsAndTypes();
+        final Map<String, String> columnsAndTypes = table.getColumnsAndTypes();
         return new HashSet<>(columnsAndTypes.keySet()).containsAll(statement.getColumns());
     }
 
     public boolean allWhereColumnsExist(final Table table, final StatementWithWhere statement) {
-        final Map<String, String> columnsAndTypes = table.getSchema().getColumnsAndTypes();
+        final Map<String, String> columnsAndTypes = table.getColumnsAndTypes();
         return new HashSet<>(columnsAndTypes.keySet()).containsAll(statement.getWhereColumns());
     }
 
@@ -79,12 +78,12 @@ public class SemanticValidator {
 
     public boolean valueCountIsEqualToTableColumnCount(final Table table, final InsertWrapper statement) {
         final List<List<String>> listOfValueLists = statement.getValues();
-        return listOfValueLists.get(0).size() == table.getSchema().getColumnsAndTypes().size();
+        return listOfValueLists.get(0).size() == table.getColumnsAndTypes().size();
     }
 
     public boolean allInsertValuesAreValid(final Table table, final InsertWrapper statement) {
         final List<String> statementColumns = statement.getColumns();
-        final Map<String, String> columnsAndTypes = table.getSchema().getColumnsAndTypes();
+        final Map<String, String> columnsAndTypes = table.getColumnsAndTypes();
         final List<String> tableColumns = new ArrayList<>(columnsAndTypes.keySet());
         final List<String> columnsToUse = statementColumns.isEmpty() ? tableColumns : statementColumns;
         for (int i = 0; i < statement.getValues().size(); i++) {
@@ -108,9 +107,8 @@ public class SemanticValidator {
 
     public boolean columnIsPresentInTable(final Table table, final String columnName) {
         final String tableName = table.getName();
-        final Schema schema = table.getSchema();
-        return schema.getColumnsAndTypes().containsKey(columnName) ||
-            schema.getColumnsAndTypes().containsKey(tableName + "." + columnName);
+        return table.getColumnsAndTypes().containsKey(columnName) ||
+            table.getColumnsAndTypes().containsKey(tableName + "." + columnName);
     }
 
     public boolean nullInsertIntoNotNullColumn(final InsertWrapper statement, final Table table) {
@@ -121,7 +119,7 @@ public class SemanticValidator {
                 final String column = statementColumns.get(i);
                 final String value = statementValues.get(i);
                 if ((value == null || Objects.equals(value, "null")) &&
-                    Boolean.TRUE.equals(table.getSchema().getNotNullColumns().get(column))) {
+                    Boolean.TRUE.equals(table.getNotNullColumns().get(column))) {
                     return true;
                 }
             }

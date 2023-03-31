@@ -1,7 +1,6 @@
 package com.github.jfsql.driver.db;
 
 import com.github.jfsql.driver.dto.Database;
-import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.PessimisticLockException;
 import com.github.jfsql.driver.persistence.Reader;
@@ -22,13 +21,13 @@ import org.apache.logging.log4j.Logger;
 @Data
 public abstract class TransactionManager {
 
-    private static final Logger logger = LogManager.getLogger(TransactionManager.class);
     static final Object lock = new Object();
+    private static final Logger logger = LogManager.getLogger(TransactionManager.class);
     private static final Map<String, Long> FILE_TO_THREAD_ID_MAP = new HashMap<>();
     final Reader reader;
     final Writer writer;
     final Set<Table> uncommittedTables;
-    final Set<Schema> uncommittedSchemas;
+    final Set<Table> uncommittedSchemas;
     final Set<Database> uncommittedDatabases;
     final DatabaseManager databaseManager;
     boolean autoCommit;
@@ -60,8 +59,8 @@ public abstract class TransactionManager {
             for (final Database db : uncommittedDatabases) {
                 writer.writeDatabaseFile(db);
             }
-            for (final Schema schema : uncommittedSchemas) {
-                writer.writeSchema(schema);
+            for (final Table table : uncommittedSchemas) {
+                writer.writeSchema(table);
             }
             for (final Table table : uncommittedTables) {
                 writer.writeTable(table);
@@ -88,20 +87,20 @@ public abstract class TransactionManager {
         }
     }
 
-    public void executeDDLOperation(final Database database, final Table table, final Schema schema)
+    public void executeDDLOperation(final Database database, final Table table)
         throws SQLException {
         synchronized (lock) {
             if (!autoCommit) {
                 addDatabaseToUncommittedObjects(database);
-                addSchemaToUncommittedObjects(schema);
+                addSchemaToUncommittedObjects(table);
                 addTableToUncommittedObjects(table);
             } else {
                 try {
                     writer.writeDatabaseFile(database);
-                    writer.writeSchema(schema);
+                    writer.writeSchema(table);
                     writer.writeTable(table);
                     commit(String.valueOf(database.getUrl().getFileName()),
-                        String.valueOf(Path.of(schema.getSchemaFile()).getFileName()),
+                        String.valueOf(Path.of(table.getSchemaFile()).getFileName()),
                         String.valueOf(Path.of(table.getTableFile()).getFileName()));
                 } catch (final IOException e) {
                     e.printStackTrace();
@@ -142,19 +141,19 @@ public abstract class TransactionManager {
         uncommittedTables.add(table);
     }
 
-    private void addSchemaToUncommittedObjects(final Schema schema) {
-        if (FILE_TO_THREAD_ID_MAP.containsKey(schema.getSchemaFile())) {
-            if (!Objects.equals(FILE_TO_THREAD_ID_MAP.get(schema.getSchemaFile()),
+    private void addSchemaToUncommittedObjects(final Table table) {
+        if (FILE_TO_THREAD_ID_MAP.containsKey(table.getSchemaFile())) {
+            if (!Objects.equals(FILE_TO_THREAD_ID_MAP.get(table.getSchemaFile()),
                 Thread.currentThread().getId())) {
                 // remove all entries from the shared map, where the value was the thread's id
                 removeCurrentThreadChangesFromMap();
                 throw new PessimisticLockException(
-                    "The file '" + schema.getSchemaFile() + "' is currently being modified by another thread.");
+                    "The file '" + table.getSchemaFile() + "' is currently being modified by another thread.");
             }
         } else {
-            FILE_TO_THREAD_ID_MAP.put(schema.getSchemaFile(), Thread.currentThread().getId());
+            FILE_TO_THREAD_ID_MAP.put(table.getSchemaFile(), Thread.currentThread().getId());
         }
-        uncommittedSchemas.add(schema);
+        uncommittedSchemas.add(table);
     }
 
     private void addDatabaseToUncommittedObjects(final Database database) {

@@ -16,7 +16,6 @@ import static org.mockito.Mockito.when;
 import com.github.jfsql.driver.db.DatabaseManager;
 import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.dto.Database;
-import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.util.FileNameCreator;
@@ -55,8 +54,6 @@ class AlterTableServiceTest {
     private Database database;
     @Mock
     private Table table;
-    @Mock
-    private Schema schema;
     @Mock
     private Set<Table> uncommittedTables;
     @Mock
@@ -147,7 +144,7 @@ class AlterTableServiceTest {
         final SQLException thrown = assertThrows(SQLException.class,
             () -> alterTableService.renameTable(statement, database, table));
         assertEquals("Table name cannot be the same as database name.", thrown.getMessage());
-        verify(transactionManager, never()).executeDDLOperation(any(), any(), any());
+        verify(transactionManager, never()).executeDDLOperation(any(), any());
     }
 
     @Test
@@ -157,8 +154,7 @@ class AlterTableServiceTest {
             "myTableEdited.xml");
 
         when(table.getTableFile()).thenReturn("tableFile");
-        when(table.getSchema()).thenReturn(schema);
-        when(schema.getSchemaFile()).thenReturn("schemaFile");
+        when(table.getSchemaFile()).thenReturn("schemaFile");
         when(transactionManager.getUncommittedTables()).thenReturn(uncommittedTables);
         when(uncommittedTables.contains(table)).thenReturn(false);
 
@@ -166,7 +162,7 @@ class AlterTableServiceTest {
         final SQLException thrown = assertThrows(SQLException.class,
             () -> alterTableService.renameTable(statement, database, table));
         assertTrue(thrown.getMessage().contains("Failed to rename files.\n"));
-        verify(transactionManager, never()).executeDDLOperation(any(), any(), any());
+        verify(transactionManager, never()).executeDDLOperation(any(), any());
     }
 
     @Test
@@ -176,15 +172,14 @@ class AlterTableServiceTest {
             "myTableEdited.xml");
 
         when(table.getTableFile()).thenReturn("tableFile");
-        when(table.getSchema()).thenReturn(schema);
-        when(schema.getSchemaFile()).thenReturn("schemaFile");
+        when(table.getSchemaFile()).thenReturn("schemaFile");
         when(transactionManager.getUncommittedTables()).thenReturn(uncommittedTables);
         when(uncommittedTables.contains(table)).thenReturn(true);
 
         doThrow(IOException.class).when(ioOperationHandler).renameFile(anyString(), anyString());
         assertDoesNotThrow(() -> alterTableService.renameTable(statement, database, table));
         verify(reader, times(1)).readEntriesFromTable(any());
-        verify(transactionManager, times(1)).executeDDLOperation(any(), any(), any());
+        verify(transactionManager, times(1)).executeDDLOperation(any(), any());
     }
 
     @Test
@@ -195,6 +190,6 @@ class AlterTableServiceTest {
             () -> alterTableService.renameColumn(statement, database, table));
         assertTrue(thrown.getMessage()
             .contains("The column '" + statement.getNewColumnName() + "' already exists in '" + table.getName() + "'"));
-        verify(transactionManager, never()).executeDDLOperation(any(), any(), any());
+        verify(transactionManager, never()).executeDDLOperation(any(), any());
     }
 }

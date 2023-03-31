@@ -35,17 +35,17 @@ public class JfsqlResultSet implements ResultSet {
 
     private Table table;
     private final String tableName;
-    private List<Entry> entries;
     private final List<String> columnNames;
     private final List<String> columnTypes;
+    private List<Entry> entries;
     private int currentEntry = 0;
 
     public JfsqlResultSet(final Table table) {
         this.table = table;
         tableName = table.getName();
         entries = table.getEntries();
-        columnNames = new ArrayList<>(table.getSchema().getColumnsAndTypes().keySet());
-        columnTypes = new ArrayList<>(table.getSchema().getColumnsAndTypes().values());
+        columnNames = new ArrayList<>(table.getColumnsAndTypes().keySet());
+        columnTypes = new ArrayList<>(table.getColumnsAndTypes().values());
     }
 
     private int getColumnIndex(final String columnName) throws SQLException {

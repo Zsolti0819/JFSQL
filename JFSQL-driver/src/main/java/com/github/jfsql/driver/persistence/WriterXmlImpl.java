@@ -2,7 +2,6 @@ package com.github.jfsql.driver.persistence;
 
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
-import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.util.DatatypeConverter;
 import com.github.jfsql.driver.validation.SchemaValidationException;
@@ -89,7 +88,7 @@ public class WriterXmlImpl extends Writer {
         }
 
         if (useSchemaValidation) {
-            final String schemaFile = table.getSchema().getSchemaFile();
+            final String schemaFile = table.getSchemaFile();
             final boolean isValid = XML_SCHEMA_VALIDATOR.schemaIsValid(schemaFile, tableFile);
             if (!isValid) {
                 throw new SchemaValidationException("'" + tableFile + "' is not valid against '" + schemaFile + "'");
@@ -100,7 +99,7 @@ public class WriterXmlImpl extends Writer {
     private void checkTypeAndValueThenAddProperty(final Table table, final Entry entry, final String column,
         final Document document, final Element element) throws IOException {
         final String value = entry.getColumnsAndValues().get(column);
-        final String type = table.getSchema().getColumnsAndTypes().get(column);
+        final String type = table.getColumnsAndTypes().get(column);
         if (value == null || Objects.equals(value, "null")) {
             return;
         }
@@ -116,7 +115,7 @@ public class WriterXmlImpl extends Writer {
     }
 
     @Override
-    public void writeSchema(final Schema schema) throws IOException {
+    public void writeSchema(final Table schema) throws IOException {
         logger.trace("table = {}", schema);
         final String tableName = String.valueOf(Path.of(schema.getSchemaFile()).getFileName()).replace(".xsd", "");
         final String schemaFile = schema.getSchemaFile();
@@ -200,7 +199,7 @@ public class WriterXmlImpl extends Writer {
                 tableElement.appendChild(tableFile);
 
                 final Element schemaFile = document.createElement("pathToSchema");
-                final String xsdPath = table.getSchema().getSchemaFile();
+                final String xsdPath = table.getSchemaFile();
                 schemaFile.setTextContent(xsdPath);
                 tableElement.appendChild(schemaFile);
 
