@@ -3,7 +3,7 @@ package com.github.jfsql.driver.factories;
 import com.github.jfsql.driver.cache.Cache;
 import com.github.jfsql.driver.cache.NullCacheImpl;
 import com.github.jfsql.driver.cache.WeakCacheImpl;
-import com.github.jfsql.driver.util.PropertiesReader;
+import com.github.jfsql.driver.config.PropertiesReader;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass

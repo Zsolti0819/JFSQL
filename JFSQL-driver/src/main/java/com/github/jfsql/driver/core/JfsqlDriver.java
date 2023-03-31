@@ -1,6 +1,6 @@
 package com.github.jfsql.driver.core;
 
-import com.github.jfsql.driver.util.PropertiesReader;
+import com.github.jfsql.driver.config.PropertiesReader;
 import java.io.File;
 import java.nio.file.Path;
 import java.sql.Connection;

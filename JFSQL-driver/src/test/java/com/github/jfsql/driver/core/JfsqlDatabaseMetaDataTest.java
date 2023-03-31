@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.github.jfsql.driver.TestUtils;
-import com.github.jfsql.driver.util.PropertiesReader;
+import com.github.jfsql.driver.config.PropertiesReader;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;

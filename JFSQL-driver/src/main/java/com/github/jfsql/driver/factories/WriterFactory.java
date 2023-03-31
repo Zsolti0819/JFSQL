@@ -1,9 +1,9 @@
 package com.github.jfsql.driver.factories;
 
+import com.github.jfsql.driver.config.PropertiesReader;
 import com.github.jfsql.driver.persistence.Writer;
 import com.github.jfsql.driver.persistence.WriterJsonImpl;
 import com.github.jfsql.driver.persistence.WriterXmlImpl;
-import com.github.jfsql.driver.util.PropertiesReader;
 import java.util.Objects;
 import lombok.experimental.UtilityClass;
 

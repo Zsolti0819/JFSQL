@@ -1,4 +1,4 @@
-package com.github.jfsql.driver.util;
+package com.github.jfsql.driver.config;
 
 import java.util.Properties;
 import lombok.Getter;

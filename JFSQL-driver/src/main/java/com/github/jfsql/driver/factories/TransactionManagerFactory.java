@@ -1,12 +1,12 @@
 package com.github.jfsql.driver.factories;
 
+import com.github.jfsql.driver.config.PropertiesReader;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
 import com.github.jfsql.driver.transactions.DatabaseManager;
 import com.github.jfsql.driver.transactions.JGitTransactionManagerImpl;
 import com.github.jfsql.driver.transactions.NotVersioningTransactionManagerImpl;
 import com.github.jfsql.driver.transactions.TransactionManager;
-import com.github.jfsql.driver.util.PropertiesReader;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
