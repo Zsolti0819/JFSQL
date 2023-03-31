@@ -1,10 +1,10 @@
 package com.github.jfsql.driver.services;
 
+import com.github.jfsql.driver.db.DatabaseManager;
+import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
-import com.github.jfsql.driver.transactions.DatabaseManager;
-import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.util.FileNameCreator;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.CreateTableWrapper;

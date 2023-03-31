@@ -1,9 +1,9 @@
 package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.cache.Cache;
+import com.github.jfsql.driver.db.DatabaseManager;
+import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.persistence.Reader;
-import com.github.jfsql.driver.transactions.DatabaseManager;
-import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.util.ColumnToTypeMapper;
 import com.github.jfsql.driver.util.FileNameCreator;
 import com.github.jfsql.driver.util.IoOperationHandler;

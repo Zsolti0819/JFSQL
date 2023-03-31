@@ -1,12 +1,12 @@
 package com.github.jfsql.driver.services;
 
+import com.github.jfsql.driver.db.DatabaseManager;
+import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
-import com.github.jfsql.driver.transactions.DatabaseManager;
-import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.util.FileNameCreator;
 import com.github.jfsql.driver.util.IoOperationHandler;
 import com.github.jfsql.driver.util.TableFinder;
@@ -77,7 +77,8 @@ public class AlterTableService {
             final Set<Table> uncommittedTables = transactionManager.getUncommittedTables();
             if (uncommittedTables.contains(table)) {
                 logger.debug(
-                    "The table has not yet been written to file, but it is present in the list of uncommitted tables.");
+                    "The table '{}' has not yet been written to file, but it's present in the uncommitted list.",
+                    table);
             } else {
                 throw new SQLException("Failed to rename files.\n" + e.getMessage());
             }

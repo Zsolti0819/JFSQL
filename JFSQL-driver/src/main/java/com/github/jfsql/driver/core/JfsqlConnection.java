@@ -2,6 +2,8 @@ package com.github.jfsql.driver.core;
 
 import com.github.jfsql.driver.cache.Cache;
 import com.github.jfsql.driver.config.PropertiesReader;
+import com.github.jfsql.driver.db.DatabaseManager;
+import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.factories.CacheFactory;
 import com.github.jfsql.driver.factories.DatabaseManagerFactory;
 import com.github.jfsql.driver.factories.ReaderFactory;
@@ -10,8 +12,6 @@ import com.github.jfsql.driver.factories.WriterFactory;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
 import com.github.jfsql.driver.services.StatementServiceManager;
-import com.github.jfsql.driver.transactions.DatabaseManager;
-import com.github.jfsql.driver.transactions.TransactionManager;
 import java.nio.file.Path;
 import java.sql.Array;
 import java.sql.Blob;

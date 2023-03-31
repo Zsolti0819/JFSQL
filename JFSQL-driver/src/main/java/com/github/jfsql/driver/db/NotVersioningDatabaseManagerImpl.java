@@ -1,4 +1,4 @@
-package com.github.jfsql.driver.transactions;
+package com.github.jfsql.driver.db;
 
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;

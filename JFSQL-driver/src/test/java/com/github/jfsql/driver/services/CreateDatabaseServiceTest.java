@@ -8,8 +8,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.github.jfsql.driver.db.DatabaseManager;
 import com.github.jfsql.driver.persistence.Reader;
-import com.github.jfsql.driver.transactions.DatabaseManager;
 import com.github.jfsql.driver.util.FileNameCreator;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.CreateDatabaseWrapper;

@@ -1,11 +1,11 @@
 package com.github.jfsql.driver.factories;
 
 import com.github.jfsql.driver.config.PropertiesReader;
+import com.github.jfsql.driver.db.DatabaseManager;
+import com.github.jfsql.driver.db.JGitDatabaseManagerImpl;
+import com.github.jfsql.driver.db.NotVersioningDatabaseManagerImpl;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
-import com.github.jfsql.driver.transactions.DatabaseManager;
-import com.github.jfsql.driver.transactions.JGitDatabaseManagerImpl;
-import com.github.jfsql.driver.transactions.NotVersioningDatabaseManagerImpl;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import lombok.experimental.UtilityClass;

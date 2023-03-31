@@ -1,8 +1,8 @@
 package com.github.jfsql.driver.util;
 
+import com.github.jfsql.driver.db.DatabaseManager;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
-import com.github.jfsql.driver.transactions.DatabaseManager;
 import java.sql.SQLException;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;

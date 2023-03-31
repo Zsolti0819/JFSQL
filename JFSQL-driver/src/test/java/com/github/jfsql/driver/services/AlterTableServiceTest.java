@@ -13,12 +13,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.github.jfsql.driver.db.DatabaseManager;
+import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Schema;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
-import com.github.jfsql.driver.transactions.DatabaseManager;
-import com.github.jfsql.driver.transactions.TransactionManager;
 import com.github.jfsql.driver.util.FileNameCreator;
 import com.github.jfsql.driver.util.IoOperationHandler;
 import com.github.jfsql.driver.util.TableFinder;
@@ -183,6 +183,7 @@ class AlterTableServiceTest {
 
         doThrow(IOException.class).when(ioOperationHandler).renameFile(anyString(), anyString());
         assertDoesNotThrow(() -> alterTableService.renameTable(statement, database, table));
+        verify(reader, times(1)).readEntriesFromTable(any());
         verify(transactionManager, times(1)).executeDDLOperation(any(), any(), any());
     }
 
