@@ -2,18 +2,18 @@ package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.db.DatabaseManager;
 import com.github.jfsql.driver.persistence.Reader;
+import com.github.jfsql.driver.util.IoOperationHandler;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.DropDatabaseWrapper;
-import java.io.File;
 import java.sql.SQLException;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.io.FileUtils;
 
 @RequiredArgsConstructor
 class DropDatabaseService {
 
     private final DatabaseManager databaseManager;
     private final SemanticValidator semanticValidator;
+    private final IoOperationHandler ioOperationHandler;
     private final Reader reader;
 
     int dropDatabase(final DropDatabaseWrapper statement) throws SQLException {
@@ -21,11 +21,12 @@ class DropDatabaseService {
             throw new SQLException("Database file does not exist, it cannot be deleted.");
         }
 
-        if (!FileUtils.deleteQuietly(new File(statement.getDatabaseUrl()))) {
-            throw new SQLException("Couldn't drop database.");
+        if (!ioOperationHandler.databaseDroppedSuccessfully(statement)) {
+            throw new SQLException("Failed to DROP the database.");
         }
 
         databaseManager.setDatabase(null);
         return 1;
     }
+
 }
