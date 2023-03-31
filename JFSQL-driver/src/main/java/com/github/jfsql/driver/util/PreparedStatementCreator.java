@@ -1,5 +1,6 @@
 package com.github.jfsql.driver.util;
 
+import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.services.StatementServiceManager;
 import com.github.jfsql.parser.dto.DeleteStatement;
 import com.github.jfsql.parser.dto.DeleteWrapper;
@@ -36,8 +37,8 @@ public class PreparedStatementCreator {
         final List<String> columns;
         final List<List<String>> listOfValueLists = new ArrayList<>();
         if (statement.getColumns().isEmpty()) {
-            columns = new ArrayList<>(
-                tableFinder.getTableByName(statement.getTableName()).getSchema().getColumnsAndTypes().keySet());
+            final Table table = tableFinder.getTableByName(statement.getTableName());
+            columns = new ArrayList<>(table.getSchema().getColumnsAndTypes().keySet());
         } else {
             columns = statement.getColumns();
         }
