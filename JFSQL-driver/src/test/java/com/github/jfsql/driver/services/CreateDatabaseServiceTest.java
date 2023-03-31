@@ -40,7 +40,8 @@ class CreateDatabaseServiceTest {
     void testCreateDatabase_normally() throws SQLException {
         when(semanticValidator.urlIsAnExistingRegularFile(statement)).thenReturn(false);
         when(semanticValidator.databaseExist(statement, reader.getFileExtension())).thenReturn(false);
-        createDatabaseService.createDatabase(statement);
+        final int result = createDatabaseService.createDatabase(statement);
+        assertEquals(0, result);
         verify(fileNameCreator, times(1)).createDatabaseFileName(any());
         verify(databaseManager, times(1)).executeCreateDatabaseOperation(any());
     }

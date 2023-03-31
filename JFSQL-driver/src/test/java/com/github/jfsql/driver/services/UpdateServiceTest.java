@@ -29,8 +29,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class UpdateServiceTest {
 
     @Mock
-    private Map<String, String> mappedColumnsAndTypes;
-    @Mock
     private TableFinder tableFinder;
     @Mock
     private TransactionManager transactionManager;
@@ -49,13 +47,12 @@ class UpdateServiceTest {
 
     @Test
     void testUpdate_normally() throws SQLException {
-        when(statement.getColumns()).thenReturn(List.of("column1", "column2", "column3"));
-        when(statement.getValues()).thenReturn(List.of("1", "a", "2.5"));
+        when(statement.getColumns()).thenReturn(List.of("column1"));
+        when(statement.getValues()).thenReturn(List.of("1"));
         when(tableFinder.getTableByName(statement.getTableName())).thenReturn(table);
         when(semanticValidator.allColumnsExist(table, statement)).thenReturn(true);
         when(semanticValidator.allWhereColumnsExist(table, statement)).thenReturn(true);
-        when(columnToTypeMapper.mapColumnsToTypes(statement, table)).thenReturn(
-            mappedColumnsAndTypes);
+        when(columnToTypeMapper.mapColumnsToTypes(statement, table)).thenReturn(Map.of("column1", "INTEGER"));
         when(whereConditionSolver.getWhereEntries(table, statement)).thenReturn(Collections.emptyList());
 
         updateService.updateTable(statement);
