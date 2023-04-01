@@ -13,14 +13,10 @@ import com.github.jfsql.parser.dto.SelectWrapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
@@ -39,11 +35,28 @@ class SelectService {
 
     ResultSet selectFromTable(final SelectWrapper statement) throws SQLException {
         final List<JoinType> joinTypes = statement.getJoinTypes();
-
         if (joinTypes.isEmpty()) {
             return simpleSelect(statement);
         }
+        return selectWithJoins(statement, joinTypes);
+    }
 
+    private ResultSet simpleSelect(final SelectWrapper statement) throws SQLException {
+        final String tableName = statement.getTableName();
+        final Table table = tableFinder.getTableByName(tableName);
+        final List<String> selectedColumns = statement.getColumns();
+        for (final String columnName : selectedColumns) {
+            if (!semanticValidator.columnIsPresentInTable(table, columnName)) {
+                throw new SQLException("Column '" + columnName + "' not found in table '" + tableName + "'.");
+            }
+        }
+        final List<Entry> entries = reader.readEntriesFromTable(table);
+        table.setEntries(entries);
+        return baseSelect(statement, table);
+    }
+
+    private ResultSet selectWithJoins(final SelectWrapper statement, final List<JoinType> joinTypes)
+        throws SQLException {
         final List<Table> extractedTables = extractTables(statement);
         logger.debug("tables extracted from the statement = {}", extractedTables);
 
@@ -71,22 +84,25 @@ class SelectService {
             mergedNotNullColumns.putAll(rightTable.getNotNullColumns());
             logger.debug("mergedNotNullColumns = {}", mergedNotNullColumns);
 
-            final Table joinTable;
+            final List<Entry> entries;
             final JoinType joinType = joinTypes.get(i);
             switch (joinType) {
                 case INNER_JOIN:
-                    joinTable = innerJoin(leftTable, rightTable, mergedColumnsAndTypes, mergedNotNullColumns,
-                        modifiedJoinColumns);
-                    logger.debug("table created by inner join = {}", joinTable);
+                    entries = innerJoin(leftTable, rightTable, modifiedJoinColumns);
                     break;
                 case LEFT_JOIN:
-                    joinTable = leftJoin(leftTable, rightTable, mergedColumnsAndTypes, mergedNotNullColumns,
-                        modifiedJoinColumns);
-                    logger.debug("table created by left join = {}", joinTable);
+                    entries = leftJoin(leftTable, rightTable, modifiedJoinColumns);
                     break;
                 default:
                     throw new IllegalStateException("Unsupported join type '" + joinType + "'.");
             }
+
+            final Table joinTable = Table.builder()
+                .columnsAndTypes(mergedColumnsAndTypes)
+                .notNullColumns(mergedNotNullColumns)
+                .entries(entries)
+                .build();
+
             modifiedTables.remove(leftTable);
             modifiedTables.remove(rightTable);
             modifiedTables.add(0, joinTable);
@@ -98,7 +114,6 @@ class SelectService {
 
         final Table joinTable = modifiedTables.get(0);
         return baseSelect(statement, joinTable);
-
     }
 
     private ResultSet baseSelect(final SelectWrapper statement, final Table table) {
@@ -128,22 +143,18 @@ class SelectService {
         return new JfsqlResultSet(newTable);
     }
 
-    private ResultSet simpleSelect(final SelectWrapper statement) throws SQLException {
-        final String tableName = statement.getTableName();
-        final Table table = tableFinder.getTableByName(tableName);
-        final List<String> selectedColumns = statement.getColumns();
-        for (final String columnName : selectedColumns) {
-            if (!semanticValidator.columnIsPresentInTable(table, columnName)) {
-                throw new SQLException("Column '" + columnName + "' not found in table '" + tableName + "'.");
-            }
-        }
-        final List<Entry> entries = reader.readEntriesFromTable(table);
-        table.setEntries(entries);
-        return baseSelect(statement, table);
+    private List<Entry> getEntriesWithSortedColumns(final List<String> selectedColumns, final List<Entry> entries) {
+        return entries.stream().map(entry -> {
+            final Map<String, String> orderedMap = new LinkedHashMap<>();
+            selectedColumns.forEach(column -> {
+                final String value = entry.getColumnsAndValues().get(column);
+                orderedMap.put(column, value);
+            });
+            return new Entry(orderedMap);
+        }).collect(Collectors.toList());
     }
 
-    private Table innerJoin(final Table t1, final Table t2, final Map<String, String> mergedColumnsAndTypes,
-        final Map<String, Boolean> mergedNotNullColumns, final List<String> joinColumns) {
+    private List<Entry> innerJoin(final Table t1, final Table t2, final List<String> joinColumns) {
         final String t1JoinColumn = joinColumns.get(0);
         final String t2JoinColumn = joinColumns.get(1);
         final List<Entry> commonEntries = new ArrayList<>();
@@ -169,15 +180,10 @@ class SelectService {
             }
         }
 
-        return Table.builder()
-            .columnsAndTypes(mergedColumnsAndTypes)
-            .notNullColumns(mergedNotNullColumns)
-            .entries(commonEntries)
-            .build();
+        return commonEntries;
     }
 
-    private Table leftJoin(final Table t1, final Table t2, final Map<String, String> mergedColumnsAndTypes,
-        final Map<String, Boolean> mergedNotNullColumns, final List<String> joinColumns) {
+    private List<Entry> leftJoin(final Table t1, final Table t2, final List<String> joinColumns) {
         final String leftJoinColumn = joinColumns.get(0);
         final String rightJoinColumn = joinColumns.get(1);
         final List<Entry> joinedEntries = new ArrayList<>();
@@ -211,11 +217,7 @@ class SelectService {
             }
         }
 
-        return Table.builder()
-            .columnsAndTypes(mergedColumnsAndTypes)
-            .notNullColumns(mergedNotNullColumns)
-            .entries(joinedEntries)
-            .build();
+        return joinedEntries;
     }
 
     private List<Table> extractTables(final SelectWrapper statement) throws SQLException {
@@ -261,8 +263,7 @@ class SelectService {
     private List<Table> createModifiedTables(final SelectWrapper statement, final List<Table> tables)
         throws SQLException {
         final List<Table> modifiedTables = new ArrayList<>();
-        final Map<String, Set<String>> commonColumns = findCommonColumnsAndMapToTables(tables);
-        final Map<String, Boolean> columnPresentInMultipleTables = new HashMap<>();
+        final Map<String, Boolean> commonColumnsMap = getCommonColumnsMap(tables);
 
         // Modify column names in all tables
         for (final Table table : tables) {
@@ -272,19 +273,16 @@ class SelectService {
             // Modify column names in columnsAndTypes map
             for (final Map.Entry<String, String> entry : table.getColumnsAndTypes().entrySet()) {
                 final String column = entry.getKey();
-                final Set<String> tableNames = commonColumns.get(column);
+                final String type = entry.getValue();
+                final boolean isCommonColumn = commonColumnsMap.get(column);
 
-                if (tableNames != null && tableNames.size() > 1) {
-                    // Column found in multiple tables
+                if (isCommonColumn) {
                     final String modifiedColumnName = table.getName() + "." + column;
-                    modifiedColumnsAndTypes.put(modifiedColumnName, entry.getValue());
+                    modifiedColumnsAndTypes.put(modifiedColumnName, type);
                     modifiedNotNullColumns.put(modifiedColumnName, table.getNotNullColumns().get(column));
-                    columnPresentInMultipleTables.put(column, true);
                 } else {
-                    // Column unique to this table
-                    modifiedColumnsAndTypes.put(column, entry.getValue());
+                    modifiedColumnsAndTypes.put(column, type);
                     modifiedNotNullColumns.put(column, table.getNotNullColumns().get(column));
-                    columnPresentInMultipleTables.put(column, false);
                 }
             }
 
@@ -307,7 +305,7 @@ class SelectService {
         }
 
         for (int i = 0; i < tables.size(); i++) {
-            final List<Entry> modifiedEntries = createModifiedEntries(columnPresentInMultipleTables, tables.get(i));
+            final List<Entry> modifiedEntries = createModifiedEntries(commonColumnsMap, tables.get(i));
             modifiedTables.get(i).setEntries(modifiedEntries);
         }
         return modifiedTables;
@@ -331,17 +329,16 @@ class SelectService {
         }
     }
 
-    private List<Entry> createModifiedEntries(final Map<String, Boolean> columnPresentInMultipleTables,
-        final Table table) {
+    private List<Entry> createModifiedEntries(final Map<String, Boolean> commonColumnsMap, final Table table) {
         // Modify column names in entries
         final List<Entry> modifiedEntries = new ArrayList<>();
         for (final Entry entry : table.getEntries()) {
             final Map<String, String> modifiedColumnsAndValues = new LinkedHashMap<>();
             for (final Map.Entry<String, String> columnAndValue : entry.getColumnsAndValues().entrySet()) {
                 final String column = columnAndValue.getKey();
-                final boolean inMultipleTables = columnPresentInMultipleTables.get(column);
+                final boolean isCommonColumn = commonColumnsMap.get(column);
 
-                if (inMultipleTables) {
+                if (isCommonColumn) {
                     final String modifiedColumnName = table.getName() + "." + column;
                     modifiedColumnsAndValues.put(modifiedColumnName, columnAndValue.getValue());
                 } else {
@@ -379,34 +376,15 @@ class SelectService {
         return joinColumns;
     }
 
-    private Map<String, Set<String>> findCommonColumnsAndMapToTables(final List<Table> tables) {
-        final Map<String, Set<String>> commonColumns = new LinkedHashMap<>();
-        // Find common columns and create table name mapping
+    private Map<String, Boolean> getCommonColumnsMap(final List<Table> tables) {
+        final Map<String, Boolean> commonColumns = new LinkedHashMap<>();
         for (final Table table : tables) {
-            final String tableName = table.getName();
             for (final String column : table.getColumnsAndTypes().keySet()) {
-                if (commonColumns.containsKey(column)) {
-                    // Column already found in another table
-                    commonColumns.get(column).add(tableName);
-                } else {
-                    // First occurrence of column
-                    commonColumns.put(column, new LinkedHashSet<>(Collections.singletonList(tableName)));
-                }
+                final boolean presentInMultipleTables = commonColumns.containsKey(column);
+                commonColumns.put(column, presentInMultipleTables);
             }
         }
-        System.out.println("commonColumns = " + commonColumns);
         return commonColumns;
-    }
-
-    private List<Entry> getEntriesWithSortedColumns(final List<String> selectedColumns, final List<Entry> entries) {
-        return entries.stream().map(entry -> {
-            final Map<String, String> orderedMap = new LinkedHashMap<>();
-            selectedColumns.forEach(column -> {
-                final String value = entry.getColumnsAndValues().get(column);
-                orderedMap.put(column, value);
-            });
-            return new Entry(orderedMap);
-        }).collect(Collectors.toList());
     }
 
     private String getTableName(final String columnNameWithPrefix) {
