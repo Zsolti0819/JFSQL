@@ -98,13 +98,17 @@ class SelectService {
             modifiedTables.add(0, joinTable);
         }
 
-        return baseSelect(statement, modifiedTables.get(0));
+        if (modifiedTables.size() != 1) {
+            throw new IllegalStateException("Failed to join tables into one table.");
+        }
+
+        final Table joinTable = modifiedTables.get(0);
+        return baseSelect(statement, joinTable);
 
     }
 
-    private ResultSet baseSelect(final SelectWrapper statement, final Table table) {
+    private ResultSet baseSelect(final SelectWrapper statement, final Table table) throws SQLException {
         final Map<String, String> columnsAndTypes;
-
         List<String> selectedColumns = statement.getColumns();
         if (selectedColumns.size() == 1 && Objects.equals(selectedColumns.get(0), "*")) {
             selectedColumns = new ArrayList<>(table.getColumnsAndTypes().keySet());
@@ -113,7 +117,13 @@ class SelectService {
             columnsAndTypes = columnToTypeMapper.mapColumnsToTypes(statement, table);
         }
 
-        final String tableName = table.getName();
+        final String tableName = statement.getTableName();
+        for (final String columnName : selectedColumns) {
+            if (!semanticValidator.columnIsPresentInTable(table, columnName)) {
+                throw new SQLException("Column '" + columnName + "' not found in table '" + tableName + "'.");
+            }
+        }
+
         final String tableFile = table.getTableFile();
         final String schemaFile = table.getSchemaFile();
         final Map<String, Boolean> notNullColumns = table.getNotNullColumns();
@@ -131,7 +141,8 @@ class SelectService {
     }
 
     private ResultSet simpleSelect(final SelectWrapper statement) throws SQLException {
-        final Table table = tableFinder.getTableByName(statement.getTableName());
+        final String tableName = statement.getTableName();
+        final Table table = tableFinder.getTableByName(tableName);
         final List<Entry> entries = reader.readEntriesFromTable(table);
         table.setEntries(entries);
         return baseSelect(statement, table);
@@ -247,7 +258,7 @@ class SelectService {
                 final String columnName = getColumnName(joinColumn);
                 final Table table = tables.get(tableName);
                 if (!semanticValidator.columnIsPresentInTable(table, columnName)) {
-                    throw new SQLException("Column '" + columnName + "' not found in table '" + tableName + "'");
+                    throw new SQLException("Column '" + columnName + "' not found in table '" + tableName + "'.");
                 }
             }
         }

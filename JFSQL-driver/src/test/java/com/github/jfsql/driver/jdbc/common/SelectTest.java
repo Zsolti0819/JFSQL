@@ -2,6 +2,7 @@ package com.github.jfsql.driver.jdbc.common;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.github.jfsql.driver.TestUtils;
@@ -329,6 +330,26 @@ class SelectTest {
             assertEquals("Zsolti", resultSet.getString("name"));
             assertEquals(1, resultSet.getInt("id"));
         }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"json", "xml"})
+    void testSelect_notExistingColumn(final String format) throws SQLException {
+        setUp(format);
+
+        final SQLException thrown = assertThrows(SQLException.class,
+            () -> statement.executeQuery("SELECT lol FROM myTable;"));
+        assertEquals("Column 'lol' not found in table 'myTable'.", thrown.getMessage());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"json", "xml"})
+    void testSelect_notExistingColumnInJoinedTable(final String format) throws SQLException {
+        setUp(format);
+
+        final SQLException thrown = assertThrows(SQLException.class,
+            () -> statement.executeQuery("SELECT lol FROM myTable JOIN myTable2 ON myTable2.age2 = myTable.id"));
+        assertEquals("Column 'lol' not found in table 'myTable'.", thrown.getMessage());
     }
 
     @ParameterizedTest
