@@ -80,10 +80,11 @@ public class JfsqlResultSet implements ResultSet {
 
     @Override
     public boolean getBoolean(final int columnIndex) {
-        if (getValue(currentEntry - 1, columnIndex - 1) == null) {
+        final String value = getValue(currentEntry - 1, columnIndex - 1);
+        if (value == null) {
             return false;
         }
-        return Boolean.parseBoolean(getValue(currentEntry - 1, columnIndex - 1));
+        return Boolean.parseBoolean(value);
     }
 
     @Override
@@ -94,10 +95,11 @@ public class JfsqlResultSet implements ResultSet {
 
     @Override
     public int getInt(final int columnIndex) {
-        if (getValue(currentEntry - 1, columnIndex - 1) == null) {
+        final String value = getValue(currentEntry - 1, columnIndex - 1);
+        if (value == null) {
             return 0;
         }
-        return Integer.parseInt(getValue(currentEntry - 1, columnIndex - 1));
+        return Integer.parseInt(value);
     }
 
     @Override
@@ -108,10 +110,11 @@ public class JfsqlResultSet implements ResultSet {
 
     @Override
     public long getLong(final int columnIndex) {
-        if (getValue(currentEntry - 1, columnIndex - 1) == null) {
+        final String value = getValue(currentEntry - 1, columnIndex - 1);
+        if (value == null) {
             return 0;
         }
-        return Long.parseLong(getValue(currentEntry - 1, columnIndex - 1));
+        return Long.parseLong(value);
     }
 
     @Override
@@ -122,10 +125,11 @@ public class JfsqlResultSet implements ResultSet {
 
     @Override
     public double getDouble(final int columnIndex) {
-        if (getValue(currentEntry - 1, columnIndex - 1) == null) {
+        final String value = getValue(currentEntry - 1, columnIndex - 1);
+        if (value == null) {
             return 0;
         }
-        return Double.parseDouble(getValue(currentEntry - 1, columnIndex - 1));
+        return Double.parseDouble(value);
     }
 
     @Override
@@ -136,11 +140,12 @@ public class JfsqlResultSet implements ResultSet {
 
     @Override
     public byte[] getBytes(final int columnIndex) {
-        if (getValue(currentEntry - 1, columnIndex - 1) == null) {
+        final String value = getValue(currentEntry - 1, columnIndex - 1);
+        if (value == null) {
             return new byte[0];
         }
 
-        return Base64.getDecoder().decode(getValue(currentEntry - 1, columnIndex - 1));
+        return Base64.getDecoder().decode(value);
     }
 
     @Override
@@ -151,9 +156,6 @@ public class JfsqlResultSet implements ResultSet {
 
     @Override
     public String getString(final int columnIndex) {
-        if (getValue(currentEntry - 1, columnIndex - 1) == null) {
-            return null;
-        }
         return getValue(currentEntry - 1, columnIndex - 1);
     }
 
