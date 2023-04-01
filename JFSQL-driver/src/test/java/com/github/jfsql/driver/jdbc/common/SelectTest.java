@@ -349,7 +349,7 @@ class SelectTest {
 
         final SQLException thrown = assertThrows(SQLException.class,
             () -> statement.executeQuery("SELECT lol FROM myTable JOIN myTable2 ON myTable2.age2 = myTable.id"));
-        assertEquals("Column 'lol' not found in table 'myTable'.", thrown.getMessage());
+        assertEquals("Column 'lol' not found in the joined table.", thrown.getMessage());
     }
 
     @ParameterizedTest

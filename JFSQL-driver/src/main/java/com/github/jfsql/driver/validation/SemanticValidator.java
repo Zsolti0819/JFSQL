@@ -106,9 +106,12 @@ public class SemanticValidator {
     }
 
     public boolean columnIsPresentInTable(final Table table, final String columnName) {
+        if (Objects.equals("*", columnName)) {
+            return true;
+        }
         final String tableName = table.getName();
-        return table.getColumnsAndTypes().containsKey(columnName) ||
-            table.getColumnsAndTypes().containsKey(tableName + "." + columnName);
+        final Map<String, String> columnAndTypes = table.getColumnsAndTypes();
+        return columnAndTypes.containsKey(columnName) || columnAndTypes.containsKey(tableName + "." + columnName);
     }
 
     public boolean nullInsertIntoNotNullColumn(final InsertWrapper statement, final Table table) {

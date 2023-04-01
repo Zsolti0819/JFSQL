@@ -47,13 +47,7 @@ class SelectService {
         final List<Table> extractedTables = extractTables(statement);
         logger.debug("tables extracted from the statement = {}", extractedTables);
 
-        // Now we can load the entries into memory
-        for (final Table table : extractedTables) {
-            final List<Entry> entries = reader.readEntriesFromTable(table);
-            table.setEntries(entries);
-        }
-
-        final List<Table> modifiedTables = createModifiedTables(extractedTables);
+        final List<Table> modifiedTables = createModifiedTables(statement, extractedTables);
         logger.debug("tables after the modifications = {}", modifiedTables);
 
         final List<List<String>> listOfJoinColumns = statement.getListOfJoinColumns();
@@ -107,7 +101,7 @@ class SelectService {
 
     }
 
-    private ResultSet baseSelect(final SelectWrapper statement, final Table table) throws SQLException {
+    private ResultSet baseSelect(final SelectWrapper statement, final Table table) {
         final Map<String, String> columnsAndTypes;
         List<String> selectedColumns = statement.getColumns();
         if (selectedColumns.size() == 1 && Objects.equals(selectedColumns.get(0), "*")) {
@@ -118,12 +112,6 @@ class SelectService {
         }
 
         final String tableName = statement.getTableName();
-        for (final String columnName : selectedColumns) {
-            if (!semanticValidator.columnIsPresentInTable(table, columnName)) {
-                throw new SQLException("Column '" + columnName + "' not found in table '" + tableName + "'.");
-            }
-        }
-
         final String tableFile = table.getTableFile();
         final String schemaFile = table.getSchemaFile();
         final Map<String, Boolean> notNullColumns = table.getNotNullColumns();
@@ -143,6 +131,12 @@ class SelectService {
     private ResultSet simpleSelect(final SelectWrapper statement) throws SQLException {
         final String tableName = statement.getTableName();
         final Table table = tableFinder.getTableByName(tableName);
+        final List<String> selectedColumns = statement.getColumns();
+        for (final String columnName : selectedColumns) {
+            if (!semanticValidator.columnIsPresentInTable(table, columnName)) {
+                throw new SQLException("Column '" + columnName + "' not found in table '" + tableName + "'.");
+            }
+        }
         final List<Entry> entries = reader.readEntriesFromTable(table);
         table.setEntries(entries);
         return baseSelect(statement, table);
@@ -176,7 +170,6 @@ class SelectService {
         }
 
         return Table.builder()
-            .name("joinTable")
             .columnsAndTypes(mergedColumnsAndTypes)
             .notNullColumns(mergedNotNullColumns)
             .entries(commonEntries)
@@ -219,7 +212,6 @@ class SelectService {
         }
 
         return Table.builder()
-            .name("leftJoinTable")
             .columnsAndTypes(mergedColumnsAndTypes)
             .notNullColumns(mergedNotNullColumns)
             .entries(joinedEntries)
@@ -266,10 +258,11 @@ class SelectService {
         return new ArrayList<>(tables.values());
     }
 
-    private List<Table> createModifiedTables(final List<Table> tables) {
+    private List<Table> createModifiedTables(final SelectWrapper statement, final List<Table> tables)
+        throws SQLException {
         final List<Table> modifiedTables = new ArrayList<>();
         final Map<String, Set<String>> commonColumns = findCommonColumnsAndMapToTables(tables);
-        final Map<String, String> tableNameMap = new HashMap<>();
+        final Map<String, Boolean> columnPresentInMultipleTables = new HashMap<>();
 
         // Modify column names in all tables
         for (final Table table : tables) {
@@ -286,38 +279,70 @@ class SelectService {
                     final String modifiedColumnName = table.getName() + "." + column;
                     modifiedColumnsAndTypes.put(modifiedColumnName, entry.getValue());
                     modifiedNotNullColumns.put(modifiedColumnName, table.getNotNullColumns().get(column));
-                    tableNameMap.put(column, table.getName());
+                    columnPresentInMultipleTables.put(column, true);
                 } else {
                     // Column unique to this table
                     modifiedColumnsAndTypes.put(column, entry.getValue());
                     modifiedNotNullColumns.put(column, table.getNotNullColumns().get(column));
+                    columnPresentInMultipleTables.put(column, false);
                 }
             }
 
-            final List<Entry> modifiedEntries = createModifiedEntries(tableNameMap, table);
-
+            // Do not set the entries at this time
             final Table modifiedTable = Table.builder()
                 .name(table.getName())
                 .columnsAndTypes(modifiedColumnsAndTypes)
                 .notNullColumns(modifiedNotNullColumns)
-                .entries(modifiedEntries)
                 .build();
             modifiedTables.add(modifiedTable);
+        }
+
+        // Final check before loading the entries into the memory
+        checkIfAllSelectColumnsArePresent(statement, modifiedTables);
+
+        // Now we can load the entries into memory
+        for (final Table table : tables) {
+            final List<Entry> entries = reader.readEntriesFromTable(table);
+            table.setEntries(entries);
+        }
+
+        for (int i = 0; i < tables.size(); i++) {
+            final List<Entry> modifiedEntries = createModifiedEntries(columnPresentInMultipleTables, tables.get(i));
+            modifiedTables.get(i).setEntries(modifiedEntries);
         }
         return modifiedTables;
     }
 
-    private List<Entry> createModifiedEntries(final Map<String, String> tableNameMap, final Table table) {
+    private void checkIfAllSelectColumnsArePresent(final SelectWrapper statement, final List<Table> tables)
+        throws SQLException {
+        final Map<String, String> allColumnsAndTypes = new LinkedHashMap<>();
+        for (final Table table : tables) {
+            allColumnsAndTypes.putAll(table.getColumnsAndTypes());
+        }
+        final Table allTables = Table.builder()
+            .columnsAndTypes(allColumnsAndTypes)
+            .build();
+
+        final List<String> selectedColumns = statement.getColumns();
+        for (final String columnName : selectedColumns) {
+            if (!semanticValidator.columnIsPresentInTable(allTables, columnName)) {
+                throw new SQLException("Column '" + columnName + "' not found in the joined table.");
+            }
+        }
+    }
+
+    private List<Entry> createModifiedEntries(final Map<String, Boolean> columnPresentInMultipleTables,
+        final Table table) {
         // Modify column names in entries
         final List<Entry> modifiedEntries = new ArrayList<>();
         for (final Entry entry : table.getEntries()) {
             final Map<String, String> modifiedColumnsAndValues = new LinkedHashMap<>();
             for (final Map.Entry<String, String> columnAndValue : entry.getColumnsAndValues().entrySet()) {
                 final String column = columnAndValue.getKey();
-                final String tableName = tableNameMap.get(column);
+                final boolean inMultipleTables = columnPresentInMultipleTables.get(column);
 
-                if (tableName != null) {
-                    final String modifiedColumnName = tableName + "." + column;
+                if (inMultipleTables) {
+                    final String modifiedColumnName = table.getName() + "." + column;
                     modifiedColumnsAndValues.put(modifiedColumnName, columnAndValue.getValue());
                 } else {
                     modifiedColumnsAndValues.put(column, columnAndValue.getValue());
@@ -369,6 +394,7 @@ class SelectService {
                 }
             }
         }
+        System.out.println("commonColumns = " + commonColumns);
         return commonColumns;
     }
 
