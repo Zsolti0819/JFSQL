@@ -76,6 +76,9 @@ class SelectService {
             final List<String> modifiedJoinColumns = modifyJoinColumns(leftTable, rightTable, pairedJoinColumns);
             logger.debug("modifiedJoinColumns = {}", modifiedJoinColumns);
 
+            final String t1JoinColumn = modifiedJoinColumns.get(0);
+            final String t2JoinColumn = modifiedJoinColumns.get(1);
+
             final Map<String, String> mergedColumnsAndTypes = new LinkedHashMap<>(leftTable.getColumnsAndTypes());
             mergedColumnsAndTypes.putAll(rightTable.getColumnsAndTypes());
             logger.debug("mergedColumnsAndTypes = {}", mergedColumnsAndTypes);
@@ -88,10 +91,10 @@ class SelectService {
             final JoinType joinType = joinTypes.get(i);
             switch (joinType) {
                 case INNER_JOIN:
-                    entries = innerJoin(leftTable, rightTable, modifiedJoinColumns);
+                    entries = innerJoin(leftTable, rightTable, t1JoinColumn, t2JoinColumn);
                     break;
                 case LEFT_JOIN:
-                    entries = leftJoin(leftTable, rightTable, modifiedJoinColumns);
+                    entries = leftJoin(leftTable, rightTable, t1JoinColumn, t2JoinColumn);
                     break;
                 default:
                     throw new IllegalStateException("Unsupported join type '" + joinType + "'.");
@@ -154,22 +157,20 @@ class SelectService {
         }).collect(Collectors.toList());
     }
 
-    private List<Entry> innerJoin(final Table t1, final Table t2, final List<String> joinColumns) {
-        final String t1JoinColumn = joinColumns.get(0);
-        final String t2JoinColumn = joinColumns.get(1);
+    private List<Entry> innerJoin(final Table t1, final Table t2, final String t1JoinCol, final String t2JoinCol) {
         final List<Entry> commonEntries = new ArrayList<>();
 
-        // create a hash table for the first table
+        // create a hash table for the left table
         final Map<String, List<Entry>> hashTable = new LinkedHashMap<>();
         for (final Entry t1e : t1.getEntries()) {
-            final String key = t1e.getColumnsAndValues().get(t1JoinColumn);
+            final String key = t1e.getColumnsAndValues().get(t1JoinCol);
             hashTable.computeIfAbsent(key, k -> new ArrayList<>());
             hashTable.get(key).add(t1e);
         }
 
-        // probe the second table using the hash table
+        // probe the right table using the hash table
         for (final Entry t2e : t2.getEntries()) {
-            final String key = t2e.getColumnsAndValues().get(t2JoinColumn);
+            final String key = t2e.getColumnsAndValues().get(t2JoinCol);
             if (hashTable.containsKey(key)) {
                 final List<Entry> matchedEntries = hashTable.get(key);
                 for (final Entry t1e : matchedEntries) {
@@ -183,33 +184,30 @@ class SelectService {
         return commonEntries;
     }
 
-    private List<Entry> leftJoin(final Table t1, final Table t2, final List<String> joinColumns) {
-        final String leftJoinColumn = joinColumns.get(0);
-        final String rightJoinColumn = joinColumns.get(1);
+    private List<Entry> leftJoin(final Table t1, final Table t2, final String t1JoinCol, final String t2JoinCol) {
         final List<Entry> joinedEntries = new ArrayList<>();
 
         // create a hash table for the right table
         final Map<String, List<Entry>> hashTable = new LinkedHashMap<>();
-        for (final Entry rightEntry : t2.getEntries()) {
-            final String key = rightEntry.getColumnsAndValues().get(rightJoinColumn);
+        for (final Entry t2e : t2.getEntries()) {
+            final String key = t2e.getColumnsAndValues().get(t2JoinCol);
             hashTable.computeIfAbsent(key, k -> new ArrayList<>());
-            hashTable.get(key).add(rightEntry);
+            hashTable.get(key).add(t2e);
         }
 
         // probe the left table using the hash table
-        for (final Entry leftEntry : t1.getEntries()) {
-            final String key = leftEntry.getColumnsAndValues().get(leftJoinColumn);
+        for (final Entry t1e : t1.getEntries()) {
+            final String key = t1e.getColumnsAndValues().get(t1JoinCol);
             if (hashTable.containsKey(key)) {
                 final List<Entry> matchedEntries = hashTable.get(key);
                 for (final Entry rightEntry : matchedEntries) {
-                    final Map<String, String> joinedColumnsAndValues = new LinkedHashMap<>(
-                        leftEntry.getColumnsAndValues());
+                    final Map<String, String> joinedColumnsAndValues = new LinkedHashMap<>(t1e.getColumnsAndValues());
                     joinedColumnsAndValues.putAll(rightEntry.getColumnsAndValues());
                     joinedEntries.add(new Entry(joinedColumnsAndValues));
                 }
             } else {
                 // add a null entry for the right table columns
-                final Map<String, String> joinedColumnsAndValues = new LinkedHashMap<>(leftEntry.getColumnsAndValues());
+                final Map<String, String> joinedColumnsAndValues = new LinkedHashMap<>(t1e.getColumnsAndValues());
                 for (final String columnName : t2.getColumnsAndTypes().keySet()) {
                     joinedColumnsAndValues.put(columnName, null);
                 }
@@ -296,25 +294,8 @@ class SelectService {
         }
 
         // Final check before loading the entries into the memory
-        checkIfAllSelectColumnsArePresent(statement, modifiedTables);
-
-        // Now we can load the entries into memory
-        for (final Table table : tables) {
-            final List<Entry> entries = reader.readEntriesFromTable(table);
-            table.setEntries(entries);
-        }
-
-        for (int i = 0; i < tables.size(); i++) {
-            final List<Entry> modifiedEntries = createModifiedEntries(commonColumnsMap, tables.get(i));
-            modifiedTables.get(i).setEntries(modifiedEntries);
-        }
-        return modifiedTables;
-    }
-
-    private void checkIfAllSelectColumnsArePresent(final SelectWrapper statement, final List<Table> tables)
-        throws SQLException {
         final Map<String, String> allColumnsAndTypes = new LinkedHashMap<>();
-        for (final Table table : tables) {
+        for (final Table table : modifiedTables) {
             allColumnsAndTypes.putAll(table.getColumnsAndTypes());
         }
         final Table allTables = Table.builder()
@@ -327,6 +308,19 @@ class SelectService {
                 throw new SQLException("Column '" + columnName + "' not found in the joined table.");
             }
         }
+
+        // Now we can load the entries into memory
+        for (final Table table : tables) {
+            final List<Entry> entries = reader.readEntriesFromTable(table);
+            table.setEntries(entries);
+        }
+
+        for (int i = 0; i < tables.size(); i++) {
+            final List<Entry> modifiedEntries = createModifiedEntries(commonColumnsMap, tables.get(i));
+            modifiedTables.get(i).setEntries(modifiedEntries);
+        }
+
+        return modifiedTables;
     }
 
     private List<Entry> createModifiedEntries(final Map<String, Boolean> commonColumnsMap, final Table table) {
