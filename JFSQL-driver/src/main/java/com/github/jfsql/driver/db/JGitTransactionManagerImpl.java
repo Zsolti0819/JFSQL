@@ -65,7 +65,7 @@ public class JGitTransactionManagerImpl extends TransactionManager {
 
     @Override
     public void rollback() throws SQLException {
-        logger.warn("transaction rollback...");
+        logger.warn("Executing rollback()");
         final Database database = databaseManager.database;
         try (final Git git = Git.open(database.getUrl().getParent().toFile())) {
             final ResetCommand resetCommand = git.reset().setMode(ResetCommand.ResetType.HARD);
@@ -73,7 +73,7 @@ public class JGitTransactionManagerImpl extends TransactionManager {
             final List<Table> tables = reader.readTablesFromDatabaseFile(database);
             database.setTables(tables);
         } catch (final GitAPIException | IOException e) {
-            throw new SQLException("There was an error executing the rollback.\n" + e.getMessage());
+            throw new SQLException("There was an error executing rollback().\n" + e.getMessage());
         }
     }
 
