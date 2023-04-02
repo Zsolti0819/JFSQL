@@ -11,10 +11,13 @@ import com.github.jfsql.parser.dto.DeleteWrapper;
 import java.sql.SQLException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @RequiredArgsConstructor
 public class DeleteService {
 
+    private static final Logger logger = LogManager.getLogger(DeleteService.class);
     private final TableFinder tableFinder;
     private final TransactionManager transactionManager;
     private final SemanticValidator semanticValidator;
@@ -26,7 +29,8 @@ public class DeleteService {
         final Table table = tableFinder.getTableByName(statement.getTableName());
 
         // When autoCommit is true, it should be safe to read the entries from the file
-        if (transactionManager.getAutoCommit()) {
+        if (table.getEntries() == null || transactionManager.getAutoCommit()) {
+            logger.debug("table.getEntries() == null ? {}", table.getEntries() == null);
             final List<Entry> entries = reader.readEntriesFromTable(table);
             table.setEntries(entries);
         }

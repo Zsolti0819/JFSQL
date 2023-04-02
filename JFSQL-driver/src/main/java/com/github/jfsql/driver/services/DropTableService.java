@@ -44,7 +44,8 @@ public class DropTableService {
         final Table table = tableFinder.getTableByName(statement.getTableName());
 
         // When autoCommit is true, it should be safe to read the entries from the file
-        if (transactionManager.getAutoCommit()) {
+        if (table.getEntries() == null || transactionManager.getAutoCommit()) {
+            logger.debug("table.getEntries() == null ? {}", table.getEntries() == null);
             final List<Entry> entries = reader.readEntriesFromTable(table);
             table.setEntries(entries);
         }

@@ -8,6 +8,7 @@ import com.github.jfsql.driver.util.FileNameCreator;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.CreateTableWrapper;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +69,7 @@ public class CreateTableService {
             .schemaFile(schemaFile)
             .columnsAndTypes(columnsAndTypes)
             .notNullColumns(notNulLColumns)
+            .entries(new ArrayList<>())
             .build();
         database.getTables().add(table);
         transactionManager.executeDDLOperation(database, table);
