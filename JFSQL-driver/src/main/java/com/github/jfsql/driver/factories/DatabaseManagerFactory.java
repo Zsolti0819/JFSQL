@@ -13,7 +13,7 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class DatabaseManagerFactory {
 
-    public DatabaseManager createTransactionManager(final PropertiesReader propertiesReader, final Path url,
+    public DatabaseManager createDatabaseManager(final PropertiesReader propertiesReader, final Path url,
         final Reader reader, final Writer writer) throws SQLException {
         final boolean useJgit = propertiesReader.isTransactionVersioning();
         if (useJgit) {

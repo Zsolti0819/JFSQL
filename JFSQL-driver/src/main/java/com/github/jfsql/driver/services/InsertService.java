@@ -2,17 +2,20 @@ package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.dto.Entry;
+import com.github.jfsql.driver.dto.LargeObject;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
+import com.github.jfsql.driver.util.PreparedStatementCreator;
 import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.InsertWrapper;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.IntStream;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,6 +28,7 @@ public class InsertService {
     private final TransactionManager transactionManager;
     private final SemanticValidator semanticValidator;
     private final Reader reader;
+    private final PreparedStatementCreator preparedStatementCreator;
 
     int insertIntoTable(final InsertWrapper statement) throws SQLException {
         if (!semanticValidator.allInsertValuesAreEqualLength(statement)) {
@@ -59,7 +63,12 @@ public class InsertService {
             table.setEntries(entries);
         }
 
-        final List<Entry> entriesToInsert = getEntriesToInsert(statement, table);
+        List<String> finalColumns = statement.getColumns();
+        if (finalColumns.isEmpty()) {
+            finalColumns = new ArrayList<>(table.getColumnsAndTypes().keySet());
+        }
+
+        final List<Entry> entriesToInsert = getEntriesToInsert(finalColumns, statement, table);
         table.getEntries().addAll(entriesToInsert);
 
         transactionManager.executeDMLOperation(table);
@@ -67,33 +76,46 @@ public class InsertService {
         return statement.getValues().size();
     }
 
-    private List<Entry> getEntriesToInsert(final InsertWrapper insertStatement, final Table table) {
+    private List<Entry> getEntriesToInsert(final List<String> finalColumns, final InsertWrapper statement,
+        final Table table) {
         final List<String> tableColumns = new ArrayList<>(table.getColumnsAndTypes().keySet());
-        final List<String> statementColumns = insertStatement.getColumns();
+        final List<List<String>> insertValueLists = statement.getValues();
         final List<Entry> insertEntries = new ArrayList<>();
-        for (int i = 0; i < insertStatement.getValues().size(); i++) {
+        for (final List<String> insertValueList : insertValueLists) {
             final Map<String, String> columnsAndValues = new LinkedHashMap<>();
-            final int finalI = i;
-            if (insertStatement.getColumns().isEmpty()) {
-                IntStream.range(0, table.getColumnsAndTypes().size())
-                    .forEach(j -> columnsAndValues.put(tableColumns.get(j),
-                        insertStatement.getValues().get(finalI).get(j)));
-            } else {
-                for (final String columnName : tableColumns) {
-                    if (statementColumns.contains(columnName)) {
-                        final int index = statementColumns.indexOf(columnName);
-                        final String value = insertStatement.getValues().get(i).get(index);
-                        columnsAndValues.put(columnName, value);
-                    } else {
-                        throw new IllegalStateException(
-                            "The column '" + columnName + "' was not present in the statement.");
-                    }
+            for (final String columnName : tableColumns) {
+                if (finalColumns.contains(columnName)) {
+                    final int index = finalColumns.indexOf(columnName);
+                    final String value = insertValueList.get(index);
+                    columnsAndValues.put(columnName, value);
+                } else {
+                    throw new IllegalStateException(
+                        "The column '" + columnName + "' was not present in the statement.");
                 }
             }
-            insertEntries.add(new Entry(columnsAndValues));
+            insertEntries.add(new Entry(columnsAndValues, new HashMap<>()));
         }
+
+        insertBlobs(finalColumns, table, insertEntries);
+
         logger.debug("insertEntries = {}", insertEntries);
         return insertEntries;
+    }
+
+    private void insertBlobs(final List<String> finalColumns, final Table table, final List<Entry> insertEntries) {
+        if (finalColumns.stream().noneMatch(s -> Objects.equals(table.getColumnsAndTypes().get(s), "BLOB"))) {
+            return;
+        }
+        finalColumns.stream()
+            .filter(s -> Objects.equals(table.getColumnsAndTypes().get(s), "BLOB"))
+            .forEach(s -> {
+                for (final Entry entry : insertEntries) {
+                    final LargeObject largeObject = preparedStatementCreator.getBlob(entry, s);
+                    if (largeObject != null) {
+                        entry.getColumnsAndBlobs().put(s, largeObject);
+                    }
+                }
+            });
     }
 
 }

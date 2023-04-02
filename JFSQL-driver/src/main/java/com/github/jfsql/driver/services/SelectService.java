@@ -2,6 +2,7 @@ package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.core.JfsqlResultSet;
 import com.github.jfsql.driver.dto.Entry;
+import com.github.jfsql.driver.dto.LargeObject;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.util.ColumnToTypeMapper;
@@ -13,6 +14,7 @@ import com.github.jfsql.parser.dto.SelectWrapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -119,7 +121,7 @@ class SelectService {
         return baseSelect(statement, joinTable);
     }
 
-    private ResultSet baseSelect(final SelectWrapper statement, final Table table) {
+    private ResultSet baseSelect(final SelectWrapper statement, final Table table) throws SQLException {
         final Map<String, String> columnsAndTypes;
         List<String> selectedColumns = statement.getColumns();
         if (selectedColumns.size() == 1 && Objects.equals(selectedColumns.get(0), "*")) {
@@ -135,6 +137,21 @@ class SelectService {
         final Map<String, Boolean> notNullColumns = table.getNotNullColumns();
         final List<Entry> whereEntries = whereConditionSolver.getWhereEntries(table, statement);
         final List<Entry> orderedEntries = getEntriesWithSortedColumns(selectedColumns, whereEntries);
+
+        for (final Entry entry : orderedEntries) {
+            for (final String column : selectedColumns) {
+                final String type = table.getColumnsAndTypes().get(column);
+                if (Objects.equals(type, "BLOB")) {
+                    final String path = entry.getColumnsAndValues().get(column);
+                    if (path != null) {
+                        final String value = reader.readBlob(path);
+                        final LargeObject largeObject = new LargeObject(path, value);
+                        entry.getColumnsAndBlobs().put(column, largeObject);
+                    }
+                }
+            }
+        }
+
         final Table newTable = Table.builder()
             .name(tableName)
             .tableFile(tableFile)
@@ -153,7 +170,7 @@ class SelectService {
                 final String value = entry.getColumnsAndValues().get(column);
                 orderedMap.put(column, value);
             });
-            return new Entry(orderedMap);
+            return new Entry(orderedMap, new HashMap<>());
         }).collect(Collectors.toList());
     }
 
@@ -176,7 +193,7 @@ class SelectService {
                 for (final Entry t1e : matchedEntries) {
                     final Map<String, String> commonColumnsAndValues = new LinkedHashMap<>(t1e.getColumnsAndValues());
                     commonColumnsAndValues.putAll(t2e.getColumnsAndValues());
-                    commonEntries.add(new Entry(commonColumnsAndValues));
+                    commonEntries.add(new Entry(commonColumnsAndValues, new HashMap<>()));
                 }
             }
         }
@@ -203,7 +220,7 @@ class SelectService {
                 for (final Entry rightEntry : matchedEntries) {
                     final Map<String, String> joinedColumnsAndValues = new LinkedHashMap<>(t1e.getColumnsAndValues());
                     joinedColumnsAndValues.putAll(rightEntry.getColumnsAndValues());
-                    joinedEntries.add(new Entry(joinedColumnsAndValues));
+                    joinedEntries.add(new Entry(joinedColumnsAndValues, new HashMap<>()));
                 }
             } else {
                 // add a null entry for the right table columns
@@ -211,7 +228,7 @@ class SelectService {
                 for (final String columnName : t2.getColumnsAndTypes().keySet()) {
                     joinedColumnsAndValues.put(columnName, null);
                 }
-                joinedEntries.add(new Entry(joinedColumnsAndValues));
+                joinedEntries.add(new Entry(joinedColumnsAndValues, new HashMap<>()));
             }
         }
 
@@ -339,7 +356,7 @@ class SelectService {
                     modifiedColumnsAndValues.put(column, columnAndValue.getValue());
                 }
             }
-            modifiedEntries.add(new Entry(modifiedColumnsAndValues));
+            modifiedEntries.add(new Entry(modifiedColumnsAndValues, new HashMap<>()));
         }
         return modifiedEntries;
     }

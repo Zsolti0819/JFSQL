@@ -106,7 +106,7 @@ public class WriterXmlImpl extends Writer {
         final Element row;
         if (Objects.equals(type, "BLOB")) {
             row = document.createElement(column);
-            row.setTextContent(writeBlob(table, value));
+            row.setTextContent(writeBlob(table, entry, column));
         } else {
             row = document.createElement(column);
             row.setTextContent(value);
@@ -213,27 +213,29 @@ public class WriterXmlImpl extends Writer {
     }
 
     @Override
-    public String writeBlob(final Table table, final String value) throws IOException {
-        logger.trace("blob value = {}", value);
+    public String writeBlob(final Table table, final Entry entry, final String column) throws IOException {
+        final String blobUrl = entry.getColumnsAndBlobs().get(column).getUrl();
+        logger.trace("blob url = {}", blobUrl);
+        final String blobValue = entry.getColumnsAndBlobs().get(column).getValue();
+        logger.trace("blob value = {}", blobValue);
         final Path tableParent = Path.of(table.getTableFile()).getParent();
         final Path blobParent = Path.of(tableParent + File.separator + "blob");
         Files.createDirectories(blobParent);
-        final String newBlobName = incrementFileName(blobParent, "xml");
-        final Path blobPath = Path.of(blobParent + File.separator + newBlobName);
-        try (final FileOutputStream fileOutputStream = new FileOutputStream(blobPath.toFile());
+
+        try (final FileOutputStream fileOutputStream = new FileOutputStream(blobUrl);
             final FileChannel fileChannel = fileOutputStream.getChannel()) {
             fileChannel.tryLock();
             final DocumentBuilder documentBuilder;
             documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             final Document document = documentBuilder.newDocument();
             final Element root = document.createElement("blob");
-            root.setTextContent(value);
+            root.setTextContent(blobValue);
             document.appendChild(root);
             beautifyAndWrite(fileOutputStream, document);
         } catch (final ParserConfigurationException e) {
             throw new IOException("Failed to configure the parser.");
         }
-        return String.valueOf(blobPath);
+        return blobUrl;
     }
 
 }

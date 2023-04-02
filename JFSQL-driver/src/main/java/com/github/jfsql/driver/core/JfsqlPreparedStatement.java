@@ -1,6 +1,8 @@
 package com.github.jfsql.driver.core;
 
+import com.github.jfsql.driver.dto.LargeObject;
 import com.github.jfsql.driver.services.StatementServiceManager;
+import com.github.jfsql.driver.util.BlobFileNameCreator;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,15 +37,16 @@ public class JfsqlPreparedStatement implements PreparedStatement {
 
     private JfsqlConnection connection;
     private final StatementServiceManager statementServiceManager;
+    private final BlobFileNameCreator blobFileNameCreator;
     private final String sql;
 
-
     JfsqlPreparedStatement(final JfsqlConnection connection, final StatementServiceManager statementServiceManager,
-        final String sql) throws SQLException {
+        final BlobFileNameCreator blobFileNameCreator, final String sql) throws SQLException {
         this.connection = connection;
         this.statementServiceManager = statementServiceManager;
+        this.blobFileNameCreator = blobFileNameCreator;
         this.sql = sql;
-        statementServiceManager.setParameters(new Object[statementServiceManager.getParameterCount(sql)]);
+        statementServiceManager.initParameterCount(sql);
     }
 
     @Override
@@ -128,7 +131,7 @@ public class JfsqlPreparedStatement implements PreparedStatement {
 
     @Override
     public void setBytes(final int parameterIndex, final byte[] x) {
-        statementServiceManager.getParameters()[parameterIndex - 1] = Base64.getEncoder().encodeToString(x);
+        statementServiceManager.getParameters()[parameterIndex - 1] = x;
     }
 
     @Override
@@ -190,7 +193,10 @@ public class JfsqlPreparedStatement implements PreparedStatement {
             final byte[] byteArray = byteArrayOutputStream.toByteArray();
             x.close();
             byteArrayOutputStream.close();
-            statementServiceManager.getParameters()[parameterIndex - 1] = Base64.getEncoder().encodeToString(byteArray);
+            final String value = Base64.getEncoder().encodeToString(byteArray);
+            final String path = blobFileNameCreator.getBlobUrl();
+            final LargeObject largeObject = new LargeObject(path, value);
+            statementServiceManager.getParameters()[parameterIndex - 1] = largeObject;
         } catch (final IOException e) {
             throw new SQLException("Couldn't set InputStream.\n" + e.getMessage());
         }

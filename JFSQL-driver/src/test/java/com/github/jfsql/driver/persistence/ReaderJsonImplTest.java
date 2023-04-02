@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,10 +52,10 @@ class ReaderJsonImplTest {
         entry4ColumnsAndTypes.put("name", "Lukas");
         entry4ColumnsAndTypes.put("age", "34");
         final List<Entry> returnEntries = List.of(
-            new Entry(entry1ColumnsAndTypes),
-            new Entry(entry2ColumnsAndTypes),
-            new Entry(entry3ColumnsAndTypes),
-            new Entry(entry4ColumnsAndTypes)
+            new Entry(entry1ColumnsAndTypes, new HashMap<>()),
+            new Entry(entry2ColumnsAndTypes, new HashMap<>()),
+            new Entry(entry3ColumnsAndTypes, new HashMap<>()),
+            new Entry(entry4ColumnsAndTypes, new HashMap<>())
         );
         table = Table.builder()
             .name("myTable")

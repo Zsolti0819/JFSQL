@@ -1,6 +1,7 @@
 package com.github.jfsql.driver.core;
 
 import com.github.jfsql.driver.dto.Entry;
+import com.github.jfsql.driver.dto.LargeObject;
 import com.github.jfsql.driver.dto.Table;
 import java.io.InputStream;
 import java.io.Reader;
@@ -60,6 +61,11 @@ public class JfsqlResultSet implements ResultSet {
     private String getValue(final int row, final int column) {
         final List<String> entryValues = new ArrayList<>(entries.get(row).getColumnsAndValues().values());
         return entryValues.get(column);
+    }
+
+    private String getBlobValue(final int row, final int column) {
+        final List<LargeObject> entryValues = new ArrayList<>(entries.get(row).getColumnsAndBlobs().values());
+        return entryValues.get(column).getValue();
     }
 
     @Override
@@ -140,11 +146,11 @@ public class JfsqlResultSet implements ResultSet {
 
     @Override
     public byte[] getBytes(final int columnIndex) {
-        final String value = getValue(currentEntry - 1, columnIndex - 1);
-        if (value == null) {
+        final String path = getValue(currentEntry - 1, columnIndex - 1);
+        if (path == null) {
             return new byte[0];
         }
-
+        final String value = getBlobValue(currentEntry - 1, columnIndex - 1);
         return Base64.getDecoder().decode(value);
     }
 

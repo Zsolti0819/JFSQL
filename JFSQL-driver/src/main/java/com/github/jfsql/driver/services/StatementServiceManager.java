@@ -47,7 +47,6 @@ public class StatementServiceManager {
 
     private ResultSet resultSet;
     private int updateCount = 0;
-    private Object[] parameters;
 
     public StatementServiceManager(final DatabaseManager databaseManager, final Cache cache,
         final TransactionManager transactionManager, final Reader reader) {
@@ -61,7 +60,7 @@ public class StatementServiceManager {
         final WhereConditionSolver whereConditionSolver = new WhereConditionSolver();
 
         parser = new Parser();
-        preparedStatementCreator = new PreparedStatementCreator(tableFinder, this);
+        preparedStatementCreator = new PreparedStatementCreator(tableFinder);
 
         alterTableService = new AlterTableService(tableFinder, databaseManager, transactionManager, semanticValidator,
             ioOperationHandler, fileNameCreator, reader);
@@ -69,13 +68,14 @@ public class StatementServiceManager {
         dropDatabaseService = new DropDatabaseService(databaseManager, semanticValidator, ioOperationHandler, reader);
         createTableService = new CreateTableService(databaseManager, transactionManager, semanticValidator,
             fileNameCreator);
-        insertService = new InsertService(tableFinder, transactionManager, semanticValidator, reader);
+        insertService = new InsertService(tableFinder, transactionManager, semanticValidator, reader,
+            preparedStatementCreator);
         selectService = new SelectService(tableFinder, semanticValidator, columnToTypeMapper,
             whereConditionSolver,
             reader);
         updateService = new UpdateService(tableFinder, transactionManager, semanticValidator,
             columnToTypeMapper,
-            whereConditionSolver, reader);
+            whereConditionSolver, reader, preparedStatementCreator);
         deleteService = new DeleteService(tableFinder, transactionManager, semanticValidator,
             whereConditionSolver,
             reader);
@@ -204,40 +204,16 @@ public class StatementServiceManager {
         }
     }
 
-    public int getParameterCount(final String sql) throws SQLException {
-        synchronized (lock) {
-            final int parameterCount;
-            final BaseStatement statement = parser.parse(sql);
-            if (statement == null) {
-                throw new IllegalStateException("The statement couldn't be created.");
-            }
-            final TypeOfStatement statementType = statement.getTypeOfStatement();
-            switch (statementType) {
-                case ALTER_TABLE:
-                case CREATE_DATABASE:
-                case CREATE_TABLE:
-                case DROP_DATABASE:
-                case DROP_TABLE:
-                    parameterCount = 0;
-                    break;
-                case DELETE:
-                    parameterCount = ((DeleteWrapper) statement).getWhereValues().size();
-                    break;
-                case INSERT:
-                    parameterCount = ((InsertWrapper) statement).getValues().get(0).size();
-                    break;
-                case SELECT:
-                    parameterCount = ((SelectWrapper) statement).getWhereValues().size();
-                    break;
-                case UPDATE:
-                    parameterCount = ((UpdateWrapper) statement).getValues().size()
-                        + ((UpdateWrapper) statement).getWhereValues().size();
-                    break;
-                default:
-                    throw new SQLException("Cannot determine the type of the statement.");
-            }
-            return parameterCount;
+    public void initParameterCount(final String sql) throws SQLException {
+        final BaseStatement statement = parser.parse(sql);
+        if (statement == null) {
+            throw new IllegalStateException("The statement couldn't be created.");
         }
+        preparedStatementCreator.initParameterCount(statement);
+    }
+
+    public Object[] getParameters() {
+        return preparedStatementCreator.getParameters();
     }
 
 }

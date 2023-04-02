@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -57,10 +58,10 @@ public class ReaderJsonImpl implements Reader {
                 final JsonObject entryObject = entryList.get(i).getAsJsonObject();
                 final LinkedHashMap<String, String> columnsAndValues = new LinkedHashMap<>();
                 for (final String column : columnsAndTypes.keySet()) {
-                    final String value = getValue(table, column, entryObject);
+                    final String value = getValue(column, entryObject);
                     columnsAndValues.put(column, value);
                 }
-                entries.add(new Entry(columnsAndValues));
+                entries.add(new Entry(columnsAndValues, new HashMap<>()));
             }
         } catch (final IOException e) {
             throw new SQLException(e);
@@ -68,16 +69,11 @@ public class ReaderJsonImpl implements Reader {
         return entries;
     }
 
-    private String getValue(final Table table, final String column, final JsonObject entryObject) throws SQLException {
+    private String getValue(final String column, final JsonObject entryObject) {
         if (entryObject.get(column).isJsonNull()) {
             return null;
-        } else {
-            if (Objects.equals(table.getColumnsAndTypes().get(column), "BLOB")) {
-                return readBlob(entryObject.get(column).getAsString());
-            } else {
-                return entryObject.get(column).getAsString();
-            }
         }
+        return entryObject.get(column).getAsString();
     }
 
     @Override
@@ -161,7 +157,7 @@ public class ReaderJsonImpl implements Reader {
     }
 
     @Override
-    public Set<File> getFilesInDatabaseFile(final Database database) throws SQLException {
+    public Set<File> getFilesFromDatabaseFile(final Database database) throws SQLException {
         final String jsonFilePath = String.valueOf(database.getUrl());
         try (final FileReader fileReader = new FileReader(jsonFilePath)) {
             final JsonElement jsonElement = JsonParser.parseReader(fileReader);
@@ -182,6 +178,31 @@ public class ReaderJsonImpl implements Reader {
             throw new SQLException(e);
         }
 
+    }
+
+    @Override
+    public Set<File> getBlobsFromTables(final Database database) throws SQLException {
+        final Set<File> fileSet = new HashSet<>();
+        for (final Table table : database.getTables()) {
+            for (final Map.Entry<String, String> entry : table.getColumnsAndTypes().entrySet()) {
+                if (entry.getValue().equals("BLOB")) {
+                    try (final FileReader fileReader = new FileReader(table.getTableFile())) {
+                        final JsonObject rootObject = JsonParser.parseReader(fileReader).getAsJsonObject();
+                        final JsonArray tableArray = rootObject.getAsJsonArray("Entry");
+                        tableArray.forEach(tableElement -> {
+                            final JsonElement value = tableElement.getAsJsonObject().get(entry.getKey());
+                            if (!value.isJsonNull()) {
+                                final String path = value.getAsString();
+                                fileSet.add(new File(path));
+                            }
+                        });
+                    } catch (final IOException e) {
+                        throw new SQLException(e);
+                    }
+                }
+            }
+        }
+        return fileSet;
     }
 
 }

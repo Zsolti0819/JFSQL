@@ -95,7 +95,7 @@ public class WriterJsonImpl extends Writer {
                     entryObject.addProperty(column, value);
                     break;
                 case "BLOB":
-                    entryObject.addProperty(column, writeBlob(table, value));
+                    entryObject.addProperty(column, writeBlob(table, entry, column));
                     break;
                 default:
                     throw new IllegalStateException("Unsupported data type '" + type + "'.");
@@ -194,21 +194,23 @@ public class WriterJsonImpl extends Writer {
     }
 
     @Override
-    public String writeBlob(final Table table, final String value) throws IOException {
-        logger.trace("blob value = {}", value);
+    public String writeBlob(final Table table, final Entry entry, final String column) throws IOException {
+        final String blobUrl = entry.getColumnsAndBlobs().get(column).getUrl();
+        logger.trace("blob url = {}", blobUrl);
+        final String blobValue = entry.getColumnsAndBlobs().get(column).getValue();
+        logger.trace("blob value = {}", blobValue);
         final Path tableParent = Path.of(table.getTableFile()).getParent();
         final Path blobParent = Path.of(tableParent + File.separator + "blob");
         Files.createDirectories(blobParent);
-        final String newBlobName = incrementFileName(blobParent, "json");
-        final Path blobPath = Path.of(blobParent + File.separator + newBlobName);
-        try (final FileOutputStream fileOutputStream = new FileOutputStream(blobPath.toFile());
+
+        try (final FileOutputStream fileOutputStream = new FileOutputStream(blobUrl);
             final FileChannel fileChannel = fileOutputStream.getChannel()) {
             fileChannel.tryLock();
             final JsonObject root = new JsonObject();
-            root.addProperty("blob", value);
+            root.addProperty("blob", blobValue);
             final String jsonString = beautify(root);
             fileOutputStream.write(jsonString.getBytes());
-            return String.valueOf(blobPath);
+            return blobUrl;
         }
     }
 

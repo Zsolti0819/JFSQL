@@ -2,9 +2,11 @@ package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.dto.Entry;
+import com.github.jfsql.driver.dto.LargeObject;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.util.ColumnToTypeMapper;
+import com.github.jfsql.driver.util.PreparedStatementCreator;
 import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.driver.util.WhereConditionSolver;
 import com.github.jfsql.driver.validation.SemanticValidator;
@@ -12,6 +14,7 @@ import com.github.jfsql.parser.dto.UpdateWrapper;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,6 +29,7 @@ public class UpdateService {
     private final ColumnToTypeMapper columnToTypeMapper;
     private final WhereConditionSolver whereConditionSolver;
     private final Reader reader;
+    private final PreparedStatementCreator preparedStatementCreator;
 
     int updateTable(final UpdateWrapper statement) throws SQLException {
         final String tableName = statement.getTableName();
@@ -59,15 +63,27 @@ public class UpdateService {
                 final String column = columns.get(i);
                 final String value = values.get(i);
                 final String type = types.get(i);
-                if (semanticValidator.isValid(value, type)) {
-                    entry.getColumnsAndValues().put(column, value);
-                } else {
-                    throw new SQLException("Value " + value + " cannot be converted to '" + type + "'.");
-                }
+                updateEntry(entry, column, value, type);
             }
         }
 
         transactionManager.executeDMLOperation(table);
         return whereEntries.size();
+    }
+
+    private void updateEntry(final Entry entry, final String column, final String value,
+        final String type)
+        throws SQLException {
+        if (semanticValidator.isValid(value, type)) {
+            entry.getColumnsAndValues().put(column, value);
+        } else {
+            throw new SQLException("Value " + value + " cannot be converted to '" + type + "'.");
+        }
+        if (Objects.equals(type, "BLOB")) {
+            final LargeObject largeObject = preparedStatementCreator.getBlob(entry, column);
+            if (largeObject != null) {
+                entry.getColumnsAndBlobs().put(column, largeObject);
+            }
+        }
     }
 }

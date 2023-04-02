@@ -4,6 +4,7 @@ import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,8 +21,11 @@ public class NotVersioningDatabaseManagerImpl extends DatabaseManager {
 
     @Override
     public void initDatabase(final Database database) throws SQLException {
+        final Path databaseFolder = database.getUrl().getParent();
+        final Path blobFolder = Path.of(databaseFolder + File.separator + "blob");
         try {
-            Files.createDirectories(database.getUrl().getParent());
+            Files.createDirectories(databaseFolder.getParent());
+            Files.createDirectories(blobFolder.getParent());
         } catch (final IOException e) {
             throw new SQLException("Failed to create directory for the database.\n" + e.getMessage());
         }

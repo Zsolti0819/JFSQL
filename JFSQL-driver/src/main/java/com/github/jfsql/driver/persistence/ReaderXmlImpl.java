@@ -9,11 +9,11 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -65,13 +65,13 @@ public class ReaderXmlImpl implements Reader {
 
             final Map<String, String> columnsAndTypes = table.getColumnsAndTypes();
             for (int i = 0; i < entryList.getLength(); i++) {
-                final Element entry = (Element) entryList.item(i);
+                final Element element = (Element) entryList.item(i);
                 final LinkedHashMap<String, String> columnsAndValues = new LinkedHashMap<>();
                 for (final String column : columnsAndTypes.keySet()) {
-                    final String value = getValue(table, column, entry);
+                    final String value = getValue(column, element);
                     columnsAndValues.put(column, value);
                 }
-                entries.add(new Entry(columnsAndValues));
+                entries.add(new Entry(columnsAndValues, new HashMap<>()));
             }
         } catch (final ParserConfigurationException | SAXException | IOException e) {
             throw new SQLException(e);
@@ -79,15 +79,12 @@ public class ReaderXmlImpl implements Reader {
         return entries;
     }
 
-    private String getValue(final Table table, final String column, final Element entry) throws SQLException {
-        if (entry.getElementsByTagName(column).item(0) == null) {
+    private String getValue(final String column, final Element entry) {
+        final Node node = entry.getElementsByTagName(column).item(0);
+        if (node == null) {
             return null;
         }
-        if (Objects.equals(table.getColumnsAndTypes().get(column), "BLOB")) {
-            return readBlob(entry.getElementsByTagName(column).item(0).getTextContent());
-        } else {
-            return entry.getElementsByTagName(column).item(0).getTextContent();
-        }
+        return node.getTextContent();
     }
 
     @Override
@@ -186,7 +183,7 @@ public class ReaderXmlImpl implements Reader {
     }
 
     @Override
-    public Set<File> getFilesInDatabaseFile(final Database database) throws SQLException {
+    public Set<File> getFilesFromDatabaseFile(final Database database) throws SQLException {
         final String xmlFilePath = String.valueOf(database.getUrl());
         try {
             final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -214,4 +211,29 @@ public class ReaderXmlImpl implements Reader {
         }
     }
 
+    @Override
+    public Set<File> getBlobsFromTables(final Database database) throws SQLException {
+        final Set<File> fileSet = new HashSet<>();
+        for (final Table table : database.getTables()) {
+            for (final Map.Entry<String, String> entry : table.getColumnsAndTypes().entrySet()) {
+                if (entry.getValue().equals("BLOB")) {
+                    try {
+                        final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+                        final DocumentBuilder builder = factory.newDocumentBuilder();
+                        final Document doc = builder.parse(table.getTableFile());
+
+                        final NodeList pathList = doc.getElementsByTagName(entry.getKey());
+                        for (int i = 0; i < pathList.getLength(); i++) {
+                            final String path = pathList.item(i).getTextContent();
+                            fileSet.add(new File(path));
+                        }
+                    } catch (final ParserConfigurationException | SAXException | IOException e) {
+                        throw new SQLException(e);
+                    }
+                }
+            }
+        }
+        return fileSet;
+    }
 }

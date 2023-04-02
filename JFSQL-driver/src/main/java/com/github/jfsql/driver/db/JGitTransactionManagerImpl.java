@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -81,19 +82,33 @@ public class JGitTransactionManagerImpl extends TransactionManager {
         final Map<File, Boolean> filesToAdd = new HashMap<>();
         final Database database = databaseManager.database;
         final Path databaseUrl = database.getUrl();
+        final Path databaseFolder = databaseUrl.getParent();
+        final Path blobFolder = Path.of(databaseFolder + File.separator + "blob");
         final String fileExtension = reader.getFileExtension();
         final String schemaExtension = reader.getSchemaFileExtension();
         final String[] extensions = new String[]{fileExtension, schemaExtension};
 
-        final Collection<File> allFiles = FileUtils.listFiles(databaseUrl.getParent().toFile(), extensions, false);
-        final Set<File> filesInDatabaseFile = reader.getFilesInDatabaseFile(database);
+        final Collection<File> mainFolderFiles = FileUtils.listFiles(databaseFolder.toFile(), extensions, false);
+        final Collection<File> blobFiles = FileUtils.listFiles(blobFolder.toFile(), extensions, false);
+        final Collection<File> allFiles = new ArrayList<>();
+        allFiles.addAll(mainFolderFiles);
+        allFiles.addAll(blobFiles);
 
-        allFiles.removeAll(filesInDatabaseFile);
+        final Set<File> filesFromDatabaseFile = reader.getFilesFromDatabaseFile(database);
+        logger.debug("filesFromDatabaseFile = {}", filesFromDatabaseFile);
+        final Set<File> blobsFromTables = reader.getBlobsFromTables(database);
+        logger.debug("blobsFromTables = {}", blobsFromTables);
+
+        allFiles.removeAll(filesFromDatabaseFile);
+        logger.debug("allFiles after removeAll filesFromDatabaseFile = {}", allFiles);
+        allFiles.removeAll(blobsFromTables);
+        logger.debug("allFiles after removeAll blobsFromTables = {}", allFiles);
         allFiles.forEach(file -> filesToAdd.put(file, false));
 
-        filesInDatabaseFile.forEach(file -> filesToAdd.put(file, true));
+        filesFromDatabaseFile.forEach(file -> filesToAdd.put(file, true));
+        blobsFromTables.forEach(file -> filesToAdd.put(file, true));
         filesToAdd.put(databaseUrl.toFile(), true);
-
+        logger.debug("filesToAdd = {}", filesToAdd);
         return filesToAdd;
     }
 

@@ -1,7 +1,9 @@
 package com.github.jfsql.driver.util;
 
+import com.github.jfsql.driver.dto.Entry;
+import com.github.jfsql.driver.dto.LargeObject;
 import com.github.jfsql.driver.dto.Table;
-import com.github.jfsql.driver.services.StatementServiceManager;
+import com.github.jfsql.parser.dto.BaseStatement;
 import com.github.jfsql.parser.dto.DeleteStatement;
 import com.github.jfsql.parser.dto.DeleteWrapper;
 import com.github.jfsql.parser.dto.InsertStatement;
@@ -9,19 +11,52 @@ import com.github.jfsql.parser.dto.InsertWrapper;
 import com.github.jfsql.parser.dto.JoinType;
 import com.github.jfsql.parser.dto.SelectStatement;
 import com.github.jfsql.parser.dto.SelectWrapper;
+import com.github.jfsql.parser.dto.TypeOfStatement;
 import com.github.jfsql.parser.dto.UpdateStatement;
 import com.github.jfsql.parser.dto.UpdateWrapper;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
+@Data
 @RequiredArgsConstructor
 public class PreparedStatementCreator {
 
     private final TableFinder tableFinder;
-    private final StatementServiceManager statementServiceManager;
+    private Object[] parameters;
+
+    public void initParameterCount(final BaseStatement statement) throws SQLException {
+        final int parameterCount;
+        final TypeOfStatement statementType = statement.getTypeOfStatement();
+        switch (statementType) {
+            case ALTER_TABLE:
+            case CREATE_DATABASE:
+            case CREATE_TABLE:
+            case DROP_DATABASE:
+            case DROP_TABLE:
+                parameterCount = 0;
+                break;
+            case DELETE:
+                parameterCount = ((DeleteWrapper) statement).getWhereValues().size();
+                break;
+            case INSERT:
+                parameterCount = ((InsertWrapper) statement).getValues().get(0).size();
+                break;
+            case SELECT:
+                parameterCount = ((SelectWrapper) statement).getWhereValues().size();
+                break;
+            case UPDATE:
+                parameterCount = ((UpdateWrapper) statement).getValues().size()
+                    + ((UpdateWrapper) statement).getWhereValues().size();
+                break;
+            default:
+                throw new SQLException("Cannot determine the type of the statement.");
+        }
+        parameters = new Object[parameterCount];
+    }
 
     public DeleteWrapper getPreparedDeleteStatement(final DeleteWrapper statement) {
         final String tableName = statement.getTableName();
@@ -78,11 +113,33 @@ public class PreparedStatementCreator {
         final List<String> modifiedList = new ArrayList<>();
         for (int i = 0; i < columns.size(); i++) {
             if (Objects.equals(values.get(i), "?")) {
-                modifiedList.add(i, String.valueOf(statementServiceManager.getParameters()[i + offset]));
+                final Object parameter = parameters[i + offset];
+                if (parameter instanceof LargeObject) {
+                    modifiedList.add(i, String.valueOf(((LargeObject) parameter).getUrl()));
+                } else {
+                    modifiedList.add(i, String.valueOf(parameter));
+                }
             } else {
                 modifiedList.add(i, values.get(i + offset));
             }
         }
         return modifiedList;
     }
+
+    public LargeObject getBlob(final Entry entry, final String column) {
+        if (parameters == null) {
+            return null;
+        }
+
+        for (final Object o : parameters) {
+            if (o instanceof LargeObject) {
+                final String blobPath = entry.getColumnsAndValues().get(column);
+                if (Objects.equals(((LargeObject) o).getUrl(), blobPath)) {
+                    return (LargeObject) o;
+                }
+            }
+        }
+        return null;
+    }
+
 }
