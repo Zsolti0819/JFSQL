@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
 
 class ReaderXmlImplTest {
 
-    private static final Reader reader = new ReaderJsonImpl();
+    private static final Reader reader = new ReaderXmlImpl();
     private static Table table;
     private static Database database;
 
@@ -65,9 +65,9 @@ class ReaderXmlImplTest {
             .entries(returnEntries)
             .build();
         database = new Database(TestUtils.XML_DATABASE_PATH, List.of(table));
-        new WriterJsonImpl(true).writeSchema(table);
-        new WriterJsonImpl(true).writeTable(table);
-        new WriterJsonImpl(true).writeDatabaseFile(database);
+        new WriterXmlImpl(true).writeSchema(table);
+        new WriterXmlImpl(true).writeTable(table);
+        new WriterXmlImpl(true).writeDatabaseFile(database);
     }
 
     @AfterAll
