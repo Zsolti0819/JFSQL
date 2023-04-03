@@ -7,16 +7,14 @@ import java.io.File;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.LinkedList;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
+@Data
 public abstract class DatabaseManager {
 
-    @Getter
-    @Setter
     Database database;
-    Reader reader;
-    Writer writer;
+    final Reader reader;
+    final Writer writer;
 
     protected DatabaseManager(final String url, final Reader reader, final Writer writer) throws SQLException {
         this.reader = reader;
