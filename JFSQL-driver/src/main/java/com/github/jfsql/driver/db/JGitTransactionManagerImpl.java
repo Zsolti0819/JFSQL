@@ -9,13 +9,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -88,25 +89,25 @@ public class JGitTransactionManagerImpl extends TransactionManager {
         final String schemaExtension = reader.getSchemaFileExtension();
         final String[] extensions = new String[]{fileExtension, schemaExtension};
 
-        final Collection<File> mainFolderFiles = FileUtils.listFiles(databaseFolder.toFile(), extensions, false);
-        final Collection<File> blobFiles = FileUtils.listFiles(blobFolder.toFile(), extensions, false);
-        final Collection<File> allFiles = new ArrayList<>();
-        allFiles.addAll(mainFolderFiles);
-        allFiles.addAll(blobFiles);
+        final Collection<File> allFiles = Stream.concat(
+                FileUtils.listFiles(databaseFolder.toFile(), extensions, false).stream(),
+                FileUtils.listFiles(blobFolder.toFile(), extensions, false).stream())
+            .collect(Collectors.toList());
 
         final Set<File> filesFromDatabaseFile = reader.getFilesFromDatabaseFile(database);
         logger.debug("filesFromDatabaseFile = {}", filesFromDatabaseFile);
+
         final Set<File> blobsFromTables = reader.getBlobsFromTables(database);
         logger.debug("blobsFromTables = {}", blobsFromTables);
 
-        allFiles.removeAll(filesFromDatabaseFile);
+        allFiles.removeIf(filesFromDatabaseFile::contains);
         logger.debug("allFiles after removeAll filesFromDatabaseFile = {}", allFiles);
-        allFiles.removeAll(blobsFromTables);
+        allFiles.removeIf(blobsFromTables::contains);
         logger.debug("allFiles after removeAll blobsFromTables = {}", allFiles);
         allFiles.forEach(file -> filesToAdd.put(file, false));
 
-        filesFromDatabaseFile.forEach(file -> filesToAdd.put(file, true));
-        blobsFromTables.forEach(file -> filesToAdd.put(file, true));
+        Stream.concat(filesFromDatabaseFile.stream(), blobsFromTables.stream())
+            .forEach(file -> filesToAdd.put(file, true));
         filesToAdd.put(databaseUrl.toFile(), true);
         logger.debug("filesToAdd = {}", filesToAdd);
         return filesToAdd;
