@@ -6,7 +6,6 @@ import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -43,11 +42,14 @@ public class JGitTransactionManagerImpl extends TransactionManager {
                 final Map<File, Boolean> filesToAdd = getFilesToAdd();
                 for (final Map.Entry<File, Boolean> entry : filesToAdd.entrySet()) {
                     final File file = entry.getKey();
+                    final String fileName = file.getName();
+                    final String parentFolder = file.getParent();
+                    final String prefix = parentFolder.endsWith("blob") ? "blob/" : "";
                     if (Boolean.TRUE.equals(entry.getValue())) {
-                        git.add().addFilepattern(file.getName()).call();
+                        git.add().addFilepattern(prefix + fileName).call();
                     } else {
-                        git.rm().addFilepattern(file.getName());
-                        Files.delete(file.toPath());
+                        // This removes the file even from the disk, IDK why
+                        git.rm().addFilepattern(prefix + fileName).call();
                     }
                 }
 

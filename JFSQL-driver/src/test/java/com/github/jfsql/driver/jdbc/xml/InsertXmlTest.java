@@ -1,6 +1,7 @@
 package com.github.jfsql.driver.jdbc.xml;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.github.jfsql.driver.TestUtils;
@@ -172,6 +173,56 @@ class InsertXmlTest {
         }
 
         assertTrue(TestUtils.BLOB_COPY_PATH.toFile().exists());
+    }
+
+    @Test
+    void testInsert_preparedStatement_blob_transaction() throws SQLException, IOException {
+        statement.execute("DROP TABLE IF EXISTS myTable");
+        statement.execute("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER, file BLOB)");
+        connection.setAutoCommit(false);
+        final PreparedStatement preparedStatement = connection.prepareStatement(
+            "INSERT INTO myTable (id, name, age, file) VALUES (?, ?, ?, ?)");
+        preparedStatement.setInt(1, 1);
+        preparedStatement.setString(2, "Zsolti");
+        preparedStatement.setInt(3, 25);
+        preparedStatement.setBinaryStream(4, new FileInputStream(TestUtils.META_INF_DRIVER_PATH.toFile()));
+        assertEquals(1, preparedStatement.executeUpdate());
+
+        connection.commit();
+
+        final String realFileContent = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
+            StandardCharsets.UTF_8);
+        final String expectedFileContent = "" +
+            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
+            "<myTable>\n" +
+            "    <Entry>\n" +
+            "        <id>1</id>\n" +
+            "        <name>Zsolti</name>\n" +
+            "        <age>25</age>\n" +
+            "        <file>" + TestUtils.ENCODED_XML_BLOB_PATH + "</file>\n" +
+            "    </Entry>\n" +
+            "</myTable>\n";
+
+        assertEquals(StringUtils.deleteWhitespace(expectedFileContent),
+            StringUtils.deleteWhitespace(realFileContent));
+
+        final PreparedStatement selectPreparedStatement = connection.prepareStatement(
+            "SELECT file FROM myTable WHERE id = 1");
+        final ResultSet resultSet = selectPreparedStatement.executeQuery();
+        while (resultSet.next()) {
+            final byte[] bytes = resultSet.getBytes("file");
+            final FileOutputStream fileOutputStream = new FileOutputStream(TestUtils.BLOB_COPY_PATH.toFile());
+            fileOutputStream.write(bytes);
+            fileOutputStream.close();
+        }
+
+        assertTrue(TestUtils.BLOB_COPY_PATH.toFile().exists());
+
+        statement.execute("DELETE FROM myTable WHERE id = 1");
+
+        connection.commit();
+
+        assertFalse(TestUtils.ENCODED_XML_BLOB_PATH.toFile().exists());
     }
 
     @Test
