@@ -6,14 +6,13 @@ import com.github.jfsql.driver.db.JGitDatabaseManagerImpl;
 import com.github.jfsql.driver.db.NotVersioningDatabaseManagerImpl;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
-import java.nio.file.Path;
 import java.sql.SQLException;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class DatabaseManagerFactory {
 
-    public DatabaseManager createDatabaseManager(final PropertiesReader propertiesReader, final Path url,
+    public DatabaseManager createDatabaseManager(final PropertiesReader propertiesReader, final String url,
         final Reader reader, final Writer writer) throws SQLException {
         final boolean useJgit = propertiesReader.isTransactionVersioning();
         if (useJgit) {

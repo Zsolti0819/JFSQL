@@ -9,7 +9,7 @@ import java.sql.SQLException;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-class DropDatabaseService {
+public class DropDatabaseService {
 
     private final DatabaseManager databaseManager;
     private final SemanticValidator semanticValidator;

@@ -17,14 +17,15 @@ import org.apache.logging.log4j.Logger;
 public class BlobFileNameCreator {
 
     private static final Logger logger = LogManager.getLogger(BlobFileNameCreator.class);
-    private final Path url;
+    private final String url;
     private final PropertiesReader propertiesReader;
 
     public String getBlobUrl() {
+        final Path urlPath = Path.of(url);
         final String fileExtension = propertiesReader.getPersistence();
         final List<Integer> fileNumbers = new ArrayList<>();
         final Pattern pattern = Pattern.compile("blob" + "(\\d+)" + "\\." + fileExtension);
-        final Collection<File> files = FileUtils.listFiles(url.toFile(), new String[]{fileExtension}, false);
+        final Collection<File> files = FileUtils.listFiles(urlPath.toFile(), new String[]{fileExtension}, false);
         for (final File file : files) {
             final String fileName = file.getName();
             final Matcher matcher = pattern.matcher(fileName);
@@ -40,7 +41,7 @@ public class BlobFileNameCreator {
             .orElse(1);
 
         final String nextBlobName =
-            url + File.separator + "blob" + File.separator + "blob" + nextFileNumber + "." + fileExtension;
+            urlPath + File.separator + "blob" + File.separator + "blob" + nextFileNumber + "." + fileExtension;
         logger.debug("nextBlobName = {}", nextBlobName);
         return nextBlobName;
     }

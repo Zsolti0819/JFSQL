@@ -26,7 +26,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 @RequiredArgsConstructor
-class SelectService {
+public class SelectService {
 
     private static final Logger logger = LogManager.getLogger(SelectService.class);
     private final TableFinder tableFinder;

@@ -1,9 +1,6 @@
 package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.cache.Cache;
-import com.github.jfsql.driver.db.DatabaseManager;
-import com.github.jfsql.driver.db.TransactionManager;
-import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.util.ColumnToTypeMapper;
 import com.github.jfsql.driver.util.FileNameCreator;
 import com.github.jfsql.driver.util.IoOperationHandler;
@@ -25,16 +22,17 @@ import com.github.jfsql.parser.dto.TypeOfStatement;
 import com.github.jfsql.parser.dto.UpdateWrapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class StatementServiceManager {
 
     static final Object lock = new Object();
     private final Cache cache;
     private final Parser parser;
     private final PreparedStatementCreator preparedStatementCreator;
-
     private final AlterTableService alterTableService;
     private final CreateDatabaseService createDatabaseService;
     private final DropDatabaseService dropDatabaseService;
@@ -44,45 +42,15 @@ public class StatementServiceManager {
     private final UpdateService updateService;
     private final DeleteService deleteService;
     private final DropTableService dropTableService;
+    private final IoOperationHandler ioOperationHandler;
+    private final FileNameCreator fileNameCreator;
+    private final TableFinder tableFinder;
+    private final SemanticValidator semanticValidator;
+    private final ColumnToTypeMapper columnToTypeMapper;
+    private final WhereConditionSolver whereConditionSolver;
 
     private ResultSet resultSet;
-    private int updateCount = 0;
-
-    public StatementServiceManager(final DatabaseManager databaseManager, final Cache cache,
-        final TransactionManager transactionManager, final Reader reader) {
-        this.cache = cache;
-
-        final IoOperationHandler ioOperationHandler = new IoOperationHandler();
-        final FileNameCreator fileNameCreator = new FileNameCreator(reader);
-        final TableFinder tableFinder = new TableFinder(databaseManager);
-        final SemanticValidator semanticValidator = new SemanticValidator();
-        final ColumnToTypeMapper columnToTypeMapper = new ColumnToTypeMapper();
-        final WhereConditionSolver whereConditionSolver = new WhereConditionSolver();
-
-        parser = new Parser();
-        preparedStatementCreator = new PreparedStatementCreator(tableFinder);
-
-        alterTableService = new AlterTableService(tableFinder, databaseManager, transactionManager, semanticValidator,
-            ioOperationHandler, fileNameCreator, reader);
-        createDatabaseService = new CreateDatabaseService(databaseManager, semanticValidator, fileNameCreator, reader);
-        dropDatabaseService = new DropDatabaseService(databaseManager, semanticValidator, ioOperationHandler, reader);
-        createTableService = new CreateTableService(databaseManager, transactionManager, semanticValidator,
-            fileNameCreator);
-        insertService = new InsertService(tableFinder, transactionManager, semanticValidator, reader,
-            preparedStatementCreator);
-        selectService = new SelectService(tableFinder, semanticValidator, columnToTypeMapper,
-            whereConditionSolver,
-            reader);
-        updateService = new UpdateService(tableFinder, transactionManager, semanticValidator,
-            columnToTypeMapper,
-            whereConditionSolver, reader, preparedStatementCreator);
-        deleteService = new DeleteService(tableFinder, transactionManager, semanticValidator,
-            whereConditionSolver,
-            reader);
-        dropTableService = new DropTableService(tableFinder, databaseManager, transactionManager,
-            semanticValidator,
-            reader);
-    }
+    private int updateCount;
 
     private BaseStatement getFromCacheOrParseStatement(final String sql) {
         final BaseStatement statement;

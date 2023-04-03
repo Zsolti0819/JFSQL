@@ -6,24 +6,26 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
 import com.github.jfsql.driver.TestUtils;
-import com.github.jfsql.driver.config.PropertiesReader;
 import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class JfsqlDatabaseMetaDataTest {
 
-    private static JfsqlDatabaseMetaData metaData;
+    @Mock
+    JfsqlConnection connection;
+    @InjectMocks
+    private JfsqlDatabaseMetaData metaData;
 
-    @BeforeAll
-    static void beforeAll() throws SQLException {
-        metaData = new JfsqlDatabaseMetaData(new JfsqlConnection(TestUtils.DATABASE_PATH, new PropertiesReader(null)));
-    }
 
     @AfterAll
     static void afterAll() {
@@ -42,7 +44,8 @@ class JfsqlDatabaseMetaDataTest {
 
     @Test
     void getUrl() {
-        assertEquals(metaData.getURL(), String.valueOf(TestUtils.DATABASE_PATH));
+        when(connection.getUrl()).thenReturn("someUrl");
+        assertEquals("someUrl", metaData.getURL());
     }
 
     @Test

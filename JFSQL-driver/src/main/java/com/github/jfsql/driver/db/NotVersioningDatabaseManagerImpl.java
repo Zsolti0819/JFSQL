@@ -14,7 +14,7 @@ import java.util.List;
 
 public class NotVersioningDatabaseManagerImpl extends DatabaseManager {
 
-    public NotVersioningDatabaseManagerImpl(final Path url, final Reader reader, final Writer writer)
+    public NotVersioningDatabaseManagerImpl(final String url, final Reader reader, final Writer writer)
         throws SQLException {
         super(url, reader, writer);
     }

@@ -18,10 +18,12 @@ public abstract class DatabaseManager {
     Reader reader;
     Writer writer;
 
-    protected DatabaseManager(final Path url, final Reader reader, final Writer writer) throws SQLException {
+    protected DatabaseManager(final String url, final Reader reader, final Writer writer) throws SQLException {
         this.reader = reader;
         this.writer = writer;
-        final Path databaseFile = Path.of(url + File.separator + url.getFileName() + "." + reader.getFileExtension());
+        final Path urlPath = Path.of(url);
+        final Path databaseFile = Path.of(
+            urlPath + File.separator + urlPath.getFileName() + "." + reader.getFileExtension());
         database = new Database(databaseFile, new LinkedList<>());
         if (!database.getUrl().toFile().exists()) {
             initDatabase(database);

@@ -7,26 +7,49 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.github.jfsql.driver.TestUtils;
+import com.github.jfsql.driver.cache.Cache;
 import com.github.jfsql.driver.config.PropertiesReader;
-import java.sql.Connection;
+import com.github.jfsql.driver.db.DatabaseManager;
+import com.github.jfsql.driver.db.TransactionManager;
+import com.github.jfsql.driver.persistence.Reader;
+import com.github.jfsql.driver.persistence.Writer;
+import com.github.jfsql.driver.services.StatementServiceManager;
+import com.github.jfsql.driver.util.BlobFileNameCreator;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@SuppressWarnings("unused")
+@ExtendWith(MockitoExtension.class)
 class JfsqlConnectionTest {
 
-    private static Connection connection;
-    private static Statement statement;
-
-    @BeforeAll
-    static void beforeAll() throws SQLException {
-        connection = new JfsqlConnection(TestUtils.DATABASE_PATH, new PropertiesReader(null));
-        statement = connection.createStatement();
-    }
+    @Mock
+    private PropertiesReader propertiesReader;
+    @Mock
+    private BlobFileNameCreator blobFileNameCreator;
+    @Mock
+    private Cache cache;
+    @Mock
+    private Reader reader;
+    @Mock
+    private Writer writer;
+    @Mock
+    private DatabaseManager databaseManager;
+    @Mock
+    private TransactionManager transactionManager;
+    @Mock
+    private StatementServiceManager statementServiceManager;
+    @Mock
+    private Statement statement;
+    @InjectMocks
+    private JfsqlConnection connection;
 
     @AfterEach
     void tearDown() {
@@ -54,7 +77,7 @@ class JfsqlConnectionTest {
     }
 
     @Test
-    void testIsValid() throws SQLException {
+    void testIsValid() {
         assertTrue(connection.isValid(0));
     }
 
@@ -64,7 +87,7 @@ class JfsqlConnectionTest {
     }
 
     @Test
-    void testIsClosed() throws SQLException {
+    void testIsClosed() {
         assertFalse(connection.isClosed());
     }
 
@@ -79,7 +102,7 @@ class JfsqlConnectionTest {
     }
 
     @Test
-    void testGetWarnings() throws SQLException {
+    void testGetWarnings() {
         assertNull(connection.getWarnings());
     }
 
@@ -221,7 +244,7 @@ class JfsqlConnectionTest {
     }
 
     @Test
-    void testGetNetworkTimeout() throws SQLException {
+    void testGetNetworkTimeout() {
         assertEquals(0, connection.getNetworkTimeout());
     }
 

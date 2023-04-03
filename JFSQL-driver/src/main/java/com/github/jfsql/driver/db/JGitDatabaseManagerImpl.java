@@ -16,8 +16,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 
 public class JGitDatabaseManagerImpl extends DatabaseManager {
 
-    public JGitDatabaseManagerImpl(final Path url, final Reader reader, final Writer writer)
-        throws SQLException {
+    public JGitDatabaseManagerImpl(final String url, final Reader reader, final Writer writer) throws SQLException {
         super(url, reader, writer);
     }
 
