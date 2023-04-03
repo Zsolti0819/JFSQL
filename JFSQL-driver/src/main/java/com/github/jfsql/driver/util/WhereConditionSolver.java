@@ -51,10 +51,9 @@ public class WhereConditionSolver {
         for (final Entry entry : entries) {
             if (entry.getColumnsAndValues().containsKey(whereColumn)) {
                 final String value = entry.getColumnsAndValues().get(whereColumn);
-                if (Objects.equals(symbol, "LIKE") && likeCompare(value, whereValue,
-                    table.getColumnsAndTypes().get(whereColumn)) ||
-                    !Objects.equals(symbol, "LIKE") && compareValues(value, whereValue, symbol,
-                        table.getColumnsAndTypes().get(whereColumn))) {
+                final String type = table.getColumnsAndTypes().get(whereColumn);
+                if (Objects.equals(symbol, "LIKE") && likeCompare(value, whereValue, type) ||
+                    !Objects.equals(symbol, "LIKE") && compareValues(value, whereValue, symbol, type)) {
                     entriesFulfillingConditions.add(entry);
                 }
             }
@@ -65,39 +64,39 @@ public class WhereConditionSolver {
     /**
      * @param originalValue The entry's original value in the database
      * @param whereValue    The value in the where expression
-     * @param compareSymbol The symbol in the where expression
-     * @param originalType  The original value's type
+     * @param symbol The symbol in the where expression
+     * @param type  The original value's type
      * @return The value 0 if originalValue == whereValue; a value less than 0 if originalValue < whereValue; and a
      * value greater than 0 if originalValue > whereValue
      */
-    private boolean compareValues(final String originalValue, final String whereValue, final String compareSymbol,
-        final String originalType) {
+    private boolean compareValues(final String originalValue, final String whereValue, final String symbol,
+        final String type) {
         if (originalValue == null) {
             return false;
         }
-        final String javaType = DatatypeConverter.convertFromSqlToJava(originalType);
-        final int comparisonResult;
+        final String javaType = DatatypeConverter.convertFromSqlToJava(type);
+        final int result;
         switch (javaType) {
             case "Long":
-                comparisonResult = Long.compare(Long.parseLong(originalValue), Long.parseLong(whereValue));
+                result = Long.compare(Long.parseLong(originalValue), Long.parseLong(whereValue));
                 break;
             case "Double":
-                comparisonResult = Double.compare(Double.parseDouble(originalValue), Double.parseDouble(whereValue));
+                result = Double.compare(Double.parseDouble(originalValue), Double.parseDouble(whereValue));
                 break;
             case "String":
-                comparisonResult = String.CASE_INSENSITIVE_ORDER.compare(originalValue, whereValue);
+                result = String.CASE_INSENSITIVE_ORDER.compare(originalValue, whereValue);
                 break;
             default:
                 throw new IllegalStateException("Cannot compare " + javaType + "datatype.");
         }
 
-        return (Objects.equals("=", compareSymbol) && comparisonResult == 0)
-            || (Objects.equals(">", compareSymbol) && comparisonResult > 0)
-            || (Objects.equals(">=", compareSymbol) && comparisonResult > 0
-            || compareSymbol.equals(">=") && comparisonResult == 0)
-            || (Objects.equals("<", compareSymbol) && comparisonResult < 0)
-            || (Objects.equals("<=", compareSymbol) && comparisonResult < 0
-            || compareSymbol.equals("<=") && comparisonResult == 0);
+        return (Objects.equals("=", symbol) && result == 0)
+            || (Objects.equals(">", symbol) && result > 0)
+            || (Objects.equals(">=", symbol) && result > 0
+            || symbol.equals(">=") && result == 0)
+            || (Objects.equals("<", symbol) && result < 0)
+            || (Objects.equals("<=", symbol) && result < 0
+            || symbol.equals("<=") && result == 0);
     }
 
     private boolean likeCompare(final String originalValue, final String whereValue, final String originalType) {

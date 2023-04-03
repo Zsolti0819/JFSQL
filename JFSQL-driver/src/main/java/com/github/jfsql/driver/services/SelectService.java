@@ -19,8 +19,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -374,13 +374,13 @@ public class SelectService {
     }
 
     private List<String> modifyJoinColumns(final Table t1, final Table t2, final List<String> joinColumns) {
-        final Stream<String> t1Columns = t1.getColumnsAndTypes().keySet().stream();
-        if (t1Columns.noneMatch(joinColumns.get(0)::equals)) {
+        final Set<String> t1Columns = t1.getColumnsAndTypes().keySet();
+        if (t1Columns.stream().noneMatch(joinColumns.get(0)::equals)) {
             joinColumns.set(0, getColumnName(joinColumns.get(0)));
         }
 
-        final Stream<String> t2Columns = t2.getColumnsAndTypes().keySet().stream();
-        if (t2Columns.noneMatch(joinColumns.get(1)::equals)) {
+        final Set<String> t2Columns = t2.getColumnsAndTypes().keySet();
+        if (t2Columns.stream().noneMatch(joinColumns.get(1)::equals)) {
             joinColumns.set(1, getColumnName(joinColumns.get(1)));
         }
 
