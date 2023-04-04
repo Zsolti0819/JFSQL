@@ -5,6 +5,7 @@ import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.parser.dto.StatementWithWhere;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class WhereConditionSolver {
@@ -49,8 +50,9 @@ public class WhereConditionSolver {
         final String whereValue, final String symbol) {
         final List<Entry> entriesFulfillingConditions = new ArrayList<>();
         for (final Entry entry : entries) {
-            if (entry.getColumnsAndValues().containsKey(whereColumn)) {
-                final String value = entry.getColumnsAndValues().get(whereColumn);
+            final Map<String, String> columnsAndValues = entry.getColumnsAndValues();
+            if (columnsAndValues.containsKey(whereColumn)) {
+                final String value = columnsAndValues.get(whereColumn);
                 final String type = table.getColumnsAndTypes().get(whereColumn);
                 if (Objects.equals(symbol, "LIKE") && likeCompare(value, whereValue, type) ||
                     !Objects.equals(symbol, "LIKE") && compareValues(value, whereValue, symbol, type)) {
@@ -64,8 +66,8 @@ public class WhereConditionSolver {
     /**
      * @param originalValue The entry's original value in the database
      * @param whereValue    The value in the where expression
-     * @param symbol The symbol in the where expression
-     * @param type  The original value's type
+     * @param symbol        The symbol in the where expression
+     * @param type          The original value's type
      * @return The value 0 if originalValue == whereValue; a value less than 0 if originalValue < whereValue; and a
      * value greater than 0 if originalValue > whereValue
      */

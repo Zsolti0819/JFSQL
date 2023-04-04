@@ -30,8 +30,6 @@ import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.driver.util.WhereConditionSolver;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.core.Parser;
-import java.io.File;
-import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -68,14 +66,6 @@ public class JfsqlDriver implements Driver {
         if (!acceptsURL(url)) {
             throw new SQLException("Couldn't establish connection, because wrong connection string format was used.");
         }
-        String urlWithoutPrefix = url.replace("jdbc:jfsql:", "");
-        if (!urlWithoutPrefix.endsWith(File.separator)) {
-            urlWithoutPrefix += File.separator;
-        }
-        final Path urlPath = Path.of(urlWithoutPrefix);
-        if (urlPath.toFile().isFile()) {
-            throw new SQLException("Database is not a directory.");
-        }
 
         final PropertiesReader propertiesReader = new PropertiesReader(info);
 
@@ -84,7 +74,7 @@ public class JfsqlDriver implements Driver {
         final Reader reader = ReaderFactory.createReader(propertiesReader);
         final Writer writer = WriterFactory.createWriter(propertiesReader);
         final DatabaseManager databaseManager = DatabaseManagerFactory
-            .createDatabaseManager(propertiesReader, urlWithoutPrefix, reader, writer);
+            .createDatabaseManager(propertiesReader, url, reader, writer);
         final TransactionManager transactionManager = TransactionManagerFactory
             .createTransactionManager(propertiesReader, databaseManager, reader, writer);
 
@@ -140,11 +130,11 @@ public class JfsqlDriver implements Driver {
             .build();
 
         // Only used in JfsqlPreparedStatement
-        final BlobFileNameCreator blobFileNameCreator = new BlobFileNameCreator(urlWithoutPrefix, propertiesReader);
+        final BlobFileNameCreator blobFileNameCreator = new BlobFileNameCreator(databaseManager, propertiesReader);
 
         return JfsqlConnection.builder()
-            .url(urlWithoutPrefix)
             .blobFileNameCreator(blobFileNameCreator)
+            .databaseManager(databaseManager)
             .transactionManager(transactionManager)
             .statementServiceManager(statementServiceManager)
             .build();

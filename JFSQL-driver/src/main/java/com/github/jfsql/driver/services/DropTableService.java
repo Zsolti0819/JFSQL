@@ -44,9 +44,12 @@ public class DropTableService {
         final Table table = tableFinder.getTableByName(statement.getTableName());
 
         // When autoCommit is true, it should be safe to read the entries from the file
-        if (table.getEntries() == null || transactionManager.getAutoCommit()) {
-            logger.debug("table.getEntries() == null ? {}", table.getEntries() == null);
-            final List<Entry> entries = reader.readEntriesFromTable(table);
+        List<Entry> entries = table.getEntries();
+        if (entries == null || transactionManager.getAutoCommit()) {
+            logger.debug("Table's entries in memory = {}, autoCommit = {}",
+                entries != null,
+                transactionManager.getAutoCommit());
+            entries = reader.readEntriesFromTable(table);
             table.setEntries(entries);
         }
 
@@ -55,8 +58,9 @@ public class DropTableService {
                 "Cannot DROP " + statement.getTableName() + " because the table's file or schema doesn't exist.");
         }
 
-        final int deleteCount = table.getEntries().size();
-        database.getTables().remove(table);
+        final int deleteCount = entries.size();
+        final List<Table> tables = database.getTables();
+        tables.remove(table);
         transactionManager.executeDropTableOperation();
         return deleteCount;
     }

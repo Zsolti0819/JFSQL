@@ -1,6 +1,7 @@
 package com.github.jfsql.driver.util;
 
 import com.github.jfsql.driver.config.PropertiesReader;
+import com.github.jfsql.driver.db.DatabaseManager;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -17,10 +18,11 @@ import org.apache.logging.log4j.Logger;
 public class BlobFileNameCreator {
 
     private static final Logger logger = LogManager.getLogger(BlobFileNameCreator.class);
-    private final String url;
+    private final DatabaseManager databaseManager;
     private final PropertiesReader propertiesReader;
 
     public String getBlobUrl() {
+        final String url = databaseManager.getUrl();
         final Path urlPath = Path.of(url);
         final String fileExtension = propertiesReader.getPersistence();
         final List<Integer> fileNumbers = new ArrayList<>();

@@ -40,6 +40,8 @@ public class JGitTransactionManagerImpl extends TransactionManager {
                 writeUncommittedObjects();
 
                 final Map<File, Boolean> filesToAdd = getFilesToAdd();
+                logger.debug("filesToAdd = {}", filesToAdd);
+
                 for (final Map.Entry<File, Boolean> entry : filesToAdd.entrySet()) {
                     final File file = entry.getKey();
                     final String fileName = file.getName();
@@ -91,9 +93,9 @@ public class JGitTransactionManagerImpl extends TransactionManager {
         final String schemaExtension = reader.getSchemaFileExtension();
         final String[] extensions = new String[]{fileExtension, schemaExtension};
 
-        final Collection<File> allFiles = Stream.concat(
-                FileUtils.listFiles(databaseFolder.toFile(), extensions, false).stream(),
-                FileUtils.listFiles(blobFolder.toFile(), extensions, false).stream())
+        final Collection<File> mainFolderFiles = FileUtils.listFiles(databaseFolder.toFile(), extensions, false);
+        final Collection<File> blobFolderFiles = FileUtils.listFiles(blobFolder.toFile(), extensions, false);
+        final Collection<File> allFiles = Stream.concat(mainFolderFiles.stream(), blobFolderFiles.stream())
             .collect(Collectors.toList());
 
         final Set<File> filesFromDatabaseFile = reader.getFilesFromDatabaseFile(database);
@@ -106,7 +108,6 @@ public class JGitTransactionManagerImpl extends TransactionManager {
         Stream.concat(filesFromDatabaseFile.stream(), blobsFromTables.stream())
             .forEach(file -> filesToAdd.put(file, true));
         filesToAdd.put(databaseUrl.toFile(), true);
-        logger.debug("filesToAdd = {}", filesToAdd);
         return filesToAdd;
     }
 

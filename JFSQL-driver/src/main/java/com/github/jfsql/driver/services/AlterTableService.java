@@ -110,7 +110,8 @@ public class AlterTableService {
         // Modify the column name for every entry in the table
         for (final Entry entry : table.getEntries()) {
             final LinkedHashMap<String, String> modifiedColumnsAndValues = new LinkedHashMap<>();
-            for (final Map.Entry<String, String> columnValuePair : entry.getColumnsAndValues().entrySet()) {
+            final Map<String, String> columnsAndValues = entry.getColumnsAndValues();
+            for (final Map.Entry<String, String> columnValuePair : columnsAndValues.entrySet()) {
                 if (Objects.equals(columnValuePair.getKey(), statement.getOldColumnName())) {
                     modifiedColumnsAndValues.put(newColumnName, columnValuePair.getValue());
                 } else {
@@ -173,6 +174,7 @@ public class AlterTableService {
 
         // Add the column to every entry in the table
         for (final Entry entry : table.getEntries()) {
+            final Map<String, String> columnsAndValues = entry.getColumnsAndValues();
             if (Boolean.TRUE.equals(statement.getColumnToAddCannotBeNull())) {
                 final String valueToAdd;
                 switch (columnTypeToAdd) {
@@ -187,9 +189,9 @@ public class AlterTableService {
                     default:
                         throw new IllegalStateException("Unknown data type '" + columnTypeToAdd + "'");
                 }
-                entry.getColumnsAndValues().put(columnNameToAdd, valueToAdd);
-            } else if (Boolean.FALSE.equals(statement.getColumnToAddCannotBeNull())) {
-                entry.getColumnsAndValues().put(columnNameToAdd, null);
+                columnsAndValues.put(columnNameToAdd, valueToAdd);
+            } else {
+                columnsAndValues.put(columnNameToAdd, null);
             }
         }
         transactionManager.executeDDLOperation(database, table);
@@ -202,15 +204,18 @@ public class AlterTableService {
             throw new SQLException("The column '" + columnNameToDrop + "' doesn't exist in '" + table.getName() + "'");
         }
 
-        table.getColumnsAndTypes().remove(columnNameToDrop);
-        table.getNotNullColumns().remove(columnNameToDrop);
+        final Map<String, String> columnsAndTypes = table.getColumnsAndTypes();
+        columnsAndTypes.remove(columnNameToDrop);
+        final Map<String, Boolean> notNullColumns = table.getNotNullColumns();
+        notNullColumns.remove(columnNameToDrop);
 
         final List<Entry> entries = reader.readEntriesFromTable(table);
         table.setEntries(entries);
 
         // Remove the columns from every entry in the table
         for (final Entry entry : table.getEntries()) {
-            entry.getColumnsAndValues().remove(columnNameToDrop);
+            final Map<String, String> columnsAndValues = entry.getColumnsAndValues();
+            columnsAndValues.remove(columnNameToDrop);
         }
         transactionManager.executeDDLOperation(database, table);
     }

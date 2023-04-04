@@ -14,6 +14,7 @@ import com.github.jfsql.parser.dto.UpdateWrapper;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
@@ -44,19 +45,22 @@ public class UpdateService {
         }
 
         // When autoCommit is true, it should be safe to read the entries from the file
+        List<Entry> entries = table.getEntries();
         if (table.getEntries() == null || transactionManager.getAutoCommit()) {
-            logger.debug("table.getEntries() == null ? {}", table.getEntries() == null);
-            final List<Entry> entries = reader.readEntriesFromTable(table);
+            logger.debug("Table's entries in memory = {}, autoCommit = {}",
+                entries != null,
+                transactionManager.getAutoCommit());
+            entries = reader.readEntriesFromTable(table);
             table.setEntries(entries);
         }
 
         final List<Entry> whereEntries = whereConditionSolver.getWhereEntries(table, statement);
-
         logger.debug("whereEntries = {}", whereEntries);
 
         final List<String> columns = statement.getColumns();
         final List<String> values = statement.getValues();
-        final List<String> types = new ArrayList<>(columnToTypeMapper.mapColumnsToTypes(statement, table).values());
+        final Map<String, String> columnsMappedToTypes = columnToTypeMapper.mapColumnsToTypes(statement, table);
+        final List<String> types = new ArrayList<>(columnsMappedToTypes.values());
 
         for (final Entry entry : whereEntries) {
             for (int i = 0; i < columns.size(); i++) {
@@ -75,14 +79,16 @@ public class UpdateService {
         final String type)
         throws SQLException {
         if (semanticValidator.isValid(value, type)) {
-            entry.getColumnsAndValues().put(column, value);
+            final Map<String, String> columnsAndValues = entry.getColumnsAndValues();
+            columnsAndValues.put(column, value);
         } else {
             throw new SQLException("Value " + value + " cannot be converted to '" + type + "'.");
         }
         if (Objects.equals(type, "BLOB")) {
             final LargeObject largeObject = preparedStatementCreator.getBlob(entry, column);
             if (largeObject != null) {
-                entry.getColumnsAndBlobs().put(column, largeObject);
+                final Map<String, LargeObject> columnsAndBlobs = entry.getColumnsAndBlobs();
+                columnsAndBlobs.put(column, largeObject);
             }
         }
     }

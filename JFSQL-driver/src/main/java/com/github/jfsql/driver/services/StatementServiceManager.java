@@ -22,6 +22,7 @@ import com.github.jfsql.parser.dto.TypeOfStatement;
 import com.github.jfsql.parser.dto.UpdateWrapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 import lombok.Builder;
 import lombok.Data;
 
@@ -54,11 +55,12 @@ public class StatementServiceManager {
 
     private BaseStatement getFromCacheOrParseStatement(final String sql) {
         final BaseStatement statement;
-        if (cache.getCachedStatements().containsKey(sql)) {
-            statement = cache.getCachedStatements().get(sql);
+        final Map<String, BaseStatement> cachedStatements = cache.getCachedStatements();
+        if (cachedStatements.containsKey(sql)) {
+            statement = cachedStatements.get(sql);
         } else {
             statement = parser.parse(sql);
-            cache.getCachedStatements().put(sql, statement);
+            cachedStatements.put(sql, statement);
         }
         if (statement == null) {
             throw new IllegalStateException("The statement couldn't be created.");

@@ -59,19 +59,24 @@ public class JfsqlResultSet implements ResultSet {
     }
 
     private String getValue(final int row, final int column) {
-        final List<String> entryValues = new ArrayList<>(entries.get(row).getColumnsAndValues().values());
+        final Entry entry = entries.get(row);
+        final Map<String, String> columnsAndValues = entry.getColumnsAndValues();
+        final List<String> entryValues = new ArrayList<>(columnsAndValues.values());
         return entryValues.get(column);
     }
 
     private String getBlobValue(final int row, final int column) {
-        final List<LargeObject> entryValues = new ArrayList<>(entries.get(row).getColumnsAndBlobs().values());
-        return entryValues.get(column).getValue();
+        final Entry entry = entries.get(row);
+        final Map<String, LargeObject> columnsAndBlobs = entry.getColumnsAndBlobs();
+        final List<LargeObject> entryValues = new ArrayList<>(columnsAndBlobs.values());
+        final LargeObject largeObject = entryValues.get(column);
+        return largeObject.getValue();
     }
 
     @Override
     public boolean next() {
         currentEntry++;
-        return currentEntry <= getEntries().size();
+        return currentEntry <= entries.size();
     }
 
     @Override
@@ -183,7 +188,7 @@ public class JfsqlResultSet implements ResultSet {
 
     @Override
     public boolean isBeforeFirst() {
-        if (getEntries().isEmpty()) {
+        if (entries.isEmpty()) {
             return false;
         }
         return currentEntry == 0;
@@ -191,20 +196,20 @@ public class JfsqlResultSet implements ResultSet {
 
     @Override
     public boolean isAfterLast() {
-        if (getEntries().isEmpty()) {
+        if (entries.isEmpty()) {
             return false;
         }
-        return currentEntry == getEntries().size() + 1;
+        return currentEntry == entries.size() + 1;
     }
 
     @Override
     public boolean isFirst() {
-        return currentEntry == 1 && !getEntries().isEmpty();
+        return currentEntry == 1 && !entries.isEmpty();
     }
 
     @Override
     public boolean isLast() {
-        return (currentEntry == getEntries().size()) && (!getEntries().isEmpty());
+        return (currentEntry == entries.size()) && (!entries.isEmpty());
     }
 
     @Override
@@ -214,7 +219,7 @@ public class JfsqlResultSet implements ResultSet {
 
     @Override
     public void afterLast() {
-        currentEntry = getEntries().size() + 1;
+        currentEntry = entries.size() + 1;
     }
 
     @Override
@@ -229,8 +234,8 @@ public class JfsqlResultSet implements ResultSet {
 
     @Override
     public boolean absolute(final int row) {
-        currentEntry = row < 0 ? getEntries().size() + row + 1 : row;
-        return currentEntry > 0 && currentEntry <= getEntries().size();
+        currentEntry = row < 0 ? entries.size() + row + 1 : row;
+        return currentEntry > 0 && currentEntry <= entries.size();
     }
 
     @Override

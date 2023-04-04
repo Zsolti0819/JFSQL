@@ -1,5 +1,6 @@
 package com.github.jfsql.driver.core;
 
+import com.github.jfsql.driver.db.DatabaseManager;
 import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.services.StatementServiceManager;
 import com.github.jfsql.driver.util.BlobFileNameCreator;
@@ -28,13 +29,12 @@ import lombok.Data;
 @Builder
 public class JfsqlConnection implements Connection {
 
-    private final String url;
     private final BlobFileNameCreator blobFileNameCreator;
+    private final DatabaseManager databaseManager;
     private final TransactionManager transactionManager;
     private final StatementServiceManager statementServiceManager;
     private JfsqlStatement statement;
     private JfsqlPreparedStatement preparedStatement;
-    private DatabaseMetaData metaData;
 
     @Override
     public Statement createStatement() {
@@ -98,6 +98,11 @@ public class JfsqlConnection implements Connection {
     @Override
     public SQLWarning getWarnings() {
         return null;
+    }
+
+    @Override
+    public DatabaseMetaData getMetaData() {
+        return new JfsqlDatabaseMetaData(this, databaseManager);
     }
 
     // Unsupported operations

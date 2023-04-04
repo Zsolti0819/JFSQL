@@ -17,6 +17,7 @@ import com.github.jfsql.parser.dto.UpdateWrapper;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -71,11 +72,12 @@ public class PreparedStatementCreator {
         final String tableName = statement.getTableName();
         final List<String> columns;
         final List<List<String>> listOfValueLists = new ArrayList<>();
-        if (statement.getColumns().isEmpty()) {
+        final List<String> statementColumns = statement.getColumns();
+        if (statementColumns.isEmpty()) {
             final Table table = tableFinder.getTableByName(statement.getTableName());
             columns = new ArrayList<>(table.getColumnsAndTypes().keySet());
         } else {
-            columns = statement.getColumns();
+            columns = statementColumns;
         }
         for (int i = 0; i < statement.getValues().size(); i++) {
             final List<String> values = replaceQuestionmarks(columns, new ArrayList<>(statement.getValues().get(i)), 0);
@@ -133,7 +135,8 @@ public class PreparedStatementCreator {
 
         for (final Object o : parameters) {
             if (o instanceof LargeObject) {
-                final String blobPath = entry.getColumnsAndValues().get(column);
+                final Map<String, String> columnsAndValues = entry.getColumnsAndValues();
+                final String blobPath = columnsAndValues.get(column);
                 if (Objects.equals(((LargeObject) o).getUrl(), blobPath)) {
                     return (LargeObject) o;
                 }

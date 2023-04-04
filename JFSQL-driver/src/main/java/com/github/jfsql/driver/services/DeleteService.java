@@ -29,24 +29,27 @@ public class DeleteService {
         final Table table = tableFinder.getTableByName(statement.getTableName());
 
         // When autoCommit is true, it should be safe to read the entries from the file
-        if (table.getEntries() == null || transactionManager.getAutoCommit()) {
-            logger.debug("table.getEntries() == null ? {}", table.getEntries() == null);
-            final List<Entry> entries = reader.readEntriesFromTable(table);
+        List<Entry> entries = table.getEntries();
+        if (entries == null || transactionManager.getAutoCommit()) {
+            logger.debug("Table's entries in memory = {}, autoCommit = {}",
+                entries != null,
+                transactionManager.getAutoCommit());
+            entries = reader.readEntriesFromTable(table);
             table.setEntries(entries);
         }
 
         final int deleteCount;
-        final int entriesSizeBefore = table.getEntries().size();
+        final int entriesSizeBefore = entries.size();
         if (whereColumns.isEmpty()) {
-            table.getEntries().clear();
+            entries.clear();
             deleteCount = entriesSizeBefore;
         } else {
             if (!semanticValidator.allWhereColumnsExist(table, statement)) {
                 throw new SQLException("Some columns entered doesn't exist in '" + table.getName() + "'.");
             }
             final List<Entry> whereEntries = whereConditionSolver.getWhereEntries(table, statement);
-            table.getEntries().removeAll(whereEntries);
-            final int entriesSizeAfter = table.getEntries().size();
+            entries.removeAll(whereEntries);
+            final int entriesSizeAfter = entries.size();
             deleteCount = entriesSizeBefore - entriesSizeAfter;
         }
 

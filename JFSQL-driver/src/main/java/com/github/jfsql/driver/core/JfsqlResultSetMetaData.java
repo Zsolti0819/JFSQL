@@ -2,6 +2,7 @@ package com.github.jfsql.driver.core;
 
 import java.sql.ResultSetMetaData;
 import java.sql.SQLFeatureNotSupportedException;
+import java.util.List;
 
 public class JfsqlResultSetMetaData implements ResultSetMetaData {
 
@@ -18,7 +19,8 @@ public class JfsqlResultSetMetaData implements ResultSetMetaData {
 
     @Override
     public String getColumnName(final int column) {
-        return resultSet.getColumnNames().get(column - 1);
+        final List<String> columnNames = resultSet.getColumnNames();
+        return columnNames.get(column - 1);
     }
 
     @Override
@@ -28,7 +30,8 @@ public class JfsqlResultSetMetaData implements ResultSetMetaData {
 
     @Override
     public int getColumnCount() {
-        return resultSet.getColumnNames().size();
+        final List<String> columnNames = resultSet.getColumnNames();
+        return columnNames.size();
     }
 
     @Override

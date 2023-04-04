@@ -1,5 +1,8 @@
 package com.github.jfsql.driver.services;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -13,7 +16,11 @@ import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.InsertWrapper;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -54,5 +61,29 @@ class InsertServiceTest {
 
         verify(entries, times(1)).addAll(any());
         verify(transactionManager, times(1)).executeDMLOperation(table);
+    }
+
+    @Test
+    void testGetEntriesToInsert() throws SQLException {
+        when(statement.getColumns()).thenReturn(List.of("id", "name", "age", "resumee"));
+        when(table.getColumnsAndTypes()).thenReturn(
+            Map.of("id", "INTEGER", "name", "TEXT", "age", "INTEGER", "resumee", "BLOB"));
+        when(statement.getValues()).thenReturn(List.of(List.of("1", "Zsolti", "25", "null")));
+        when(semanticValidator.nullInsertIntoNotNullColumn(anyString(), anyString(), any())).thenReturn(false);
+        insertService.getEntriesToInsert(statement, table);
+        when(semanticValidator.nullInsertIntoNotNullColumn(anyString(), anyString(), eq(table)))
+            .thenReturn(false);
+
+        final List<Entry> expectedEntries = new ArrayList<>();
+        final Map<String, String> columnsAndValues = new LinkedHashMap<>();
+        columnsAndValues.put("id", "1");
+        columnsAndValues.put("name", "Zsolti");
+        columnsAndValues.put("age", "25");
+        columnsAndValues.put("resumee", "null");
+        expectedEntries.add(new Entry(columnsAndValues, new HashMap<>()));
+
+        List<Entry> actualEntries = insertService.getEntriesToInsert(statement, table);
+
+        assertEquals(expectedEntries, actualEntries);
     }
 }

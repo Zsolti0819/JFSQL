@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import com.github.jfsql.driver.TestUtils;
+import com.github.jfsql.driver.db.DatabaseManager;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLFeatureNotSupportedException;
 import org.junit.jupiter.api.AfterAll;
@@ -18,11 +19,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+@SuppressWarnings("unused")
 @ExtendWith(MockitoExtension.class)
 class JfsqlDatabaseMetaDataTest {
 
     @Mock
-    JfsqlConnection connection;
+    private JfsqlConnection connection;
+    @Mock
+    private DatabaseManager databaseManager;
     @InjectMocks
     private JfsqlDatabaseMetaData metaData;
 
@@ -44,7 +48,7 @@ class JfsqlDatabaseMetaDataTest {
 
     @Test
     void getUrl() {
-        when(connection.getUrl()).thenReturn("someUrl");
+        when(metaData.getURL()).thenReturn("someUrl");
         assertEquals("someUrl", metaData.getURL());
     }
 

@@ -1,18 +1,18 @@
 package com.github.jfsql.driver.core;
 
+import com.github.jfsql.driver.db.DatabaseManager;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.RowIdLifetime;
 import java.sql.SQLFeatureNotSupportedException;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 public class JfsqlDatabaseMetaData implements DatabaseMetaData {
 
     private final JfsqlConnection connection;
-
-    JfsqlDatabaseMetaData(final JfsqlConnection connection) {
-        this.connection = connection;
-    }
+    private final DatabaseManager databaseManager;
 
     @Override
     public boolean allProceduresAreCallable() {
@@ -26,7 +26,7 @@ public class JfsqlDatabaseMetaData implements DatabaseMetaData {
 
     @Override
     public String getURL() {
-        return connection.getUrl();
+        return databaseManager.getUrl();
     }
 
     @Override

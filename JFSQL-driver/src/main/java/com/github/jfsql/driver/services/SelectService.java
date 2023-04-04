@@ -140,13 +140,15 @@ public class SelectService {
 
         for (final Entry entry : orderedEntries) {
             for (final String column : selectedColumns) {
-                final String type = table.getColumnsAndTypes().get(column);
+                final String type = columnsAndTypes.get(column);
                 if (Objects.equals(type, "BLOB")) {
-                    final String path = entry.getColumnsAndValues().get(column);
+                    final Map<String, String> columnsAndValues = entry.getColumnsAndValues();
+                    final String path = columnsAndValues.get(column);
                     if (path != null) {
                         final String value = reader.readBlob(path);
                         final LargeObject largeObject = new LargeObject(path, value);
-                        entry.getColumnsAndBlobs().put(column, largeObject);
+                        final Map<String, LargeObject> columnsAndBlobs = entry.getColumnsAndBlobs();
+                        columnsAndBlobs.put(column, largeObject);
                     }
                 }
             }
@@ -180,19 +182,22 @@ public class SelectService {
         // create a hash table for the left table
         final Map<String, List<Entry>> hashTable = new LinkedHashMap<>();
         for (final Entry t1e : t1.getEntries()) {
-            final String key = t1e.getColumnsAndValues().get(t1JoinCol);
+            final Map<String, String> t1eColumnsAndValues = t1e.getColumnsAndValues();
+            final String key = t1eColumnsAndValues.get(t1JoinCol);
             hashTable.computeIfAbsent(key, k -> new ArrayList<>());
-            hashTable.get(key).add(t1e);
+            final List<Entry> value = hashTable.get(key);
+            value.add(t1e);
         }
 
         // probe the right table using the hash table
         for (final Entry t2e : t2.getEntries()) {
-            final String key = t2e.getColumnsAndValues().get(t2JoinCol);
+            final Map<String, String> t2eColumnsAndValues = t2e.getColumnsAndValues();
+            final String key = t2eColumnsAndValues.get(t2JoinCol);
             if (hashTable.containsKey(key)) {
                 final List<Entry> matchedEntries = hashTable.get(key);
                 for (final Entry t1e : matchedEntries) {
                     final Map<String, String> commonColumnsAndValues = new LinkedHashMap<>(t1e.getColumnsAndValues());
-                    commonColumnsAndValues.putAll(t2e.getColumnsAndValues());
+                    commonColumnsAndValues.putAll(t2eColumnsAndValues);
                     commonEntries.add(new Entry(commonColumnsAndValues, new HashMap<>()));
                 }
             }
@@ -207,25 +212,29 @@ public class SelectService {
         // create a hash table for the right table
         final Map<String, List<Entry>> hashTable = new LinkedHashMap<>();
         for (final Entry t2e : t2.getEntries()) {
-            final String key = t2e.getColumnsAndValues().get(t2JoinCol);
+            final Map<String, String> t2eColumnsAndValues = t2e.getColumnsAndValues();
+            final String key = t2eColumnsAndValues.get(t2JoinCol);
             hashTable.computeIfAbsent(key, k -> new ArrayList<>());
-            hashTable.get(key).add(t2e);
+            final List<Entry> value = hashTable.get(key);
+            value.add(t2e);
         }
 
         // probe the left table using the hash table
         for (final Entry t1e : t1.getEntries()) {
-            final String key = t1e.getColumnsAndValues().get(t1JoinCol);
+            final Map<String, String> t1eColumnsAndValues = t1e.getColumnsAndValues();
+            final String key = t1eColumnsAndValues.get(t1JoinCol);
             if (hashTable.containsKey(key)) {
                 final List<Entry> matchedEntries = hashTable.get(key);
                 for (final Entry rightEntry : matchedEntries) {
-                    final Map<String, String> joinedColumnsAndValues = new LinkedHashMap<>(t1e.getColumnsAndValues());
+                    final Map<String, String> joinedColumnsAndValues = new LinkedHashMap<>(t1eColumnsAndValues);
                     joinedColumnsAndValues.putAll(rightEntry.getColumnsAndValues());
                     joinedEntries.add(new Entry(joinedColumnsAndValues, new HashMap<>()));
                 }
             } else {
                 // add a null entry for the right table columns
-                final Map<String, String> joinedColumnsAndValues = new LinkedHashMap<>(t1e.getColumnsAndValues());
-                for (final String columnName : t2.getColumnsAndTypes().keySet()) {
+                final Map<String, String> joinedColumnsAndValues = new LinkedHashMap<>(t1eColumnsAndValues);
+                final Map<String, String> t2ColumnsAndTypes = t2.getColumnsAndTypes();
+                for (final String columnName : t2ColumnsAndTypes.keySet()) {
                     joinedColumnsAndValues.put(columnName, null);
                 }
                 joinedEntries.add(new Entry(joinedColumnsAndValues, new HashMap<>()));
@@ -286,18 +295,20 @@ public class SelectService {
             final Map<String, Boolean> modifiedNotNullColumns = new LinkedHashMap<>();
 
             // Modify column names in columnsAndTypes map
-            for (final Map.Entry<String, String> entry : table.getColumnsAndTypes().entrySet()) {
+            final Map<String, String> columnsAndTypes = table.getColumnsAndTypes();
+            for (final Map.Entry<String, String> entry : columnsAndTypes.entrySet()) {
                 final String column = entry.getKey();
                 final String type = entry.getValue();
                 final boolean isCommonColumn = commonColumnsMap.get(column);
 
+                final Map<String, Boolean> notNullColumns = table.getNotNullColumns();
                 if (isCommonColumn) {
                     final String modifiedColumnName = table.getName() + "." + column;
                     modifiedColumnsAndTypes.put(modifiedColumnName, type);
-                    modifiedNotNullColumns.put(modifiedColumnName, table.getNotNullColumns().get(column));
+                    modifiedNotNullColumns.put(modifiedColumnName, notNullColumns.get(column));
                 } else {
                     modifiedColumnsAndTypes.put(column, type);
-                    modifiedNotNullColumns.put(column, table.getNotNullColumns().get(column));
+                    modifiedNotNullColumns.put(column, notNullColumns.get(column));
                 }
             }
 
@@ -334,7 +345,8 @@ public class SelectService {
 
         for (int i = 0; i < tables.size(); i++) {
             final List<Entry> modifiedEntries = createModifiedEntries(commonColumnsMap, tables.get(i));
-            modifiedTables.get(i).setEntries(modifiedEntries);
+            final Table modifiedTable = modifiedTables.get(i);
+            modifiedTable.setEntries(modifiedEntries);
         }
 
         return modifiedTables;
@@ -345,7 +357,8 @@ public class SelectService {
         final List<Entry> modifiedEntries = new ArrayList<>();
         for (final Entry entry : table.getEntries()) {
             final Map<String, String> modifiedColumnsAndValues = new LinkedHashMap<>();
-            for (final Map.Entry<String, String> columnAndValue : entry.getColumnsAndValues().entrySet()) {
+            final Map<String, String> columnsAndValues = entry.getColumnsAndValues();
+            for (final Map.Entry<String, String> columnAndValue : columnsAndValues.entrySet()) {
                 final String column = columnAndValue.getKey();
                 final boolean isCommonColumn = commonColumnsMap.get(column);
 
@@ -363,7 +376,8 @@ public class SelectService {
 
     private List<String> pairJoinColumns(final List<String> joinColumns, final List<Table> tables) {
         final List<String> pairedJoinColumns = new ArrayList<>();
-        if (Objects.equals(tables.get(1).getName(), getTableName(joinColumns.get(0)))) {
+        final Table table = tables.get(1);
+        if (Objects.equals(table.getName(), getTableName(joinColumns.get(0)))) {
             pairedJoinColumns.add(joinColumns.get(1));
             pairedJoinColumns.add(joinColumns.get(0));
         } else {
@@ -374,12 +388,14 @@ public class SelectService {
     }
 
     private List<String> modifyJoinColumns(final Table t1, final Table t2, final List<String> joinColumns) {
-        final Set<String> t1Columns = t1.getColumnsAndTypes().keySet();
+        final Map<String, String> t1ColumnsAndTypes = t1.getColumnsAndTypes();
+        final Set<String> t1Columns = t1ColumnsAndTypes.keySet();
         if (t1Columns.stream().noneMatch(joinColumns.get(0)::equals)) {
             joinColumns.set(0, getColumnName(joinColumns.get(0)));
         }
 
-        final Set<String> t2Columns = t2.getColumnsAndTypes().keySet();
+        final Map<String, String> t2ColumnsAndTypes = t2.getColumnsAndTypes();
+        final Set<String> t2Columns = t2ColumnsAndTypes.keySet();
         if (t2Columns.stream().noneMatch(joinColumns.get(1)::equals)) {
             joinColumns.set(1, getColumnName(joinColumns.get(1)));
         }
@@ -390,7 +406,8 @@ public class SelectService {
     private Map<String, Boolean> getCommonColumnsMap(final List<Table> tables) {
         final Map<String, Boolean> commonColumns = new LinkedHashMap<>();
         for (final Table table : tables) {
-            for (final String column : table.getColumnsAndTypes().keySet()) {
+            final Map<String, String> columnsAndTypes = table.getColumnsAndTypes();
+            for (final String column : columnsAndTypes.keySet()) {
                 final boolean presentInMultipleTables = commonColumns.containsKey(column);
                 commonColumns.put(column, presentInMultipleTables);
             }

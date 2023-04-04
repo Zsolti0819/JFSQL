@@ -132,9 +132,12 @@ public class SemanticValidator {
         return columnAndTypes.containsKey(columnName) || columnAndTypes.containsKey(tableName + "." + columnName);
     }
 
-    public boolean nullInsertIntoNotNullColumn(final String column, final Table table) {
-        final Map<String, Boolean> notNullColumns = table.getNotNullColumns();
-        return notNullColumns.get(column);
+    public boolean nullInsertIntoNotNullColumn(final String column, final String value, final Table table) {
+        if (Objects.equals(value, null) || Objects.equals(value, "null")) {
+            final Map<String, Boolean> notNullColumns = table.getNotNullColumns();
+            return notNullColumns.get(column);
+        }
+        return false;
     }
 
     public boolean urlIsAnExistingRegularFile(final StatementWithUrl statementWithUrl) {
