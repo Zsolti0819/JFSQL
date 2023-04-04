@@ -20,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+@SuppressWarnings("unused")
 @ExtendWith(MockitoExtension.class)
 class InsertServiceTest {
 
@@ -44,7 +45,7 @@ class InsertServiceTest {
     void testInsert_noExplicitColumns() throws SQLException {
         when(semanticValidator.allInsertValuesAreEqualLength(statement)).thenReturn(true);
         when(tableFinder.getTableByName(statement.getTableName())).thenReturn(table);
-        when(semanticValidator.valueCountIsEqualToTableColumnCount(table, statement)).thenReturn(true);
+        when(semanticValidator.valueCountIsLteTableColumnCount(table, statement)).thenReturn(true);
         when(semanticValidator.allColumnsExist(table, statement)).thenReturn(true);
         when(semanticValidator.allInsertValuesAreValid(table, statement)).thenReturn(true);
         when(table.getEntries()).thenReturn(entries);

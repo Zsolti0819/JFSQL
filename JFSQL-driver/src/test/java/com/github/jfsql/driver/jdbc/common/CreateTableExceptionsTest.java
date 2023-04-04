@@ -75,7 +75,7 @@ class CreateTableExceptionsTest {
 
         final SQLException thrown = assertThrows(SQLException.class,
             () -> statement.executeUpdate("CREATE TABLE myTable (name TEXT, name TEXT, age INTEGER)"));
-        assertEquals("Some columns were identical during table creation.", thrown.getMessage());
+        assertEquals("Duplicate columns were found in the statement.", thrown.getMessage());
     }
 
 }

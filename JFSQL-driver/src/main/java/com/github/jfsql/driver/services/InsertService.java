@@ -35,12 +35,15 @@ public class InsertService {
             throw new SQLException("The values in some parentheses were not equal.");
         }
 
+        if (semanticValidator.statementColumnsContainDuplicates(statement)) {
+            throw new SQLException("Duplicate columns were found in the statement.");
+        }
+
         final String tableName = statement.getTableName();
         final Table table = tableFinder.getTableByName(tableName);
 
-        if (!semanticValidator.valueCountIsEqualToTableColumnCount(table, statement)) {
-            throw new SQLException(
-                "The values in the parentheses were lower or greater than the table's column count.");
+        if (!semanticValidator.valueCountIsLteTableColumnCount(table, statement)) {
+            throw new SQLException("The values in the parentheses were greater than the table's column count.");
         }
 
         if (!semanticValidator.allColumnsExist(table, statement)) {
@@ -52,10 +55,6 @@ public class InsertService {
                 "Some value's type didn't match the type of the column, to which it was intended to be inserted.");
         }
 
-        if (semanticValidator.nullInsertIntoNotNullColumn(statement, table)) {
-            throw new SQLException("Inserting null value into a NOT NULL column.");
-        }
-
         // When autoCommit is true, it should be safe to read the entries from the file
         if (table.getEntries() == null || transactionManager.getAutoCommit()) {
             logger.debug("table.getEntries() == null ? {}", table.getEntries() == null);
@@ -63,12 +62,7 @@ public class InsertService {
             table.setEntries(entries);
         }
 
-        List<String> finalColumns = statement.getColumns();
-        if (finalColumns.isEmpty()) {
-            finalColumns = new ArrayList<>(table.getColumnsAndTypes().keySet());
-        }
-
-        final List<Entry> entriesToInsert = getEntriesToInsert(finalColumns, statement, table);
+        final List<Entry> entriesToInsert = getEntriesToInsert(statement, table);
         table.getEntries().addAll(entriesToInsert);
 
         transactionManager.executeDMLOperation(table);
@@ -76,43 +70,44 @@ public class InsertService {
         return statement.getValues().size();
     }
 
-    private List<Entry> getEntriesToInsert(final List<String> finalColumns, final InsertWrapper statement,
-        final Table table) {
-        final List<String> tableColumns = new ArrayList<>(table.getColumnsAndTypes().keySet());
-        final List<List<String>> insertValueLists = statement.getValues();
+    private List<Entry> getEntriesToInsert(final InsertWrapper statement, final Table table) throws SQLException {
         final List<Entry> insertEntries = new ArrayList<>();
+        final List<String> statementColumns = statement.getColumns();
+        final List<String> tableColumns = new ArrayList<>(table.getColumnsAndTypes().keySet());
+        final List<String> finalColumns = statementColumns.isEmpty() ? tableColumns : statementColumns;
+        final List<List<String>> insertValueLists = statement.getValues();
         for (final List<String> insertValueList : insertValueLists) {
             final Map<String, String> columnsAndValues = new LinkedHashMap<>();
             for (final String columnName : tableColumns) {
+                if (semanticValidator.nullInsertIntoNotNullColumn(columnName, table)) {
+                    throw new SQLException("Inserting null value into a NOT NULL column.");
+                }
                 if (finalColumns.contains(columnName)) {
                     final int index = finalColumns.indexOf(columnName);
                     final String value = insertValueList.get(index);
                     columnsAndValues.put(columnName, value);
                 } else {
-                    throw new IllegalStateException(
-                        "The column '" + columnName + "' was not present in the statement.");
+                    columnsAndValues.put(columnName, null);
                 }
             }
             insertEntries.add(new Entry(columnsAndValues, new HashMap<>()));
         }
-
         insertBlobs(finalColumns, table, insertEntries);
-
         logger.debug("insertEntries = {}", insertEntries);
         return insertEntries;
     }
 
     private void insertBlobs(final List<String> finalColumns, final Table table, final List<Entry> insertEntries) {
-        if (finalColumns.stream().noneMatch(s -> Objects.equals(table.getColumnsAndTypes().get(s), "BLOB"))) {
+        if (finalColumns.stream().noneMatch(column -> Objects.equals(table.getColumnsAndTypes().get(column), "BLOB"))) {
             return;
         }
         finalColumns.stream()
-            .filter(s -> Objects.equals(table.getColumnsAndTypes().get(s), "BLOB"))
-            .forEach(s -> {
+            .filter(column -> Objects.equals(table.getColumnsAndTypes().get(column), "BLOB"))
+            .forEach(column -> {
                 for (final Entry entry : insertEntries) {
-                    final LargeObject largeObject = preparedStatementCreator.getBlob(entry, s);
+                    final LargeObject largeObject = preparedStatementCreator.getBlob(entry, column);
                     if (largeObject != null) {
-                        entry.getColumnsAndBlobs().put(s, largeObject);
+                        entry.getColumnsAndBlobs().put(column, largeObject);
                     }
                 }
             });

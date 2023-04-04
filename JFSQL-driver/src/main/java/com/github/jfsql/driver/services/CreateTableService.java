@@ -48,8 +48,8 @@ public class CreateTableService {
             return 0;
         }
 
-        if (semanticValidator.columnsHaveDuplicate(statement)) {
-            throw new SQLException("Some columns were identical during table creation.");
+        if (semanticValidator.statementColumnsContainDuplicates(statement)) {
+            throw new SQLException("Duplicate columns were found in the statement.");
         }
 
         final List<String> columns = statement.getColumns();

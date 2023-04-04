@@ -48,7 +48,7 @@ class CreateTableServiceTest {
 
         createTableService.createTable(statement);
 
-        verify(semanticValidator, times(1)).columnsHaveDuplicate(any());
+        verify(semanticValidator, times(1)).statementColumnsContainDuplicates(any());
         verify(database, times(1)).getTables();
         verify(fileNameCreator, times(1)).createTableFileName(any(), any());
         verify(fileNameCreator, times(1)).createSchemaFileName(any(), any());
@@ -99,11 +99,11 @@ class CreateTableServiceTest {
     void testCreateTable_identicalColumns() throws SQLException {
         when(databaseManager.getDatabase()).thenReturn(database);
         when(semanticValidator.tableExists(statement, database)).thenReturn(false);
-        when(semanticValidator.columnsHaveDuplicate(statement)).thenReturn(true);
+        when(semanticValidator.statementColumnsContainDuplicates(statement)).thenReturn(true);
 
         final SQLException thrown = assertThrows(SQLException.class, () -> createTableService.createTable(
             statement));
-        assertEquals("Some columns were identical during table creation.", thrown.getMessage());
+        assertEquals("Duplicate columns were found in the statement.", thrown.getMessage());
 
         verify(fileNameCreator, never()).createTableFileName(any(), any());
         verify(fileNameCreator, never()).createSchemaFileName(any(), any());

@@ -97,15 +97,10 @@ public class JGitTransactionManagerImpl extends TransactionManager {
             .collect(Collectors.toList());
 
         final Set<File> filesFromDatabaseFile = reader.getFilesFromDatabaseFile(database);
-        logger.debug("filesFromDatabaseFile = {}", filesFromDatabaseFile);
-
         final Set<File> blobsFromTables = reader.getBlobsFromTables(database);
-        logger.debug("blobsFromTables = {}", blobsFromTables);
 
         allFiles.removeIf(filesFromDatabaseFile::contains);
-        logger.debug("allFiles after removeAll filesFromDatabaseFile = {}", allFiles);
         allFiles.removeIf(blobsFromTables::contains);
-        logger.debug("allFiles after removeAll blobsFromTables = {}", allFiles);
         allFiles.forEach(file -> filesToAdd.put(file, false));
 
         Stream.concat(filesFromDatabaseFile.stream(), blobsFromTables.stream())

@@ -2,7 +2,6 @@ package com.github.jfsql.driver.validation;
 
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
-import com.github.jfsql.parser.dto.CreateTableWrapper;
 import com.github.jfsql.parser.dto.InsertWrapper;
 import com.github.jfsql.parser.dto.StatementWithColumns;
 import com.github.jfsql.parser.dto.StatementWithTableName;
@@ -12,10 +11,13 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.apache.commons.lang3.math.NumberUtils;
 
 public class SemanticValidator {
@@ -43,26 +45,27 @@ public class SemanticValidator {
     }
 
     public boolean allColumnsExist(final Table table, final StatementWithColumns statement) {
-        final Map<String, String> columnsAndTypes = table.getColumnsAndTypes();
-        return new HashSet<>(columnsAndTypes.keySet()).containsAll(statement.getColumns());
+        final List<String> tableColumns = new ArrayList<>(table.getColumnsAndTypes().keySet());
+        final List<String> statementColumns = statement.getColumns();
+        return new HashSet<>(tableColumns).containsAll(statementColumns);
     }
 
     public boolean allWhereColumnsExist(final Table table, final StatementWithWhere statement) {
-        final Map<String, String> columnsAndTypes = table.getColumnsAndTypes();
-        return new HashSet<>(columnsAndTypes.keySet()).containsAll(statement.getWhereColumns());
+        final List<String> tableColumns = new ArrayList<>(table.getColumnsAndTypes().keySet());
+        final List<String> statementWhereColumns = statement.getWhereColumns();
+        return new HashSet<>(tableColumns).containsAll(statementWhereColumns);
     }
 
     public boolean isValid(final String value, final String type) {
         return Objects.equals(type, "INTEGER") && NumberUtils.isCreatable(value)
             || Objects.equals(type, "REAL") && NumberUtils.isCreatable(value)
-            || Objects.equals(type, "TEXT")
-            || Objects.equals(type, "BLOB");
+            || Objects.equals(type, "TEXT") || Objects.equals(type, "BLOB");
     }
 
-    public boolean columnsHaveDuplicate(final CreateTableWrapper statement) {
-        final List<String> columns = statement.getColumns();
-        final Set<String> columnSet = new HashSet<>(columns);
-        return columnSet.size() != columns.size();
+    public boolean statementColumnsContainDuplicates(final StatementWithColumns statement) {
+        final List<String> statementColumns = statement.getColumns();
+        final Set<String> columnSet = new HashSet<>(statementColumns);
+        return columnSet.size() != statementColumns.size();
     }
 
     public boolean allInsertValuesAreEqualLength(final InsertWrapper statement) {
@@ -76,20 +79,35 @@ public class SemanticValidator {
         return true;
     }
 
-    public boolean valueCountIsEqualToTableColumnCount(final Table table, final InsertWrapper statement) {
+    public boolean valueCountIsLteTableColumnCount(final Table table, final InsertWrapper statement) {
         final List<List<String>> listOfValueLists = statement.getValues();
-        return listOfValueLists.get(0).size() == table.getColumnsAndTypes().size();
+        return listOfValueLists.get(0).size() <= table.getColumnsAndTypes().size();
     }
 
     public boolean allInsertValuesAreValid(final Table table, final InsertWrapper statement) {
-        final List<String> statementColumns = statement.getColumns();
         final Map<String, String> columnsAndTypes = table.getColumnsAndTypes();
         final List<String> tableColumns = new ArrayList<>(columnsAndTypes.keySet());
-        final List<String> columnsToUse = statementColumns.isEmpty() ? tableColumns : statementColumns;
-        for (int i = 0; i < statement.getValues().size(); i++) {
-            for (int j = 0; j < statement.getValues().get(i).size(); j++) {
-                final String column = columnsToUse.get(j);
-                final String value = statement.getValues().get(i).get(j);
+        final List<String> statementColumns = statement.getColumns();
+        final List<List<String>> valueLists = statement.getValues();
+        final List<String> columnsToUse;
+
+        if (statementColumns.isEmpty()) {
+            columnsToUse = tableColumns;
+        } else {
+            columnsToUse = statementColumns;
+        }
+
+        for (final List<String> values : valueLists) {
+            final LinkedHashMap<String, String> columnsAndValues = IntStream.range(0, columnsToUse.size())
+                .boxed()
+                .collect(Collectors.toMap(
+                    columnsToUse::get, values::get,
+                    (oldValue, newValue) -> oldValue,
+                    LinkedHashMap::new
+                ));
+            for (final Map.Entry<String, String> entry : columnsAndValues.entrySet()) {
+                final String column = entry.getKey();
+                final String value = entry.getValue();
                 final String type = columnsAndTypes.get(column);
                 if (!isValid(value, type)) {
                     return false;
@@ -114,20 +132,9 @@ public class SemanticValidator {
         return columnAndTypes.containsKey(columnName) || columnAndTypes.containsKey(tableName + "." + columnName);
     }
 
-    public boolean nullInsertIntoNotNullColumn(final InsertWrapper statement, final Table table) {
-        final List<String> statementColumns = statement.getColumns();
-        final List<List<String>> valueLists = statement.getValues();
-        for (final List<String> statementValues : valueLists) {
-            for (int i = 0; i < statementColumns.size(); i++) {
-                final String column = statementColumns.get(i);
-                final String value = statementValues.get(i);
-                if ((value == null || Objects.equals(value, "null")) &&
-                    Boolean.TRUE.equals(table.getNotNullColumns().get(column))) {
-                    return true;
-                }
-            }
-        }
-        return false;
+    public boolean nullInsertIntoNotNullColumn(final String column, final Table table) {
+        final Map<String, Boolean> notNullColumns = table.getNotNullColumns();
+        return notNullColumns.get(column);
     }
 
     public boolean urlIsAnExistingRegularFile(final StatementWithUrl statementWithUrl) {
