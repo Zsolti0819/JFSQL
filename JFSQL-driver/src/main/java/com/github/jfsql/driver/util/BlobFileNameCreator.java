@@ -21,13 +21,13 @@ public class BlobFileNameCreator {
     private final DatabaseManager databaseManager;
     private final PropertiesReader propertiesReader;
 
-    public String getBlobUrl() {
-        final String url = databaseManager.getUrl();
-        final Path urlPath = Path.of(url);
+    public String getBlobURL() {
+        final String URL = databaseManager.getURL();
+        final Path pathURL = Path.of(URL);
         final String fileExtension = propertiesReader.getPersistence();
         final List<Integer> fileNumbers = new ArrayList<>();
         final Pattern pattern = Pattern.compile("blob" + "(\\d+)" + "\\." + fileExtension);
-        final Collection<File> files = FileUtils.listFiles(urlPath.toFile(), new String[]{fileExtension}, false);
+        final Collection<File> files = FileUtils.listFiles(pathURL.toFile(), new String[]{fileExtension}, false);
         for (final File file : files) {
             final String fileName = file.getName();
             final Matcher matcher = pattern.matcher(fileName);
@@ -43,7 +43,7 @@ public class BlobFileNameCreator {
             .orElse(1);
 
         final String nextBlobName =
-            urlPath + File.separator + "blob" + File.separator + "blob" + nextFileNumber + "." + fileExtension;
+            pathURL + File.separator + "blob" + File.separator + "blob" + nextFileNumber + "." + fileExtension;
         logger.debug("nextBlobName = {}", nextBlobName);
         return nextBlobName;
     }

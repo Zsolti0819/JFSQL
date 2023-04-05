@@ -4,6 +4,8 @@ import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
+import com.github.jfsql.driver.util.FileNameCreator;
+import com.github.jfsql.driver.validation.SemanticValidator;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,13 +18,16 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 
 public class JGitDatabaseManagerImpl extends DatabaseManager {
 
-    public JGitDatabaseManagerImpl(final String url, final Reader reader, final Writer writer) throws SQLException {
-        super(url, reader, writer);
+    public JGitDatabaseManagerImpl(final String URL,
+        final SemanticValidator semanticValidator,
+        final FileNameCreator fileNameCreator, final Reader reader, final Writer writer)
+        throws SQLException {
+        super(URL, semanticValidator, fileNameCreator, reader, writer);
     }
 
     @Override
     public void initDatabase(final Database database) throws SQLException {
-        final Path databaseFolder = database.getUrl().getParent();
+        final Path databaseFolder = database.getURL().getParent();
         final Path blobFolder = Path.of(databaseFolder + File.separator + "blob");
         try (final Git git = Git.init().setDirectory(databaseFolder.toFile()).call()) {
             Files.createDirectories(blobFolder);
@@ -40,7 +45,7 @@ public class JGitDatabaseManagerImpl extends DatabaseManager {
 
     @Override
     public void openDatabase() throws SQLException {
-        final Path databaseFolder = database.getUrl().getParent();
+        final Path databaseFolder = database.getURL().getParent();
         try (final Git ignored = Git.open(databaseFolder.toFile())) {
             final List<Table> tables = reader.readTablesFromDatabaseFile(database);
             database.setTables(tables);

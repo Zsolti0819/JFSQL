@@ -91,12 +91,12 @@ public class Parser extends JFSQLBaseVisitor<BaseStatement> implements JFSQLVisi
 
     private CreateDatabaseStatement getCreateDatabaseStatement(
         final JFSQLParser.CreateDatabaseContext createDatabaseContext) {
-        final String databaseUrl = createDatabaseContext.databaseUrl().getText();
-        String modifiedUrl = databaseUrl.replaceAll("[\\[\\]]", "");
-        if (!modifiedUrl.endsWith(File.pathSeparator)) {
-            modifiedUrl += File.separator;
+        final String databaseURL = createDatabaseContext.databaseURL().getText();
+        String modifiedURL = databaseURL.replaceAll("[\\[\\]]", "");
+        if (!modifiedURL.endsWith(File.pathSeparator)) {
+            modifiedURL += File.separator;
         }
-        final CreateDatabaseStatement createDatabaseStatement = new CreateDatabaseStatement(modifiedUrl);
+        final CreateDatabaseStatement createDatabaseStatement = new CreateDatabaseStatement(modifiedURL);
         logger.trace(createDatabaseStatement);
         return createDatabaseStatement;
     }
@@ -112,12 +112,12 @@ public class Parser extends JFSQLBaseVisitor<BaseStatement> implements JFSQLVisi
     }
 
     private DropDatabaseStatement getDropDatabaseStatement(final JFSQLParser.DropDatabaseContext dropDatabaseContext) {
-        final String databaseUrl = dropDatabaseContext.databaseUrl().getText();
-        String modifiedUrl = databaseUrl.replaceAll("[\\[\\]]", "");
-        if (!modifiedUrl.endsWith(File.pathSeparator)) {
-            modifiedUrl += File.separator;
+        final String databaseURL = dropDatabaseContext.databaseURL().getText();
+        String modifiedURL = databaseURL.replaceAll("[\\[\\]]", "");
+        if (!modifiedURL.endsWith(File.pathSeparator)) {
+            modifiedURL += File.separator;
         }
-        final DropDatabaseStatement dropDatabaseStatement = new DropDatabaseStatement(modifiedUrl);
+        final DropDatabaseStatement dropDatabaseStatement = new DropDatabaseStatement(modifiedURL);
         logger.trace(dropDatabaseStatement);
         return dropDatabaseStatement;
     }

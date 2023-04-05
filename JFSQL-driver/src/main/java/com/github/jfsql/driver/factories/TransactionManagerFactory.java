@@ -7,6 +7,7 @@ import com.github.jfsql.driver.db.NotVersioningTransactionManagerImpl;
 import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
+import java.util.Objects;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
@@ -15,8 +16,8 @@ public class TransactionManagerFactory {
     public TransactionManager createTransactionManager(final PropertiesReader propertiesReader,
         final DatabaseManager databaseManager,
         final Reader reader, final Writer writer) {
-        final boolean useJgit = propertiesReader.isTransactionVersioning();
-        if (useJgit) {
+        final String type = propertiesReader.getTransactionVersioning();
+        if (Objects.equals(type, "jgit")) {
             return new JGitTransactionManagerImpl(databaseManager, reader, writer);
         } else {
             return new NotVersioningTransactionManagerImpl(databaseManager, reader, writer);

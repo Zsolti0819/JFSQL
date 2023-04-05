@@ -2,6 +2,7 @@ package com.github.jfsql.driver.persistence;
 
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
+import com.github.jfsql.driver.dto.LargeObject;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.util.DatatypeConverter;
 import com.github.jfsql.driver.validation.SchemaValidationException;
@@ -10,6 +11,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -65,7 +67,7 @@ public class WriterXmlImpl extends Writer {
         final String tableFile = table.getTableFile();
         try (final FileOutputStream fileOutputStream = new FileOutputStream(tableFile);
             final FileChannel fileChannel = fileOutputStream.getChannel()) {
-            fileChannel.tryLock();
+            final FileLock lock = fileChannel.tryLock();
             final String tableName = table.getName();
             final List<Entry> entries = table.getEntries();
 
@@ -83,6 +85,7 @@ public class WriterXmlImpl extends Writer {
             }
             document.appendChild(root);
             beautifyAndWrite(fileOutputStream, document);
+            lock.release();
         } catch (final ParserConfigurationException e) {
             throw new IOException(e);
         }
@@ -121,7 +124,7 @@ public class WriterXmlImpl extends Writer {
         final String schemaFile = schema.getSchemaFile();
         try (final FileOutputStream fileOutputStream = new FileOutputStream(schemaFile);
             final FileChannel fileChannel = fileOutputStream.getChannel()) {
-            fileChannel.tryLock();
+            final FileLock lock = fileChannel.tryLock();
             final List<String> columnNames = new ArrayList<>(schema.getColumnsAndTypes().keySet());
             final List<String> columnTypes = new ArrayList<>(schema.getColumnsAndTypes().values());
             final DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -168,6 +171,7 @@ public class WriterXmlImpl extends Writer {
                 sequenceElement2.appendChild(column);
             }
             beautifyAndWrite(fileOutputStream, document);
+            lock.release();
         } catch (final ParserConfigurationException e) {
             throw new IOException("Failed to configure the parser.");
         }
@@ -177,12 +181,12 @@ public class WriterXmlImpl extends Writer {
     public void writeDatabaseFile(final Database database) throws IOException {
         logger.trace("database = {}", database);
         logger.trace("database tables = {}", database.getTables());
-        final Path databaseFilePath = database.getUrl();
+        final Path databaseFilePath = database.getURL();
         final String databaseFileParentPath = String.valueOf(databaseFilePath.getParent());
         final Path databaseFolderName = Path.of(databaseFileParentPath);
         try (final FileOutputStream fileOutputStream = new FileOutputStream(databaseFilePath.toFile());
             final FileChannel fileChannel = fileOutputStream.getChannel()) {
-            fileChannel.tryLock();
+            final FileLock lock = fileChannel.tryLock();
             final Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
             final Element root = document.createElement("Database");
             root.setAttribute("name", String.valueOf(databaseFolderName.getFileName()));
@@ -207,6 +211,7 @@ public class WriterXmlImpl extends Writer {
             }
 
             beautifyAndWrite(fileOutputStream, document);
+            lock.release();
         } catch (final ParserConfigurationException e) {
             throw new IOException("Failed to configure the parser.");
         }
@@ -214,17 +219,19 @@ public class WriterXmlImpl extends Writer {
 
     @Override
     public String writeBlob(final Table table, final Entry entry, final String column) throws IOException {
-        final String blobUrl = entry.getColumnsAndBlobs().get(column).getUrl();
-        logger.trace("blob url = {}", blobUrl);
-        final String blobValue = entry.getColumnsAndBlobs().get(column).getValue();
+        final Map<String, LargeObject> columnsAndBlobs = entry.getColumnsAndBlobs();
+        final LargeObject largeObject = columnsAndBlobs.get(column);
+        final String blobURL = largeObject.getURL();
+        logger.trace("blobURL = {}", blobURL);
+        final String blobValue = largeObject.getValue();
         logger.trace("blob value = {}", blobValue);
         final Path tableParent = Path.of(table.getTableFile()).getParent();
         final Path blobParent = Path.of(tableParent + File.separator + "blob");
         Files.createDirectories(blobParent);
 
-        try (final FileOutputStream fileOutputStream = new FileOutputStream(blobUrl);
+        try (final FileOutputStream fileOutputStream = new FileOutputStream(blobURL);
             final FileChannel fileChannel = fileOutputStream.getChannel()) {
-            fileChannel.tryLock();
+            final FileLock lock = fileChannel.tryLock();
             final DocumentBuilder documentBuilder;
             documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             final Document document = documentBuilder.newDocument();
@@ -232,10 +239,11 @@ public class WriterXmlImpl extends Writer {
             root.setTextContent(blobValue);
             document.appendChild(root);
             beautifyAndWrite(fileOutputStream, document);
+            lock.release();
         } catch (final ParserConfigurationException e) {
             throw new IOException("Failed to configure the parser.");
         }
-        return blobUrl;
+        return blobURL;
     }
 
 }

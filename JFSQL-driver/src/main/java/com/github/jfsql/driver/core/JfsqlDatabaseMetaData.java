@@ -26,7 +26,7 @@ public class JfsqlDatabaseMetaData implements DatabaseMetaData {
 
     @Override
     public String getURL() {
-        return databaseManager.getUrl();
+        return databaseManager.getURL();
     }
 
     @Override

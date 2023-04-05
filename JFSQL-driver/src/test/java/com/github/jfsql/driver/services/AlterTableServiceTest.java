@@ -1,13 +1,10 @@
 package com.github.jfsql.driver.services;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -19,11 +16,9 @@ import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.util.FileNameCreator;
-import com.github.jfsql.driver.util.IoOperationHandler;
 import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.AlterTableWrapper;
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
@@ -33,6 +28,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+@SuppressWarnings("unused")
 @ExtendWith(MockitoExtension.class)
 class AlterTableServiceTest {
 
@@ -46,8 +42,6 @@ class AlterTableServiceTest {
     private SemanticValidator semanticValidator;
     @Mock
     private FileNameCreator fileNameCreator;
-    @Mock
-    private IoOperationHandler ioOperationHandler;
     @Mock
     private Reader reader;
     @Mock
@@ -145,41 +139,6 @@ class AlterTableServiceTest {
             () -> alterTableService.renameTable(statement, database, table));
         assertEquals("Table name cannot be the same as database name.", thrown.getMessage());
         verify(transactionManager, never()).executeDDLOperation(any(), any());
-    }
-
-    @Test
-    void testRenameTable_whenFailedToRenameFilesThenRethrowException() throws IOException, SQLException {
-        when(statement.getNewTableName()).thenReturn("myTableEdited");
-        when(fileNameCreator.createTableFileName(statement.getNewTableName(), database)).thenReturn(
-            "myTableEdited.xml");
-
-        when(table.getTableFile()).thenReturn("tableFile");
-        when(table.getSchemaFile()).thenReturn("schemaFile");
-        when(transactionManager.getUncommittedTables()).thenReturn(uncommittedTables);
-        when(uncommittedTables.contains(table)).thenReturn(false);
-
-        doThrow(IOException.class).when(ioOperationHandler).renameFile(anyString(), anyString());
-        final SQLException thrown = assertThrows(SQLException.class,
-            () -> alterTableService.renameTable(statement, database, table));
-        assertTrue(thrown.getMessage().contains("Failed to rename files.\n"));
-        verify(transactionManager, never()).executeDDLOperation(any(), any());
-    }
-
-    @Test
-    void testRenameTable_whenTableIsNotCommittedButExistsThenDoNotThrowException() throws IOException, SQLException {
-        when(statement.getNewTableName()).thenReturn("myTableEdited");
-        when(fileNameCreator.createTableFileName(statement.getNewTableName(), database)).thenReturn(
-            "myTableEdited.xml");
-
-        when(table.getTableFile()).thenReturn("tableFile");
-        when(table.getSchemaFile()).thenReturn("schemaFile");
-        when(transactionManager.getUncommittedTables()).thenReturn(uncommittedTables);
-        when(uncommittedTables.contains(table)).thenReturn(true);
-
-        doThrow(IOException.class).when(ioOperationHandler).renameFile(anyString(), anyString());
-        assertDoesNotThrow(() -> alterTableService.renameTable(statement, database, table));
-        verify(reader, times(1)).readEntriesFromTable(any());
-        verify(transactionManager, times(1)).executeDDLOperation(any(), any());
     }
 
     @Test

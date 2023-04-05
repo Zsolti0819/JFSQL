@@ -5,7 +5,7 @@ import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.parser.dto.InsertWrapper;
 import com.github.jfsql.parser.dto.StatementWithColumns;
 import com.github.jfsql.parser.dto.StatementWithTableName;
-import com.github.jfsql.parser.dto.StatementWithUrl;
+import com.github.jfsql.parser.dto.StatementWithURL;
 import com.github.jfsql.parser.dto.StatementWithWhere;
 import java.io.File;
 import java.nio.file.Path;
@@ -23,7 +23,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 public class SemanticValidator {
 
     public boolean tableNameEqualsDatabaseName(final String tableName, final Database database) {
-        final String databaseName = database.getUrl().getFileName().toString().replace(".json", "").replace(".xml", "");
+        final String databaseName = database.getURL().getFileName().toString().replace(".json", "").replace(".xml", "");
         return Objects.equals(tableName, databaseName);
     }
 
@@ -140,14 +140,14 @@ public class SemanticValidator {
         return false;
     }
 
-    public boolean urlIsAnExistingRegularFile(final StatementWithUrl statementWithUrl) {
-        return Path.of(statementWithUrl.getDatabaseUrl()).toFile().isFile();
+    public boolean URLIsNotDirectory(final String URL) {
+        return Path.of(URL).toFile().isFile();
     }
 
-    public boolean databaseExist(final StatementWithUrl statement, final String fileExtension) {
-        final Path url = Path.of(statement.getDatabaseUrl());
-        final String databaseFile = File.separator + url.getFileName() + "." + fileExtension;
-        final Path databaseXmlFilePath = Path.of(url + databaseFile);
+    public boolean databaseExist(final StatementWithURL statement, final String fileExtension) {
+        final Path URL = Path.of(statement.getDatabaseURL());
+        final String databaseFile = File.separator + URL.getFileName() + "." + fileExtension;
+        final Path databaseXmlFilePath = Path.of(URL + databaseFile);
         return databaseXmlFilePath.toFile().exists();
     }
 

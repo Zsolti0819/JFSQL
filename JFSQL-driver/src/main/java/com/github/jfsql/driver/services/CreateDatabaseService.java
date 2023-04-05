@@ -20,7 +20,9 @@ public class CreateDatabaseService {
     private final Reader reader;
 
     int createDatabase(final CreateDatabaseWrapper statement) throws SQLException {
-        if (semanticValidator.urlIsAnExistingRegularFile(statement)) {
+        final String URL = statement.getDatabaseURL();
+
+        if (semanticValidator.URLIsNotDirectory(URL)) {
             throw new SQLException("Database is not a directory.");
         }
 
@@ -28,7 +30,7 @@ public class CreateDatabaseService {
             throw new SQLException("Database already exists.");
         }
 
-        final Path databaseFilePath = fileNameCreator.createDatabaseFileName(statement);
+        final Path databaseFilePath = fileNameCreator.createDatabaseFileName(URL);
         final Database database = new Database(databaseFilePath, new LinkedList<>());
 
         databaseManager.executeCreateDatabaseOperation(database);

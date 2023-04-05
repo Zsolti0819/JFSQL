@@ -2,6 +2,7 @@ package com.github.jfsql.driver.persistence;
 
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
+import com.github.jfsql.driver.dto.LargeObject;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.util.DatatypeConverter;
 import com.github.jfsql.driver.validation.JsonSchemaValidator;
@@ -16,6 +17,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -50,7 +52,7 @@ public class WriterJsonImpl extends Writer {
         final String tableFile = table.getTableFile();
         try (final FileOutputStream fileOutputStream = new FileOutputStream(tableFile);
             final FileChannel fileChannel = fileOutputStream.getChannel()) {
-            fileChannel.tryLock();
+            final FileLock lock = fileChannel.tryLock();
             final List<Entry> entries = table.getEntries();
             final JsonObject root = new JsonObject();
 
@@ -67,6 +69,7 @@ public class WriterJsonImpl extends Writer {
 
             final String jsonString = beautify(root);
             fileOutputStream.write(jsonString.getBytes());
+            lock.release();
         }
         if (useSchemaValidation) {
             final String schemaFile = table.getSchemaFile();
@@ -109,7 +112,7 @@ public class WriterJsonImpl extends Writer {
         final String schemaFile = schema.getSchemaFile();
         try (final FileOutputStream fileOutputStream = new FileOutputStream(schemaFile);
             final FileChannel fileChannel = fileOutputStream.getChannel()) {
-            fileChannel.tryLock();
+            final FileLock lock = fileChannel.tryLock();
             final List<String> columnNames = new ArrayList<>(schema.getColumnsAndTypes().keySet());
             final List<String> columnTypes = new ArrayList<>(schema.getColumnsAndTypes().values());
 
@@ -160,6 +163,7 @@ public class WriterJsonImpl extends Writer {
 
             final String jsonString = beautify(root);
             fileOutputStream.write(jsonString.getBytes());
+            lock.release();
         }
     }
 
@@ -167,12 +171,12 @@ public class WriterJsonImpl extends Writer {
     public void writeDatabaseFile(final Database database) throws IOException {
         logger.trace("database = {}", database);
         logger.trace("database tables = {}", database.getTables());
-        final Path databaseFilePath = database.getUrl();
+        final Path databaseFilePath = database.getURL();
         final String databaseFileParentPath = String.valueOf(databaseFilePath.getParent());
         final Path databaseFolderName = Path.of(databaseFileParentPath);
         try (final FileOutputStream fileOutputStream = new FileOutputStream(String.valueOf(databaseFilePath));
             final FileChannel fileChannel = fileOutputStream.getChannel()) {
-            fileChannel.tryLock();
+            final FileLock lock = fileChannel.tryLock();
             final JsonObject root = new JsonObject();
             root.addProperty("Database", String.valueOf(databaseFolderName.getFileName()));
             final List<Table> tables = database.getTables();
@@ -190,28 +194,32 @@ public class WriterJsonImpl extends Writer {
 
             final String jsonString = beautify(root);
             fileOutputStream.write(jsonString.getBytes());
+            lock.release();
         }
     }
 
     @Override
     public String writeBlob(final Table table, final Entry entry, final String column) throws IOException {
-        final String blobUrl = entry.getColumnsAndBlobs().get(column).getUrl();
-        logger.trace("blob url = {}", blobUrl);
-        final String blobValue = entry.getColumnsAndBlobs().get(column).getValue();
+        final Map<String, LargeObject> columnsAndBlobs = entry.getColumnsAndBlobs();
+        final LargeObject largeObject = columnsAndBlobs.get(column);
+        final String blobURL = largeObject.getURL();
+        logger.trace("blobURL = {}", blobURL);
+        final String blobValue = largeObject.getValue();
         logger.trace("blob value = {}", blobValue);
         final Path tableParent = Path.of(table.getTableFile()).getParent();
         final Path blobParent = Path.of(tableParent + File.separator + "blob");
         Files.createDirectories(blobParent);
 
-        try (final FileOutputStream fileOutputStream = new FileOutputStream(blobUrl);
+        try (final FileOutputStream fileOutputStream = new FileOutputStream(blobURL);
             final FileChannel fileChannel = fileOutputStream.getChannel()) {
-            fileChannel.tryLock();
+            final FileLock lock = fileChannel.tryLock();
             final JsonObject root = new JsonObject();
             root.addProperty("blob", blobValue);
             final String jsonString = beautify(root);
             fileOutputStream.write(jsonString.getBytes());
-            return blobUrl;
+            lock.release();
         }
+        return blobURL;
     }
 
 }

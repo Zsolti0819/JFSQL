@@ -12,7 +12,7 @@ public class PropertiesReader {
     private boolean schemaValidation = true;
     private boolean statementCaching = true;
     private String persistence = "xml";
-    private boolean transactionVersioning = true;
+    private String transactionVersioning = "jgit";
 
     public PropertiesReader(final Properties properties) {
         if (properties == null) {
@@ -58,13 +58,15 @@ public class PropertiesReader {
     }
 
     private void readTransactionVersioningProperty(final Properties properties) {
-        final String transactionVersioningString = properties.getProperty("transaction.versioning");
+        String transactionVersioningString = properties.getProperty("transaction.versioning");
         if (transactionVersioningString != null) {
-            try {
-                transactionVersioning = Boolean.parseBoolean(transactionVersioningString);
+            transactionVersioningString = transactionVersioningString.trim();
+            if (transactionVersioningString.equalsIgnoreCase("jgit") || transactionVersioningString.equalsIgnoreCase(
+                "none")) {
+                transactionVersioning = transactionVersioningString.toLowerCase();
                 logger.trace("Successfully parsed the value '{}' for the key 'transaction.versioning', will use '{}'",
                     transactionVersioningString, transactionVersioning);
-            } catch (final IllegalArgumentException e) {
+            } else {
                 logger.trace(
                     "Failed to parse the value '{}' for the key 'transaction.versioning', the default value '{}' will be used",
                     transactionVersioningString, transactionVersioning);

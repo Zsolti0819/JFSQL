@@ -8,6 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.github.jfsql.driver.TestUtils;
 import com.github.jfsql.driver.db.DatabaseManager;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.util.FileNameCreator;
@@ -38,7 +39,8 @@ class CreateDatabaseServiceTest {
 
     @Test
     void testCreateDatabase_normally() throws SQLException {
-        when(semanticValidator.urlIsAnExistingRegularFile(statement)).thenReturn(false);
+        when(statement.getDatabaseURL()).thenReturn(String.valueOf(TestUtils.DATABASE_PATH));
+        when(semanticValidator.URLIsNotDirectory(String.valueOf(TestUtils.DATABASE_PATH))).thenReturn(false);
         when(semanticValidator.databaseExist(statement, reader.getFileExtension())).thenReturn(false);
         final int result = createDatabaseService.createDatabase(statement);
         assertEquals(0, result);
@@ -48,7 +50,8 @@ class CreateDatabaseServiceTest {
 
     @Test
     void testCreateDatabase_databaseIsNotDirectory() throws SQLException {
-        when(semanticValidator.urlIsAnExistingRegularFile(statement)).thenReturn(true);
+        when(statement.getDatabaseURL()).thenReturn(String.valueOf(TestUtils.DATABASE_PATH));
+        when(semanticValidator.URLIsNotDirectory(String.valueOf(TestUtils.DATABASE_PATH))).thenReturn(true);
 
         final SQLException thrown = assertThrows(SQLException.class,
             () -> createDatabaseService.createDatabase(statement));
@@ -60,7 +63,8 @@ class CreateDatabaseServiceTest {
 
     @Test
     void testCreateDatabase_databaseExists() throws SQLException {
-        when(semanticValidator.urlIsAnExistingRegularFile(statement)).thenReturn(false);
+        when(statement.getDatabaseURL()).thenReturn(String.valueOf(TestUtils.DATABASE_PATH));
+        when(semanticValidator.URLIsNotDirectory(String.valueOf(TestUtils.DATABASE_PATH))).thenReturn(false);
         when(semanticValidator.databaseExist(statement, reader.getFileExtension())).thenReturn(true);
 
         final SQLException thrown = assertThrows(SQLException.class,

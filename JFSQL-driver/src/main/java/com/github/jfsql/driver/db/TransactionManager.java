@@ -5,16 +5,21 @@ import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.PessimisticLockException;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.Data;
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -99,7 +104,7 @@ public abstract class TransactionManager {
                     writer.writeDatabaseFile(database);
                     writer.writeSchema(table);
                     writer.writeTable(table);
-                    commit(String.valueOf(database.getUrl().getFileName()),
+                    commit(String.valueOf(database.getURL().getFileName()),
                         String.valueOf(Path.of(table.getSchemaFile()).getFileName()),
                         String.valueOf(Path.of(table.getTableFile()).getFileName()));
                 } catch (final IOException e) {
@@ -118,7 +123,7 @@ public abstract class TransactionManager {
             } else {
                 try {
                     writer.writeDatabaseFile(database);
-                    commit(String.valueOf(database.getUrl().getFileName()));
+                    commit(String.valueOf(database.getURL().getFileName()));
                 } catch (final IOException e) {
                     e.printStackTrace();
                     rollback();
@@ -157,16 +162,16 @@ public abstract class TransactionManager {
     }
 
     private void addDatabaseToUncommittedObjects(final Database database) {
-        if (FILE_TO_THREAD_ID_MAP.containsKey(String.valueOf(database.getUrl()))) {
-            if (!Objects.equals(FILE_TO_THREAD_ID_MAP.get(String.valueOf(database.getUrl())),
+        if (FILE_TO_THREAD_ID_MAP.containsKey(String.valueOf(database.getURL()))) {
+            if (!Objects.equals(FILE_TO_THREAD_ID_MAP.get(String.valueOf(database.getURL())),
                 Thread.currentThread().getId())) {
                 // remove all entries from the shared map, where the value was the thread's id
                 removeCurrentThreadChangesFromMap();
                 throw new PessimisticLockException(
-                    "The file '" + database.getUrl() + "' is currently being modified by another thread.");
+                    "The file '" + database.getURL() + "' is currently being modified by another thread.");
             }
         } else {
-            FILE_TO_THREAD_ID_MAP.put(String.valueOf(database.getUrl()), Thread.currentThread().getId());
+            FILE_TO_THREAD_ID_MAP.put(String.valueOf(database.getURL()), Thread.currentThread().getId());
         }
         uncommittedDatabases.add(database);
     }
@@ -182,6 +187,34 @@ public abstract class TransactionManager {
                 }
             }
         }
+    }
+
+    Map<File, Boolean> getFilesToKeep() throws SQLException {
+        final Map<File, Boolean> filesToKeep = new HashMap<>();
+        final Database database = databaseManager.database;
+        final Path databaseURL = database.getURL();
+        final Path databaseFolder = databaseURL.getParent();
+        final Path blobFolder = Path.of(databaseFolder + File.separator + "blob");
+        final String fileExtension = reader.getFileExtension();
+        final String schemaExtension = reader.getSchemaFileExtension();
+        final String[] extensions = new String[]{fileExtension, schemaExtension};
+
+        final Collection<File> mainFolderFiles = FileUtils.listFiles(databaseFolder.toFile(), extensions, false);
+        final Collection<File> blobFolderFiles = FileUtils.listFiles(blobFolder.toFile(), extensions, false);
+        final Collection<File> allFiles = Stream.concat(mainFolderFiles.stream(), blobFolderFiles.stream())
+            .collect(Collectors.toList());
+
+        final Set<File> filesFromDatabaseFile = reader.getFilesFromDatabaseFile(database);
+        final Set<File> blobsFromTables = reader.getBlobsFromTables(database);
+
+        allFiles.removeIf(filesFromDatabaseFile::contains);
+        allFiles.removeIf(blobsFromTables::contains);
+        allFiles.forEach(file -> filesToKeep.put(file, false));
+
+        Stream.concat(filesFromDatabaseFile.stream(), blobsFromTables.stream())
+            .forEach(file -> filesToKeep.put(file, true));
+        filesToKeep.put(databaseURL.toFile(), true);
+        return filesToKeep;
     }
 
 }

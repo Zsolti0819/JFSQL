@@ -133,7 +133,7 @@ binaryOperator
 symbol
 value
 valuesInParentheses
-databaseUrl
+databaseURL
 tableName
 tableDotColumnName
 columnName

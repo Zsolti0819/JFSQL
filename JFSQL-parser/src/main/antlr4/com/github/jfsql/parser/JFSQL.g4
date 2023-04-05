@@ -41,7 +41,7 @@ createTable
  ;
 
 createDatabase
- : CREATE DATABASE databaseUrl
+ : CREATE DATABASE databaseURL
  ;
 
 delete
@@ -53,7 +53,7 @@ dropTable
  ;
 
 dropDatabase
- : DROP DATABASE databaseUrl
+ : DROP DATABASE databaseURL
  ;
 
 insert
@@ -134,7 +134,7 @@ valuesInParentheses
  : OPEN_PAR value ( COL value )* CLOSE_PAR
  ;
 
-databaseUrl
+databaseURL
  : IDENTIFIER
  ;
 

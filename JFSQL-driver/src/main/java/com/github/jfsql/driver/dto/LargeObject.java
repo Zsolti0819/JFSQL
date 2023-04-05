@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class LargeObject {
 
-    private final String url;
+    private final String URL;
     private final String value;
 
 }

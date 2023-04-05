@@ -54,43 +54,41 @@ public class JfsqlDriver implements Driver {
     }
 
     @Override
-    public boolean acceptsURL(final String url) {
-        if (url == null) {
+    public boolean acceptsURL(final String URL) {
+        if (URL == null) {
             return false;
         }
-        return url.startsWith("jdbc:jfsql:");
+        return URL.startsWith("jdbc:jfsql:");
     }
 
     @Override
-    public Connection connect(final String url, final Properties info) throws SQLException {
-        if (!acceptsURL(url)) {
+    public Connection connect(final String URL, final Properties info) throws SQLException {
+        if (!acceptsURL(URL)) {
             throw new SQLException("Couldn't establish connection, because wrong connection string format was used.");
         }
 
         final PropertiesReader propertiesReader = new PropertiesReader(info);
-
-        // Classes created by factories
+        final SemanticValidator semanticValidator = new SemanticValidator();
         final Cache cache = CacheFactory.createCache(propertiesReader);
         final Reader reader = ReaderFactory.createReader(propertiesReader);
         final Writer writer = WriterFactory.createWriter(propertiesReader);
+        final FileNameCreator fileNameCreator = new FileNameCreator(reader);
         final DatabaseManager databaseManager = DatabaseManagerFactory
-            .createDatabaseManager(propertiesReader, url, reader, writer);
+            .createDatabaseManager(propertiesReader, URL, semanticValidator, fileNameCreator, reader, writer);
         final TransactionManager transactionManager = TransactionManagerFactory
             .createTransactionManager(propertiesReader, databaseManager, reader, writer);
 
         // Classes used in statement services
         final Parser parser = new Parser();
         final IoOperationHandler ioOperationHandler = new IoOperationHandler();
-        final SemanticValidator semanticValidator = new SemanticValidator();
         final ColumnToTypeMapper columnToTypeMapper = new ColumnToTypeMapper();
         final WhereConditionSolver whereConditionSolver = new WhereConditionSolver();
-        final FileNameCreator fileNameCreator = new FileNameCreator(reader);
         final TableFinder tableFinder = new TableFinder(databaseManager);
         final PreparedStatementCreator preparedStatementCreator = new PreparedStatementCreator(tableFinder);
 
         // Specific statement services
         final AlterTableService alterTableService = new AlterTableService(tableFinder, databaseManager,
-            transactionManager, semanticValidator, ioOperationHandler, fileNameCreator, reader);
+            transactionManager, semanticValidator, fileNameCreator, reader);
         final CreateDatabaseService createDatabaseService = new CreateDatabaseService(databaseManager,
             semanticValidator, fileNameCreator, reader);
         final DropDatabaseService dropDatabaseService = new DropDatabaseService(databaseManager, semanticValidator,
@@ -158,7 +156,7 @@ public class JfsqlDriver implements Driver {
     // Unsupported operations
 
     @Override
-    public DriverPropertyInfo[] getPropertyInfo(final String url, final Properties info)
+    public DriverPropertyInfo[] getPropertyInfo(final String URL, final Properties info)
         throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }

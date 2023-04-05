@@ -6,19 +6,23 @@ import com.github.jfsql.driver.db.JGitDatabaseManagerImpl;
 import com.github.jfsql.driver.db.NotVersioningDatabaseManagerImpl;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
+import com.github.jfsql.driver.util.FileNameCreator;
+import com.github.jfsql.driver.validation.SemanticValidator;
 import java.sql.SQLException;
+import java.util.Objects;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class DatabaseManagerFactory {
 
-    public DatabaseManager createDatabaseManager(final PropertiesReader propertiesReader, final String url,
-        final Reader reader, final Writer writer) throws SQLException {
-        final boolean useJgit = propertiesReader.isTransactionVersioning();
-        if (useJgit) {
-            return new JGitDatabaseManagerImpl(url, reader, writer);
+    public DatabaseManager createDatabaseManager(final PropertiesReader propertiesReader, final String URL,
+        final SemanticValidator semanticValidator, final FileNameCreator fileNameCreator, final Reader reader,
+        final Writer writer) throws SQLException {
+        final String type = propertiesReader.getTransactionVersioning();
+        if (Objects.equals(type, "jgit")) {
+            return new JGitDatabaseManagerImpl(URL, semanticValidator, fileNameCreator, reader, writer);
         } else {
-            return new NotVersioningDatabaseManagerImpl(url, reader, writer);
+            return new NotVersioningDatabaseManagerImpl(URL, semanticValidator, fileNameCreator, reader, writer);
         }
     }
 

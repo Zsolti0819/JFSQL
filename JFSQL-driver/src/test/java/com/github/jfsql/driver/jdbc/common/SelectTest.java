@@ -16,19 +16,30 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class SelectTest {
 
     private Statement statement;
     private Connection connection;
 
-    private void setUp(final String format) throws SQLException {
+    static Stream<Arguments> configurations() {
+        return Stream.of(
+            Arguments.of("json", "jgit"),
+            Arguments.of("json", "none"),
+            Arguments.of("xml", "jgit"),
+            Arguments.of("xml", "none")
+        );
+    }
+
+    private void setup(final String persistence, final String transactionVersioning) throws SQLException {
         final Properties properties = new Properties();
-        properties.setProperty("persistence", format);
-        properties.setProperty("transaction.versioning", "true");
+        properties.setProperty("persistence", persistence);
+        properties.setProperty("transaction.versioning", transactionVersioning);
         properties.setProperty("statement.caching", "true");
         properties.setProperty("schema.validation", "true");
         connection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
@@ -56,9 +67,9 @@ class SelectTest {
      * <a href="https://www.sqlshack.com/sql-multiple-joins-for-beginners-with-examples/">Based on this tutorial</a>
      */
     @ParameterizedTest
-    @ValueSource(strings = {"json", "xml"})
-    void testSelect_multipleJoin(final String format) throws SQLException {
-        setUp(format);
+    @MethodSource("configurations")
+    void testSelect_multipleJoin(final String persistence, final String transactionVersioning) throws SQLException {
+        setup(persistence, transactionVersioning);
 
         statement.execute("DROP TABLE IF EXISTS sales");
         statement.execute("DROP TABLE IF EXISTS orders");
@@ -122,9 +133,9 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"json", "xml"})
-    void testSelect_innerJoin(final String format) throws SQLException {
-        setUp(format);
+    @MethodSource("configurations")
+    void testSelect_innerJoin(final String persistence, final String transactionVersioning) throws SQLException {
+        setup(persistence, transactionVersioning);
 
         assertTrue(statement.execute("SELECT * FROM myTable JOIN myTable2 ON myTable2.age2 = myTable.id"));
         final List<Integer> ids = new ArrayList<>();
@@ -155,9 +166,9 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"json", "xml"})
-    void testSelect_leftJoin(final String format) throws SQLException {
-        setUp(format);
+    @MethodSource("configurations")
+    void testSelect_leftJoin(final String persistence, final String transactionVersioning) throws SQLException {
+        setup(persistence, transactionVersioning);
 
         assertTrue(statement.execute("SELECT * FROM myTable LEFT JOIN myTable2 ON myTable.id = myTable2.age2"));
         final List<Integer> ids = new ArrayList<>();
@@ -188,9 +199,9 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"json", "xml"})
-    void testSelect_all(final String format) throws SQLException {
-        setUp(format);
+    @MethodSource("configurations")
+    void testSelect_all(final String persistence, final String transactionVersioning) throws SQLException {
+        setup(persistence, transactionVersioning);
 
         final List<String> names = new ArrayList<>();
         final List<Integer> ids = new ArrayList<>();
@@ -209,9 +220,9 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"json", "xml"})
-    void testSelect_whereIntegerGt(final String format) throws SQLException {
-        setUp(format);
+    @MethodSource("configurations")
+    void testSelect_whereIntegerGt(final String persistence, final String transactionVersioning) throws SQLException {
+        setup(persistence, transactionVersioning);
 
         final List<Integer> ages = new ArrayList<>();
         final List<String> names = new ArrayList<>();
@@ -233,9 +244,9 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"json", "xml"})
-    void testSelect_whereLike(final String format) throws SQLException {
-        setUp(format);
+    @MethodSource("configurations")
+    void testSelect_whereLike(final String persistence, final String transactionVersioning) throws SQLException {
+        setup(persistence, transactionVersioning);
 
         final List<Integer> ages = new ArrayList<>();
         final List<String> names = new ArrayList<>();
@@ -258,9 +269,10 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"json", "xml"})
-    void testSelect_whereMultipleANDs(final String format) throws SQLException {
-        setUp(format);
+    @MethodSource("configurations")
+    void testSelect_whereMultipleANDs(final String persistence, final String transactionVersioning)
+        throws SQLException {
+        setup(persistence, transactionVersioning);
 
         final List<Integer> ages = new ArrayList<>();
         final List<String> names = new ArrayList<>();
@@ -283,9 +295,9 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"json", "xml"})
-    void testSelect_whereIntegerGte(final String format) throws SQLException {
-        setUp(format);
+    @MethodSource("configurations")
+    void testSelect_whereIntegerGte(final String persistence, final String transactionVersioning) throws SQLException {
+        setup(persistence, transactionVersioning);
 
         final List<Integer> ages = new ArrayList<>();
         final List<String> names = new ArrayList<>();
@@ -307,9 +319,9 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"json", "xml"})
-    void testSelect_columnsByIndex(final String format) throws SQLException {
-        setUp(format);
+    @MethodSource("configurations")
+    void testSelect_columnsByIndex(final String persistence, final String transactionVersioning) throws SQLException {
+        setup(persistence, transactionVersioning);
 
         final ResultSet resultSet = statement.executeQuery("SELECT id, age, name FROM myTable WHERE id=1");
         while (resultSet.next()) {
@@ -320,9 +332,10 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"json", "xml"})
-    void testSelect_columnsByColumnName(final String format) throws SQLException {
-        setUp(format);
+    @MethodSource("configurations")
+    void testSelect_columnsByColumnName(final String persistence, final String transactionVersioning)
+        throws SQLException {
+        setup(persistence, transactionVersioning);
 
         final ResultSet resultSet = statement.executeQuery("SELECT name, id, age FROM myTable WHERE id=1");
         while (resultSet.next()) {
@@ -333,9 +346,10 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"json", "xml"})
-    void testSelect_notExistingColumn(final String format) throws SQLException {
-        setUp(format);
+    @MethodSource("configurations")
+    void testSelect_notExistingColumn(final String persistence, final String transactionVersioning)
+        throws SQLException {
+        setup(persistence, transactionVersioning);
 
         final SQLException thrown = assertThrows(SQLException.class,
             () -> statement.executeQuery("SELECT lol FROM myTable;"));
@@ -343,9 +357,10 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"json", "xml"})
-    void testSelect_notExistingColumnInJoinedTable(final String format) throws SQLException {
-        setUp(format);
+    @MethodSource("configurations")
+    void testSelect_notExistingColumnInJoinedTable(final String persistence, final String transactionVersioning)
+        throws SQLException {
+        setup(persistence, transactionVersioning);
 
         final SQLException thrown = assertThrows(SQLException.class,
             () -> statement.executeQuery("SELECT lol FROM myTable JOIN myTable2 ON myTable2.age2 = myTable.id"));
@@ -353,9 +368,10 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"json", "xml"})
-    void testSelect_resultSetMetadata(final String format) throws SQLException {
-        setUp(format);
+    @MethodSource("configurations")
+    void testSelect_resultSetMetadata(final String persistence, final String transactionVersioning)
+        throws SQLException {
+        setup(persistence, transactionVersioning);
 
         final ResultSet resultSet = statement.executeQuery("SELECT * FROM myTable");
         final ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
@@ -367,9 +383,10 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"json", "xml"})
-    void testSelect_resultSetMetadataAllManual(final String format) throws SQLException {
-        setUp(format);
+    @MethodSource("configurations")
+    void testSelect_resultSetMetadataAllManual(final String persistence, final String transactionVersioning)
+        throws SQLException {
+        setup(persistence, transactionVersioning);
 
         final ResultSet resultSet = statement.executeQuery("SELECT age, name, id FROM myTable");
         final ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
@@ -381,9 +398,10 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"json", "xml"})
-    void testSelect_resultSetMetadataNotAll(final String format) throws SQLException {
-        setUp(format);
+    @MethodSource("configurations")
+    void testSelect_resultSetMetadataNotAll(final String persistence, final String transactionVersioning)
+        throws SQLException {
+        setup(persistence, transactionVersioning);
 
         final ResultSet resultSet = statement.executeQuery("SELECT id, age FROM myTable");
         final ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
@@ -394,9 +412,10 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"json", "xml"})
-    void testSelect_resultSetMetadataOne(final String format) throws SQLException {
-        setUp(format);
+    @MethodSource("configurations")
+    void testSelect_resultSetMetadataOne(final String persistence, final String transactionVersioning)
+        throws SQLException {
+        setup(persistence, transactionVersioning);
 
         final ResultSet resultSet = statement.executeQuery("SELECT name FROM myTable");
         final ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
@@ -406,9 +425,10 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"json", "xml"})
-    void testSelect_preparedStatement_whereIntegerGt(final String format) throws SQLException {
-        setUp(format);
+    @MethodSource("configurations")
+    void testSelect_preparedStatement_whereIntegerGt(final String persistence, final String transactionVersioning)
+        throws SQLException {
+        setup(persistence, transactionVersioning);
 
         final List<Integer> ages = new ArrayList<>();
         final List<String> names = new ArrayList<>();
@@ -433,9 +453,10 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"json", "xml"})
-    void testSelect_preparedStatement_whereLike(final String format) throws SQLException {
-        setUp(format);
+    @MethodSource("configurations")
+    void testSelect_preparedStatement_whereLike(final String persistence, final String transactionVersioning)
+        throws SQLException {
+        setup(persistence, transactionVersioning);
 
         final List<Integer> ages = new ArrayList<>();
         final List<String> names = new ArrayList<>();
@@ -461,9 +482,10 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"json", "xml"})
-    void testSelect_preparedStatement_whereMultipleANDs(final String format) throws SQLException {
-        setUp(format);
+    @MethodSource("configurations")
+    void testSelect_preparedStatement_whereMultipleANDs(final String persistence, final String transactionVersioning)
+        throws SQLException {
+        setup(persistence, transactionVersioning);
 
         final List<Integer> ages = new ArrayList<>();
         final List<String> names = new ArrayList<>();
@@ -490,9 +512,10 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"json", "xml"})
-    void testSelect_preparedStatement_whereIntegerGte(final String format) throws SQLException {
-        setUp(format);
+    @MethodSource("configurations")
+    void testSelect_preparedStatement_whereIntegerGte(final String persistence, final String transactionVersioning)
+        throws SQLException {
+        setup(persistence, transactionVersioning);
 
         final List<Integer> ages = new ArrayList<>();
         final List<String> names = new ArrayList<>();
@@ -517,9 +540,10 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"json", "xml"})
-    void testSelect_preparedStatement_columnsByIndex(final String format) throws SQLException {
-        setUp(format);
+    @MethodSource("configurations")
+    void testSelect_preparedStatement_columnsByIndex(final String persistence, final String transactionVersioning)
+        throws SQLException {
+        setup(persistence, transactionVersioning);
 
         final PreparedStatement preparedStatement = connection.prepareStatement(
             "SELECT id, age, name FROM myTable WHERE id = ?");
@@ -533,9 +557,10 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"json", "xml"})
-    void testSelect_preparedStatement_columnsByColumnName(final String format) throws SQLException {
-        setUp(format);
+    @MethodSource("configurations")
+    void testSelect_preparedStatement_columnsByColumnName(final String persistence, final String transactionVersioning)
+        throws SQLException {
+        setup(persistence, transactionVersioning);
 
         final PreparedStatement preparedStatement = connection.prepareStatement(
             "SELECT id, age, name FROM myTable WHERE id = ?");

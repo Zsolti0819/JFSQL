@@ -9,18 +9,29 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class DeleteExceptionsTest {
 
     private Statement statement;
 
-    private void setUp(final String format) throws SQLException {
+    static Stream<Arguments> configurations() {
+        return Stream.of(
+            Arguments.of("json", "jgit"),
+            Arguments.of("json", "none"),
+            Arguments.of("xml", "jgit"),
+            Arguments.of("xml", "none")
+        );
+    }
+
+    private void setup(final String persistence, final String transactionVersioning) throws SQLException {
         final Properties properties = new Properties();
-        properties.setProperty("persistence", format);
-        properties.setProperty("transaction.versioning", "true");
+        properties.setProperty("persistence", persistence);
+        properties.setProperty("transaction.versioning", transactionVersioning);
         properties.setProperty("statement.caching", "true");
         properties.setProperty("schema.validation", "true");
         final Connection connection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
@@ -37,9 +48,9 @@ class DeleteExceptionsTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"json", "xml"})
-    void testDelete_columnsNotExist(final String format) throws SQLException {
-        setUp(format);
+    @MethodSource("configurations")
+    void testDelete_columnsNotExist(final String persistence, final String transactionVersioning) throws SQLException {
+        setup(persistence, transactionVersioning);
 
         statement.execute("DROP TABLE IF EXISTS myTable");
         statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");

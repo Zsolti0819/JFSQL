@@ -2,10 +2,18 @@ package com.github.jfsql.driver.db;
 
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.SQLException;
+import java.util.Map;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class NotVersioningTransactionManagerImpl extends TransactionManager {
+
+    private static final Logger logger = LogManager.getLogger(NotVersioningTransactionManagerImpl.class);
 
     public NotVersioningTransactionManagerImpl(final DatabaseManager databaseManager, final Reader reader,
         final Writer writer) {
@@ -16,8 +24,18 @@ public class NotVersioningTransactionManagerImpl extends TransactionManager {
     public void commit(final String... args) throws SQLException {
         try {
             writeUncommittedObjects();
+
+            final Map<File, Boolean> filesToKeep = getFilesToKeep();
+            logger.debug("filesToKeep = {}", filesToKeep);
+
+            for (final Map.Entry<File, Boolean> entry : filesToKeep.entrySet()) {
+                final File file = entry.getKey();
+                if (Boolean.FALSE.equals(entry.getValue())) {
+                    Files.delete(Path.of(file.getAbsolutePath()));
+                }
+            }
         } catch (final IOException e) {
-            throw new SQLException("commit failed.\n" + e.getMessage());
+            throw new SQLException(e);
         }
         removeCurrentThreadChangesFromMap();
     }

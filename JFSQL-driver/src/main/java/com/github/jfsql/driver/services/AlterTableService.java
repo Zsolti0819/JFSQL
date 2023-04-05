@@ -7,31 +7,24 @@ import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.util.FileNameCreator;
-import com.github.jfsql.driver.util.IoOperationHandler;
 import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.AlterTableWrapper;
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 @RequiredArgsConstructor
 public class AlterTableService {
 
-    private static final Logger logger = LogManager.getLogger(AlterTableService.class);
     private final TableFinder tableFinder;
     private final DatabaseManager databaseManager;
     private final TransactionManager transactionManager;
     private final SemanticValidator semanticValidator;
-    private final IoOperationHandler ioOperationHandler;
     private final FileNameCreator fileNameCreator;
     private final Reader reader;
 
@@ -63,25 +56,8 @@ public class AlterTableService {
         final String newTableFile = fileNameCreator.createTableFileName(newTableName, database);
         final String newSchemaFile = fileNameCreator.createSchemaFileName(newTableName, database);
 
-        final String oldTableFile = table.getTableFile();
-        final String oldSchemaFile = table.getSchemaFile();
-
         final List<Entry> entries = reader.readEntriesFromTable(table);
         table.setEntries(entries);
-
-        try {
-            ioOperationHandler.renameFile(oldTableFile, newTableFile);
-            ioOperationHandler.renameFile(oldSchemaFile, newSchemaFile);
-        } catch (final IOException e) {
-            final Set<Table> uncommittedTables = transactionManager.getUncommittedTables();
-            if (uncommittedTables.contains(table)) {
-                logger.debug(
-                    "The table '{}' has not yet been written to file, but it's present in the uncommitted list.",
-                    table);
-            } else {
-                throw new SQLException("Failed to rename files.\n" + e.getMessage());
-            }
-        }
 
         table.setName(newTableName);
         table.setTableFile(newTableFile);

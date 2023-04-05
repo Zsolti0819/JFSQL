@@ -117,7 +117,7 @@ public class PreparedStatementCreator {
             if (Objects.equals(values.get(i), "?")) {
                 final Object parameter = parameters[i + offset];
                 if (parameter instanceof LargeObject) {
-                    modifiedList.add(i, String.valueOf(((LargeObject) parameter).getUrl()));
+                    modifiedList.add(i, String.valueOf(((LargeObject) parameter).getURL()));
                 } else {
                     modifiedList.add(i, String.valueOf(parameter));
                 }
@@ -137,7 +137,7 @@ public class PreparedStatementCreator {
             if (o instanceof LargeObject) {
                 final Map<String, String> columnsAndValues = entry.getColumnsAndValues();
                 final String blobPath = columnsAndValues.get(column);
-                if (Objects.equals(((LargeObject) o).getUrl(), blobPath)) {
+                if (Objects.equals(((LargeObject) o).getURL(), blobPath)) {
                     return (LargeObject) o;
                 }
             }

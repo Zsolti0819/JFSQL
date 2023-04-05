@@ -9,18 +9,29 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class CreateDatabaseExceptionsTest {
 
     private Statement statement;
 
-    private void setUp(final String format) throws SQLException {
+    static Stream<Arguments> configurations() {
+        return Stream.of(
+            Arguments.of("json", "jgit"),
+            Arguments.of("json", "none"),
+            Arguments.of("xml", "jgit"),
+            Arguments.of("xml", "none")
+        );
+    }
+
+    private void setup(final String persistence, final String transactionVersioning) throws SQLException {
         final Properties properties = new Properties();
-        properties.setProperty("persistence", format);
-        properties.setProperty("transaction.versioning", "true");
+        properties.setProperty("persistence", persistence);
+        properties.setProperty("transaction.versioning", transactionVersioning);
         properties.setProperty("statement.caching", "true");
         properties.setProperty("schema.validation", "true");
         final Connection connection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
@@ -37,9 +48,10 @@ class CreateDatabaseExceptionsTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"json", "xml"})
-    void testCreateDatabase_databaseIsNotDirectory(final String format) throws SQLException {
-        setUp(format);
+    @MethodSource("configurations")
+    void testCreateDatabase_databaseIsNotDirectory(final String persistence, final String transactionVersioning)
+        throws SQLException {
+        setup(persistence, transactionVersioning);
 
         final SQLException thrown = assertThrows(SQLException.class,
             () -> statement.executeUpdate("CREATE DATABASE [" + TestUtils.NOT_DIRECTORY_PATH + "];"));
@@ -47,9 +59,10 @@ class CreateDatabaseExceptionsTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"json", "xml"})
-    void testCreateDatabase_databaseExists(final String format) throws SQLException {
-        setUp(format);
+    @MethodSource("configurations")
+    void testCreateDatabase_databaseExists(final String persistence, final String transactionVersioning)
+        throws SQLException {
+        setup(persistence, transactionVersioning);
 
         final SQLException thrown = assertThrows(SQLException.class,
             () -> statement.executeUpdate("CREATE DATABASE [" + TestUtils.DATABASE_PATH + "];"));

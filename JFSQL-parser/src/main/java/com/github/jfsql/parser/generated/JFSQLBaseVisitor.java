@@ -1,4 +1,4 @@
-// Generated from java-escape by ANTLR 4.11.1
+// Generated from C:/Users/destr/IdeaProjects/JFSQL/JFSQL-parser/src/main/antlr4/com/github/jfsql/parser\JFSQL.g4 by ANTLR 4.12.0
 package com.github.jfsql.parser.generated;
 
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
@@ -327,7 +327,7 @@ public class JFSQLBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
      * {@link #visitChildren} on {@code ctx}.</p>
      */
     @Override
-    public T visitDatabaseUrl(final JFSQLParser.DatabaseUrlContext ctx) {
+    public T visitDatabaseURL(final JFSQLParser.DatabaseURLContext ctx) {
         return visitChildren(ctx);
     }
 

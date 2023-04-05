@@ -1,6 +1,6 @@
 package com.github.jfsql.parser.dto;
 
-public interface DropDatabaseWrapper extends BaseStatement, StatementWithUrl {
+public interface DropDatabaseWrapper extends BaseStatement, StatementWithURL {
 
     @Override
     default TypeOfStatement getTypeOfStatement() {

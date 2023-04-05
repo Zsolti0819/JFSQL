@@ -4,6 +4,8 @@ import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
+import com.github.jfsql.driver.util.FileNameCreator;
+import com.github.jfsql.driver.validation.SemanticValidator;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,18 +16,20 @@ import java.util.List;
 
 public class NotVersioningDatabaseManagerImpl extends DatabaseManager {
 
-    public NotVersioningDatabaseManagerImpl(final String url, final Reader reader, final Writer writer)
+    public NotVersioningDatabaseManagerImpl(final String URL,
+        final SemanticValidator semanticValidator,
+        final FileNameCreator fileNameCreator, final Reader reader, final Writer writer)
         throws SQLException {
-        super(url, reader, writer);
+        super(URL, semanticValidator, fileNameCreator, reader, writer);
     }
 
     @Override
     public void initDatabase(final Database database) throws SQLException {
-        final Path databaseFolder = database.getUrl().getParent();
+        final Path databaseFolder = database.getURL().getParent();
         final Path blobFolder = Path.of(databaseFolder + File.separator + "blob");
         try {
-            Files.createDirectories(databaseFolder.getParent());
-            Files.createDirectories(blobFolder.getParent());
+            Files.createDirectories(databaseFolder);
+            Files.createDirectories(blobFolder);
         } catch (final IOException e) {
             throw new SQLException("Failed to create directory for the database.\n" + e.getMessage());
         }

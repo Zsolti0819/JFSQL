@@ -6,17 +6,10 @@ import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.api.Git;
@@ -35,14 +28,14 @@ public class JGitTransactionManagerImpl extends TransactionManager {
     public void commit(final String... args) throws SQLException {
         synchronized (lock) {
             final Database database = databaseManager.database;
-            final File databaseDirectoryPath = database.getUrl().getParent().toFile();
+            final File databaseDirectoryPath = database.getURL().getParent().toFile();
             try (final Git git = Git.open(databaseDirectoryPath)) {
                 writeUncommittedObjects();
 
-                final Map<File, Boolean> filesToAdd = getFilesToAdd();
-                logger.debug("filesToAdd = {}", filesToAdd);
+                final Map<File, Boolean> filesToKeep = getFilesToKeep();
+                logger.debug("filesToKeep = {}", filesToKeep);
 
-                for (final Map.Entry<File, Boolean> entry : filesToAdd.entrySet()) {
+                for (final Map.Entry<File, Boolean> entry : filesToKeep.entrySet()) {
                     final File file = entry.getKey();
                     final String fileName = file.getName();
                     final String parentFolder = file.getParent();
@@ -73,7 +66,7 @@ public class JGitTransactionManagerImpl extends TransactionManager {
     public void rollback() throws SQLException {
         logger.warn("Executing rollback()");
         final Database database = databaseManager.database;
-        try (final Git git = Git.open(database.getUrl().getParent().toFile())) {
+        try (final Git git = Git.open(database.getURL().getParent().toFile())) {
             final ResetCommand resetCommand = git.reset().setMode(ResetCommand.ResetType.HARD);
             resetCommand.call();
             final List<Table> tables = reader.readTablesFromDatabaseFile(database);
@@ -81,34 +74,6 @@ public class JGitTransactionManagerImpl extends TransactionManager {
         } catch (final GitAPIException | IOException e) {
             throw new SQLException("There was an error executing rollback().\n" + e.getMessage());
         }
-    }
-
-    private Map<File, Boolean> getFilesToAdd() throws SQLException {
-        final Map<File, Boolean> filesToAdd = new HashMap<>();
-        final Database database = databaseManager.database;
-        final Path databaseUrl = database.getUrl();
-        final Path databaseFolder = databaseUrl.getParent();
-        final Path blobFolder = Path.of(databaseFolder + File.separator + "blob");
-        final String fileExtension = reader.getFileExtension();
-        final String schemaExtension = reader.getSchemaFileExtension();
-        final String[] extensions = new String[]{fileExtension, schemaExtension};
-
-        final Collection<File> mainFolderFiles = FileUtils.listFiles(databaseFolder.toFile(), extensions, false);
-        final Collection<File> blobFolderFiles = FileUtils.listFiles(blobFolder.toFile(), extensions, false);
-        final Collection<File> allFiles = Stream.concat(mainFolderFiles.stream(), blobFolderFiles.stream())
-            .collect(Collectors.toList());
-
-        final Set<File> filesFromDatabaseFile = reader.getFilesFromDatabaseFile(database);
-        final Set<File> blobsFromTables = reader.getBlobsFromTables(database);
-
-        allFiles.removeIf(filesFromDatabaseFile::contains);
-        allFiles.removeIf(blobsFromTables::contains);
-        allFiles.forEach(file -> filesToAdd.put(file, false));
-
-        Stream.concat(filesFromDatabaseFile.stream(), blobsFromTables.stream())
-            .forEach(file -> filesToAdd.put(file, true));
-        filesToAdd.put(databaseUrl.toFile(), true);
-        return filesToAdd;
     }
 
 }

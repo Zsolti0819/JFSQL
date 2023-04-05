@@ -118,8 +118,8 @@ public class ReaderJsonImpl implements Reader {
     @Override
     public List<Table> readTablesFromDatabaseFile(final Database database) throws SQLException {
         final List<Table> tables = new ArrayList<>();
-        final String url = String.valueOf(database.getUrl());
-        try (final FileReader fileReader = new FileReader(url)) {
+        final String URL = String.valueOf(database.getURL());
+        try (final FileReader fileReader = new FileReader(URL)) {
             final JsonElement json = JsonParser.parseReader(fileReader);
             final JsonObject jsonObject = json.getAsJsonObject();
             final JsonArray nodeList = jsonObject.getAsJsonArray("Table");
@@ -158,7 +158,7 @@ public class ReaderJsonImpl implements Reader {
 
     @Override
     public Set<File> getFilesFromDatabaseFile(final Database database) throws SQLException {
-        final String jsonFilePath = String.valueOf(database.getUrl());
+        final String jsonFilePath = String.valueOf(database.getURL());
         try (final FileReader fileReader = new FileReader(jsonFilePath)) {
             final JsonElement jsonElement = JsonParser.parseReader(fileReader);
             final Set<File> files = new HashSet<>();

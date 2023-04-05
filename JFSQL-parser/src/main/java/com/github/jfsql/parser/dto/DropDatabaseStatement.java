@@ -9,6 +9,6 @@ import lombok.ToString;
 @RequiredArgsConstructor
 public class DropDatabaseStatement implements DropDatabaseWrapper {
 
-    private final String databaseUrl;
+    private final String databaseURL;
 
 }

@@ -35,10 +35,10 @@ import lombok.Data;
 @Data
 public class JfsqlPreparedStatement implements PreparedStatement {
 
-    private JfsqlConnection connection;
     private final StatementServiceManager statementServiceManager;
     private final BlobFileNameCreator blobFileNameCreator;
     private final String sql;
+    private JfsqlConnection connection;
 
     JfsqlPreparedStatement(final JfsqlConnection connection, final StatementServiceManager statementServiceManager,
         final BlobFileNameCreator blobFileNameCreator, final String sql) throws SQLException {
@@ -194,7 +194,7 @@ public class JfsqlPreparedStatement implements PreparedStatement {
             x.close();
             byteArrayOutputStream.close();
             final String value = Base64.getEncoder().encodeToString(byteArray);
-            final String path = blobFileNameCreator.getBlobUrl();
+            final String path = blobFileNameCreator.getBlobURL();
             final LargeObject largeObject = new LargeObject(path, value);
             statementServiceManager.getParameters()[parameterIndex - 1] = largeObject;
         } catch (final IOException e) {

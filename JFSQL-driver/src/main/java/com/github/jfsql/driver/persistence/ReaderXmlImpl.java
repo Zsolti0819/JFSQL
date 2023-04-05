@@ -135,11 +135,11 @@ public class ReaderXmlImpl implements Reader {
     public List<Table> readTablesFromDatabaseFile(final Database database) throws SQLException {
         final List<Table> tables = new ArrayList<>();
         try {
-            final String url = String.valueOf(database.getUrl());
+            final String URL = String.valueOf(database.getURL());
             final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
             documentBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
             final DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-            final Document document = documentBuilder.parse(url);
+            final Document document = documentBuilder.parse(URL);
             final XPath xpath = XPathFactory.newInstance().newXPath();
             final NodeList nodeList = (NodeList) xpath.evaluate("//Table", document, XPathConstants.NODESET);
             final int tableLengths = nodeList.getLength();
@@ -184,7 +184,7 @@ public class ReaderXmlImpl implements Reader {
 
     @Override
     public Set<File> getFilesFromDatabaseFile(final Database database) throws SQLException {
-        final String xmlFilePath = String.valueOf(database.getUrl());
+        final String xmlFilePath = String.valueOf(database.getURL());
         try {
             final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);

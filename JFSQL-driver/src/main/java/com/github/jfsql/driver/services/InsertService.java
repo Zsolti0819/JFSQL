@@ -65,46 +65,43 @@ public class InsertService {
             table.setEntries(entries);
         }
 
-        final List<Entry> entriesToInsert = getEntriesToInsert(statement, table);
-        logger.debug("entriesToInsert = {}", entriesToInsert);
-        entries.addAll(entriesToInsert);
+        final List<String> columns = statement.getColumns();
+        final List<List<String>> valuesList = statement.getValues();
+        for (final List<String> values : valuesList) {
+            final Entry entryToInsert = getEntryToInsert(columns, values, table);
+            logger.debug("entryToInsert = {}", entryToInsert);
+            entries.add(entryToInsert);
+        }
 
         transactionManager.executeDMLOperation(table);
 
-        final List<List<String>> valuesLists = statement.getValues();
-        return valuesLists.size();
+        return valuesList.size();
     }
 
-    List<Entry> getEntriesToInsert(final InsertWrapper statement, final Table table) throws SQLException {
-        final List<Entry> insertEntries = new ArrayList<>();
-        final List<String> statementColumns = statement.getColumns();
+    Entry getEntryToInsert(final List<String> statementColumns, final List<String> values, final Table table)
+        throws SQLException {
         final List<String> tableColumns = new ArrayList<>(table.getColumnsAndTypes().keySet());
         final List<String> columnsToUse = statementColumns.isEmpty() ? tableColumns : statementColumns;
-        final List<List<String>> valuesList = statement.getValues();
-        for (final List<String> values : valuesList) {
-            final Map<String, String> columnsAndValues = new LinkedHashMap<>();
-            for (final String column : tableColumns) {
-                if (columnsToUse.contains(column)) {
-                    final int index = columnsToUse.indexOf(column);
-                    final String value = values.get(index);
-                    if (semanticValidator.nullInsertIntoNotNullColumn(column, value, table)) {
-                        throw new SQLException("Inserting null value into a NOT NULL column.");
-                    }
-                    columnsAndValues.put(column, value);
-                } else {
-                    if (semanticValidator.nullInsertIntoNotNullColumn(column, null, table)) {
-                        throw new SQLException("Inserting null value into a NOT NULL column.");
-                    }
-                    columnsAndValues.put(column, null);
-                }
+
+        final Map<String, String> columnsAndValues = new LinkedHashMap<>();
+        for (final String column : tableColumns) {
+            String value = null;
+            if (columnsToUse.contains(column)) {
+                final int index = columnsToUse.indexOf(column);
+                value = values.get(index);
             }
-            insertEntries.add(new Entry(columnsAndValues, new HashMap<>()));
+            if (semanticValidator.nullInsertIntoNotNullColumn(column, value, table)) {
+                throw new SQLException("Inserting null value into a NOT NULL column.");
+            }
+            columnsAndValues.put(column, value);
         }
-        insertBlobs(columnsToUse, table, insertEntries);
-        return insertEntries;
+        final Entry entryToInsert = new Entry(columnsAndValues, new HashMap<>());
+
+        insertBlobs(columnsToUse, table, entryToInsert);
+        return entryToInsert;
     }
 
-    private void insertBlobs(final List<String> finalColumns, final Table table, final List<Entry> insertEntries) {
+    private void insertBlobs(final List<String> finalColumns, final Table table, final Entry entry) {
         final Map<String, String> columnsAndTypes = table.getColumnsAndTypes();
         if (finalColumns.stream().noneMatch(column -> Objects.equals(columnsAndTypes.get(column), "BLOB"))) {
             return;
@@ -112,12 +109,10 @@ public class InsertService {
         finalColumns.stream()
             .filter(column -> Objects.equals(columnsAndTypes.get(column), "BLOB"))
             .forEach(column -> {
-                for (final Entry entry : insertEntries) {
-                    final LargeObject largeObject = preparedStatementCreator.getBlob(entry, column);
-                    if (largeObject != null) {
-                        final Map<String, LargeObject> columnsAndBlobs = entry.getColumnsAndBlobs();
-                        columnsAndBlobs.put(column, largeObject);
-                    }
+                final LargeObject largeObject = preparedStatementCreator.getBlob(entry, column);
+                if (largeObject != null) {
+                    final Map<String, LargeObject> columnsAndBlobs = entry.getColumnsAndBlobs();
+                    columnsAndBlobs.put(column, largeObject);
                 }
             });
     }
