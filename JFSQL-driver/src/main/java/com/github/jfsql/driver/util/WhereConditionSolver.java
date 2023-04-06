@@ -63,14 +63,6 @@ public class WhereConditionSolver {
         return entriesFulfillingConditions;
     }
 
-    /**
-     * @param originalValue The entry's original value in the database
-     * @param whereValue    The value in the where expression
-     * @param symbol        The symbol in the where expression
-     * @param type          The original value's type
-     * @return The value 0 if originalValue == whereValue; a value less than 0 if originalValue < whereValue; and a
-     * value greater than 0 if originalValue > whereValue
-     */
     private boolean compareValues(final String originalValue, final String whereValue, final String symbol,
         final String type) {
         if (originalValue == null) {
