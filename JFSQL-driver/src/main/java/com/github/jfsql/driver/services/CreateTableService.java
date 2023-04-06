@@ -71,6 +71,9 @@ public class CreateTableService {
             .notNullColumns(notNulLColumns)
             .entries(new ArrayList<>())
             .build();
+
+        logger.debug("table created = {}", table);
+
         final List<Table> tables = database.getTables();
         tables.add(table);
         transactionManager.executeDDLOperation(database, table);

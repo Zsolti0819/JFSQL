@@ -10,10 +10,13 @@ import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @RequiredArgsConstructor
 public class CreateDatabaseService {
 
+    private static final Logger logger = LogManager.getLogger(CreateDatabaseService.class);
     private final DatabaseManager databaseManager;
     private final SemanticValidator semanticValidator;
     private final FileNameCreator fileNameCreator;
@@ -32,6 +35,8 @@ public class CreateDatabaseService {
 
         final Path databaseFilePath = fileNameCreator.createDatabaseFileName(URL);
         final Database database = new Database(databaseFilePath, new LinkedList<>());
+
+        logger.debug("database object created = {}", database);
 
         databaseManager.executeCreateDatabaseOperation(database);
         return 0;

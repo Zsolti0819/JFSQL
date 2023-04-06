@@ -55,7 +55,7 @@ public class UpdateService {
         }
 
         final List<Entry> whereEntries = whereConditionSolver.getWhereEntries(table, statement);
-        logger.debug("whereEntries = {}", whereEntries);
+        logger.debug("entries to update = {}", whereEntries);
 
         final List<String> columns = statement.getColumns();
         final List<String> values = statement.getValues();
@@ -75,9 +75,9 @@ public class UpdateService {
         return whereEntries.size();
     }
 
-    private void updateEntry(final Entry entry, final String column, final String value,
-        final String type)
+    private void updateEntry(final Entry entry, final String column, final String value, final String type)
         throws SQLException {
+        logger.debug("entry before the update = {}", entry);
         if (semanticValidator.isValid(value, type)) {
             final Map<String, String> columnsAndValues = entry.getColumnsAndValues();
             columnsAndValues.put(column, value);
@@ -91,5 +91,6 @@ public class UpdateService {
                 columnsAndBlobs.put(column, largeObject);
             }
         }
+        logger.debug("entry after the update = {}", entry);
     }
 }

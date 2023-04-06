@@ -69,7 +69,7 @@ public class InsertService {
         final List<List<String>> valuesList = statement.getValues();
         for (final List<String> values : valuesList) {
             final Entry entryToInsert = getEntryToInsert(columns, values, table);
-            logger.debug("entryToInsert = {}", entryToInsert);
+            logger.debug("entry to insert = {}", entryToInsert);
             entries.add(entryToInsert);
         }
 

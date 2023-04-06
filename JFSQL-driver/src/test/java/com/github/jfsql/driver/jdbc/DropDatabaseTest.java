@@ -1,7 +1,9 @@
-package com.github.jfsql.driver.jdbc.common;
+package com.github.jfsql.driver.jdbc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.github.jfsql.driver.TestUtils;
 import java.sql.Connection;
@@ -9,24 +11,13 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class DeleteExceptionsTest {
+class DropDatabaseTest {
 
     private Statement statement;
-
-    static Stream<Arguments> configurations() {
-        return Stream.of(
-            Arguments.of("json", "jgit"),
-            Arguments.of("json", "none"),
-            Arguments.of("xml", "jgit"),
-            Arguments.of("xml", "none")
-        );
-    }
 
     private void setup(final String persistence, final String transactionVersioning) throws SQLException {
         final Properties properties = new Properties();
@@ -48,16 +39,32 @@ class DeleteExceptionsTest {
     }
 
     @ParameterizedTest
-    @MethodSource("configurations")
-    void testDelete_columnsNotExist(final String persistence, final String transactionVersioning) throws SQLException {
+    @MethodSource("com.github.jfsql.driver.jdbc.TestConfiguration#configurations")
+    void testDropDatabase(final String persistence, final String transactionVersioning)
+        throws SQLException {
         setup(persistence, transactionVersioning);
+        switch (persistence) {
+            case "json":
+                testDropDatabase_json();
+                break;
+            case "xml":
+                testDropDatabase_xml();
+                break;
+            default:
+                fail("Unexpected value: " + persistence);
+        }
+    }
 
-        statement.execute("DROP TABLE IF EXISTS myTable");
-        statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
-        statement.executeUpdate("INSERT INTO myTable (id, name, age) VALUES (1, 'Zsolti', 25)");
-        final SQLException thrown = assertThrows(SQLException.class,
-            () -> statement.execute("DELETE FROM myTable WHERE lol > 3 AND age > 25 AND name = 'Lukas'"));
-        assertEquals("Some columns entered doesn't exist in 'myTable'.", thrown.getMessage());
+    void testDropDatabase_json() throws SQLException {
+        assertTrue(TestUtils.JSON_DATABASE_PATH.toFile().exists());
+        assertEquals(1, statement.executeUpdate("DROP DATABASE [" + TestUtils.DATABASE_PATH + "];"));
+        assertFalse(TestUtils.JSON_DATABASE_PATH.toFile().exists());
+    }
+
+    void testDropDatabase_xml() throws SQLException {
+        assertTrue(TestUtils.XML_DATABASE_PATH.toFile().exists());
+        assertEquals(1, statement.executeUpdate("DROP DATABASE [" + TestUtils.DATABASE_PATH + "];"));
+        assertFalse(TestUtils.XML_DATABASE_PATH.toFile().exists());
     }
 
 }

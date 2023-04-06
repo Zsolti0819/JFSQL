@@ -180,7 +180,7 @@ public class AlterTableService {
                         valueToAdd = StringUtils.EMPTY;
                         break;
                     default:
-                        throw new IllegalStateException("Unknown data type '" + columnTypeToAdd + "'");
+                        throw new IllegalStateException("Unsupported data type '" + columnTypeToAdd + "'");
                 }
                 columnsAndValues.put(columnNameToAdd, valueToAdd);
             } else {

@@ -61,6 +61,9 @@ public class DropTableService {
         final int deleteCount = entries.size();
         final List<Table> tables = database.getTables();
         tables.remove(table);
+
+        logger.debug("table removed = {}", table);
+
         transactionManager.executeDropTableOperation();
         return deleteCount;
     }

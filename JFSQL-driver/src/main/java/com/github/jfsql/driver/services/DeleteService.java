@@ -48,6 +48,9 @@ public class DeleteService {
                 throw new SQLException("Some columns entered doesn't exist in '" + table.getName() + "'.");
             }
             final List<Entry> whereEntries = whereConditionSolver.getWhereEntries(table, statement);
+
+            logger.debug("entries for removal = {}", whereEntries);
+
             entries.removeAll(whereEntries);
             final int entriesSizeAfter = entries.size();
             deleteCount = entriesSizeBefore - entriesSizeAfter;

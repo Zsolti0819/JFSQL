@@ -1,4 +1,4 @@
-package com.github.jfsql.driver.jdbc.common;
+package com.github.jfsql.driver.jdbc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -9,24 +9,13 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 class CreateDatabaseExceptionsTest {
 
     private Statement statement;
-
-    static Stream<Arguments> configurations() {
-        return Stream.of(
-            Arguments.of("json", "jgit"),
-            Arguments.of("json", "none"),
-            Arguments.of("xml", "jgit"),
-            Arguments.of("xml", "none")
-        );
-    }
 
     private void setup(final String persistence, final String transactionVersioning) throws SQLException {
         final Properties properties = new Properties();
@@ -48,7 +37,7 @@ class CreateDatabaseExceptionsTest {
     }
 
     @ParameterizedTest
-    @MethodSource("configurations")
+    @MethodSource("com.github.jfsql.driver.jdbc.TestConfiguration#configurations")
     void testCreateDatabase_databaseIsNotDirectory(final String persistence, final String transactionVersioning)
         throws SQLException {
         setup(persistence, transactionVersioning);
@@ -59,7 +48,7 @@ class CreateDatabaseExceptionsTest {
     }
 
     @ParameterizedTest
-    @MethodSource("configurations")
+    @MethodSource("com.github.jfsql.driver.jdbc.TestConfiguration#configurations")
     void testCreateDatabase_databaseExists(final String persistence, final String transactionVersioning)
         throws SQLException {
         setup(persistence, transactionVersioning);

@@ -1,4 +1,4 @@
-package com.github.jfsql.driver.jdbc.common;
+package com.github.jfsql.driver.jdbc;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -16,25 +16,14 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 class SelectTest {
 
     private Statement statement;
     private Connection connection;
-
-    static Stream<Arguments> configurations() {
-        return Stream.of(
-            Arguments.of("json", "jgit"),
-            Arguments.of("json", "none"),
-            Arguments.of("xml", "jgit"),
-            Arguments.of("xml", "none")
-        );
-    }
 
     private void setup(final String persistence, final String transactionVersioning) throws SQLException {
         final Properties properties = new Properties();
@@ -67,7 +56,7 @@ class SelectTest {
      * <a href="https://www.sqlshack.com/sql-multiple-joins-for-beginners-with-examples/">Based on this tutorial</a>
      */
     @ParameterizedTest
-    @MethodSource("configurations")
+    @MethodSource("com.github.jfsql.driver.jdbc.TestConfiguration#configurations")
     void testSelect_multipleJoin(final String persistence, final String transactionVersioning) throws SQLException {
         setup(persistence, transactionVersioning);
 
@@ -133,7 +122,7 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @MethodSource("configurations")
+    @MethodSource("com.github.jfsql.driver.jdbc.TestConfiguration#configurations")
     void testSelect_innerJoin(final String persistence, final String transactionVersioning) throws SQLException {
         setup(persistence, transactionVersioning);
 
@@ -166,7 +155,7 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @MethodSource("configurations")
+    @MethodSource("com.github.jfsql.driver.jdbc.TestConfiguration#configurations")
     void testSelect_leftJoin(final String persistence, final String transactionVersioning) throws SQLException {
         setup(persistence, transactionVersioning);
 
@@ -199,7 +188,7 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @MethodSource("configurations")
+    @MethodSource("com.github.jfsql.driver.jdbc.TestConfiguration#configurations")
     void testSelect_all(final String persistence, final String transactionVersioning) throws SQLException {
         setup(persistence, transactionVersioning);
 
@@ -220,7 +209,7 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @MethodSource("configurations")
+    @MethodSource("com.github.jfsql.driver.jdbc.TestConfiguration#configurations")
     void testSelect_whereIntegerGt(final String persistence, final String transactionVersioning) throws SQLException {
         setup(persistence, transactionVersioning);
 
@@ -244,7 +233,7 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @MethodSource("configurations")
+    @MethodSource("com.github.jfsql.driver.jdbc.TestConfiguration#configurations")
     void testSelect_whereLike(final String persistence, final String transactionVersioning) throws SQLException {
         setup(persistence, transactionVersioning);
 
@@ -269,7 +258,7 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @MethodSource("configurations")
+    @MethodSource("com.github.jfsql.driver.jdbc.TestConfiguration#configurations")
     void testSelect_whereMultipleANDs(final String persistence, final String transactionVersioning)
         throws SQLException {
         setup(persistence, transactionVersioning);
@@ -295,7 +284,7 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @MethodSource("configurations")
+    @MethodSource("com.github.jfsql.driver.jdbc.TestConfiguration#configurations")
     void testSelect_whereIntegerGte(final String persistence, final String transactionVersioning) throws SQLException {
         setup(persistence, transactionVersioning);
 
@@ -319,7 +308,7 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @MethodSource("configurations")
+    @MethodSource("com.github.jfsql.driver.jdbc.TestConfiguration#configurations")
     void testSelect_columnsByIndex(final String persistence, final String transactionVersioning) throws SQLException {
         setup(persistence, transactionVersioning);
 
@@ -332,7 +321,7 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @MethodSource("configurations")
+    @MethodSource("com.github.jfsql.driver.jdbc.TestConfiguration#configurations")
     void testSelect_columnsByColumnName(final String persistence, final String transactionVersioning)
         throws SQLException {
         setup(persistence, transactionVersioning);
@@ -346,7 +335,7 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @MethodSource("configurations")
+    @MethodSource("com.github.jfsql.driver.jdbc.TestConfiguration#configurations")
     void testSelect_notExistingColumn(final String persistence, final String transactionVersioning)
         throws SQLException {
         setup(persistence, transactionVersioning);
@@ -357,7 +346,7 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @MethodSource("configurations")
+    @MethodSource("com.github.jfsql.driver.jdbc.TestConfiguration#configurations")
     void testSelect_notExistingColumnInJoinedTable(final String persistence, final String transactionVersioning)
         throws SQLException {
         setup(persistence, transactionVersioning);
@@ -368,7 +357,7 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @MethodSource("configurations")
+    @MethodSource("com.github.jfsql.driver.jdbc.TestConfiguration#configurations")
     void testSelect_resultSetMetadata(final String persistence, final String transactionVersioning)
         throws SQLException {
         setup(persistence, transactionVersioning);
@@ -383,7 +372,7 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @MethodSource("configurations")
+    @MethodSource("com.github.jfsql.driver.jdbc.TestConfiguration#configurations")
     void testSelect_resultSetMetadataAllManual(final String persistence, final String transactionVersioning)
         throws SQLException {
         setup(persistence, transactionVersioning);
@@ -398,7 +387,7 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @MethodSource("configurations")
+    @MethodSource("com.github.jfsql.driver.jdbc.TestConfiguration#configurations")
     void testSelect_resultSetMetadataNotAll(final String persistence, final String transactionVersioning)
         throws SQLException {
         setup(persistence, transactionVersioning);
@@ -412,7 +401,7 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @MethodSource("configurations")
+    @MethodSource("com.github.jfsql.driver.jdbc.TestConfiguration#configurations")
     void testSelect_resultSetMetadataOne(final String persistence, final String transactionVersioning)
         throws SQLException {
         setup(persistence, transactionVersioning);
@@ -425,7 +414,7 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @MethodSource("configurations")
+    @MethodSource("com.github.jfsql.driver.jdbc.TestConfiguration#configurations")
     void testSelect_preparedStatement_whereIntegerGt(final String persistence, final String transactionVersioning)
         throws SQLException {
         setup(persistence, transactionVersioning);
@@ -453,7 +442,7 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @MethodSource("configurations")
+    @MethodSource("com.github.jfsql.driver.jdbc.TestConfiguration#configurations")
     void testSelect_preparedStatement_whereLike(final String persistence, final String transactionVersioning)
         throws SQLException {
         setup(persistence, transactionVersioning);
@@ -482,7 +471,7 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @MethodSource("configurations")
+    @MethodSource("com.github.jfsql.driver.jdbc.TestConfiguration#configurations")
     void testSelect_preparedStatement_whereMultipleANDs(final String persistence, final String transactionVersioning)
         throws SQLException {
         setup(persistence, transactionVersioning);
@@ -512,7 +501,7 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @MethodSource("configurations")
+    @MethodSource("com.github.jfsql.driver.jdbc.TestConfiguration#configurations")
     void testSelect_preparedStatement_whereIntegerGte(final String persistence, final String transactionVersioning)
         throws SQLException {
         setup(persistence, transactionVersioning);
@@ -540,7 +529,7 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @MethodSource("configurations")
+    @MethodSource("com.github.jfsql.driver.jdbc.TestConfiguration#configurations")
     void testSelect_preparedStatement_columnsByIndex(final String persistence, final String transactionVersioning)
         throws SQLException {
         setup(persistence, transactionVersioning);
@@ -557,7 +546,7 @@ class SelectTest {
     }
 
     @ParameterizedTest
-    @MethodSource("configurations")
+    @MethodSource("com.github.jfsql.driver.jdbc.TestConfiguration#configurations")
     void testSelect_preparedStatement_columnsByColumnName(final String persistence, final String transactionVersioning)
         throws SQLException {
         setup(persistence, transactionVersioning);
