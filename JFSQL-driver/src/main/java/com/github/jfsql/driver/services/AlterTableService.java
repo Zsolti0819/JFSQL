@@ -17,10 +17,13 @@ import java.util.Map;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @RequiredArgsConstructor
 public class AlterTableService {
 
+    private static final Logger logger = LogManager.getLogger(AlterTableService.class);
     private final TableFinder tableFinder;
     private final DatabaseManager databaseManager;
     private final TransactionManager transactionManager;
@@ -75,8 +78,15 @@ public class AlterTableService {
             throw new SQLException("The column '" + newColumnName + "' already exists in '" + table.getName() + "'");
         }
 
-        final List<Entry> entries = reader.readEntriesFromTable(table);
-        table.setEntries(entries);
+        // When autoCommit is true, it should be safe to read the entries from the file
+        List<Entry> entries = table.getEntries();
+        if (entries == null || transactionManager.getAutoCommit()) {
+            logger.debug("Table's entries in memory = {}, autoCommit = {}",
+                entries != null,
+                transactionManager.getAutoCommit());
+            entries = reader.readEntriesFromTable(table);
+            table.setEntries(entries);
+        }
 
         final Map<String, String> modifiedColumnsAndTypes = getModifiedColumnsAndTypes(statement, table);
         table.setColumnsAndTypes(modifiedColumnsAndTypes);
@@ -100,9 +110,9 @@ public class AlterTableService {
     }
 
     private Map<String, Boolean> getModifiedNotNullColumns(final AlterTableWrapper statement, final Table table) {
+        final LinkedHashMap<String, Boolean> modifiedNotNullColumns = new LinkedHashMap<>();
         final String newColumnName = statement.getNewColumnName();
         final Map<String, Boolean> notNullColumns = table.getNotNullColumns();
-        final LinkedHashMap<String, Boolean> modifiedNotNullColumns = new LinkedHashMap<>();
         for (final Map.Entry<String, Boolean> notNullColumnPair : notNullColumns.entrySet()) {
             if (Objects.equals(notNullColumnPair.getKey(), statement.getOldColumnName())) {
                 modifiedNotNullColumns.put(newColumnName, notNullColumnPair.getValue());
@@ -114,9 +124,9 @@ public class AlterTableService {
     }
 
     private Map<String, String> getModifiedColumnsAndTypes(final AlterTableWrapper statement, final Table table) {
+        final LinkedHashMap<String, String> modifiedColumnsAndTypes = new LinkedHashMap<>();
         final String newColumnName = statement.getNewColumnName();
         final Map<String, String> columnsAndTypes = table.getColumnsAndTypes();
-        final LinkedHashMap<String, String> modifiedColumnsAndTypes = new LinkedHashMap<>();
         for (final Map.Entry<String, String> columnTypePair : columnsAndTypes.entrySet()) {
             if (Objects.equals(columnTypePair.getKey(), statement.getOldColumnName())) {
                 modifiedColumnsAndTypes.put(newColumnName, columnTypePair.getValue());
@@ -138,8 +148,15 @@ public class AlterTableService {
             throw new SQLException("The column '" + columnNameToAdd + "' already exists in '" + table.getName() + "'.");
         }
 
-        final List<Entry> entries = reader.readEntriesFromTable(table);
-        table.setEntries(entries);
+        // When autoCommit is true, it should be safe to read the entries from the file
+        List<Entry> entries = table.getEntries();
+        if (entries == null || transactionManager.getAutoCommit()) {
+            logger.debug("Table's entries in memory = {}, autoCommit = {}",
+                entries != null,
+                transactionManager.getAutoCommit());
+            entries = reader.readEntriesFromTable(table);
+            table.setEntries(entries);
+        }
 
         columnsAndTypes.put(columnNameToAdd, columnTypeToAdd);
         if (Boolean.TRUE.equals(statement.getColumnToAddCannotBeNull())) {
@@ -185,8 +202,15 @@ public class AlterTableService {
         final Map<String, Boolean> notNullColumns = table.getNotNullColumns();
         notNullColumns.remove(columnNameToDrop);
 
-        final List<Entry> entries = reader.readEntriesFromTable(table);
-        table.setEntries(entries);
+        // When autoCommit is true, it should be safe to read the entries from the file
+        List<Entry> entries = table.getEntries();
+        if (entries == null || transactionManager.getAutoCommit()) {
+            logger.debug("Table's entries in memory = {}, autoCommit = {}",
+                entries != null,
+                transactionManager.getAutoCommit());
+            entries = reader.readEntriesFromTable(table);
+            table.setEntries(entries);
+        }
 
         // Remove the columns from every entry in the table
         for (final Entry entry : table.getEntries()) {
