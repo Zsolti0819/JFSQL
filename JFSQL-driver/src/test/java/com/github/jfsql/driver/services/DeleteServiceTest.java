@@ -29,20 +29,28 @@ class DeleteServiceTest {
 
     @Mock
     private TableFinder tableFinder;
+
     @Mock
     private TransactionManager transactionManager;
+
     @Mock
     private SemanticValidator semanticValidator;
+
     @Mock
     private WhereConditionSolver whereConditionSolver;
+
     @Mock
     private Table table;
+
     @Mock
     private List<Entry> entries;
+
     @Mock
     private List<Entry> whereEntries;
+
     @Mock
     private DeleteWrapper statement;
+
     @InjectMocks
     private DeleteService deleteService;
 

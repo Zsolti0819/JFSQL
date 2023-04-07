@@ -28,16 +28,22 @@ class CreateTableServiceTest {
 
     @Mock
     private DatabaseManager databaseManager;
+
     @Mock
     private TransactionManager transactionManager;
+
     @Mock
     private SemanticValidator semanticValidator;
+
     @Mock
     private Database database;
+
     @Mock
     private FileNameCreator fileNameCreator;
+
     @Mock
     private CreateTableWrapper statement;
+
     @InjectMocks
     private CreateTableService createTableService;
 

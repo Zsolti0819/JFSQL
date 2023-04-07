@@ -25,11 +25,12 @@ class JfsqlDatabaseMetaDataTest {
 
     @Mock
     private JfsqlConnection connection;
+
     @Mock
     private DatabaseManager databaseManager;
+
     @InjectMocks
     private JfsqlDatabaseMetaData metaData;
-
 
     @AfterAll
     static void afterAll() {

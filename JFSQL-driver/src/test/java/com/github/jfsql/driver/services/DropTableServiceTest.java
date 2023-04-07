@@ -29,20 +29,28 @@ class DropTableServiceTest {
 
     @Mock
     private TableFinder tableFinder;
+
     @Mock
     private DatabaseManager databaseManager;
+
     @Mock
     private TransactionManager transactionManager;
+
     @Mock
     private SemanticValidator semanticValidator;
+
     @Mock
     private Database database;
+
     @Mock
     private Table table;
+
     @Mock
     private List<Entry> entries;
+
     @Mock
     private DropTableWrapper statement;
+
     @InjectMocks
     private DropTableService dropTableService;
 

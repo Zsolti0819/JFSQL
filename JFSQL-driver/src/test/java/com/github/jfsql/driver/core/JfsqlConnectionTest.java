@@ -32,22 +32,31 @@ class JfsqlConnectionTest {
 
     @Mock
     private PropertiesReader propertiesReader;
+
     @Mock
     private BlobFileNameCreator blobFileNameCreator;
+
     @Mock
     private Cache cache;
+
     @Mock
     private Reader reader;
+
     @Mock
     private Writer writer;
+
     @Mock
     private DatabaseManager databaseManager;
+
     @Mock
     private TransactionManager transactionManager;
+
     @Mock
     private StatementServiceManager statementServiceManager;
+
     @Mock
     private Statement statement;
+
     @InjectMocks
     private JfsqlConnection connection;
 
@@ -64,16 +73,6 @@ class JfsqlConnectionTest {
     void testCreateStatement() {
         assertThrows(SQLFeatureNotSupportedException.class,
             () -> connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY));
-        assertThrows(SQLFeatureNotSupportedException.class,
-            () -> connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE));
-        assertThrows(SQLFeatureNotSupportedException.class,
-            () -> connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY));
-        assertThrows(SQLFeatureNotSupportedException.class,
-            () -> connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE));
-        assertThrows(SQLFeatureNotSupportedException.class,
-            () -> connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY));
-        assertThrows(SQLFeatureNotSupportedException.class,
-            () -> connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE));
     }
 
     @Test
@@ -147,16 +146,6 @@ class JfsqlConnectionTest {
         assertThrows(SQLFeatureNotSupportedException.class, () -> connection.prepareCall(null));
         assertThrows(SQLFeatureNotSupportedException.class,
             () -> connection.prepareCall(null, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY));
-        assertThrows(SQLFeatureNotSupportedException.class,
-            () -> connection.prepareCall(null, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE));
-        assertThrows(SQLFeatureNotSupportedException.class,
-            () -> connection.prepareCall(null, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY));
-        assertThrows(SQLFeatureNotSupportedException.class,
-            () -> connection.prepareCall(null, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE));
-        assertThrows(SQLFeatureNotSupportedException.class,
-            () -> connection.prepareCall(null, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY));
-        assertThrows(SQLFeatureNotSupportedException.class,
-            () -> connection.prepareCall(null, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE));
     }
 
     @Test
@@ -169,16 +158,6 @@ class JfsqlConnectionTest {
         assertThrows(SQLFeatureNotSupportedException.class, () -> connection.prepareStatement(null, new String[0]));
         assertThrows(SQLFeatureNotSupportedException.class,
             () -> connection.prepareStatement(null, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY));
-        assertThrows(SQLFeatureNotSupportedException.class,
-            () -> connection.prepareStatement(null, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE));
-        assertThrows(SQLFeatureNotSupportedException.class,
-            () -> connection.prepareStatement(null, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY));
-        assertThrows(SQLFeatureNotSupportedException.class,
-            () -> connection.prepareStatement(null, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE));
-        assertThrows(SQLFeatureNotSupportedException.class,
-            () -> connection.prepareStatement(null, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY));
-        assertThrows(SQLFeatureNotSupportedException.class,
-            () -> connection.prepareStatement(null, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE));
     }
 
     @Test

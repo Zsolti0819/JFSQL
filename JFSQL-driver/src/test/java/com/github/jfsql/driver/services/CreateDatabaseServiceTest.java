@@ -26,14 +26,19 @@ class CreateDatabaseServiceTest {
 
     @Mock
     private SemanticValidator semanticValidator;
+
     @Mock
     private DatabaseManager databaseManager;
+
     @Mock
     private Reader reader;
+
     @Mock
     private FileNameCreator fileNameCreator;
+
     @Mock
     private CreateDatabaseWrapper statement;
+
     @InjectMocks
     private CreateDatabaseService createDatabaseService;
 

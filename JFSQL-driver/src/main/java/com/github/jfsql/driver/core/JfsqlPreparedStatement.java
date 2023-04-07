@@ -237,6 +237,11 @@ public class JfsqlPreparedStatement implements PreparedStatement {
         return connection;
     }
 
+    @Override
+    public SQLWarning getWarnings() {
+        return null;
+    }
+
     // Unsupported operations
 
     @Override
@@ -440,11 +445,6 @@ public class JfsqlPreparedStatement implements PreparedStatement {
 
     @Override
     public void cancel() throws SQLFeatureNotSupportedException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    public SQLWarning getWarnings() throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException();
     }
 

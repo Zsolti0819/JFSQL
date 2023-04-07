@@ -30,18 +30,25 @@ class UpdateServiceTest {
 
     @Mock
     private TableFinder tableFinder;
+
     @Mock
     private TransactionManager transactionManager;
+
     @Mock
     private SemanticValidator semanticValidator;
+
     @Mock
     private ColumnToTypeMapper columnToTypeMapper;
+
     @Mock
     private WhereConditionSolver whereConditionSolver;
+
     @Mock
     private Table table;
+
     @Mock
     private UpdateWrapper statement;
+
     @InjectMocks
     private UpdateService updateService;
 

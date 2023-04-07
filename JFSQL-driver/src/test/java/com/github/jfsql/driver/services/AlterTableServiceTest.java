@@ -34,24 +34,34 @@ class AlterTableServiceTest {
 
     @Mock
     private TableFinder tableFinder;
+
     @Mock
     private DatabaseManager databaseManager;
+
     @Mock
     private TransactionManager transactionManager;
+
     @Mock
     private SemanticValidator semanticValidator;
+
     @Mock
     private FileNameCreator fileNameCreator;
+
     @Mock
     private Reader reader;
+
     @Mock
     private Database database;
+
     @Mock
     private Table table;
+
     @Mock
     private Set<Table> uncommittedTables;
+
     @Mock
     private AlterTableWrapper statement;
+
     @InjectMocks
     private AlterTableService alterTableService;
 
