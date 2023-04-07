@@ -1,13 +1,18 @@
 package com.github.jfsql.driver.jdbc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.github.jfsql.driver.TestUtils;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
@@ -20,6 +25,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 class DeleteTest {
 
     private Statement statement;
+    private Connection connection;
 
     private void setup(final String persistence, final String transactionVersioning) throws SQLException {
         final Properties properties = new Properties();
@@ -27,7 +33,7 @@ class DeleteTest {
         properties.setProperty("transaction.versioning", transactionVersioning);
         properties.setProperty("statement.caching", "true");
         properties.setProperty("schema.validation", "true");
-        final Connection connection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
+        connection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
         statement = connection.createStatement();
         statement.execute("DROP TABLE IF EXISTS myTable");
         statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
@@ -399,4 +405,54 @@ class DeleteTest {
         assertEquals(StringUtils.deleteWhitespace(expectedFileContent), StringUtils.deleteWhitespace(realFileContent));
     }
 
+    @ParameterizedTest
+    @MethodSource("com.github.jfsql.driver.jdbc.TestConfiguration#configurations")
+    void testDelete_blob(final String persistence, final String transactionVersioning)
+        throws SQLException, IOException {
+        setup(persistence, transactionVersioning);
+        switch (persistence) {
+            case "json":
+                testDelete_BLOB_json();
+                break;
+            case "xml":
+                testDelete_BLOB_xml();
+                break;
+            default:
+                fail("Unexpected value: " + persistence);
+        }
+    }
+
+    void testDelete_BLOB_json() throws SQLException, FileNotFoundException {
+        statement.execute("DROP TABLE IF EXISTS myTable");
+        statement.execute("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER, file BLOB)");
+        final PreparedStatement preparedStatement = connection.prepareStatement(
+            "INSERT INTO myTable (id, name, age, file) VALUES (?, ?, ?, ?)");
+        preparedStatement.setInt(1, 1);
+        preparedStatement.setString(2, "Zsolti");
+        preparedStatement.setInt(3, 25);
+        preparedStatement.setBinaryStream(4, new FileInputStream(TestUtils.META_INF_DRIVER_PATH.toFile()));
+        assertEquals(1, preparedStatement.executeUpdate());
+        assertTrue(TestUtils.ENCODED_JSON_BLOB_PATH.toFile().exists());
+
+        statement.executeUpdate("DELETE FROM myTable WHERE id = 1");
+
+        assertFalse(TestUtils.ENCODED_JSON_BLOB_PATH.toFile().exists());
+    }
+
+    void testDelete_BLOB_xml() throws SQLException, FileNotFoundException {
+        statement.execute("DROP TABLE IF EXISTS myTable");
+        statement.execute("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER, file BLOB)");
+        final PreparedStatement preparedStatement = connection.prepareStatement(
+            "INSERT INTO myTable (id, name, age, file) VALUES (?, ?, ?, ?)");
+        preparedStatement.setInt(1, 1);
+        preparedStatement.setString(2, "Zsolti");
+        preparedStatement.setInt(3, 25);
+        preparedStatement.setBinaryStream(4, new FileInputStream(TestUtils.META_INF_DRIVER_PATH.toFile()));
+        assertEquals(1, preparedStatement.executeUpdate());
+        assertTrue(TestUtils.ENCODED_XML_BLOB_PATH.toFile().exists());
+
+        statement.executeUpdate("DELETE FROM myTable WHERE id = 1");
+
+        assertFalse(TestUtils.ENCODED_XML_BLOB_PATH.toFile().exists());
+    }
 }

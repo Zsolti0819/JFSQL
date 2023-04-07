@@ -201,6 +201,7 @@ public class InsertPreparedStatementTest {
         preparedStatement.setInt(3, 25);
         preparedStatement.setBinaryStream(4, new FileInputStream(TestUtils.META_INF_DRIVER_PATH.toFile()));
         assertEquals(1, preparedStatement.executeUpdate());
+        assertTrue(TestUtils.ENCODED_JSON_BLOB_PATH.toFile().exists());
 
         final String realFileContent = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
@@ -239,6 +240,7 @@ public class InsertPreparedStatementTest {
         preparedStatement.setInt(3, 25);
         preparedStatement.setBinaryStream(4, new FileInputStream(TestUtils.META_INF_DRIVER_PATH.toFile()));
         assertEquals(1, preparedStatement.executeUpdate());
+        assertTrue(TestUtils.ENCODED_XML_BLOB_PATH.toFile().exists());
 
         final String realFileContent = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
