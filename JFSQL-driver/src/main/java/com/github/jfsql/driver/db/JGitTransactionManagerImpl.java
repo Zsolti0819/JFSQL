@@ -49,12 +49,10 @@ public class JGitTransactionManagerImpl extends TransactionManager {
                     }
                 }
 
-                // no args, the commit() was called explicitly through the connection object
-                if (args.length == 0) {
-                    git.commit().setMessage("Explicit commit").call();
-                } else {
-                    git.commit().setMessage("Auto committing: " + Arrays.toString(args)).call();
-                }
+                final String commitMessage =
+                    args.length == 0 ? "Explicit commit" : "Auto committing: " + Arrays.toString(args);
+                git.commit().setMessage(commitMessage).call();
+
             } catch (final GitAPIException | IOException e) {
                 throw new CommitFailedException("Commit failed.\n" + e.getMessage());
             } finally {
