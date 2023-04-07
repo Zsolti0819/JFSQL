@@ -14,7 +14,6 @@ public class PropertiesReader {
     private boolean schemaValidation = true;
     private boolean statementCaching = true;
 
-
     public PropertiesReader(final Properties properties) {
         if (properties == null) {
             logger.info("Properties was null, default config will be used: "
