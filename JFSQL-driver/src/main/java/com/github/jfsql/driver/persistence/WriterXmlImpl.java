@@ -62,8 +62,6 @@ public class WriterXmlImpl extends Writer {
 
     @Override
     public void writeTable(final Table table) throws IOException, SchemaValidationException {
-        logger.trace("table = {}", table);
-        logger.trace("table entries = {}", table.getEntries());
         final String tableFile = table.getTableFile();
         try (final FileOutputStream fileOutputStream = new FileOutputStream(tableFile);
             final FileChannel fileChannel = fileOutputStream.getChannel()) {
@@ -119,7 +117,6 @@ public class WriterXmlImpl extends Writer {
 
     @Override
     public void writeSchema(final Table schema) throws IOException {
-        logger.trace("table = {}", schema);
         final String tableName = String.valueOf(Path.of(schema.getSchemaFile()).getFileName()).replace(".xsd", "");
         final String schemaFile = schema.getSchemaFile();
         try (final FileOutputStream fileOutputStream = new FileOutputStream(schemaFile);
@@ -179,8 +176,6 @@ public class WriterXmlImpl extends Writer {
 
     @Override
     public void writeDatabaseFile(final Database database) throws IOException {
-        logger.trace("database = {}", database);
-        logger.trace("database tables = {}", database.getTables());
         final Path databaseFilePath = database.getURL();
         final String databaseFileParentPath = String.valueOf(databaseFilePath.getParent());
         final Path databaseFolderName = Path.of(databaseFileParentPath);

@@ -1,5 +1,6 @@
 package com.github.jfsql.driver.core;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -9,6 +10,7 @@ import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -30,14 +32,14 @@ class JfsqlDriverTest {
     }
 
     @Test
-    void testAcceptsURL() throws SQLException {
+    void acceptsURL() throws SQLException {
         assertTrue(driver.acceptsURL(URL));
         assertFalse(driver.acceptsURL(null));
         assertFalse(driver.acceptsURL("invalid url"));
     }
 
     @Test
-    void testConnect() throws SQLException {
+    void connect() throws SQLException {
         final Properties info = new Properties();
         final Connection connection = driver.connect(URL, info);
         assertNotNull(connection);
@@ -45,7 +47,7 @@ class JfsqlDriverTest {
     }
 
     @Test
-    void testConnectThrowsException() {
+    void connectThrowsException() {
         final Properties info = new Properties();
         final String invalidUrl = "jdbc:invalid:url";
         assertThrows(SQLException.class, () -> {
@@ -53,5 +55,30 @@ class JfsqlDriverTest {
                 connection.createStatement();
             }
         });
+    }
+
+    @Test
+    void getMajorVersion() {
+        assertEquals(1, driver.getMajorVersion());
+    }
+
+    @Test
+    void getMinorVersion() {
+        assertEquals(0, driver.getMinorVersion());
+    }
+
+    @Test
+    void jdbcCompliant() {
+        assertFalse(driver.jdbcCompliant());
+    }
+
+    @Test
+    void getPropertyInfo() {
+        assertThrows(SQLFeatureNotSupportedException.class, () -> driver.getPropertyInfo(null, null));
+    }
+
+    @Test
+    void getParentLogger() {
+        assertThrows(SQLFeatureNotSupportedException.class, () -> driver.getParentLogger());
     }
 }

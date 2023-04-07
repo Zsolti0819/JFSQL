@@ -81,11 +81,13 @@ public class AlterTableService {
         // When autoCommit is true, it should be safe to read the entries from the file
         List<Entry> entries = table.getEntries();
         if (entries == null || transactionManager.getAutoCommit()) {
-            logger.debug("Table's entries in memory = {}, autoCommit = {}",
+            logger.debug("Will read entries from table. Table's entries were loaded into memory = {}, autoCommit = {}",
                 entries != null,
                 transactionManager.getAutoCommit());
             entries = reader.readEntriesFromTable(table);
             table.setEntries(entries);
+        } else {
+            logger.debug("Will not read entries from table. autoCommit = {}", transactionManager.getAutoCommit());
         }
 
         final Map<String, String> modifiedColumnsAndTypes = getModifiedColumnsAndTypes(statement, table);
@@ -151,11 +153,13 @@ public class AlterTableService {
         // When autoCommit is true, it should be safe to read the entries from the file
         List<Entry> entries = table.getEntries();
         if (entries == null || transactionManager.getAutoCommit()) {
-            logger.debug("Table's entries in memory = {}, autoCommit = {}",
+            logger.debug("Will read entries from table. Table's entries were loaded into memory = {}, autoCommit = {}",
                 entries != null,
                 transactionManager.getAutoCommit());
             entries = reader.readEntriesFromTable(table);
             table.setEntries(entries);
+        } else {
+            logger.debug("Will not read entries from table. autoCommit = {}", transactionManager.getAutoCommit());
         }
 
         columnsAndTypes.put(columnNameToAdd, columnTypeToAdd);
@@ -205,11 +209,13 @@ public class AlterTableService {
         // When autoCommit is true, it should be safe to read the entries from the file
         List<Entry> entries = table.getEntries();
         if (entries == null || transactionManager.getAutoCommit()) {
-            logger.debug("Table's entries in memory = {}, autoCommit = {}",
+            logger.debug("Will read entries from table. Table's entries were loaded into memory = {}, autoCommit = {}",
                 entries != null,
                 transactionManager.getAutoCommit());
             entries = reader.readEntriesFromTable(table);
             table.setEntries(entries);
+        } else {
+            logger.debug("Will not read entries from table. autoCommit = {}", transactionManager.getAutoCommit());
         }
 
         // Remove the columns from every entry in the table

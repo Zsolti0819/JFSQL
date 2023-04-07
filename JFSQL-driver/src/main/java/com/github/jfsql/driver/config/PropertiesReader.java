@@ -9,33 +9,32 @@ import org.apache.logging.log4j.Logger;
 public class PropertiesReader {
 
     private static final Logger logger = LogManager.getLogger(PropertiesReader.class);
-    private boolean schemaValidation = true;
-    private boolean statementCaching = true;
     private String persistence = "xml";
     private String transactionVersioning = "jgit";
+    private boolean schemaValidation = true;
+    private boolean statementCaching = true;
+
 
     public PropertiesReader(final Properties properties) {
         if (properties == null) {
             logger.info("Properties was null, default config will be used: "
-                    + "persistence = {}, "
-                    + "statement.caching = {}, "
-                    + "transaction.versioning = {}, "
-                    + "schema.validation = {}", persistence, statementCaching, transactionVersioning,
-                schemaValidation);
+                + "persistence = {}, "
+                + "transaction.versioning = {}, "
+                + "schema.validation = {}, "
+                + "statement.caching = {}", persistence, transactionVersioning, schemaValidation, statementCaching);
             return;
         }
 
         readPersistenceProperty(properties);
-        readStatementCachingProperty(properties);
         readTransactionVersioningProperty(properties);
         readSchemaValidationProperty(properties);
+        readStatementCachingProperty(properties);
 
         logger.info("The following config will be used: "
-                + "persistence = {}, "
-                + "statement.caching = {}, "
-                + "transaction.versioning = {}, "
-                + "schema.validation = {}", persistence, statementCaching, transactionVersioning,
-            schemaValidation);
+            + "persistence = {}, "
+            + "transaction.versioning = {}, "
+            + "schema.validation = {}, "
+            + "statement.caching = {}", persistence, transactionVersioning, schemaValidation, statementCaching);
     }
 
     private void readPersistenceProperty(final Properties properties) {

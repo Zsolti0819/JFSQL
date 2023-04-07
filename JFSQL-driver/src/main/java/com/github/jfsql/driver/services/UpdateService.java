@@ -46,12 +46,14 @@ public class UpdateService {
 
         // When autoCommit is true, it should be safe to read the entries from the file
         List<Entry> entries = table.getEntries();
-        if (table.getEntries() == null || transactionManager.getAutoCommit()) {
-            logger.debug("Table's entries in memory = {}, autoCommit = {}",
+        if (entries == null || transactionManager.getAutoCommit()) {
+            logger.debug("Will read entries from table. Table's entries were loaded into memory = {}, autoCommit = {}",
                 entries != null,
                 transactionManager.getAutoCommit());
             entries = reader.readEntriesFromTable(table);
             table.setEntries(entries);
+        } else {
+            logger.debug("Will not read entries from table. autoCommit = {}", transactionManager.getAutoCommit());
         }
 
         final List<Entry> whereEntries = whereConditionSolver.getWhereEntries(table, statement);
