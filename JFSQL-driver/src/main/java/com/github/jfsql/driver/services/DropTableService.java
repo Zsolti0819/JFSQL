@@ -9,6 +9,7 @@ import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.DropTableWrapper;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -49,10 +50,12 @@ public class DropTableService {
             logger.debug("Will read entries from table. Table's entries were loaded into memory = {}, autoCommit = {}",
                 entries != null,
                 transactionManager.getAutoCommit());
-            entries = reader.readEntriesFromTable(table);
+            try {
+                entries = reader.readEntriesFromTable(table);
+            } catch (final IOException e) {
+                throw new SQLException(e);
+            }
             table.setEntries(entries);
-        } else {
-            logger.debug("Will not read entries from table. autoCommit = {}", transactionManager.getAutoCommit());
         }
 
         if (!ifExistsIsPresent && (!semanticValidator.tableExists(statement, database))) {
@@ -66,7 +69,7 @@ public class DropTableService {
 
         logger.debug("table removed = {}", table);
 
-        transactionManager.executeDropTableOperation();
+        transactionManager.executeDropTableOperation(database);
         return deleteCount;
     }
 }

@@ -15,12 +15,12 @@ import lombok.Data;
 @Data
 public abstract class DatabaseManager {
 
+    protected final Reader reader;
+    protected final Writer writer;
     private final String URL;
     private final SemanticValidator semanticValidator;
     private final FileNameCreator fileNameCreator;
-    final Reader reader;
-    final Writer writer;
-    Database database;
+    protected Database database;
 
     protected DatabaseManager(final String URL, final SemanticValidator semanticValidator,
         final FileNameCreator fileNameCreator, final Reader reader, final Writer writer) throws SQLException {

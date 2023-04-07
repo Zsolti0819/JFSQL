@@ -3,7 +3,7 @@ package com.github.jfsql.driver.persistence;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
-import com.github.jfsql.driver.validation.SchemaValidationException;
+import com.github.jfsql.driver.exceptions.SchemaValidationException;
 import java.io.IOException;
 
 public abstract class Writer {

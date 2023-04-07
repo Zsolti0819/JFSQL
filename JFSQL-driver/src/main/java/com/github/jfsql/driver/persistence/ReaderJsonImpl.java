@@ -12,7 +12,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,7 +38,7 @@ public class ReaderJsonImpl implements Reader {
     }
 
     @Override
-    public List<Entry> readEntriesFromTable(final Table table) throws SQLException {
+    public List<Entry> readEntriesFromTable(final Table table) throws IOException {
         final String tableFile = table.getTableFile();
         final List<Entry> entries = new ArrayList<>();
 
@@ -63,8 +62,6 @@ public class ReaderJsonImpl implements Reader {
                 }
                 entries.add(new Entry(columnsAndValues, new HashMap<>()));
             }
-        } catch (final IOException e) {
-            throw new SQLException(e);
         }
         return entries;
     }
@@ -77,7 +74,7 @@ public class ReaderJsonImpl implements Reader {
     }
 
     @Override
-    public Table readSchema(final String pathToSchema) throws SQLException {
+    public Table readSchema(final String pathToSchema) throws IOException {
         final Map<String, String> columnsAndTypes = new LinkedHashMap<>();
         final Map<String, Boolean> notNullColumns = new LinkedHashMap<>();
         try (final FileReader fileReader = new FileReader(pathToSchema)) {
@@ -110,13 +107,11 @@ public class ReaderJsonImpl implements Reader {
                 .columnsAndTypes(columnsAndTypes)
                 .notNullColumns(notNullColumns)
                 .build();
-        } catch (final IOException e) {
-            throw new SQLException(e);
         }
     }
 
     @Override
-    public List<Table> readTablesFromDatabaseFile(final Database database) throws SQLException {
+    public List<Table> readTablesFromDatabaseFile(final Database database) throws IOException {
         final List<Table> tables = new ArrayList<>();
         final String URL = String.valueOf(database.getURL());
         try (final FileReader fileReader = new FileReader(URL)) {
@@ -139,25 +134,21 @@ public class ReaderJsonImpl implements Reader {
                     .build();
                 tables.add(table);
             }
-        } catch (final IOException e) {
-            throw new SQLException(e);
         }
         return tables;
     }
 
     @Override
-    public String readBlob(final String pathToBlob) throws SQLException {
+    public String readBlob(final String pathToBlob) throws IOException {
         try (final FileReader fileReader = new FileReader(pathToBlob)) {
             final JsonElement json = JsonParser.parseReader(fileReader);
             final JsonObject jsonObject = json.getAsJsonObject();
             return jsonObject.get("blob").getAsString();
-        } catch (final IOException e) {
-            throw new SQLException(e);
         }
     }
 
     @Override
-    public Set<File> getFilesFromDatabaseFile(final Database database) throws SQLException {
+    public Set<File> getFilesFromDatabaseFile(final Database database) throws IOException {
         final String jsonFilePath = String.valueOf(database.getURL());
         try (final FileReader fileReader = new FileReader(jsonFilePath)) {
             final JsonElement jsonElement = JsonParser.parseReader(fileReader);
@@ -174,14 +165,11 @@ public class ReaderJsonImpl implements Reader {
                 }
             }
             return files;
-        } catch (final IOException e) {
-            throw new SQLException(e);
         }
-
     }
 
     @Override
-    public Set<File> getBlobsFromTables(final Database database) throws SQLException {
+    public Set<File> getBlobsFromTables(final Database database) throws IOException {
         final Set<File> fileSet = new HashSet<>();
         for (final Table table : database.getTables()) {
             for (final Map.Entry<String, String> entry : table.getColumnsAndTypes().entrySet()) {
@@ -196,8 +184,6 @@ public class ReaderJsonImpl implements Reader {
                                 fileSet.add(new File(path));
                             }
                         });
-                    } catch (final IOException e) {
-                        throw new SQLException(e);
                     }
                 }
             }

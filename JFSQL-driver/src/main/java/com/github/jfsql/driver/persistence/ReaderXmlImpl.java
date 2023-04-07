@@ -7,7 +7,6 @@ import com.github.jfsql.driver.util.DatatypeConverter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -46,7 +45,7 @@ public class ReaderXmlImpl implements Reader {
     }
 
     @Override
-    public List<Entry> readEntriesFromTable(final Table table) throws SQLException {
+    public List<Entry> readEntriesFromTable(final Table table) throws IOException {
         final String tableFile = table.getTableFile();
         final List<Entry> entries = new ArrayList<>();
 
@@ -73,8 +72,8 @@ public class ReaderXmlImpl implements Reader {
                 }
                 entries.add(new Entry(columnsAndValues, new HashMap<>()));
             }
-        } catch (final ParserConfigurationException | SAXException | IOException e) {
-            throw new SQLException(e);
+        } catch (final ParserConfigurationException | SAXException e) {
+            throw new IOException(e);
         }
         return entries;
     }
@@ -88,7 +87,7 @@ public class ReaderXmlImpl implements Reader {
     }
 
     @Override
-    public Table readSchema(final String pathToSchema) throws SQLException {
+    public Table readSchema(final String pathToSchema) throws IOException {
         final Map<String, String> columnsAndTypes = new LinkedHashMap<>();
         final Map<String, Boolean> notNullColumns = new LinkedHashMap<>();
         try {
@@ -126,13 +125,13 @@ public class ReaderXmlImpl implements Reader {
                 .columnsAndTypes(columnsAndTypes)
                 .notNullColumns(notNullColumns)
                 .build();
-        } catch (final ParserConfigurationException | SAXException | IOException e) {
-            throw new SQLException(e);
+        } catch (final ParserConfigurationException | SAXException e) {
+            throw new IOException(e);
         }
     }
 
     @Override
-    public List<Table> readTablesFromDatabaseFile(final Database database) throws SQLException {
+    public List<Table> readTablesFromDatabaseFile(final Database database) throws IOException {
         final List<Table> tables = new ArrayList<>();
         try {
             final String URL = String.valueOf(database.getURL());
@@ -162,14 +161,14 @@ public class ReaderXmlImpl implements Reader {
                     .build();
                 tables.add(table);
             }
-        } catch (final ParserConfigurationException | SAXException | XPathExpressionException | IOException e) {
-            throw new SQLException(e);
+        } catch (final ParserConfigurationException | SAXException | XPathExpressionException e) {
+            throw new IOException(e);
         }
         return tables;
     }
 
     @Override
-    public String readBlob(final String pathToBlob) throws SQLException {
+    public String readBlob(final String pathToBlob) throws IOException {
         try {
             final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
@@ -177,13 +176,13 @@ public class ReaderXmlImpl implements Reader {
             final Document document = builder.parse(pathToBlob);
             return document.getElementsByTagName("blob").item(0).getTextContent();
 
-        } catch (final ParserConfigurationException | SAXException | IOException e) {
-            throw new SQLException(e);
+        } catch (final ParserConfigurationException | SAXException e) {
+            throw new IOException(e);
         }
     }
 
     @Override
-    public Set<File> getFilesFromDatabaseFile(final Database database) throws SQLException {
+    public Set<File> getFilesFromDatabaseFile(final Database database) throws IOException {
         final String xmlFilePath = String.valueOf(database.getURL());
         try {
             final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -206,13 +205,13 @@ public class ReaderXmlImpl implements Reader {
             }
 
             return fileSet;
-        } catch (final ParserConfigurationException | SAXException | IOException e) {
-            throw new SQLException(e);
+        } catch (final ParserConfigurationException | SAXException e) {
+            throw new IOException(e);
         }
     }
 
     @Override
-    public Set<File> getBlobsFromTables(final Database database) throws SQLException {
+    public Set<File> getBlobsFromTables(final Database database) throws IOException {
         final Set<File> fileSet = new HashSet<>();
         for (final Table table : database.getTables()) {
             for (final Map.Entry<String, String> entry : table.getColumnsAndTypes().entrySet()) {
@@ -228,8 +227,8 @@ public class ReaderXmlImpl implements Reader {
                             final String path = pathList.item(i).getTextContent();
                             fileSet.add(new File(path));
                         }
-                    } catch (final ParserConfigurationException | SAXException | IOException e) {
-                        throw new SQLException(e);
+                    } catch (final ParserConfigurationException | SAXException e) {
+                        throw new IOException(e);
                     }
                 }
             }

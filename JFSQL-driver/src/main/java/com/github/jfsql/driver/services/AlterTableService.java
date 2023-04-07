@@ -10,6 +10,7 @@ import com.github.jfsql.driver.util.FileNameCreator;
 import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.AlterTableWrapper;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -59,8 +60,19 @@ public class AlterTableService {
         final String newTableFile = fileNameCreator.createTableFileName(newTableName, database);
         final String newSchemaFile = fileNameCreator.createSchemaFileName(newTableName, database);
 
-        final List<Entry> entries = reader.readEntriesFromTable(table);
-        table.setEntries(entries);
+        // When autoCommit is true, it should be safe to read the entries from the file
+        List<Entry> entries = table.getEntries();
+        if (entries == null || transactionManager.getAutoCommit()) {
+            logger.debug("Will read entries from table. Table's entries were loaded into memory = {}, autoCommit = {}",
+                entries != null,
+                transactionManager.getAutoCommit());
+            try {
+                entries = reader.readEntriesFromTable(table);
+            } catch (final IOException e) {
+                throw new SQLException(e);
+            }
+            table.setEntries(entries);
+        }
 
         table.setName(newTableName);
         table.setTableFile(newTableFile);
@@ -84,10 +96,12 @@ public class AlterTableService {
             logger.debug("Will read entries from table. Table's entries were loaded into memory = {}, autoCommit = {}",
                 entries != null,
                 transactionManager.getAutoCommit());
-            entries = reader.readEntriesFromTable(table);
+            try {
+                entries = reader.readEntriesFromTable(table);
+            } catch (final IOException e) {
+                throw new SQLException(e);
+            }
             table.setEntries(entries);
-        } else {
-            logger.debug("Will not read entries from table. autoCommit = {}", transactionManager.getAutoCommit());
         }
 
         final Map<String, String> modifiedColumnsAndTypes = getModifiedColumnsAndTypes(statement, table);
@@ -156,10 +170,12 @@ public class AlterTableService {
             logger.debug("Will read entries from table. Table's entries were loaded into memory = {}, autoCommit = {}",
                 entries != null,
                 transactionManager.getAutoCommit());
-            entries = reader.readEntriesFromTable(table);
+            try {
+                entries = reader.readEntriesFromTable(table);
+            } catch (final IOException e) {
+                throw new SQLException(e);
+            }
             table.setEntries(entries);
-        } else {
-            logger.debug("Will not read entries from table. autoCommit = {}", transactionManager.getAutoCommit());
         }
 
         columnsAndTypes.put(columnNameToAdd, columnTypeToAdd);
@@ -212,10 +228,12 @@ public class AlterTableService {
             logger.debug("Will read entries from table. Table's entries were loaded into memory = {}, autoCommit = {}",
                 entries != null,
                 transactionManager.getAutoCommit());
-            entries = reader.readEntriesFromTable(table);
+            try {
+                entries = reader.readEntriesFromTable(table);
+            } catch (final IOException e) {
+                throw new SQLException(e);
+            }
             table.setEntries(entries);
-        } else {
-            logger.debug("Will not read entries from table. autoCommit = {}", transactionManager.getAutoCommit());
         }
 
         // Remove the columns from every entry in the table

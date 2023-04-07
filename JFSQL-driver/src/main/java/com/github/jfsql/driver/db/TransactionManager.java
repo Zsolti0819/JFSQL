@@ -2,7 +2,8 @@ package com.github.jfsql.driver.db;
 
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
-import com.github.jfsql.driver.persistence.PessimisticLockException;
+import com.github.jfsql.driver.exceptions.CommitFailedException;
+import com.github.jfsql.driver.exceptions.PessimisticLockException;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
 import java.io.File;
@@ -84,7 +85,7 @@ public abstract class TransactionManager {
                 try {
                     writer.writeTable(table);
                     commit(String.valueOf(Path.of(table.getTableFile()).getFileName()));
-                } catch (final IOException e) {
+                } catch (final IOException | CommitFailedException e) {
                     e.printStackTrace();
                     rollback();
                 }
@@ -92,8 +93,7 @@ public abstract class TransactionManager {
         }
     }
 
-    public void executeDDLOperation(final Database database, final Table table)
-        throws SQLException {
+    public void executeDDLOperation(final Database database, final Table table) throws SQLException {
         synchronized (lock) {
             if (!autoCommit) {
                 addDatabaseToUncommittedObjects(database);
@@ -107,7 +107,7 @@ public abstract class TransactionManager {
                     commit(String.valueOf(database.getURL().getFileName()),
                         String.valueOf(Path.of(table.getSchemaFile()).getFileName()),
                         String.valueOf(Path.of(table.getTableFile()).getFileName()));
-                } catch (final IOException e) {
+                } catch (final IOException | CommitFailedException e) {
                     e.printStackTrace();
                     rollback();
                 }
@@ -115,16 +115,15 @@ public abstract class TransactionManager {
         }
     }
 
-    public void executeDropTableOperation() throws SQLException {
+    public void executeDropTableOperation(final Database database) throws SQLException {
         synchronized (lock) {
-            final Database database = databaseManager.getDatabase();
             if (!autoCommit) {
                 addDatabaseToUncommittedObjects(database);
             } else {
                 try {
                     writer.writeDatabaseFile(database);
                     commit(String.valueOf(database.getURL().getFileName()));
-                } catch (final IOException e) {
+                } catch (final IOException | CommitFailedException e) {
                     e.printStackTrace();
                     rollback();
                 }
@@ -189,7 +188,7 @@ public abstract class TransactionManager {
         }
     }
 
-    Map<File, Boolean> getFilesToKeep() throws SQLException {
+    Map<File, Boolean> getFilesToKeep() throws IOException {
         final Map<File, Boolean> filesToKeep = new HashMap<>();
         final Database database = databaseManager.database;
         final Path databaseURL = database.getURL();

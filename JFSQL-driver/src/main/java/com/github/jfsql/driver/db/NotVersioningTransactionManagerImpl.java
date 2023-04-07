@@ -1,12 +1,12 @@
 package com.github.jfsql.driver.db;
 
+import com.github.jfsql.driver.exceptions.CommitFailedException;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.SQLException;
 import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,7 +21,7 @@ public class NotVersioningTransactionManagerImpl extends TransactionManager {
     }
 
     @Override
-    public void commit(final String... args) throws SQLException {
+    public void commit(final String... args) {
         try {
             writeUncommittedObjects();
 
@@ -35,7 +35,7 @@ public class NotVersioningTransactionManagerImpl extends TransactionManager {
                 }
             }
         } catch (final IOException e) {
-            throw new SQLException(e);
+            throw new CommitFailedException("Commit failed.\n" + e.getMessage());
         }
         removeCurrentThreadChangesFromMap();
     }

@@ -2,6 +2,7 @@ package com.github.jfsql.driver.db;
 
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
+import com.github.jfsql.driver.exceptions.CommitFailedException;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
 import java.io.File;
@@ -25,7 +26,7 @@ public class JGitTransactionManagerImpl extends TransactionManager {
     }
 
     @Override
-    public void commit(final String... args) throws SQLException {
+    public void commit(final String... args) {
         synchronized (lock) {
             final Database database = databaseManager.database;
             final File databaseDirectoryPath = database.getURL().getParent().toFile();
@@ -55,7 +56,7 @@ public class JGitTransactionManagerImpl extends TransactionManager {
                     git.commit().setMessage("Auto committing: " + Arrays.toString(args)).call();
                 }
             } catch (final GitAPIException | IOException e) {
-                throw new SQLException(e);
+                throw new CommitFailedException("Commit failed.\n" + e.getMessage());
             } finally {
                 removeCurrentThreadChangesFromMap();
             }

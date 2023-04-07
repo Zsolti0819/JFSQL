@@ -2,7 +2,6 @@ package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.core.JfsqlResultSet;
 import com.github.jfsql.driver.dto.Entry;
-import com.github.jfsql.driver.dto.LargeObject;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.util.ColumnToTypeMapper;
@@ -11,6 +10,7 @@ import com.github.jfsql.driver.util.WhereConditionSolver;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.JoinType;
 import com.github.jfsql.parser.dto.SelectWrapper;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -52,7 +52,12 @@ public class SelectService {
                 throw new SQLException("Column '" + columnName + "' not found in table '" + tableName + "'.");
             }
         }
-        final List<Entry> entries = reader.readEntriesFromTable(table);
+        final List<Entry> entries;
+        try {
+            entries = reader.readEntriesFromTable(table);
+        } catch (final IOException e) {
+            throw new SQLException(e);
+        }
         table.setEntries(entries);
         return baseSelect(statement, table);
     }
@@ -121,7 +126,7 @@ public class SelectService {
         return baseSelect(statement, joinTable);
     }
 
-    private ResultSet baseSelect(final SelectWrapper statement, final Table table) throws SQLException {
+    private ResultSet baseSelect(final SelectWrapper statement, final Table table) {
         final Map<String, String> columnsAndTypes;
         List<String> selectedColumns = statement.getColumns();
         if (selectedColumns.size() == 1 && Objects.equals(selectedColumns.get(0), "*")) {
@@ -138,22 +143,6 @@ public class SelectService {
         final List<Entry> whereEntries = whereConditionSolver.getWhereEntries(table, statement);
         final List<Entry> orderedEntries = getEntriesWithSortedColumns(selectedColumns, whereEntries);
 
-        for (final Entry entry : orderedEntries) {
-            for (final String column : selectedColumns) {
-                final String type = columnsAndTypes.get(column);
-                if (Objects.equals(type, "BLOB")) {
-                    final Map<String, String> columnsAndValues = entry.getColumnsAndValues();
-                    final String path = columnsAndValues.get(column);
-                    if (path != null) {
-                        final String value = reader.readBlob(path);
-                        final LargeObject largeObject = new LargeObject(path, value);
-                        final Map<String, LargeObject> columnsAndBlobs = entry.getColumnsAndBlobs();
-                        columnsAndBlobs.put(column, largeObject);
-                    }
-                }
-            }
-        }
-
         final Table newTable = Table.builder()
             .name(tableName)
             .tableFile(tableFile)
@@ -162,7 +151,7 @@ public class SelectService {
             .notNullColumns(notNullColumns)
             .entries(orderedEntries)
             .build();
-        return new JfsqlResultSet(newTable);
+        return new JfsqlResultSet(newTable, reader);
     }
 
     private List<Entry> getEntriesWithSortedColumns(final List<String> selectedColumns, final List<Entry> entries) {
@@ -339,7 +328,12 @@ public class SelectService {
 
         // Now we can load the entries into memory
         for (final Table table : tables) {
-            final List<Entry> entries = reader.readEntriesFromTable(table);
+            final List<Entry> entries;
+            try {
+                entries = reader.readEntriesFromTable(table);
+            } catch (final IOException e) {
+                throw new SQLException(e);
+            }
             table.setEntries(entries);
         }
 

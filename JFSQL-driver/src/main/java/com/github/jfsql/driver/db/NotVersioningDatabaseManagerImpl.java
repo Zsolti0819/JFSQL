@@ -16,10 +16,8 @@ import java.util.List;
 
 public class NotVersioningDatabaseManagerImpl extends DatabaseManager {
 
-    public NotVersioningDatabaseManagerImpl(final String URL,
-        final SemanticValidator semanticValidator,
-        final FileNameCreator fileNameCreator, final Reader reader, final Writer writer)
-        throws SQLException {
+    public NotVersioningDatabaseManagerImpl(final String URL, final SemanticValidator semanticValidator,
+        final FileNameCreator fileNameCreator, final Reader reader, final Writer writer) throws SQLException {
         super(URL, semanticValidator, fileNameCreator, reader, writer);
     }
 
@@ -44,7 +42,12 @@ public class NotVersioningDatabaseManagerImpl extends DatabaseManager {
 
     @Override
     public void openDatabase() throws SQLException {
-        final List<Table> tables = reader.readTablesFromDatabaseFile(database);
+        final List<Table> tables;
+        try {
+            tables = reader.readTablesFromDatabaseFile(database);
+        } catch (final IOException e) {
+            throw new SQLException(e);
+        }
         database.setTables(tables);
     }
 }

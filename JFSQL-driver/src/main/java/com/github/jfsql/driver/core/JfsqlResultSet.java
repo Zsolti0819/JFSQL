@@ -1,8 +1,8 @@
 package com.github.jfsql.driver.core;
 
 import com.github.jfsql.driver.dto.Entry;
-import com.github.jfsql.driver.dto.LargeObject;
 import com.github.jfsql.driver.dto.Table;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -34,15 +34,17 @@ import lombok.Data;
 @Data
 public class JfsqlResultSet implements ResultSet {
 
-    private Table table;
+    private final com.github.jfsql.driver.persistence.Reader reader;
     private final String tableName;
     private final List<String> columnNames;
     private final List<String> columnTypes;
+    private Table table;
     private List<Entry> entries;
     private int currentEntry = 0;
 
-    public JfsqlResultSet(final Table table) {
+    public JfsqlResultSet(final Table table, final com.github.jfsql.driver.persistence.Reader reader) {
         this.table = table;
+        this.reader = reader;
         tableName = table.getName();
         entries = table.getEntries();
         columnNames = new ArrayList<>(table.getColumnsAndTypes().keySet());
@@ -65,12 +67,12 @@ public class JfsqlResultSet implements ResultSet {
         return entryValues.get(column);
     }
 
-    private String getBlobValue(final int row, final int column) {
-        final Entry entry = entries.get(row);
-        final Map<String, LargeObject> columnsAndBlobs = entry.getColumnsAndBlobs();
-        final List<LargeObject> entryValues = new ArrayList<>(columnsAndBlobs.values());
-        final LargeObject largeObject = entryValues.get(column);
-        return largeObject.getValue();
+    private String getBlobValue(final String path) throws SQLException {
+        try {
+            return reader.readBlob(path);
+        } catch (final IOException e) {
+            throw new SQLException("Failed to read blob from file '" + path + "'.");
+        }
     }
 
     @Override
@@ -150,12 +152,12 @@ public class JfsqlResultSet implements ResultSet {
     }
 
     @Override
-    public byte[] getBytes(final int columnIndex) {
+    public byte[] getBytes(final int columnIndex) throws SQLException {
         final String path = getValue(currentEntry - 1, columnIndex - 1);
         if (path == null) {
             return new byte[0];
         }
-        final String value = getBlobValue(currentEntry - 1, columnIndex - 1);
+        final String value = getBlobValue(path);
         return Base64.getDecoder().decode(value);
     }
 
