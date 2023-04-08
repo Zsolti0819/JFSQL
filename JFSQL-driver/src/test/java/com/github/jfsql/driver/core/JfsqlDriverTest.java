@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.github.jfsql.driver.TestUtils;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -18,7 +19,7 @@ import org.junit.jupiter.api.Test;
 
 class JfsqlDriverTest {
 
-    private static final String URL = "jdbc:jfsql:database";
+    private static final String URL = "jdbc:jfsql:" + TestUtils.DATABASE_PATH;
     private static Driver driver;
 
     @BeforeAll
@@ -29,6 +30,7 @@ class JfsqlDriverTest {
     @AfterAll
     static void tearDown() throws SQLException {
         DriverManager.deregisterDriver(driver);
+        TestUtils.deleteDatabaseDirectory();
     }
 
     @Test
