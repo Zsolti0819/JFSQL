@@ -46,7 +46,7 @@ public class CommitAndRollbackTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"json", "xml"})
-    void testCommit(final String persistence)
+    void testCommitAndRollback(final String persistence)
         throws SQLException, IOException {
         setup(persistence);
         switch (persistence) {
