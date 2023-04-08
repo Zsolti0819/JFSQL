@@ -128,7 +128,7 @@ public class JfsqlDriver implements Driver {
             .build();
 
         // Only used in JfsqlPreparedStatement
-        final BlobFileNameCreator blobFileNameCreator = new BlobFileNameCreator(databaseManager, propertiesReader);
+        final BlobFileNameCreator blobFileNameCreator = new BlobFileNameCreator(databaseManager, ioOperationHandler, propertiesReader);
 
         return JfsqlConnection.builder()
             .blobFileNameCreator(blobFileNameCreator)

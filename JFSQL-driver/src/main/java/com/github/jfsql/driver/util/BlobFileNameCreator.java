@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -19,6 +18,7 @@ public class BlobFileNameCreator {
 
     private static final Logger logger = LogManager.getLogger(BlobFileNameCreator.class);
     private final DatabaseManager databaseManager;
+    private final IoOperationHandler ioOperationHandler;
     private final PropertiesReader propertiesReader;
 
     public String getBlobURL() {
@@ -27,7 +27,7 @@ public class BlobFileNameCreator {
         final String fileExtension = propertiesReader.getPersistence();
         final List<Integer> fileNumbers = new ArrayList<>();
         final Pattern pattern = Pattern.compile("blob" + "(\\d+)" + "\\." + fileExtension);
-        final Collection<File> files = FileUtils.listFiles(pathURL.toFile(), new String[]{fileExtension}, false);
+        final Collection<File> files = ioOperationHandler.listFiles(pathURL, fileExtension);
         for (final File file : files) {
             final String fileName = file.getName();
             final Matcher matcher = pattern.matcher(fileName);
