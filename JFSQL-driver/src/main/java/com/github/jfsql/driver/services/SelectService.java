@@ -40,7 +40,7 @@ public class SelectService {
         if (joinTypes.isEmpty()) {
             return simpleSelect(statement);
         }
-        return selectWithJoins(statement, joinTypes);
+        return selectWithJoins(statement);
     }
 
     private ResultSet simpleSelect(final SelectWrapper statement) throws SQLException {
@@ -62,8 +62,9 @@ public class SelectService {
         return baseSelect(statement, table);
     }
 
-    private ResultSet selectWithJoins(final SelectWrapper statement, final List<JoinType> joinTypes)
-        throws SQLException {
+    private ResultSet selectWithJoins(final SelectWrapper statement) throws SQLException {
+        final List<JoinType> joinTypes = statement.getJoinTypes();
+
         final List<Table> extractedTables = extractTables(statement);
         logger.debug("tables extracted from the statement = {}", extractedTables);
 
