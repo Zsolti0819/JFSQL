@@ -16,7 +16,7 @@ public interface Reader {
 
     List<Entry> readEntriesFromTable(final Table table) throws IOException;
 
-    Table readSchema(final String pathToSchema) throws IOException;
+    void setTableMetaDataFromSchema(final Table table) throws IOException;
 
     List<Table> readTablesFromDatabaseFile(final Database database) throws IOException;
 

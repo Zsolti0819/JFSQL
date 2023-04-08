@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
 class ReaderXmlImplTest {
@@ -25,15 +26,42 @@ class ReaderXmlImplTest {
 
     @BeforeAll
     static void beforeAll() throws IOException {
-        Files.createDirectories(TestUtils.XML_DATABASE_PATH.getParent());
-        final Map<String, String> returnColumnsAndTypes = new LinkedHashMap<>();
-        returnColumnsAndTypes.put("id", "INTEGER");
-        returnColumnsAndTypes.put("name", "TEXT");
-        returnColumnsAndTypes.put("age", "INTEGER");
-        final Map<String, Boolean> notNullColumns = new LinkedHashMap<>();
-        notNullColumns.put("id", true);
-        notNullColumns.put("name", true);
-        notNullColumns.put("age", true);
+        table = Table.builder()
+            .name("myTable")
+            .tableFile(String.valueOf(TestUtils.TEST_XML_TABLE_PATH))
+            .schemaFile(String.valueOf(TestUtils.TEST_XSD_PATH))
+            .build();
+        database = new Database(TestUtils.TEST_XML_DATABASE_FILE_PATH, List.of(table));
+        // Since the database file contains absolute paths, we will create it instead of manipulating with a static file
+        new WriterXmlImpl(true).writeDatabaseFile(database);
+    }
+
+    @AfterAll
+    static void deleteDatabaseFolder() throws IOException {
+        Files.delete(TestUtils.TEST_XML_DATABASE_FILE_PATH);
+    }
+
+    @Order(1)
+    @Test
+    void testReader_setSchema() throws IOException {
+        final Map<String, String> expectedColumnsAndTypes = new LinkedHashMap<>();
+        expectedColumnsAndTypes.put("id", "INTEGER");
+        expectedColumnsAndTypes.put("name", "TEXT");
+        expectedColumnsAndTypes.put("age", "INTEGER");
+        final Map<String, Boolean> expectedNotNullColumns = new LinkedHashMap<>();
+        expectedNotNullColumns.put("id", true);
+        expectedNotNullColumns.put("name", true);
+        expectedNotNullColumns.put("age", true);
+
+        reader.setTableMetaDataFromSchema(table);
+
+        assertEquals(expectedColumnsAndTypes, table.getColumnsAndTypes());
+        assertEquals(expectedNotNullColumns, table.getNotNullColumns());
+    }
+
+    @Order(2)
+    @Test
+    void testReader_readEntriesFromTable() throws IOException {
         final Map<String, String> entry1ColumnsAndTypes = new LinkedHashMap<>();
         entry1ColumnsAndTypes.put("id", "1");
         entry1ColumnsAndTypes.put("name", "Zsolti");
@@ -50,45 +78,19 @@ class ReaderXmlImplTest {
         entry4ColumnsAndTypes.put("id", "4");
         entry4ColumnsAndTypes.put("name", "Lukas");
         entry4ColumnsAndTypes.put("age", "34");
-        final List<Entry> returnEntries = List.of(
+        final List<Entry> expectedEntries = List.of(
             new Entry(entry1ColumnsAndTypes, new HashMap<>()),
             new Entry(entry2ColumnsAndTypes, new HashMap<>()),
             new Entry(entry3ColumnsAndTypes, new HashMap<>()),
             new Entry(entry4ColumnsAndTypes, new HashMap<>())
         );
-        table = Table.builder()
-            .name("myTable")
-            .tableFile(String.valueOf(TestUtils.XML_TABLE_PATH))
-            .schemaFile(String.valueOf(TestUtils.XSD_PATH))
-            .columnsAndTypes(returnColumnsAndTypes)
-            .notNullColumns(notNullColumns)
-            .entries(returnEntries)
-            .build();
-        database = new Database(TestUtils.XML_DATABASE_PATH, List.of(table));
-        new WriterXmlImpl(true).writeSchema(table);
-        new WriterXmlImpl(true).writeTable(table);
-        new WriterXmlImpl(true).writeDatabaseFile(database);
-    }
 
-    @AfterAll
-    static void deleteDatabaseFolder() {
-        TestUtils.deleteDatabaseDirectory();
-    }
-
-    @Test
-    void testReader_readEntriesFromTable() throws IOException {
         final List<Entry> entries = reader.readEntriesFromTable(table);
-        assertEquals(table.getEntries(), entries);
+
+        assertEquals(expectedEntries, entries);
     }
 
-    @Test
-    void testReader_readSchema() throws IOException {
-        final Table schema = reader.readSchema(String.valueOf(TestUtils.XSD_PATH));
-        assertEquals(table.getColumnsAndTypes(), schema.getColumnsAndTypes());
-        assertEquals(table.getNotNullColumns(), schema.getNotNullColumns());
-        assertEquals(table.getSchemaFile(), schema.getSchemaFile());
-    }
-
+    @Order(3)
     @Test
     void testReader_readTablesFromDatabaseFile() throws IOException {
         final List<Table> tables = reader.readTablesFromDatabaseFile(database);
@@ -97,11 +99,13 @@ class ReaderXmlImplTest {
             .name(table.getName())
             .tableFile(table.getTableFile())
             .schemaFile(table.getSchemaFile())
-            .columnsAndTypes(table.getColumnsAndTypes())
-            .notNullColumns(table.getNotNullColumns())
             .entries(Collections.emptyList())
             .build();
+
+        reader.setTableMetaDataFromSchema(tableWithoutEntries);
+
         final List<Table> returnTables = List.of(tableWithoutEntries);
+
         assertEquals(returnTables, tables);
     }
 }

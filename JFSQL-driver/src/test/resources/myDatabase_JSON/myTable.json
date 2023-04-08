@@ -1,0 +1,24 @@
+{
+  "Entry": [
+    {
+      "id": 1,
+      "name": "Zsolti",
+      "age": 25
+    },
+    {
+      "id": 2,
+      "name": "Tomi",
+      "age": 24
+    },
+    {
+      "id": 3,
+      "name": "Ivan",
+      "age": 26
+    },
+    {
+      "id": 4,
+      "name": "Lukas",
+      "age": 34
+    }
+  ]
+}

@@ -15,6 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -79,7 +80,8 @@ class WriterJsonImplTest {
         writer.writeSchema(table);
         final String realFileContent = FileUtils.readFileToString(TestUtils.JSON_SCHEMA_PATH.toFile(),
             StandardCharsets.UTF_8);
-        final String expectedContent = "{\n" +
+        final String expectedContent = StringUtils.EMPTY +
+            "{\n" +
             "  \"$schema\": \"http://json-schema.org/draft-06/schema#\",\n" +
             "  \"type\": \"object\",\n" +
             "  \"required\": [\n" +
@@ -124,7 +126,8 @@ class WriterJsonImplTest {
         writer.writeTable(table);
         final String realFileContent = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
-        final String expectedContent = "{\n" +
+        final String expectedContent = StringUtils.EMPTY +
+            "{\n" +
             "  \"Entry\": [\n" +
             "    {\n" +
             "      \"id\": 1,\n" +

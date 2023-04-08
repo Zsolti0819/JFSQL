@@ -46,6 +46,24 @@ public class TestUtils {
         BASE_PATH + File.separator + "src" + File.separator + "main" + File.separator + "resources" + File.separator
             + "META-INF" + File.separator + "services" + File.separator + "java.sql.Driver");
 
+    // For testing the reader
+    public static final Path TEST_JSON_DATABASE_PATH = Path.of(
+        BASE_PATH + File.separator + "src" + File.separator + "test" + File.separator + "resources" + File.separator
+            + "myDatabase_JSON" + File.separator);
+    public static final Path TEST_JSON_DATABASE_FILE_PATH = Path.of(
+        TEST_JSON_DATABASE_PATH + File.separator + "myDatabase_JSON.json");
+    public static final Path TEST_JSON_TABLE_PATH = Path.of(TEST_JSON_DATABASE_PATH + File.separator + "myTable.json");
+    public static final Path TEST_JSON_SCHEMA_PATH = Path.of(
+        TEST_JSON_DATABASE_PATH + File.separator + "myTableSchema.json");
+
+    public static final Path TEST_XML_DATABASE_PATH = Path.of(
+        BASE_PATH + File.separator + "src" + File.separator + "test" + File.separator + "resources" + File.separator
+            + "myDatabase_XML" + File.separator);
+    public static final Path TEST_XML_DATABASE_FILE_PATH = Path.of(
+        TEST_XML_DATABASE_PATH + File.separator + "myDatabase_XML.xml");
+    public static final Path TEST_XML_TABLE_PATH = Path.of(TEST_XML_DATABASE_PATH + File.separator + "myTable.xml");
+    public static final Path TEST_XSD_PATH = Path.of(TEST_XML_DATABASE_PATH + File.separator + "myTable.xsd");
+
     public void deleteDatabaseDirectory() {
         final File folder = new File(TestUtils.DATABASE_PATH.toUri());
         boolean isDeleted = false;

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<myTable>
+    <Entry>
+        <id>1</id>
+        <name>Zsolti</name>
+        <age>25</age>
+    </Entry>
+    <Entry>
+        <id>2</id>
+        <name>Tomi</name>
+        <age>24</age>
+    </Entry>
+    <Entry>
+        <id>3</id>
+        <name>Ivan</name>
+        <age>26</age>
+    </Entry>
+    <Entry>
+        <id>4</id>
+        <name>Lukas</name>
+        <age>34</age>
+    </Entry>
+</myTable>

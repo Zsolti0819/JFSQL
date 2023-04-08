@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "type": "object",
+  "required": [
+    "Entry"
+  ],
+  "properties": {
+    "Entry": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "age"
+        ],
+        "properties": {
+          "id": {
+            "type": [
+              "integer"
+            ]
+          },
+          "name": {
+            "type": [
+              "string"
+            ]
+          },
+          "age": {
+            "type": [
+              "integer"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

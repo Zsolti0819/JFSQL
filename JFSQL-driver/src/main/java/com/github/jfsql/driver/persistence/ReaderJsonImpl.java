@@ -74,9 +74,10 @@ public class ReaderJsonImpl implements Reader {
     }
 
     @Override
-    public Table readSchema(final String pathToSchema) throws IOException {
+    public void setTableMetaDataFromSchema(final Table table) throws IOException {
         final Map<String, String> columnsAndTypes = new LinkedHashMap<>();
         final Map<String, Boolean> notNullColumns = new LinkedHashMap<>();
+        final String pathToSchema = table.getSchemaFile();
         try (final FileReader fileReader = new FileReader(pathToSchema)) {
             final JsonElement root = JsonParser.parseReader(fileReader);
             final JsonObject firstPropertiesObject = root.getAsJsonObject().get("properties").getAsJsonObject();
@@ -102,11 +103,8 @@ public class ReaderJsonImpl implements Reader {
                     notNullColumns.put(columnName, true);
                 }
             }
-            return Table.builder()
-                .schemaFile(pathToSchema)
-                .columnsAndTypes(columnsAndTypes)
-                .notNullColumns(notNullColumns)
-                .build();
+            table.setColumnsAndTypes(columnsAndTypes);
+            table.setNotNullColumns(notNullColumns);
         }
     }
 
@@ -124,14 +122,12 @@ public class ReaderJsonImpl implements Reader {
                 final String tableName = jsonTableObject.get("name").getAsString();
                 final String tablePath = jsonTableObject.get("pathToTable").getAsString();
                 final String schemaPath = jsonTableObject.get("pathToSchema").getAsString();
-                final Table schema = readSchema(schemaPath);
                 final Table table = Table.builder()
                     .name(tableName)
                     .tableFile(tablePath)
-                    .schemaFile(schema.getSchemaFile())
-                    .columnsAndTypes(schema.getColumnsAndTypes())
-                    .notNullColumns(schema.getNotNullColumns())
+                    .schemaFile(schemaPath)
                     .build();
+                setTableMetaDataFromSchema(table);
                 tables.add(table);
             }
         }

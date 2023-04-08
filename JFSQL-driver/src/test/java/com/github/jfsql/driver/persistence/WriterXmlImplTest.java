@@ -80,7 +80,8 @@ class WriterXmlImplTest {
         writer.writeSchema(table);
         final String realFileContent = FileUtils.readFileToString(TestUtils.XSD_PATH.toFile(),
             StandardCharsets.UTF_8);
-        final String expectedFileContent = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
+        final String expectedFileContent = StringUtils.EMPTY +
+            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\">\n" +
             "    <xs:element name=\"myTable\">\n" +
             "        <xs:complexType>\n" +
@@ -107,7 +108,8 @@ class WriterXmlImplTest {
         writer.writeTable(table);
         final String realFileContent = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
-        final String expectedFileContent = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
+        final String expectedFileContent = StringUtils.EMPTY +
+            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<myTable>\n" +
             "    <Entry>\n" +
             "        <id>1</id>\n" +

@@ -87,13 +87,14 @@ public class ReaderXmlImpl implements Reader {
     }
 
     @Override
-    public Table readSchema(final String pathToSchema) throws IOException {
+    public void setTableMetaDataFromSchema(final Table table) throws IOException {
         final Map<String, String> columnsAndTypes = new LinkedHashMap<>();
         final Map<String, Boolean> notNullColumns = new LinkedHashMap<>();
         try {
             final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
             documentBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
             final DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+            final String pathToSchema = table.getSchemaFile();
             final Document document = documentBuilder.parse(pathToSchema);
 
             final NodeList nodeList1 = document.getElementsByTagName("xs:element");
@@ -120,11 +121,8 @@ public class ReaderXmlImpl implements Reader {
                     notNullColumns.put(columnNames[i], false);
                 }
             }
-            return Table.builder()
-                .schemaFile(pathToSchema)
-                .columnsAndTypes(columnsAndTypes)
-                .notNullColumns(notNullColumns)
-                .build();
+            table.setColumnsAndTypes(columnsAndTypes);
+            table.setNotNullColumns(notNullColumns);
         } catch (final ParserConfigurationException | SAXException e) {
             throw new IOException(e);
         }
@@ -151,14 +149,13 @@ public class ReaderXmlImpl implements Reader {
                     XPathConstants.STRING);
                 final String xsdPath = (String) xpath.evaluate("pathToSchema/text()", nodeList.item(i),
                     XPathConstants.STRING);
-                final Table schema = readSchema(xsdPath);
+
                 final Table table = Table.builder()
                     .name(tableName)
                     .tableFile(xmlPath)
-                    .schemaFile(schema.getSchemaFile())
-                    .columnsAndTypes(schema.getColumnsAndTypes())
-                    .notNullColumns(schema.getNotNullColumns())
+                    .schemaFile(xsdPath)
                     .build();
+                setTableMetaDataFromSchema(table);
                 tables.add(table);
             }
         } catch (final ParserConfigurationException | SAXException | XPathExpressionException e) {
