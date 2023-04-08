@@ -15,7 +15,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -80,44 +79,8 @@ class WriterJsonImplTest {
         writer.writeSchema(table);
         final String realFileContent = FileUtils.readFileToString(TestUtils.JSON_SCHEMA_PATH.toFile(),
             StandardCharsets.UTF_8);
-        final String expectedContent = StringUtils.EMPTY +
-            "{\n" +
-            "  \"$schema\": \"http://json-schema.org/draft-06/schema#\",\n" +
-            "  \"type\": \"object\",\n" +
-            "  \"required\": [\n" +
-            "    \"Entry\"\n" +
-            "  ],\n" +
-            "  \"properties\": {\n" +
-            "    \"Entry\": {\n" +
-            "      \"type\": \"array\",\n" +
-            "      \"items\": {\n" +
-            "        \"type\": \"object\",\n" +
-            "        \"required\": [\n" +
-            "          \"id\",\n" +
-            "          \"name\",\n" +
-            "          \"age\"\n" +
-            "        ],\n" +
-            "        \"properties\": {\n" +
-            "          \"id\": {\n" +
-            "            \"type\": [\n" +
-            "              \"integer\"\n" +
-            "            ]\n" +
-            "          },\n" +
-            "          \"name\": {\n" +
-            "            \"type\": [\n" +
-            "              \"string\"\n" +
-            "            ]\n" +
-            "          },\n" +
-            "          \"age\": {\n" +
-            "            \"type\": [\n" +
-            "              \"integer\"\n" +
-            "            ]\n" +
-            "          }\n" +
-            "        }\n" +
-            "      }\n" +
-            "    }\n" +
-            "  }\n" +
-            "}";
+        final String expectedContent = FileUtils.readFileToString(TestUtils.TEST_JSON_SCHEMA_PATH.toFile(),
+            StandardCharsets.UTF_8);
         assertEquals(expectedContent, realFileContent);
     }
 
@@ -126,31 +89,8 @@ class WriterJsonImplTest {
         writer.writeTable(table);
         final String realFileContent = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
-        final String expectedContent = StringUtils.EMPTY +
-            "{\n" +
-            "  \"Entry\": [\n" +
-            "    {\n" +
-            "      \"id\": 1,\n" +
-            "      \"name\": \"Zsolti\",\n" +
-            "      \"age\": 25\n" +
-            "    },\n" +
-            "    {\n" +
-            "      \"id\": 2,\n" +
-            "      \"name\": \"Tomi\",\n" +
-            "      \"age\": 24\n" +
-            "    },\n" +
-            "    {\n" +
-            "      \"id\": 3,\n" +
-            "      \"name\": \"Ivan\",\n" +
-            "      \"age\": 26\n" +
-            "    },\n" +
-            "    {\n" +
-            "      \"id\": 4,\n" +
-            "      \"name\": \"Lukas\",\n" +
-            "      \"age\": 34\n" +
-            "    }\n" +
-            "  ]\n" +
-            "}";
+        final String expectedContent = FileUtils.readFileToString(TestUtils.TEST_JSON_TABLE_PATH.toFile(),
+            StandardCharsets.UTF_8);
         assertEquals(expectedContent, realFileContent);
     }
 
@@ -158,4 +98,5 @@ class WriterJsonImplTest {
     void testWriter_writeDatabaseFile() {
         assertDoesNotThrow(() -> writer.writeDatabaseFile(database));
     }
+
 }
