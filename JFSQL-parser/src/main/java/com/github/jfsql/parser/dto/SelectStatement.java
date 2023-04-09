@@ -19,5 +19,7 @@ public class SelectStatement implements SelectWrapper {
     private final List<String> whereValues;
     private final List<String> symbols;
     private final List<String> binaryOperators;
+    private final String limit;
+    private final String offset;
 
 }

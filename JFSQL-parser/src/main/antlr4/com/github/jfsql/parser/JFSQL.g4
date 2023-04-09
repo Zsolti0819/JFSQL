@@ -61,8 +61,21 @@ insert
  ;
 
 select
-  : SELECT columnName ( COL columnName )* FROM tableName ( joinOperation )* ( WHERE expr )?
+  : SELECT columnName ( COL columnName )* FROM tableName ( joinOperation )* ( WHERE expr )? ( limit )?
   ;
+
+limit
+ : LIMIT numericValue
+ | LIMIT numericValue offset
+ ;
+
+offset
+ : OFFSET numericValue
+ ;
+
+numericValue
+ : NUMERIC_LITERAL
+ ;
 
 joinOperation
  : innerJoin
@@ -169,6 +182,8 @@ NULL :  N U L L;
 IF : I F;
 EXISTS : E X I S T S;
 LIKE : L I K E;
+LIMIT : L I M I T;
+OFFSET : O F F S E T;
 AND : A N D;
 OR: O R;
 ADD : A D D;

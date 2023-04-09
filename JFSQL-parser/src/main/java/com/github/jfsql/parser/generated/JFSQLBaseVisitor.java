@@ -173,6 +173,39 @@ public class JFSQLBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
      * {@link #visitChildren} on {@code ctx}.</p>
      */
     @Override
+    public T visitLimit(final JFSQLParser.LimitContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation returns the result of calling
+     * {@link #visitChildren} on {@code ctx}.</p>
+     */
+    @Override
+    public T visitOffset(final JFSQLParser.OffsetContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation returns the result of calling
+     * {@link #visitChildren} on {@code ctx}.</p>
+     */
+    @Override
+    public T visitNumericValue(final JFSQLParser.NumericValueContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation returns the result of calling
+     * {@link #visitChildren} on {@code ctx}.</p>
+     */
+    @Override
     public T visitJoinOperation(final JFSQLParser.JoinOperationContext ctx) {
         return visitChildren(ctx);
     }

@@ -96,8 +96,10 @@ public class PreparedStatementCreator {
         final List<String> whereValues = replaceQuestionmarks(whereColumns, statement.getWhereValues(), 0);
         final List<String> symbols = statement.getSymbols();
         final List<String> binaryOperators = statement.getBinaryOperators();
+        final String limit = statement.getLimit();
+        final String offset = statement.getOffset();
         return new SelectStatement(tableName, joinTableNames, joinTypes, columns, listOfJoinColumns, whereColumns,
-            whereValues, symbols, binaryOperators);
+            whereValues, symbols, binaryOperators, limit, offset);
     }
 
     public UpdateWrapper getPreparedUpdateStatement(final UpdateWrapper statement) {

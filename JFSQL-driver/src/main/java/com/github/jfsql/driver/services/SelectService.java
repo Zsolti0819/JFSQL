@@ -127,7 +127,7 @@ public class SelectService {
         return baseSelect(statement, joinTable);
     }
 
-    private ResultSet baseSelect(final SelectWrapper statement, final Table table) {
+    private ResultSet baseSelect(final SelectWrapper statement, final Table table) throws SQLException {
         final Map<String, String> columnsAndTypes;
         List<String> selectedColumns = statement.getColumns();
         if (selectedColumns.size() == 1 && Objects.equals(selectedColumns.get(0), "*")) {
@@ -142,7 +142,12 @@ public class SelectService {
         final String schemaFile = table.getSchemaFile();
         final Map<String, Boolean> notNullColumns = table.getNotNullColumns();
         final List<Entry> whereEntries = whereConditionSolver.getWhereEntries(table, statement);
-        final List<Entry> orderedEntries = getEntriesWithSortedColumns(selectedColumns, whereEntries);
+        List<Entry> orderedEntries = getEntriesWithSortedColumns(selectedColumns, whereEntries);
+
+        final String limit = statement.getLimit();
+        final String offset = statement.getOffset();
+
+        orderedEntries = applyLimitAndOffset(orderedEntries, limit, offset);
 
         final Table newTable = Table.builder()
             .name(tableName)
@@ -164,6 +169,28 @@ public class SelectService {
             });
             return new Entry(orderedMap, new HashMap<>());
         }).collect(Collectors.toList());
+    }
+
+    private List<Entry> applyLimitAndOffset(List<Entry> orderedEntries, final String limit, final String offset)
+        throws SQLException {
+        if (offset != null) {
+            try {
+                final int offsetInteger = Integer.parseInt(offset);
+                orderedEntries = orderedEntries.subList(offsetInteger, orderedEntries.size());
+            } catch (final NumberFormatException e) {
+                throw new SQLException("Offset '" + offset + "' is not a whole number.");
+            }
+        }
+
+        if (limit != null) {
+            try {
+                final int limitInteger = Integer.parseInt(limit);
+                orderedEntries = orderedEntries.subList(0, Math.min(limitInteger, orderedEntries.size()));
+            } catch (final NumberFormatException e) {
+                throw new SQLException("Limit '" + limit + "' is not a whole number.");
+            }
+        }
+        return orderedEntries;
     }
 
     private List<Entry> innerJoin(final Table t1, final Table t2, final String t1JoinCol, final String t2JoinCol) {

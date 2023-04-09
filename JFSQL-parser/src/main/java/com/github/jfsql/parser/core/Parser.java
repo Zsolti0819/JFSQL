@@ -189,12 +189,21 @@ public class Parser extends JFSQLBaseVisitor<BaseStatement> implements JFSQLVisi
             }
         }
 
+        String limit = null;
+        String offset = null;
+        if (selectContext.limit() != null) {
+            limit = selectContext.limit().numericValue().getText();
+            if (selectContext.limit().offset() != null) {
+                offset = selectContext.limit().offset().numericValue().getText();
+            }
+        }
+
         final Map<String, List<String>> whereClause = extractWhereClause(selectContext.expr());
         final SelectStatement selectStatement = new SelectStatement(selectTable, joinTables, joinTypes,
             Collections.unmodifiableList(selectColumns),
             Collections.unmodifiableList(listOfJoinColumnsWithPrefixes), whereClause.get("whereColumns"),
             whereClause.get("whereValues"),
-            whereClause.get("symbols"), whereClause.get("binaryOperators"));
+            whereClause.get("symbols"), whereClause.get("binaryOperators"), limit, offset);
         logger.trace(selectStatement);
         return selectStatement;
     }

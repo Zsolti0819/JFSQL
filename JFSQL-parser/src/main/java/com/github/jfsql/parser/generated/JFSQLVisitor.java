@@ -95,6 +95,24 @@ public interface JFSQLVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSelect(JFSQLParser.SelectContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link JFSQLParser#limit}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLimit(JFSQLParser.LimitContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link JFSQLParser#offset}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOffset(JFSQLParser.OffsetContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link JFSQLParser#numericValue}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNumericValue(JFSQLParser.NumericValueContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link JFSQLParser#joinOperation}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

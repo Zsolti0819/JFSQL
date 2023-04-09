@@ -270,6 +270,60 @@ public class JFSQLBaseListener implements JFSQLListener {
      * <p>The default implementation does nothing.</p>
      */
     @Override
+    public void enterLimit(final JFSQLParser.LimitContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation does nothing.</p>
+     */
+    @Override
+    public void exitLimit(final JFSQLParser.LimitContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation does nothing.</p>
+     */
+    @Override
+    public void enterOffset(final JFSQLParser.OffsetContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation does nothing.</p>
+     */
+    @Override
+    public void exitOffset(final JFSQLParser.OffsetContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation does nothing.</p>
+     */
+    @Override
+    public void enterNumericValue(final JFSQLParser.NumericValueContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation does nothing.</p>
+     */
+    @Override
+    public void exitNumericValue(final JFSQLParser.NumericValueContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation does nothing.</p>
+     */
+    @Override
     public void enterJoinOperation(final JFSQLParser.JoinOperationContext ctx) {
     }
 

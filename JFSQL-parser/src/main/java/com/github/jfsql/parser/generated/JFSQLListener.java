@@ -148,6 +148,36 @@ public interface JFSQLListener extends ParseTreeListener {
 	 */
 	void exitSelect(JFSQLParser.SelectContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link JFSQLParser#limit}.
+	 * @param ctx the parse tree
+	 */
+	void enterLimit(JFSQLParser.LimitContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link JFSQLParser#limit}.
+	 * @param ctx the parse tree
+	 */
+	void exitLimit(JFSQLParser.LimitContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link JFSQLParser#offset}.
+	 * @param ctx the parse tree
+	 */
+	void enterOffset(JFSQLParser.OffsetContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link JFSQLParser#offset}.
+	 * @param ctx the parse tree
+	 */
+	void exitOffset(JFSQLParser.OffsetContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link JFSQLParser#numericValue}.
+	 * @param ctx the parse tree
+	 */
+	void enterNumericValue(JFSQLParser.NumericValueContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link JFSQLParser#numericValue}.
+	 * @param ctx the parse tree
+	 */
+	void exitNumericValue(JFSQLParser.NumericValueContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link JFSQLParser#joinOperation}.
 	 * @param ctx the parse tree
 	 */

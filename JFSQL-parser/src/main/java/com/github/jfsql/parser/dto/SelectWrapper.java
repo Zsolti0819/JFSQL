@@ -10,6 +10,10 @@ public interface SelectWrapper extends BaseStatement, StatementWithTableName, St
 
     List<List<String>> getListOfJoinColumns();
 
+    String getLimit();
+
+    String getOffset();
+
     @Override
     default TypeOfStatement getTypeOfStatement() {
         return TypeOfStatement.SELECT;
