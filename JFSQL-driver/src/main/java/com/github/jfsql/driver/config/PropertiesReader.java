@@ -9,7 +9,7 @@ import org.apache.logging.log4j.Logger;
 public class PropertiesReader {
 
     private static final Logger logger = LogManager.getLogger(PropertiesReader.class);
-    private String persistence = "xml";
+    private String persistence = "json";
     private String transactionVersioning = "jgit";
     private boolean schemaValidation = true;
     private boolean statementCaching = true;
