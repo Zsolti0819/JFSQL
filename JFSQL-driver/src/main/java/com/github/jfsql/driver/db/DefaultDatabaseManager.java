@@ -14,9 +14,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NotVersioningDatabaseManagerImpl extends DatabaseManager {
+public class DefaultDatabaseManager extends DatabaseManager {
 
-    public NotVersioningDatabaseManagerImpl(final String URL, final SemanticValidator semanticValidator,
+    public DefaultDatabaseManager(final String URL, final SemanticValidator semanticValidator,
         final FileNameCreator fileNameCreator, final Reader reader, final Writer writer) throws SQLException {
         super(URL, semanticValidator, fileNameCreator, reader, writer);
     }

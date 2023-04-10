@@ -2,8 +2,8 @@ package com.github.jfsql.driver.factories;
 
 import com.github.jfsql.driver.config.PropertiesReader;
 import com.github.jfsql.driver.db.DatabaseManager;
+import com.github.jfsql.driver.db.DefaultTransactionManagerImpl;
 import com.github.jfsql.driver.db.JGitTransactionManagerImpl;
-import com.github.jfsql.driver.db.NotVersioningTransactionManagerImpl;
 import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
@@ -20,7 +20,7 @@ public class TransactionManagerFactory {
         if (Objects.equals(type, "jgit")) {
             return new JGitTransactionManagerImpl(databaseManager, reader, writer);
         } else {
-            return new NotVersioningTransactionManagerImpl(databaseManager, reader, writer);
+            return new DefaultTransactionManagerImpl(databaseManager, reader, writer);
         }
     }
 }

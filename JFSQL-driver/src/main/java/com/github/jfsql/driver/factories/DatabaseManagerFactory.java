@@ -3,7 +3,7 @@ package com.github.jfsql.driver.factories;
 import com.github.jfsql.driver.config.PropertiesReader;
 import com.github.jfsql.driver.db.DatabaseManager;
 import com.github.jfsql.driver.db.JGitDatabaseManagerImpl;
-import com.github.jfsql.driver.db.NotVersioningDatabaseManagerImpl;
+import com.github.jfsql.driver.db.DefaultDatabaseManager;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
 import com.github.jfsql.driver.util.FileNameCreator;
@@ -22,7 +22,7 @@ public class DatabaseManagerFactory {
         if (Objects.equals(type, "jgit")) {
             return new JGitDatabaseManagerImpl(URL, semanticValidator, fileNameCreator, reader, writer);
         } else {
-            return new NotVersioningDatabaseManagerImpl(URL, semanticValidator, fileNameCreator, reader, writer);
+            return new DefaultDatabaseManager(URL, semanticValidator, fileNameCreator, reader, writer);
         }
     }
 

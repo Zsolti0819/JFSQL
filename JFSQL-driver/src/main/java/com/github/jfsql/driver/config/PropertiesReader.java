@@ -60,7 +60,7 @@ public class PropertiesReader {
         if (transactionVersioningString != null) {
             transactionVersioningString = transactionVersioningString.trim();
             if (transactionVersioningString.equalsIgnoreCase("jgit") || transactionVersioningString.equalsIgnoreCase(
-                "none")) {
+                "default")) {
                 transactionVersioning = transactionVersioningString.toLowerCase();
                 logger.trace("Successfully parsed the value '{}' for the key 'transaction.versioning', will use '{}'",
                     transactionVersioningString, transactionVersioning);

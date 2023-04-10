@@ -10,9 +10,9 @@ public class TestConfiguration {
     static Stream<Arguments> configurations() {
         return Stream.of(
             Arguments.of("json", "jgit"),
-            Arguments.of("json", "none"),
+            Arguments.of("json", "default"),
             Arguments.of("xml", "jgit"),
-            Arguments.of("xml", "none")
+            Arguments.of("xml", "default")
         );
     }
 

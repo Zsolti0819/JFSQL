@@ -11,11 +11,11 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class NotVersioningTransactionManagerImpl extends TransactionManager {
+public class DefaultTransactionManagerImpl extends TransactionManager {
 
-    private static final Logger logger = LogManager.getLogger(NotVersioningTransactionManagerImpl.class);
+    private static final Logger logger = LogManager.getLogger(DefaultTransactionManagerImpl.class);
 
-    public NotVersioningTransactionManagerImpl(final DatabaseManager databaseManager, final Reader reader,
+    public DefaultTransactionManagerImpl(final DatabaseManager databaseManager, final Reader reader,
         final Writer writer) {
         super(databaseManager, reader, writer);
     }
@@ -42,7 +42,7 @@ public class NotVersioningTransactionManagerImpl extends TransactionManager {
 
     @Override
     public void rollback() {
-        throw new UnsupportedOperationException("Rollback is not possible in the not committing mode.");
+        // NO-OP
     }
 
 }
