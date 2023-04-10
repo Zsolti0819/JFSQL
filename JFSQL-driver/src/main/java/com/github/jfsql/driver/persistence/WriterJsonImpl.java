@@ -12,12 +12,12 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonWriter;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.StringWriter;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -48,9 +48,7 @@ public class WriterJsonImpl extends Writer {
     @Override
     public void writeTable(final Table table) throws IOException, SchemaValidationException {
         final String tableFile = table.getTableFile();
-        try (final FileOutputStream fileOutputStream = new FileOutputStream(tableFile);
-            final FileChannel fileChannel = fileOutputStream.getChannel()) {
-            final FileLock lock = fileChannel.tryLock();
+        try (final FileOutputStream fileOutputStream = new FileOutputStream(tableFile)) {
             final List<Entry> entries = table.getEntries();
             final JsonObject root = new JsonObject();
 
@@ -66,9 +64,13 @@ public class WriterJsonImpl extends Writer {
             root.add("Entry", entryArray);
 
             final String jsonString = beautify(root);
-            fileOutputStream.write(jsonString.getBytes());
-            lock.release();
+
+            // Use a BufferedWriter to improve performance
+            try (final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(fileOutputStream))) {
+                bufferedWriter.write(jsonString);
+            }
         }
+
         if (useSchemaValidation) {
             final String schemaFile = table.getSchemaFile();
             final boolean isValid = JSON_SCHEMA_VALIDATOR.schemaIsValid(schemaFile, tableFile);
@@ -107,9 +109,7 @@ public class WriterJsonImpl extends Writer {
     @Override
     public void writeSchema(final Table schema) throws IOException {
         final String schemaFile = schema.getSchemaFile();
-        try (final FileOutputStream fileOutputStream = new FileOutputStream(schemaFile);
-            final FileChannel fileChannel = fileOutputStream.getChannel()) {
-            final FileLock lock = fileChannel.tryLock();
+        try (final FileOutputStream fileOutputStream = new FileOutputStream(schemaFile)) {
             final List<String> columnNames = new ArrayList<>(schema.getColumnsAndTypes().keySet());
             final List<String> columnTypes = new ArrayList<>(schema.getColumnsAndTypes().values());
 
@@ -159,8 +159,11 @@ public class WriterJsonImpl extends Writer {
             }
 
             final String jsonString = beautify(root);
-            fileOutputStream.write(jsonString.getBytes());
-            lock.release();
+
+            // Use a BufferedWriter to improve performance
+            try (final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(fileOutputStream))) {
+                bufferedWriter.write(jsonString);
+            }
         }
     }
 
@@ -169,9 +172,7 @@ public class WriterJsonImpl extends Writer {
         final Path databaseFilePath = database.getURL();
         final String databaseFileParentPath = String.valueOf(databaseFilePath.getParent());
         final Path databaseFolderName = Path.of(databaseFileParentPath);
-        try (final FileOutputStream fileOutputStream = new FileOutputStream(String.valueOf(databaseFilePath));
-            final FileChannel fileChannel = fileOutputStream.getChannel()) {
-            final FileLock lock = fileChannel.tryLock();
+        try (final FileOutputStream fileOutputStream = new FileOutputStream(String.valueOf(databaseFilePath))) {
             final JsonObject root = new JsonObject();
             root.addProperty("Database", String.valueOf(databaseFolderName.getFileName()));
             final List<Table> tables = database.getTables();
@@ -188,8 +189,11 @@ public class WriterJsonImpl extends Writer {
             root.add("Table", gson.toJsonTree(tablesArray));
 
             final String jsonString = beautify(root);
-            fileOutputStream.write(jsonString.getBytes());
-            lock.release();
+
+            // Use a BufferedWriter to improve performance
+            try (final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(fileOutputStream))) {
+                bufferedWriter.write(jsonString);
+            }
         }
     }
 
@@ -205,14 +209,15 @@ public class WriterJsonImpl extends Writer {
         final Path blobParent = Path.of(tableParent + File.separator + "blob");
         Files.createDirectories(blobParent);
 
-        try (final FileOutputStream fileOutputStream = new FileOutputStream(blobURL);
-            final FileChannel fileChannel = fileOutputStream.getChannel()) {
-            final FileLock lock = fileChannel.tryLock();
+        try (final FileOutputStream fileOutputStream = new FileOutputStream(blobURL)) {
             final JsonObject root = new JsonObject();
             root.addProperty("blob", blobValue);
             final String jsonString = beautify(root);
-            fileOutputStream.write(jsonString.getBytes());
-            lock.release();
+
+            // Use a BufferedWriter to improve performance
+            try (final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(fileOutputStream))) {
+                bufferedWriter.write(jsonString);
+            }
         }
         return blobURL;
     }
