@@ -63,7 +63,7 @@ public class AlterTableService {
         // When autoCommit is true, it should be safe to read the entries from the file
         List<Entry> entries = table.getEntries();
         if (entries == null || transactionManager.getAutoCommit()) {
-            logger.debug("Will read entries from table. Table's entries were loaded into memory = {}, autoCommit = {}",
+            logger.trace("Will read entries from table. Table's entries were loaded into memory = {}, autoCommit = {}",
                 entries != null,
                 transactionManager.getAutoCommit());
             try {
@@ -93,7 +93,7 @@ public class AlterTableService {
         // When autoCommit is true, it should be safe to read the entries from the file
         List<Entry> entries = table.getEntries();
         if (entries == null || transactionManager.getAutoCommit()) {
-            logger.debug("Will read entries from table. Table's entries were loaded into memory = {}, autoCommit = {}",
+            logger.trace("Will read entries from table. Table's entries were loaded into memory = {}, autoCommit = {}",
                 entries != null,
                 transactionManager.getAutoCommit());
             try {
@@ -167,7 +167,7 @@ public class AlterTableService {
         // When autoCommit is true, it should be safe to read the entries from the file
         List<Entry> entries = table.getEntries();
         if (entries == null || transactionManager.getAutoCommit()) {
-            logger.debug("Will read entries from table. Table's entries were loaded into memory = {}, autoCommit = {}",
+            logger.trace("Will read entries from table. Table's entries were loaded into memory = {}, autoCommit = {}",
                 entries != null,
                 transactionManager.getAutoCommit());
             try {
@@ -225,7 +225,7 @@ public class AlterTableService {
         // When autoCommit is true, it should be safe to read the entries from the file
         List<Entry> entries = table.getEntries();
         if (entries == null || transactionManager.getAutoCommit()) {
-            logger.debug("Will read entries from table. Table's entries were loaded into memory = {}, autoCommit = {}",
+            logger.trace("Will read entries from table. Table's entries were loaded into memory = {}, autoCommit = {}",
                 entries != null,
                 transactionManager.getAutoCommit());
             try {

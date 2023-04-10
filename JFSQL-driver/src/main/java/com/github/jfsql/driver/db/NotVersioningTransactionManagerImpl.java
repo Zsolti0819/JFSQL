@@ -26,7 +26,7 @@ public class NotVersioningTransactionManagerImpl extends TransactionManager {
             writeUncommittedObjects();
 
             final Map<File, Boolean> filesToKeep = getFilesToKeep();
-            logger.debug("filesToKeep = {}", filesToKeep);
+            logger.trace("filesToKeep = {}", filesToKeep);
 
             for (final Map.Entry<File, Boolean> entry : filesToKeep.entrySet()) {
                 final File file = entry.getKey();
