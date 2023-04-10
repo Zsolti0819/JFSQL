@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("unused")
@@ -72,15 +71,11 @@ class AlterTableServiceTest {
         when(statement.getNewTableName()).thenReturn("myTableEdited");
         when(tableFinder.getTableByName("myTable")).thenReturn(table);
 
-        final AlterTableService alterTableServiceSpy = Mockito.spy(alterTableService);
-        doNothing().when(alterTableServiceSpy)
-            .renameTable(any(AlterTableWrapper.class), any(Database.class), any(Table.class));
-
+        final AlterTableService alterTableServiceSpy = spy(alterTableService);
         final int result = alterTableServiceSpy.alterTable(statement);
 
         verify(tableFinder, times(1)).getTableByName("myTable");
-        verify(alterTableServiceSpy, times(1)).renameTable(any(AlterTableWrapper.class), any(Database.class),
-            any(Table.class));
+        verify(alterTableServiceSpy, times(1)).renameTable(any(), any(), any());
         assertEquals(0, result);
     }
 
@@ -91,15 +86,11 @@ class AlterTableServiceTest {
         when(statement.getOldColumnName()).thenReturn("col1");
         when(tableFinder.getTableByName("myTable")).thenReturn(table);
 
-        final AlterTableService alterTableServiceSpy = Mockito.spy(alterTableService);
-        doNothing().when(alterTableServiceSpy)
-            .renameColumn(any(AlterTableWrapper.class), any(Database.class), any(Table.class));
-
+        final AlterTableService alterTableServiceSpy = spy(alterTableService);
         final int result = alterTableServiceSpy.alterTable(statement);
 
         verify(tableFinder, times(1)).getTableByName("myTable");
-        verify(alterTableServiceSpy, times(1)).renameColumn(any(AlterTableWrapper.class), any(Database.class),
-            any(Table.class));
+        verify(alterTableServiceSpy, times(1)).renameColumn(any(), any(), any());
         assertEquals(0, result);
     }
 
@@ -110,15 +101,11 @@ class AlterTableServiceTest {
         when(statement.getColumnNameToAdd()).thenReturn("col1");
         when(tableFinder.getTableByName("myTable")).thenReturn(table);
 
-        final AlterTableService alterTableServiceSpy = Mockito.spy(alterTableService);
-        doNothing().when(alterTableServiceSpy)
-            .addColumn(any(AlterTableWrapper.class), any(Database.class), any(Table.class));
-
+        final AlterTableService alterTableServiceSpy = spy(alterTableService);
         final int result = alterTableServiceSpy.alterTable(statement);
 
         verify(tableFinder, times(1)).getTableByName("myTable");
-        verify(alterTableServiceSpy, times(1)).addColumn(any(AlterTableWrapper.class), any(Database.class),
-            any(Table.class));
+        verify(alterTableServiceSpy, times(1)).addColumn(any(), any(), any());
         assertEquals(0, result);
     }
 
@@ -126,18 +113,15 @@ class AlterTableServiceTest {
     void testAlterTable_withColumnToDrop() throws SQLException {
         when(databaseManager.getDatabase()).thenReturn(database);
         when(statement.getTableName()).thenReturn("myTable");
-        when(statement.getColumnToDrop()).thenReturn("col1");
+        when(statement.getColumnToDrop()).thenReturn("id");
         when(tableFinder.getTableByName("myTable")).thenReturn(table);
+        when(semanticValidator.columnIsPresentInTable(table, statement.getColumnToDrop())).thenReturn(true);
 
-        final AlterTableService alterTableServiceSpy = Mockito.spy(alterTableService);
-        doNothing().when(alterTableServiceSpy)
-            .dropColumn(any(AlterTableWrapper.class), any(Database.class), any(Table.class));
-
+        final AlterTableService alterTableServiceSpy = spy(alterTableService);
         final int result = alterTableServiceSpy.alterTable(statement);
 
         verify(tableFinder, times(1)).getTableByName("myTable");
-        verify(alterTableServiceSpy, times(1)).dropColumn(any(AlterTableWrapper.class), any(Database.class),
-            any(Table.class));
+        verify(alterTableServiceSpy, times(1)).dropColumn(any(), any(), any());
         assertEquals(0, result);
     }
 
