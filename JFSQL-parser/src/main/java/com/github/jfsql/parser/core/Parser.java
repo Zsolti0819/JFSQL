@@ -2,10 +2,8 @@ package com.github.jfsql.parser.core;
 
 import com.github.jfsql.parser.dto.AlterTableStatement;
 import com.github.jfsql.parser.dto.BaseStatement;
-import com.github.jfsql.parser.dto.CreateDatabaseStatement;
 import com.github.jfsql.parser.dto.CreateTableStatement;
 import com.github.jfsql.parser.dto.DeleteStatement;
-import com.github.jfsql.parser.dto.DropDatabaseStatement;
 import com.github.jfsql.parser.dto.DropTableStatement;
 import com.github.jfsql.parser.dto.InsertStatement;
 import com.github.jfsql.parser.dto.JoinType;
@@ -16,7 +14,6 @@ import com.github.jfsql.parser.generated.JFSQLBaseVisitor;
 import com.github.jfsql.parser.generated.JFSQLLexer;
 import com.github.jfsql.parser.generated.JFSQLParser;
 import com.github.jfsql.parser.generated.JFSQLVisitor;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -89,18 +86,6 @@ public class Parser extends JFSQLBaseVisitor<BaseStatement> implements JFSQLVisi
         return createTableStatement;
     }
 
-    private CreateDatabaseStatement getCreateDatabaseStatement(
-        final JFSQLParser.CreateDatabaseContext createDatabaseContext) {
-        final String databaseURL = createDatabaseContext.databaseURL().getText();
-        String modifiedURL = databaseURL.replaceAll("[\\[\\]]", "");
-        if (!modifiedURL.endsWith(File.pathSeparator)) {
-            modifiedURL += File.separator;
-        }
-        final CreateDatabaseStatement createDatabaseStatement = new CreateDatabaseStatement(modifiedURL);
-        logger.trace(createDatabaseStatement);
-        return createDatabaseStatement;
-    }
-
     private DeleteStatement getDeleteStatement(final JFSQLParser.DeleteContext deleteContext) {
         final String tableName = deleteContext.tableName().getText();
         final Map<String, List<String>> whereClause = extractWhereClause(deleteContext.expr());
@@ -109,17 +94,6 @@ public class Parser extends JFSQLBaseVisitor<BaseStatement> implements JFSQLVisi
             whereClause.get("symbols"), whereClause.get("binaryOperators"));
         logger.trace(deleteStatement);
         return deleteStatement;
-    }
-
-    private DropDatabaseStatement getDropDatabaseStatement(final JFSQLParser.DropDatabaseContext dropDatabaseContext) {
-        final String databaseURL = dropDatabaseContext.databaseURL().getText();
-        String modifiedURL = databaseURL.replaceAll("[\\[\\]]", "");
-        if (!modifiedURL.endsWith(File.pathSeparator)) {
-            modifiedURL += File.separator;
-        }
-        final DropDatabaseStatement dropDatabaseStatement = new DropDatabaseStatement(modifiedURL);
-        logger.trace(dropDatabaseStatement);
-        return dropDatabaseStatement;
     }
 
     private DropTableStatement getDropTableStatement(final JFSQLParser.DropTableContext dropTableContext) {
@@ -264,12 +238,8 @@ public class Parser extends JFSQLBaseVisitor<BaseStatement> implements JFSQLVisi
             return getAlterTableStatement(rootContext.statement().alterTable());
         } else if (rootContext.statement().createTable() != null) {
             return getCreateTableStatement(rootContext.statement().createTable());
-        } else if (rootContext.statement().createDatabase() != null) {
-            return getCreateDatabaseStatement(rootContext.statement().createDatabase());
         } else if (rootContext.statement().delete() != null) {
             return getDeleteStatement(rootContext.statement().delete());
-        } else if (rootContext.statement().dropDatabase() != null) {
-            return getDropDatabaseStatement(rootContext.statement().dropDatabase());
         } else if (rootContext.statement().dropTable() != null) {
             return getDropTableStatement(rootContext.statement().dropTable());
         } else if (rootContext.statement().insert() != null) {

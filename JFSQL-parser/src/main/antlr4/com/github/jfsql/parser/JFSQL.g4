@@ -7,10 +7,8 @@ root
 statement
  : alterTable
  | createTable
- | createDatabase
  | delete
  | dropTable
- | dropDatabase
  | insert
  | select
  | update
@@ -40,20 +38,12 @@ createTable
  : CREATE TABLE ( ifNotExists )? tableName OPEN_PAR columnDefinition ( COL columnDefinition )* CLOSE_PAR
  ;
 
-createDatabase
- : CREATE DATABASE databaseURL
- ;
-
 delete
  : DELETE FROM tableName ( WHERE expr )?
  ;
 
 dropTable
  : DROP TABLE ( ifExists )? tableName
- ;
-
-dropDatabase
- : DROP DATABASE databaseURL
  ;
 
 insert
@@ -89,7 +79,6 @@ innerJoin
 leftJoin
  : LEFT ( OUTER )? JOIN tableName ON tableDotColumnName EQ tableDotColumnName
  ;
-
 
 update
  : UPDATE tableName SET columnName EQ value ( COL columnName EQ value )* ( WHERE expr )?
@@ -145,10 +134,6 @@ value
 
 valuesInParentheses
  : OPEN_PAR value ( COL value )* CLOSE_PAR
- ;
-
-databaseURL
- : IDENTIFIER
  ;
 
 tableName

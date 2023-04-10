@@ -10,6 +10,7 @@ import lombok.NonNull;
 @AllArgsConstructor
 public class Database {
 
+    private final String name;
     private final Path URL;
     @NonNull
     private List<Table> tables;

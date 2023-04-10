@@ -162,24 +162,6 @@ public class JFSQLBaseListener implements JFSQLListener {
      * <p>The default implementation does nothing.</p>
      */
     @Override
-    public void enterCreateDatabase(final JFSQLParser.CreateDatabaseContext ctx) {
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation does nothing.</p>
-     */
-    @Override
-    public void exitCreateDatabase(final JFSQLParser.CreateDatabaseContext ctx) {
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation does nothing.</p>
-     */
-    @Override
     public void enterDelete(final JFSQLParser.DeleteContext ctx) {
     }
 
@@ -208,24 +190,6 @@ public class JFSQLBaseListener implements JFSQLListener {
      */
     @Override
     public void exitDropTable(final JFSQLParser.DropTableContext ctx) {
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation does nothing.</p>
-     */
-    @Override
-    public void enterDropDatabase(final JFSQLParser.DropDatabaseContext ctx) {
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation does nothing.</p>
-     */
-    @Override
-    public void exitDropDatabase(final JFSQLParser.DropDatabaseContext ctx) {
     }
 
     /**
@@ -568,24 +532,6 @@ public class JFSQLBaseListener implements JFSQLListener {
      */
     @Override
     public void exitValuesInParentheses(final JFSQLParser.ValuesInParenthesesContext ctx) {
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation does nothing.</p>
-     */
-    @Override
-    public void enterDatabaseURL(final JFSQLParser.DatabaseURLContext ctx) {
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation does nothing.</p>
-     */
-    @Override
-    public void exitDatabaseURL(final JFSQLParser.DatabaseURLContext ctx) {
     }
 
     /**

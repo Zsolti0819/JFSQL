@@ -4,10 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.github.jfsql.parser.dto.AlterTableStatement;
-import com.github.jfsql.parser.dto.CreateDatabaseStatement;
 import com.github.jfsql.parser.dto.CreateTableStatement;
 import com.github.jfsql.parser.dto.DeleteStatement;
-import com.github.jfsql.parser.dto.DropDatabaseStatement;
 import com.github.jfsql.parser.dto.DropTableStatement;
 import com.github.jfsql.parser.dto.InsertStatement;
 import com.github.jfsql.parser.dto.SelectStatement;
@@ -80,7 +78,6 @@ class ParserTest {
         "UPDATE a",
         "UPDATE a SET b",
         "UPDATE a SET b =",
-        "CREATE DATABASE C:\\Users\\f7ifsut\\IdeaProjects\\JFSQL-driver-main\\src\\main\\resources\\myDatabase",
         "UPDATE myTable SET name = 'Zsolti' WHERE id = 1 AND name = 'Not Zsolti' AND age = 25 AND name = 'Zsolti' AND id ;"
     })
     void testBadStatements(final String query) {
@@ -110,16 +107,6 @@ class ParserTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
-        "create database \"C:\\Users\\f7ifsut\\IdeaProjects\\JFSQL-driver-main\\src\\main\\resources\\myDatabase\"",
-        "CREATE DATABASE \"C:\\Users\\f7ifsut\\IdeaProjects\\JFSQL-driver-main\\src\\main\\resources\\myDatabase\";",
-        "CREATE DATABASE [C:\\Users\\f7ifsut\\IdeaProjects\\JFSQL-driver-main\\src\\main\\resources\\myDatabase];",
-    })
-    void testCreateDatabaseStatements(final String query) {
-        assertEquals(Objects.requireNonNull(parser.parse(query)).getClass(), CreateDatabaseStatement.class);
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {
         "delete from myTable",
         "DELETE FROM myTable;",
         "DELETE FROM myTable WHERE name = 'Zsolti';",
@@ -133,15 +120,6 @@ class ParserTest {
     })
     void testDeleteStatements(final String query) {
         assertEquals(Objects.requireNonNull(parser.parse(query)).getClass(), DeleteStatement.class);
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {
-        "drop database [C:\\Users\\destr\\IdeaProjects\\JFSQL-driver\\src\\main\\resources\\myDatabase]",
-        "DROP DATABASE [C:\\Users\\destr\\IdeaProjects\\JFSQL-driver\\src\\main\\resources\\myDatabase];"
-    })
-    void testDropDatabaseStatements(final String query) {
-        assertEquals(Objects.requireNonNull(parser.parse(query)).getClass(), DropDatabaseStatement.class);
     }
 
     @ParameterizedTest

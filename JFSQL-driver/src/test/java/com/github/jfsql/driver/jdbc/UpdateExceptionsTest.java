@@ -29,11 +29,7 @@ class UpdateExceptionsTest {
 
     @AfterEach
     void tearDown() {
-        try {
-            statement.execute("DROP DATABASE [" + TestUtils.DATABASE_PATH + "]");
-        } catch (final SQLException e) {
-            TestUtils.deleteDatabaseDirectory();
-        }
+        TestUtils.deleteDatabaseDirectory();
     }
 
     @ParameterizedTest

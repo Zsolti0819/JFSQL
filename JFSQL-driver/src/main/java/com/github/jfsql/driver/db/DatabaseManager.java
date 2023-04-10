@@ -35,9 +35,10 @@ public abstract class DatabaseManager {
         if (semanticValidator.URLIsNotDirectory(modifiedURL)) {
             throw new SQLException("URL is not a directory.");
         }
-        final Path databaseFileName = fileNameCreator.createDatabaseFileName(modifiedURL);
-        database = new Database(databaseFileName, new LinkedList<>());
-        if (Files.exists(databaseFileName)) {
+        final Path databaseFileURL = fileNameCreator.createDatabaseFileName(modifiedURL);
+        final String databaseFileName = String.valueOf(databaseFileURL.getFileName());
+        database = new Database(databaseFileName, databaseFileURL, new LinkedList<>());
+        if (Files.exists(databaseFileURL)) {
             openDatabase();
         } else {
             initDatabase(database);
@@ -48,9 +49,5 @@ public abstract class DatabaseManager {
     public abstract void initDatabase(final Database database) throws SQLException;
 
     public abstract void openDatabase() throws SQLException;
-
-    public void executeCreateDatabaseOperation(final Database database) throws SQLException {
-        initDatabase(database);
-    }
 
 }

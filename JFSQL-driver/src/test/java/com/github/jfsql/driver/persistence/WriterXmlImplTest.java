@@ -67,7 +67,7 @@ class WriterXmlImplTest {
             .notNullColumns(notNullColumns)
             .entries(returnEntries)
             .build();
-        database = new Database(TestUtils.XML_DATABASE_PATH, List.of(table));
+        database = new Database("myDatabase", TestUtils.XML_DATABASE_PATH, List.of(table));
     }
 
     @AfterAll

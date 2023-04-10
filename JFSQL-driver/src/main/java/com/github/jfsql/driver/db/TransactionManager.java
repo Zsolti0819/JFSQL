@@ -29,7 +29,7 @@ public abstract class TransactionManager {
 
     static final Object lock = new Object();
     private static final Logger logger = LogManager.getLogger(TransactionManager.class);
-    private static final Map<String, Long> FILE_TO_THREAD_ID_MAP = new HashMap<>();
+    private static final Map<String, Long> OBJECT_NAME_TO_THREAD_ID_MAP = new HashMap<>();
     final Reader reader;
     final Writer writer;
     final Set<Table> uncommittedTables;
@@ -132,22 +132,22 @@ public abstract class TransactionManager {
     }
 
     private void addTableToUncommittedObjects(final Table table) {
-        if (FILE_TO_THREAD_ID_MAP.containsKey(table.getTableFile())) {
-            if (!Objects.equals(FILE_TO_THREAD_ID_MAP.get(table.getTableFile()), Thread.currentThread().getId())) {
+        if (OBJECT_NAME_TO_THREAD_ID_MAP.containsKey(table.getName())) {
+            if (!Objects.equals(OBJECT_NAME_TO_THREAD_ID_MAP.get(table.getName()), Thread.currentThread().getId())) {
                 // remove all entries from the shared map, where the value was the thread's id
                 removeCurrentThreadChangesFromMap();
                 throw new PessimisticLockException(
                     "The file '" + table.getTableFile() + "' is currently being modified by another thread.");
             }
         } else {
-            FILE_TO_THREAD_ID_MAP.put(table.getTableFile(), Thread.currentThread().getId());
+            OBJECT_NAME_TO_THREAD_ID_MAP.put(table.getName(), Thread.currentThread().getId());
         }
         uncommittedTables.add(table);
     }
 
     private void addSchemaToUncommittedObjects(final Table table) {
-        if (FILE_TO_THREAD_ID_MAP.containsKey(table.getSchemaFile())) {
-            if (!Objects.equals(FILE_TO_THREAD_ID_MAP.get(table.getSchemaFile()),
+        if (OBJECT_NAME_TO_THREAD_ID_MAP.containsKey(table.getName())) {
+            if (!Objects.equals(OBJECT_NAME_TO_THREAD_ID_MAP.get(table.getName()),
                 Thread.currentThread().getId())) {
                 // remove all entries from the shared map, where the value was the thread's id
                 removeCurrentThreadChangesFromMap();
@@ -155,14 +155,14 @@ public abstract class TransactionManager {
                     "The file '" + table.getSchemaFile() + "' is currently being modified by another thread.");
             }
         } else {
-            FILE_TO_THREAD_ID_MAP.put(table.getSchemaFile(), Thread.currentThread().getId());
+            OBJECT_NAME_TO_THREAD_ID_MAP.put(table.getName(), Thread.currentThread().getId());
         }
         uncommittedSchemas.add(table);
     }
 
     private void addDatabaseToUncommittedObjects(final Database database) {
-        if (FILE_TO_THREAD_ID_MAP.containsKey(String.valueOf(database.getURL()))) {
-            if (!Objects.equals(FILE_TO_THREAD_ID_MAP.get(String.valueOf(database.getURL())),
+        if (OBJECT_NAME_TO_THREAD_ID_MAP.containsKey(database.getName())) {
+            if (!Objects.equals(OBJECT_NAME_TO_THREAD_ID_MAP.get(database.getName()),
                 Thread.currentThread().getId())) {
                 // remove all entries from the shared map, where the value was the thread's id
                 removeCurrentThreadChangesFromMap();
@@ -170,14 +170,14 @@ public abstract class TransactionManager {
                     "The file '" + database.getURL() + "' is currently being modified by another thread.");
             }
         } else {
-            FILE_TO_THREAD_ID_MAP.put(String.valueOf(database.getURL()), Thread.currentThread().getId());
+            OBJECT_NAME_TO_THREAD_ID_MAP.put(database.getName(), Thread.currentThread().getId());
         }
         uncommittedDatabases.add(database);
     }
 
     void removeCurrentThreadChangesFromMap() {
-        synchronized (FILE_TO_THREAD_ID_MAP) {
-            final Iterator<Map.Entry<String, Long>> iterator = FILE_TO_THREAD_ID_MAP.entrySet().iterator();
+        synchronized (OBJECT_NAME_TO_THREAD_ID_MAP) {
+            final Iterator<Map.Entry<String, Long>> iterator = OBJECT_NAME_TO_THREAD_ID_MAP.entrySet().iterator();
             while (iterator.hasNext()) {
                 final Map.Entry<String, Long> entry = iterator.next();
                 final Long value = entry.getValue();

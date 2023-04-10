@@ -107,17 +107,6 @@ public class JFSQLBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
      * {@link #visitChildren} on {@code ctx}.</p>
      */
     @Override
-    public T visitCreateDatabase(final JFSQLParser.CreateDatabaseContext ctx) {
-        return visitChildren(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override
     public T visitDelete(final JFSQLParser.DeleteContext ctx) {
         return visitChildren(ctx);
     }
@@ -130,17 +119,6 @@ public class JFSQLBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
      */
     @Override
     public T visitDropTable(final JFSQLParser.DropTableContext ctx) {
-        return visitChildren(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override
-    public T visitDropDatabase(final JFSQLParser.DropDatabaseContext ctx) {
         return visitChildren(ctx);
     }
 
@@ -350,17 +328,6 @@ public class JFSQLBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
      */
     @Override
     public T visitValuesInParentheses(final JFSQLParser.ValuesInParenthesesContext ctx) {
-        return visitChildren(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override
-    public T visitDatabaseURL(final JFSQLParser.DatabaseURLContext ctx) {
         return visitChildren(ctx);
     }
 

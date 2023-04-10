@@ -66,7 +66,7 @@ class WriterJsonImplTest {
             .notNullColumns(notNullColumns)
             .entries(returnEntries)
             .build();
-        database = new Database(TestUtils.JSON_DATABASE_PATH, List.of(table));
+        database = new Database("myDatabase", TestUtils.JSON_DATABASE_PATH, List.of(table));
     }
 
     @AfterAll

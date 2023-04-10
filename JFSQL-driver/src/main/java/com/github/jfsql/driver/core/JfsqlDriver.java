@@ -12,10 +12,8 @@ import com.github.jfsql.driver.factories.WriterFactory;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
 import com.github.jfsql.driver.services.AlterTableService;
-import com.github.jfsql.driver.services.CreateDatabaseService;
 import com.github.jfsql.driver.services.CreateTableService;
 import com.github.jfsql.driver.services.DeleteService;
-import com.github.jfsql.driver.services.DropDatabaseService;
 import com.github.jfsql.driver.services.DropTableService;
 import com.github.jfsql.driver.services.InsertService;
 import com.github.jfsql.driver.services.SelectService;
@@ -89,10 +87,6 @@ public class JfsqlDriver implements Driver {
         // Specific statement services
         final AlterTableService alterTableService = new AlterTableService(tableFinder, databaseManager,
             transactionManager, semanticValidator, fileNameCreator, reader);
-        final CreateDatabaseService createDatabaseService = new CreateDatabaseService(databaseManager,
-            semanticValidator, fileNameCreator, reader);
-        final DropDatabaseService dropDatabaseService = new DropDatabaseService(databaseManager, semanticValidator,
-            ioOperationHandler, reader);
         final CreateTableService createTableService = new CreateTableService(databaseManager, transactionManager,
             semanticValidator, fileNameCreator);
         final InsertService insertService = new InsertService(tableFinder, transactionManager, semanticValidator,
@@ -111,8 +105,6 @@ public class JfsqlDriver implements Driver {
             .parser(parser)
             .preparedStatementCreator(preparedStatementCreator)
             .alterTableService(alterTableService)
-            .createDatabaseService(createDatabaseService)
-            .dropDatabaseService(dropDatabaseService)
             .createTableService(createTableService)
             .insertService(insertService)
             .selectService(selectService)
@@ -128,7 +120,8 @@ public class JfsqlDriver implements Driver {
             .build();
 
         // Only used in JfsqlPreparedStatement
-        final BlobFileNameCreator blobFileNameCreator = new BlobFileNameCreator(databaseManager, ioOperationHandler, propertiesReader);
+        final BlobFileNameCreator blobFileNameCreator = new BlobFileNameCreator(databaseManager, ioOperationHandler,
+            propertiesReader);
 
         return JfsqlConnection.builder()
             .blobFileNameCreator(blobFileNameCreator)

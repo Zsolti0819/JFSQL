@@ -31,7 +31,7 @@ class ReaderXmlImplTest {
             .tableFile(String.valueOf(TestUtils.TEST_XML_TABLE_PATH))
             .schemaFile(String.valueOf(TestUtils.TEST_XSD_PATH))
             .build();
-        database = new Database(TestUtils.TEST_XML_DATABASE_FILE_PATH, List.of(table));
+        database = new Database("myDatabase", TestUtils.TEST_XML_DATABASE_FILE_PATH, List.of(table));
         // Since the database file contains absolute paths, we will create it instead of manipulating with a static file
         new WriterXmlImpl(true).writeDatabaseFile(database);
     }

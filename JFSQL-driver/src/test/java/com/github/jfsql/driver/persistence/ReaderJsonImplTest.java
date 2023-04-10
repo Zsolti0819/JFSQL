@@ -31,7 +31,7 @@ class ReaderJsonImplTest {
             .tableFile(String.valueOf(TestUtils.TEST_JSON_TABLE_PATH))
             .schemaFile(String.valueOf(TestUtils.TEST_JSON_SCHEMA_PATH))
             .build();
-        database = new Database(TestUtils.TEST_JSON_DATABASE_FILE_PATH, List.of(table));
+        database = new Database("myDatabase", TestUtils.TEST_JSON_DATABASE_FILE_PATH, List.of(table));
         // Since the database file contains absolute paths, we will create it instead of manipulating with a static file
         new WriterJsonImpl(true).writeDatabaseFile(database);
     }

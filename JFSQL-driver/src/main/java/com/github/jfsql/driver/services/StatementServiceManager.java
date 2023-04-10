@@ -11,10 +11,8 @@ import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.core.Parser;
 import com.github.jfsql.parser.dto.AlterTableWrapper;
 import com.github.jfsql.parser.dto.BaseStatement;
-import com.github.jfsql.parser.dto.CreateDatabaseWrapper;
 import com.github.jfsql.parser.dto.CreateTableWrapper;
 import com.github.jfsql.parser.dto.DeleteWrapper;
-import com.github.jfsql.parser.dto.DropDatabaseWrapper;
 import com.github.jfsql.parser.dto.DropTableWrapper;
 import com.github.jfsql.parser.dto.InsertWrapper;
 import com.github.jfsql.parser.dto.SelectWrapper;
@@ -35,8 +33,6 @@ public class StatementServiceManager {
     private final Parser parser;
     private final PreparedStatementCreator preparedStatementCreator;
     private final AlterTableService alterTableService;
-    private final CreateDatabaseService createDatabaseService;
-    private final DropDatabaseService dropDatabaseService;
     private final CreateTableService createTableService;
     private final InsertService insertService;
     private final SelectService selectService;
@@ -91,9 +87,6 @@ public class StatementServiceManager {
                 case ALTER_TABLE:
                     updateCount = alterTableService.alterTable((AlterTableWrapper) statement);
                     break;
-                case CREATE_DATABASE:
-                    updateCount = createDatabaseService.createDatabase((CreateDatabaseWrapper) statement);
-                    break;
                 case CREATE_TABLE:
                     updateCount = createTableService.createTable((CreateTableWrapper) statement);
                     break;
@@ -101,9 +94,6 @@ public class StatementServiceManager {
                     updateCount = deleteService.deleteFromTable(isPreparedStatement ?
                         preparedStatementCreator.getPreparedDeleteStatement((DeleteWrapper) statement) :
                         (DeleteWrapper) statement);
-                    break;
-                case DROP_DATABASE:
-                    updateCount = dropDatabaseService.dropDatabase((DropDatabaseWrapper) statement);
                     break;
                 case DROP_TABLE:
                     updateCount = dropTableService.dropTable((DropTableWrapper) statement);
@@ -135,9 +125,6 @@ public class StatementServiceManager {
                 case ALTER_TABLE:
                     updateCount = alterTableService.alterTable((AlterTableWrapper) statement);
                     break;
-                case CREATE_DATABASE:
-                    updateCount = createDatabaseService.createDatabase((CreateDatabaseWrapper) statement);
-                    break;
                 case CREATE_TABLE:
                     updateCount = createTableService.createTable((CreateTableWrapper) statement);
                     break;
@@ -145,9 +132,6 @@ public class StatementServiceManager {
                     updateCount = deleteService.deleteFromTable(isPreparedStatement ?
                         preparedStatementCreator.getPreparedDeleteStatement((DeleteWrapper) statement) :
                         (DeleteWrapper) statement);
-                    break;
-                case DROP_DATABASE:
-                    updateCount = dropDatabaseService.dropDatabase((DropDatabaseWrapper) statement);
                     break;
                 case DROP_TABLE:
                     updateCount = dropTableService.dropTable((DropTableWrapper) statement);

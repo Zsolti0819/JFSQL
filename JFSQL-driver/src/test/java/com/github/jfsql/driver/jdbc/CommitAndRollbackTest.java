@@ -20,7 +20,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 public class CommitAndRollbackTest {
 
-    private Statement statement;
     private Connection connection;
 
     private void setup(final String persistence) throws SQLException {
@@ -30,18 +29,14 @@ public class CommitAndRollbackTest {
         properties.setProperty("statement.caching", "true");
         properties.setProperty("schema.validation", "true");
         connection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
-        statement = connection.createStatement();
+        final Statement statement = connection.createStatement();
         statement.execute("DROP TABLE IF EXISTS myTable");
         statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
     }
 
     @AfterEach
     void tearDown() {
-        try {
-            statement.execute("DROP DATABASE [" + TestUtils.DATABASE_PATH + "]");
-        } catch (final SQLException e) {
-            TestUtils.deleteDatabaseDirectory();
-        }
+        TestUtils.deleteDatabaseDirectory();
     }
 
     @ParameterizedTest
