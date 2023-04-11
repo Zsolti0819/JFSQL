@@ -5,7 +5,6 @@ import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.parser.dto.InsertWrapper;
 import com.github.jfsql.parser.dto.StatementWithColumns;
 import com.github.jfsql.parser.dto.StatementWithTableName;
-import com.github.jfsql.parser.dto.StatementWithURL;
 import com.github.jfsql.parser.dto.StatementWithWhere;
 import java.io.File;
 import java.nio.file.Path;
@@ -142,13 +141,6 @@ public class SemanticValidator {
 
     public boolean URLIsNotDirectory(final String URL) {
         return Path.of(URL).toFile().isFile();
-    }
-
-    public boolean databaseExist(final StatementWithURL statement, final String fileExtension) {
-        final Path URL = Path.of(statement.getDatabaseURL());
-        final String databaseFile = File.separator + URL.getFileName() + "." + fileExtension;
-        final Path databaseXmlFilePath = Path.of(URL + databaseFile);
-        return databaseXmlFilePath.toFile().exists();
     }
 
 }

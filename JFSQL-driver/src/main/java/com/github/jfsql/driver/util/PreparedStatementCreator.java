@@ -34,9 +34,7 @@ public class PreparedStatementCreator {
         final TypeOfStatement statementType = statement.getTypeOfStatement();
         switch (statementType) {
             case ALTER_TABLE:
-            case CREATE_DATABASE:
             case CREATE_TABLE:
-            case DROP_DATABASE:
             case DROP_TABLE:
                 parameterCount = 0;
                 break;
