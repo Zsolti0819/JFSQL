@@ -6,9 +6,8 @@ import com.github.jfsql.driver.dto.Table;
 
 /**
  * Custom exception created in order to be able to catch failed commit in functions
- * {@link TransactionManager#executeDDLOperation(Database, Table)},
- * {@link TransactionManager#executeDMLOperation(Table)},
- * {@link TransactionManager#executeDropTableOperation(Database)}
+ * {@link TransactionManager#executeOperation(Table)}, {@link TransactionManager#executeOperation(Database)}
+ * {@link TransactionManager#executeOperation(Database, Table)},
  */
 public class CommitFailedException extends RuntimeException {
 

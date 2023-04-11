@@ -78,7 +78,7 @@ public class AlterTableService {
         table.setTableFile(newTableFile);
         table.setSchemaFile(newSchemaFile);
 
-        transactionManager.executeDDLOperation(database, table);
+        transactionManager.executeOperation(database, table);
     }
 
     void renameColumn(final AlterTableWrapper statement, final Database database, final Table table)
@@ -122,7 +122,7 @@ public class AlterTableService {
             }
             entry.setColumnsAndValues(modifiedColumnsAndValues);
         }
-        transactionManager.executeDDLOperation(database, table);
+        transactionManager.executeOperation(database, table);
     }
 
     private Map<String, Boolean> getModifiedNotNullColumns(final AlterTableWrapper statement, final Table table) {
@@ -207,7 +207,7 @@ public class AlterTableService {
                 columnsAndValues.put(columnNameToAdd, null);
             }
         }
-        transactionManager.executeDDLOperation(database, table);
+        transactionManager.executeOperation(database, table);
     }
 
     void dropColumn(final AlterTableWrapper statement, final Database database, final Table table) throws SQLException {
@@ -241,6 +241,6 @@ public class AlterTableService {
             final Map<String, String> columnsAndValues = entry.getColumnsAndValues();
             columnsAndValues.remove(columnNameToDrop);
         }
-        transactionManager.executeDDLOperation(database, table);
+        transactionManager.executeOperation(database, table);
     }
 }

@@ -61,7 +61,7 @@ public class DeleteService {
             deleteCount = entriesSizeBefore - entriesSizeAfter;
         }
 
-        transactionManager.executeDMLOperation(table);
+        transactionManager.executeOperation(table);
         return deleteCount;
     }
 }

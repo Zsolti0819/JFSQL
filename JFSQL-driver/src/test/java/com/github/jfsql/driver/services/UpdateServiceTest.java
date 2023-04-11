@@ -64,7 +64,7 @@ class UpdateServiceTest {
 
         updateService.updateTable(statement);
 
-        verify(transactionManager, times(1)).executeDMLOperation(table);
+        verify(transactionManager, times(1)).executeOperation(table);
     }
 
     @Test
@@ -79,7 +79,7 @@ class UpdateServiceTest {
 
         verifyNoInteractions(whereConditionSolver);
         verifyNoInteractions(columnToTypeMapper);
-        verify(transactionManager, never()).executeDMLOperation(table);
+        verify(transactionManager, never()).executeOperation(table);
     }
 
     @Test
@@ -95,6 +95,6 @@ class UpdateServiceTest {
 
         verifyNoInteractions(whereConditionSolver);
         verifyNoInteractions(columnToTypeMapper);
-        verify(transactionManager, never()).executeDMLOperation(table);
+        verify(transactionManager, never()).executeOperation(table);
     }
 }

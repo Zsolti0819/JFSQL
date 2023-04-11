@@ -76,7 +76,7 @@ public class UpdateService {
             }
         }
 
-        transactionManager.executeDMLOperation(table);
+        transactionManager.executeOperation(table);
         return whereEntries.size();
     }
 

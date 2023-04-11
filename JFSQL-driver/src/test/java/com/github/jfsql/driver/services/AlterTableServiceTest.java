@@ -132,7 +132,7 @@ class AlterTableServiceTest {
         final SQLException thrown = assertThrows(SQLException.class,
             () -> alterTableService.renameTable(statement, database, table));
         assertEquals("Table name cannot be the same as database name.", thrown.getMessage());
-        verify(transactionManager, never()).executeDDLOperation(any(), any());
+        verify(transactionManager, never()).executeOperation(any(), any());
     }
 
     @Test
@@ -143,6 +143,6 @@ class AlterTableServiceTest {
             () -> alterTableService.renameColumn(statement, database, table));
         assertTrue(thrown.getMessage()
             .contains("The column '" + statement.getNewColumnName() + "' already exists in '" + table.getName() + "'"));
-        verify(transactionManager, never()).executeDDLOperation(any(), any());
+        verify(transactionManager, never()).executeOperation(any(), any());
     }
 }

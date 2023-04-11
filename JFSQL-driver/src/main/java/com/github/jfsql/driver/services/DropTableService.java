@@ -69,7 +69,7 @@ public class DropTableService {
 
         logger.debug("table removed = {}", table);
 
-        transactionManager.executeDropTableOperation(database);
+        transactionManager.executeOperation(database);
         return deleteCount;
     }
 }

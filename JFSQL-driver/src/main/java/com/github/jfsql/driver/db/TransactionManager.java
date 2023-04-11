@@ -77,7 +77,10 @@ public abstract class TransactionManager {
         }
     }
 
-    public void executeDMLOperation(final Table table) throws SQLException {
+    /**
+     * Called when executing INSERT, UPDATE, DELETE -> then we only edit the table
+     */
+    public void executeOperation(final Table table) throws SQLException {
         synchronized (lock) {
             if (!autoCommit) {
                 addTableToUncommittedObjects(table);
@@ -93,7 +96,10 @@ public abstract class TransactionManager {
         }
     }
 
-    public void executeDDLOperation(final Database database, final Table table) throws SQLException {
+    /**
+     * Called when executing CREATE TABLE, ALTER TABLE -> then we edit the table, schema and database file
+     */
+    public void executeOperation(final Database database, final Table table) throws SQLException {
         synchronized (lock) {
             if (!autoCommit) {
                 addDatabaseToUncommittedObjects(database);
@@ -115,7 +121,10 @@ public abstract class TransactionManager {
         }
     }
 
-    public void executeDropTableOperation(final Database database) throws SQLException {
+    /**
+     * Called when executing DROP TABLE -> then we only edit the database file
+     */
+    public void executeOperation(final Database database) throws SQLException {
         synchronized (lock) {
             if (!autoCommit) {
                 addDatabaseToUncommittedObjects(database);
