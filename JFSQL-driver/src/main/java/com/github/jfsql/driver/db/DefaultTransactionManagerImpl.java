@@ -1,5 +1,7 @@
 package com.github.jfsql.driver.db;
 
+import com.github.jfsql.driver.dto.Database;
+import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.exceptions.CommitFailedException;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
@@ -7,6 +9,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -41,8 +45,16 @@ public class DefaultTransactionManagerImpl extends TransactionManager {
     }
 
     @Override
-    public void rollback() {
-        // NO-OP
+    public void rollback() throws SQLException {
+        logger.warn("Executing rollback()");
+        final Database database = databaseManager.database;
+        final List<Table> tables;
+        try {
+            tables = reader.readTablesFromDatabaseFile(database);
+            database.setTables(tables);
+        } catch (final IOException e) {
+            throw new SQLException("There was an error executing rollback().\n" + e.getMessage());
+        }
     }
 
 }
