@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.github.jfsql.driver.TestUtils;
+import com.github.jfsql.driver.factories.TransactionManagerFactory;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -29,6 +30,7 @@ class DeleteExceptionsTest {
 
     @AfterEach
     void tearDown() {
+        TransactionManagerFactory.setTransactionManagerToNull();
         TestUtils.deleteDatabaseDirectory();
     }
 

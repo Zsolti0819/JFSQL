@@ -15,8 +15,8 @@ import lombok.Data;
 @Data
 public abstract class DatabaseManager {
 
-    protected final Reader reader;
-    protected final Writer writer;
+    final Reader reader;
+    final Writer writer;
     private final String URL;
     private final SemanticValidator semanticValidator;
     private final FileNameCreator fileNameCreator;

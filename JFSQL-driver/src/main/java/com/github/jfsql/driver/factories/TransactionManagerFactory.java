@@ -13,14 +13,23 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class TransactionManagerFactory {
 
-    public TransactionManager createTransactionManager(final PropertiesReader propertiesReader,
+    private static TransactionManager INSTANCE = null;
+
+    public static synchronized TransactionManager createTransactionManager(final PropertiesReader propertiesReader,
         final DatabaseManager databaseManager,
         final Reader reader, final Writer writer) {
         final String type = propertiesReader.getTransactionVersioning();
-        if (Objects.equals(type, "jgit")) {
-            return new JGitTransactionManagerImpl(databaseManager, reader, writer);
-        } else {
-            return new DefaultTransactionManagerImpl(databaseManager, reader, writer);
+        if (INSTANCE == null) {
+            if (Objects.equals(type, "jgit")) {
+                INSTANCE = new JGitTransactionManagerImpl(databaseManager, reader, writer);
+            } else {
+                INSTANCE = new DefaultTransactionManagerImpl(databaseManager, reader, writer);
+            }
         }
+        return INSTANCE;
+    }
+
+    public static void setTransactionManagerToNull() {
+        INSTANCE = null;
     }
 }

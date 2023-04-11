@@ -12,8 +12,8 @@ import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -30,11 +30,11 @@ public abstract class TransactionManager {
     static final Object lock = new Object();
     private static final Logger logger = LogManager.getLogger(TransactionManager.class);
     private static final Map<String, Long> OBJECT_NAME_TO_THREAD_ID_MAP = new HashMap<>();
+    final ThreadLocal<Set<Table>> uncommittedTables = ThreadLocal.withInitial(HashSet::new);
+    final ThreadLocal<Set<Table>> uncommittedSchemas = ThreadLocal.withInitial(HashSet::new);
+    final ThreadLocal<Set<Database>> uncommittedDatabases = ThreadLocal.withInitial(HashSet::new);
     final Reader reader;
     final Writer writer;
-    final Set<Table> uncommittedTables;
-    final Set<Table> uncommittedSchemas;
-    final Set<Database> uncommittedDatabases;
     final DatabaseManager databaseManager;
     boolean autoCommit;
 
@@ -43,9 +43,6 @@ public abstract class TransactionManager {
         this.databaseManager = databaseManager;
         this.reader = reader;
         this.writer = writer;
-        uncommittedTables = new LinkedHashSet<>();
-        uncommittedSchemas = new LinkedHashSet<>();
-        uncommittedDatabases = new LinkedHashSet<>();
     }
 
     public abstract void commit(String... args) throws SQLException;
@@ -62,18 +59,18 @@ public abstract class TransactionManager {
 
     void writeUncommittedObjects() throws IOException {
         synchronized (lock) {
-            for (final Database db : uncommittedDatabases) {
+            for (final Database db : uncommittedDatabases.get()) {
                 writer.writeDatabaseFile(db);
             }
-            for (final Table table : uncommittedSchemas) {
+            for (final Table table : uncommittedSchemas.get()) {
                 writer.writeSchema(table);
             }
-            for (final Table table : uncommittedTables) {
+            for (final Table table : uncommittedTables.get()) {
                 writer.writeTable(table);
             }
-            uncommittedDatabases.clear();
-            uncommittedSchemas.clear();
-            uncommittedTables.clear();
+            uncommittedDatabases.get().clear();
+            uncommittedSchemas.get().clear();
+            uncommittedTables.get().clear();
         }
     }
 
@@ -151,7 +148,7 @@ public abstract class TransactionManager {
         } else {
             OBJECT_NAME_TO_THREAD_ID_MAP.put(table.getName(), Thread.currentThread().getId());
         }
-        uncommittedTables.add(table);
+        uncommittedTables.get().add(table);
     }
 
     private void addSchemaToUncommittedObjects(final Table table) {
@@ -166,7 +163,7 @@ public abstract class TransactionManager {
         } else {
             OBJECT_NAME_TO_THREAD_ID_MAP.put(table.getName(), Thread.currentThread().getId());
         }
-        uncommittedSchemas.add(table);
+        uncommittedSchemas.get().add(table);
     }
 
     private void addDatabaseToUncommittedObjects(final Database database) {
@@ -181,7 +178,7 @@ public abstract class TransactionManager {
         } else {
             OBJECT_NAME_TO_THREAD_ID_MAP.put(database.getName(), Thread.currentThread().getId());
         }
-        uncommittedDatabases.add(database);
+        uncommittedDatabases.get().add(database);
     }
 
     void removeCurrentThreadChangesFromMap() {

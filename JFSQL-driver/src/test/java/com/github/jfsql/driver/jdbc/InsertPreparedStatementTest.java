@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.github.jfsql.driver.TestUtils;
+import com.github.jfsql.driver.factories.TransactionManagerFactory;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -43,6 +44,7 @@ public class InsertPreparedStatementTest {
 
     @AfterEach
     void tearDown() {
+        TransactionManagerFactory.setTransactionManagerToNull();
         TestUtils.deleteDatabaseDirectory();
     }
 

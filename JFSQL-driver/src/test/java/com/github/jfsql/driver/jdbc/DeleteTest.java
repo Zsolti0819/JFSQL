@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.github.jfsql.driver.TestUtils;
+import com.github.jfsql.driver.factories.TransactionManagerFactory;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -44,6 +45,7 @@ class DeleteTest {
 
     @AfterEach
     void tearDown() {
+        TransactionManagerFactory.setTransactionManagerToNull();
         TestUtils.deleteDatabaseDirectory();
     }
 
