@@ -27,7 +27,6 @@ import org.apache.logging.log4j.Logger;
 @Data
 public abstract class TransactionManager {
 
-    static final Object lock = new Object();
     private static final Logger logger = LogManager.getLogger(TransactionManager.class);
     private static final Map<String, Long> OBJECT_NAME_TO_THREAD_ID_MAP = new HashMap<>();
     final ThreadLocal<Set<Table>> uncommittedTables = ThreadLocal.withInitial(HashSet::new);
@@ -57,38 +56,34 @@ public abstract class TransactionManager {
         this.autoCommit = autoCommit;
     }
 
-    void writeUncommittedObjects() throws IOException {
-        synchronized (lock) {
-            for (final Database db : uncommittedDatabases.get()) {
-                writer.writeDatabaseFile(db);
-            }
-            for (final Table table : uncommittedSchemas.get()) {
-                writer.writeSchema(table);
-            }
-            for (final Table table : uncommittedTables.get()) {
-                writer.writeTable(table);
-            }
-            uncommittedDatabases.get().clear();
-            uncommittedSchemas.get().clear();
-            uncommittedTables.get().clear();
+    synchronized void writeUncommittedObjects() throws IOException {
+        for (final Database db : uncommittedDatabases.get()) {
+            writer.writeDatabaseFile(db);
         }
+        for (final Table table : uncommittedSchemas.get()) {
+            writer.writeSchema(table);
+        }
+        for (final Table table : uncommittedTables.get()) {
+            writer.writeTable(table);
+        }
+        uncommittedDatabases.get().clear();
+        uncommittedSchemas.get().clear();
+        uncommittedTables.get().clear();
     }
 
     /**
      * Called when executing INSERT, UPDATE, DELETE -> then we only edit the table
      */
-    public void executeOperation(final Table table) throws SQLException {
-        synchronized (lock) {
-            if (!autoCommit) {
-                addTableToUncommittedObjects(table);
-            } else {
-                try {
-                    writer.writeTable(table);
-                    commit(String.valueOf(Path.of(table.getTableFile()).getFileName()));
-                } catch (final IOException | CommitFailedException e) {
-                    e.printStackTrace();
-                    rollback();
-                }
+    public synchronized void executeOperation(final Table table) throws SQLException {
+        if (!autoCommit) {
+            addTableToUncommittedObjects(table);
+        } else {
+            try {
+                writer.writeTable(table);
+                commit(String.valueOf(Path.of(table.getTableFile()).getFileName()));
+            } catch (final IOException | CommitFailedException e) {
+                e.printStackTrace();
+                rollback();
             }
         }
     }
@@ -96,24 +91,22 @@ public abstract class TransactionManager {
     /**
      * Called when executing CREATE TABLE, ALTER TABLE -> then we edit the table, schema and database file
      */
-    public void executeOperation(final Database database, final Table table) throws SQLException {
-        synchronized (lock) {
-            if (!autoCommit) {
-                addDatabaseToUncommittedObjects(database);
-                addSchemaToUncommittedObjects(table);
-                addTableToUncommittedObjects(table);
-            } else {
-                try {
-                    writer.writeDatabaseFile(database);
-                    writer.writeSchema(table);
-                    writer.writeTable(table);
-                    commit(String.valueOf(database.getURL().getFileName()),
-                        String.valueOf(Path.of(table.getSchemaFile()).getFileName()),
-                        String.valueOf(Path.of(table.getTableFile()).getFileName()));
-                } catch (final IOException | CommitFailedException e) {
-                    e.printStackTrace();
-                    rollback();
-                }
+    public synchronized void executeOperation(final Database database, final Table table) throws SQLException {
+        if (!autoCommit) {
+            addDatabaseToUncommittedObjects(database);
+            addSchemaToUncommittedObjects(table);
+            addTableToUncommittedObjects(table);
+        } else {
+            try {
+                writer.writeDatabaseFile(database);
+                writer.writeSchema(table);
+                writer.writeTable(table);
+                commit(String.valueOf(database.getURL().getFileName()),
+                    String.valueOf(Path.of(table.getSchemaFile()).getFileName()),
+                    String.valueOf(Path.of(table.getTableFile()).getFileName()));
+            } catch (final IOException | CommitFailedException e) {
+                e.printStackTrace();
+                rollback();
             }
         }
     }
@@ -121,18 +114,16 @@ public abstract class TransactionManager {
     /**
      * Called when executing DROP TABLE -> then we only edit the database file
      */
-    public void executeOperation(final Database database) throws SQLException {
-        synchronized (lock) {
-            if (!autoCommit) {
-                addDatabaseToUncommittedObjects(database);
-            } else {
-                try {
-                    writer.writeDatabaseFile(database);
-                    commit(String.valueOf(database.getURL().getFileName()));
-                } catch (final IOException | CommitFailedException e) {
-                    e.printStackTrace();
-                    rollback();
-                }
+    public synchronized void executeOperation(final Database database) throws SQLException {
+        if (!autoCommit) {
+            addDatabaseToUncommittedObjects(database);
+        } else {
+            try {
+                writer.writeDatabaseFile(database);
+                commit(String.valueOf(database.getURL().getFileName()));
+            } catch (final IOException | CommitFailedException e) {
+                e.printStackTrace();
+                rollback();
             }
         }
     }

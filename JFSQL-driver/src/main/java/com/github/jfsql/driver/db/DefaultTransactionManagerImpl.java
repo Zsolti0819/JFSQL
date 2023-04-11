@@ -25,7 +25,7 @@ public class DefaultTransactionManagerImpl extends TransactionManager {
     }
 
     @Override
-    public void commit(final String... args) {
+    public synchronized void commit(final String... args) {
         try {
             writeUncommittedObjects();
 
@@ -45,7 +45,7 @@ public class DefaultTransactionManagerImpl extends TransactionManager {
     }
 
     @Override
-    public void rollback() throws SQLException {
+    public synchronized void rollback() throws SQLException {
         logger.warn("Executing rollback()");
         final Database database = databaseManager.database;
         final List<Table> tables;
