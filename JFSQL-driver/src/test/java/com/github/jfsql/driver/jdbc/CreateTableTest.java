@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.github.jfsql.driver.TestUtils;
-import com.github.jfsql.driver.factories.TransactionManagerFactory;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
@@ -34,7 +33,6 @@ class CreateTableTest {
 
     @AfterEach
     void tearDown() {
-        TransactionManagerFactory.setTransactionManagerToNull();
         TestUtils.deleteDatabaseDirectory();
     }
 

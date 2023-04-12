@@ -9,11 +9,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.github.jfsql.driver.TestUtils;
 import java.sql.Connection;
 import java.sql.Driver;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -27,9 +26,8 @@ class JfsqlDriverTest {
         driver = new JfsqlDriver();
     }
 
-    @AfterAll
-    static void tearDown() throws SQLException {
-        DriverManager.deregisterDriver(driver);
+    @AfterEach
+    void tearDown() {
         TestUtils.deleteDatabaseDirectory();
     }
 

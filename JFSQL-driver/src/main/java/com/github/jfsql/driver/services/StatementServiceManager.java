@@ -28,7 +28,7 @@ import lombok.Data;
 @Builder
 public class StatementServiceManager {
 
-    static final Object lock = new Object();
+    public static final Object lock = new Object();
     private final Cache cache;
     private final Parser parser;
     private final PreparedStatementCreator preparedStatementCreator;

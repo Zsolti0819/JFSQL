@@ -1,5 +1,7 @@
 package com.github.jfsql.driver.db;
 
+import static com.github.jfsql.driver.services.StatementServiceManager.lock;
+
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.exceptions.CommitFailedException;
@@ -56,34 +58,38 @@ public abstract class TransactionManager {
         this.autoCommit = autoCommit;
     }
 
-    synchronized void writeUncommittedObjects() throws IOException {
-        for (final Database db : uncommittedDatabases.get()) {
-            writer.writeDatabaseFile(db);
+    void writeUncommittedObjects() throws IOException {
+        synchronized (lock) {
+            for (final Database db : uncommittedDatabases.get()) {
+                writer.writeDatabaseFile(db);
+            }
+            for (final Table table : uncommittedSchemas.get()) {
+                writer.writeSchema(table);
+            }
+            for (final Table table : uncommittedTables.get()) {
+                writer.writeTable(table);
+            }
+            uncommittedDatabases.get().clear();
+            uncommittedSchemas.get().clear();
+            uncommittedTables.get().clear();
         }
-        for (final Table table : uncommittedSchemas.get()) {
-            writer.writeSchema(table);
-        }
-        for (final Table table : uncommittedTables.get()) {
-            writer.writeTable(table);
-        }
-        uncommittedDatabases.get().clear();
-        uncommittedSchemas.get().clear();
-        uncommittedTables.get().clear();
     }
 
     /**
      * Called when executing INSERT, UPDATE, DELETE -> then we only edit the table
      */
-    public synchronized void executeOperation(final Table table) throws SQLException {
-        if (!autoCommit) {
-            addTableToUncommittedObjects(table);
-        } else {
-            try {
-                writer.writeTable(table);
-                commit(String.valueOf(Path.of(table.getTableFile()).getFileName()));
-            } catch (final IOException | CommitFailedException e) {
-                e.printStackTrace();
-                rollback();
+    public void executeOperation(final Table table) throws SQLException {
+        synchronized (lock) {
+            if (!autoCommit) {
+                addTableToUncommittedObjects(table);
+            } else {
+                try {
+                    writer.writeTable(table);
+                    commit(String.valueOf(Path.of(table.getTableFile()).getFileName()));
+                } catch (final IOException | CommitFailedException e) {
+                    e.printStackTrace();
+                    rollback();
+                }
             }
         }
     }
@@ -91,22 +97,24 @@ public abstract class TransactionManager {
     /**
      * Called when executing CREATE TABLE, ALTER TABLE -> then we edit the table, schema and database file
      */
-    public synchronized void executeOperation(final Database database, final Table table) throws SQLException {
-        if (!autoCommit) {
-            addDatabaseToUncommittedObjects(database);
-            addSchemaToUncommittedObjects(table);
-            addTableToUncommittedObjects(table);
-        } else {
-            try {
-                writer.writeDatabaseFile(database);
-                writer.writeSchema(table);
-                writer.writeTable(table);
-                commit(String.valueOf(database.getURL().getFileName()),
-                    String.valueOf(Path.of(table.getSchemaFile()).getFileName()),
-                    String.valueOf(Path.of(table.getTableFile()).getFileName()));
-            } catch (final IOException | CommitFailedException e) {
-                e.printStackTrace();
-                rollback();
+    public void executeOperation(final Database database, final Table table) throws SQLException {
+        synchronized (lock) {
+            if (!autoCommit) {
+                addDatabaseToUncommittedObjects(database);
+                addSchemaToUncommittedObjects(table);
+                addTableToUncommittedObjects(table);
+            } else {
+                try {
+                    writer.writeDatabaseFile(database);
+                    writer.writeSchema(table);
+                    writer.writeTable(table);
+                    commit(String.valueOf(database.getURL().getFileName()),
+                        String.valueOf(Path.of(table.getSchemaFile()).getFileName()),
+                        String.valueOf(Path.of(table.getTableFile()).getFileName()));
+                } catch (final IOException | CommitFailedException e) {
+                    e.printStackTrace();
+                    rollback();
+                }
             }
         }
     }
@@ -114,66 +122,75 @@ public abstract class TransactionManager {
     /**
      * Called when executing DROP TABLE -> then we only edit the database file
      */
-    public synchronized void executeOperation(final Database database) throws SQLException {
-        if (!autoCommit) {
-            addDatabaseToUncommittedObjects(database);
-        } else {
-            try {
-                writer.writeDatabaseFile(database);
-                commit(String.valueOf(database.getURL().getFileName()));
-            } catch (final IOException | CommitFailedException e) {
-                e.printStackTrace();
-                rollback();
+    public void executeOperation(final Database database) throws SQLException {
+        synchronized (lock) {
+            if (!autoCommit) {
+                addDatabaseToUncommittedObjects(database);
+            } else {
+                try {
+                    writer.writeDatabaseFile(database);
+                    commit(String.valueOf(database.getURL().getFileName()));
+                } catch (final IOException | CommitFailedException e) {
+                    e.printStackTrace();
+                    rollback();
+                }
             }
         }
     }
 
     private void addTableToUncommittedObjects(final Table table) {
-        if (OBJECT_NAME_TO_THREAD_ID_MAP.containsKey(table.getName())) {
-            if (!Objects.equals(OBJECT_NAME_TO_THREAD_ID_MAP.get(table.getName()), Thread.currentThread().getId())) {
-                // remove all entries from the shared map, where the value was the thread's id
-                removeCurrentThreadChangesFromMap();
-                throw new PessimisticLockException(
-                    "The file '" + table.getTableFile() + "' is currently being modified by another thread.");
+        synchronized (lock) {
+            if (OBJECT_NAME_TO_THREAD_ID_MAP.containsKey(table.getName())) {
+                if (!Objects.equals(OBJECT_NAME_TO_THREAD_ID_MAP.get(table.getName()),
+                    Thread.currentThread().getId())) {
+                    // remove all entries from the shared map, where the value was the thread's id
+                    removeCurrentThreadChangesFromMap();
+                    throw new PessimisticLockException(
+                        "The file '" + table.getTableFile() + "' is currently being modified by another thread.");
+                }
+            } else {
+                OBJECT_NAME_TO_THREAD_ID_MAP.put(table.getName(), Thread.currentThread().getId());
             }
-        } else {
-            OBJECT_NAME_TO_THREAD_ID_MAP.put(table.getName(), Thread.currentThread().getId());
+            uncommittedTables.get().add(table);
         }
-        uncommittedTables.get().add(table);
     }
 
     private void addSchemaToUncommittedObjects(final Table table) {
-        if (OBJECT_NAME_TO_THREAD_ID_MAP.containsKey(table.getName())) {
-            if (!Objects.equals(OBJECT_NAME_TO_THREAD_ID_MAP.get(table.getName()),
-                Thread.currentThread().getId())) {
-                // remove all entries from the shared map, where the value was the thread's id
-                removeCurrentThreadChangesFromMap();
-                throw new PessimisticLockException(
-                    "The file '" + table.getSchemaFile() + "' is currently being modified by another thread.");
+        synchronized (lock) {
+            if (OBJECT_NAME_TO_THREAD_ID_MAP.containsKey(table.getName())) {
+                if (!Objects.equals(OBJECT_NAME_TO_THREAD_ID_MAP.get(table.getName()),
+                    Thread.currentThread().getId())) {
+                    // remove all entries from the shared map, where the value was the thread's id
+                    removeCurrentThreadChangesFromMap();
+                    throw new PessimisticLockException(
+                        "The file '" + table.getSchemaFile() + "' is currently being modified by another thread.");
+                }
+            } else {
+                OBJECT_NAME_TO_THREAD_ID_MAP.put(table.getName(), Thread.currentThread().getId());
             }
-        } else {
-            OBJECT_NAME_TO_THREAD_ID_MAP.put(table.getName(), Thread.currentThread().getId());
+            uncommittedSchemas.get().add(table);
         }
-        uncommittedSchemas.get().add(table);
     }
 
     private void addDatabaseToUncommittedObjects(final Database database) {
-        if (OBJECT_NAME_TO_THREAD_ID_MAP.containsKey(database.getName())) {
-            if (!Objects.equals(OBJECT_NAME_TO_THREAD_ID_MAP.get(database.getName()),
-                Thread.currentThread().getId())) {
-                // remove all entries from the shared map, where the value was the thread's id
-                removeCurrentThreadChangesFromMap();
-                throw new PessimisticLockException(
-                    "The file '" + database.getURL() + "' is currently being modified by another thread.");
+        synchronized (lock) {
+            if (OBJECT_NAME_TO_THREAD_ID_MAP.containsKey(database.getName())) {
+                if (!Objects.equals(OBJECT_NAME_TO_THREAD_ID_MAP.get(database.getName()),
+                    Thread.currentThread().getId())) {
+                    // remove all entries from the shared map, where the value was the thread's id
+                    removeCurrentThreadChangesFromMap();
+                    throw new PessimisticLockException(
+                        "The file '" + database.getURL() + "' is currently being modified by another thread.");
+                }
+            } else {
+                OBJECT_NAME_TO_THREAD_ID_MAP.put(database.getName(), Thread.currentThread().getId());
             }
-        } else {
-            OBJECT_NAME_TO_THREAD_ID_MAP.put(database.getName(), Thread.currentThread().getId());
+            uncommittedDatabases.get().add(database);
         }
-        uncommittedDatabases.get().add(database);
     }
 
     void removeCurrentThreadChangesFromMap() {
-        synchronized (OBJECT_NAME_TO_THREAD_ID_MAP) {
+        synchronized (lock) {
             final Iterator<Map.Entry<String, Long>> iterator = OBJECT_NAME_TO_THREAD_ID_MAP.entrySet().iterator();
             while (iterator.hasNext()) {
                 final Map.Entry<String, Long> entry = iterator.next();

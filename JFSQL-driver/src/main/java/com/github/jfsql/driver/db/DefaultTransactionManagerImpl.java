@@ -1,5 +1,7 @@
 package com.github.jfsql.driver.db;
 
+import static com.github.jfsql.driver.services.StatementServiceManager.lock;
+
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.exceptions.CommitFailedException;
@@ -25,35 +27,40 @@ public class DefaultTransactionManagerImpl extends TransactionManager {
     }
 
     @Override
-    public synchronized void commit(final String... args) {
-        try {
-            writeUncommittedObjects();
+    public void commit(final String... args) {
+        synchronized (lock) {
+            try {
+                writeUncommittedObjects();
 
-            final Map<File, Boolean> filesToKeep = getFilesToKeep();
-            logger.trace("filesToKeep = {}", filesToKeep);
+                final Map<File, Boolean> filesToKeep = getFilesToKeep();
+                logger.trace("filesToKeep = {}", filesToKeep);
 
-            for (final Map.Entry<File, Boolean> entry : filesToKeep.entrySet()) {
-                final File file = entry.getKey();
-                if (Boolean.FALSE.equals(entry.getValue())) {
-                    Files.delete(Path.of(file.getAbsolutePath()));
+                for (final Map.Entry<File, Boolean> entry : filesToKeep.entrySet()) {
+                    final File file = entry.getKey();
+                    if (Boolean.FALSE.equals(entry.getValue())) {
+                        Files.delete(Path.of(file.getAbsolutePath()));
+                    }
                 }
+            } catch (final IOException e) {
+                throw new CommitFailedException("Commit failed.\n" + e.getMessage());
             }
-        } catch (final IOException e) {
-            throw new CommitFailedException("Commit failed.\n" + e.getMessage());
+            removeCurrentThreadChangesFromMap();
         }
-        removeCurrentThreadChangesFromMap();
     }
 
+
     @Override
-    public synchronized void rollback() throws SQLException {
-        logger.warn("Executing rollback()");
-        final Database database = databaseManager.database;
-        final List<Table> tables;
-        try {
-            tables = reader.readTablesFromDatabaseFile(database);
-            database.setTables(tables);
-        } catch (final IOException e) {
-            throw new SQLException("There was an error executing rollback().\n" + e.getMessage());
+    public void rollback() throws SQLException {
+        synchronized (lock) {
+            logger.warn("Executing rollback()");
+            final Database database = databaseManager.database;
+            final List<Table> tables;
+            try {
+                tables = reader.readTablesFromDatabaseFile(database);
+                database.setTables(tables);
+            } catch (final IOException e) {
+                throw new SQLException("There was an error executing rollback().\n" + e.getMessage());
+            }
         }
     }
 

@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.github.jfsql.driver.TestUtils;
-import com.github.jfsql.driver.factories.TransactionManagerFactory;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -36,7 +35,6 @@ class DropTableTest {
 
     @AfterEach
     void tearDown() {
-        TransactionManagerFactory.setTransactionManagerToNull();
         TestUtils.deleteDatabaseDirectory();
     }
 
