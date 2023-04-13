@@ -78,7 +78,7 @@ public class InsertService {
             entries.add(entryToInsert);
         }
 
-        transactionManager.executeOperation(table);
+        transactionManager.executeOperation(table, false);
 
         return valuesList.size();
     }

@@ -39,11 +39,11 @@ public class AlterTableService {
         if (statement.getNewTableName() != null) {
             renameTable(statement, database, table);
         } else if (statement.getOldColumnName() != null) {
-            renameColumn(statement, database, table);
+            renameColumn(statement, table);
         } else if (statement.getColumnNameToAdd() != null) {
-            addColumn(statement, database, table);
+            addColumn(statement, table);
         } else if (statement.getColumnToDrop() != null) {
-            dropColumn(statement, database, table);
+            dropColumn(statement, table);
         }
         return 0;
     }
@@ -81,7 +81,7 @@ public class AlterTableService {
         transactionManager.executeOperation(database, table);
     }
 
-    void renameColumn(final AlterTableWrapper statement, final Database database, final Table table)
+    void renameColumn(final AlterTableWrapper statement, final Table table)
         throws SQLException {
 
         final String newColumnName = statement.getNewColumnName();
@@ -122,7 +122,7 @@ public class AlterTableService {
             }
             entry.setColumnsAndValues(modifiedColumnsAndValues);
         }
-        transactionManager.executeOperation(database, table);
+        transactionManager.executeOperation(table, true);
     }
 
     private Map<String, Boolean> getModifiedNotNullColumns(final AlterTableWrapper statement, final Table table) {
@@ -153,7 +153,7 @@ public class AlterTableService {
         return modifiedColumnsAndTypes;
     }
 
-    void addColumn(final AlterTableWrapper statement, final Database database, final Table table) throws SQLException {
+    void addColumn(final AlterTableWrapper statement, final Table table) throws SQLException {
         final String columnNameToAdd = statement.getColumnNameToAdd();
         final String columnTypeToAdd = statement.getColumnTypeToAdd();
 
@@ -207,10 +207,10 @@ public class AlterTableService {
                 columnsAndValues.put(columnNameToAdd, null);
             }
         }
-        transactionManager.executeOperation(database, table);
+        transactionManager.executeOperation(table, true);
     }
 
-    void dropColumn(final AlterTableWrapper statement, final Database database, final Table table) throws SQLException {
+    void dropColumn(final AlterTableWrapper statement, final Table table) throws SQLException {
         final String columnNameToDrop = statement.getColumnToDrop();
 
         if (!semanticValidator.columnIsPresentInTable(table, columnNameToDrop)) {
@@ -241,6 +241,6 @@ public class AlterTableService {
             final Map<String, String> columnsAndValues = entry.getColumnsAndValues();
             columnsAndValues.remove(columnNameToDrop);
         }
-        transactionManager.executeOperation(database, table);
+        transactionManager.executeOperation(table, true);
     }
 }

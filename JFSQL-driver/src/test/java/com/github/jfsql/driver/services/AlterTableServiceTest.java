@@ -90,7 +90,7 @@ class AlterTableServiceTest {
         final int result = alterTableServiceSpy.alterTable(statement);
 
         verify(tableFinder, times(1)).getTableByName("myTable");
-        verify(alterTableServiceSpy, times(1)).renameColumn(any(), any(), any());
+        verify(alterTableServiceSpy, times(1)).renameColumn(any(), any());
         assertEquals(0, result);
     }
 
@@ -105,7 +105,7 @@ class AlterTableServiceTest {
         final int result = alterTableServiceSpy.alterTable(statement);
 
         verify(tableFinder, times(1)).getTableByName("myTable");
-        verify(alterTableServiceSpy, times(1)).addColumn(any(), any(), any());
+        verify(alterTableServiceSpy, times(1)).addColumn(any(), any());
         assertEquals(0, result);
     }
 
@@ -121,7 +121,7 @@ class AlterTableServiceTest {
         final int result = alterTableServiceSpy.alterTable(statement);
 
         verify(tableFinder, times(1)).getTableByName("myTable");
-        verify(alterTableServiceSpy, times(1)).dropColumn(any(), any(), any());
+        verify(alterTableServiceSpy, times(1)).dropColumn(any(), any());
         assertEquals(0, result);
     }
 
@@ -140,7 +140,7 @@ class AlterTableServiceTest {
         when(statement.getNewColumnName()).thenReturn("newColumnName");
         when(semanticValidator.columnIsPresentInTable(table, statement.getNewColumnName())).thenReturn(true);
         final SQLException thrown = assertThrows(SQLException.class,
-            () -> alterTableService.renameColumn(statement, database, table));
+            () -> alterTableService.renameColumn(statement, table));
         assertTrue(thrown.getMessage()
             .contains("The column '" + statement.getNewColumnName() + "' already exists in '" + table.getName() + "'"));
         verify(transactionManager, never()).executeOperation(any(), any());

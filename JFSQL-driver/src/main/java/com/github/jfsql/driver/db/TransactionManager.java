@@ -76,14 +76,44 @@ public abstract class TransactionManager {
     }
 
     /**
-     * Called when executing INSERT, UPDATE, DELETE -> then we only edit the table
+     * Called when executing DROP TABLE -> then we only edit the database file
      */
-    public void executeOperation(final Table table) throws SQLException {
+    public void executeOperation(final Database database) throws SQLException {
         synchronized (lock) {
             if (!autoCommit) {
+                addDatabaseToUncommittedObjects(database);
+            } else {
+                try {
+                    writer.writeDatabaseFile(database);
+                    commit(String.valueOf(database.getURL().getFileName()));
+                } catch (final IOException | CommitFailedException e) {
+                    e.printStackTrace();
+                    rollback();
+                }
+            }
+        }
+    }
+
+    /**
+     * Called when executing INSERT, UPDATE, DELETE or ALTERING table (ADD/DROP/RENAME COLUMN) -> then we edit the table
+     * and may edit the schema too
+     */
+    public void executeOperation(final Table table, final boolean writeSchema) throws SQLException {
+        synchronized (lock) {
+            if (!autoCommit) {
+                if (writeSchema) {
+                    addSchemaToUncommittedObjects(table);
+                }
                 addTableToUncommittedObjects(table);
             } else {
                 try {
+                    if (writeSchema) {
+                        writer.writeSchema(table);
+                        writer.writeTable(table);
+                        commit(String.valueOf(Path.of(table.getSchemaFile()).getFileName()),
+                            String.valueOf(Path.of(table.getTableFile()).getFileName()));
+                        return;
+                    }
                     writer.writeTable(table);
                     commit(String.valueOf(Path.of(table.getTableFile()).getFileName()));
                 } catch (final IOException | CommitFailedException e) {
@@ -95,7 +125,8 @@ public abstract class TransactionManager {
     }
 
     /**
-     * Called when executing CREATE TABLE, ALTER TABLE -> then we edit the table, schema and database file
+     * Called when executing CREATE TABLE, ALTER TABLE (RENAME TABLE) -> then we edit the table, schema and database
+     * file
      */
     public void executeOperation(final Database database, final Table table) throws SQLException {
         synchronized (lock) {
@@ -111,25 +142,6 @@ public abstract class TransactionManager {
                     commit(String.valueOf(database.getURL().getFileName()),
                         String.valueOf(Path.of(table.getSchemaFile()).getFileName()),
                         String.valueOf(Path.of(table.getTableFile()).getFileName()));
-                } catch (final IOException | CommitFailedException e) {
-                    e.printStackTrace();
-                    rollback();
-                }
-            }
-        }
-    }
-
-    /**
-     * Called when executing DROP TABLE -> then we only edit the database file
-     */
-    public void executeOperation(final Database database) throws SQLException {
-        synchronized (lock) {
-            if (!autoCommit) {
-                addDatabaseToUncommittedObjects(database);
-            } else {
-                try {
-                    writer.writeDatabaseFile(database);
-                    commit(String.valueOf(database.getURL().getFileName()));
                 } catch (final IOException | CommitFailedException e) {
                     e.printStackTrace();
                     rollback();
