@@ -1,5 +1,6 @@
 package com.github.jfsql.driver.services;
 
+import com.github.jfsql.driver.db.SharedMapHandler;
 import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.LargeObject;
@@ -56,12 +57,11 @@ public class InsertService {
                 "Some value's type didn't match the type of the column, to which it was intended to be inserted.");
         }
 
+        SharedMapHandler.addTableToSharedMap(table);
+
         // When autoCommit is true, it should be safe to read the entries from the file
         List<Entry> entries = table.getEntries();
-        if (entries == null || transactionManager.getAutoCommit()) {
-            logger.trace("Will read entries from table. Table's entries were loaded into memory = {}, autoCommit = {}",
-                entries != null,
-                transactionManager.getAutoCommit());
+        if (entries == null) {
             try {
                 entries = reader.readEntriesFromTable(table);
             } catch (final IOException e) {

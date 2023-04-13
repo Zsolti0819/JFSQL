@@ -1,6 +1,6 @@
 package com.github.jfsql.driver.db;
 
-import static com.github.jfsql.driver.services.StatementServiceManager.lock;
+import static com.github.jfsql.driver.db.SharedMapHandler.OBJECT_NAME_TO_THREAD_ID_MAP;
 
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
@@ -29,7 +29,7 @@ public class JGitTransactionManagerImpl extends TransactionManager {
 
     @Override
     public void commit(final String... args) {
-        synchronized (lock) {
+        synchronized (OBJECT_NAME_TO_THREAD_ID_MAP) {
             final Database database = databaseManager.database;
             final File databaseDirectoryPath = database.getURL().getParent().toFile();
             try (final Git git = Git.open(databaseDirectoryPath)) {
@@ -58,24 +58,22 @@ public class JGitTransactionManagerImpl extends TransactionManager {
             } catch (final GitAPIException | IOException e) {
                 throw new CommitFailedException("Commit failed.\n" + e.getMessage());
             } finally {
-                removeCurrentThreadChangesFromMap();
+                SharedMapHandler.removeCurrentThreadChangesFromMap();
             }
         }
     }
 
     @Override
     public void rollback() throws SQLException {
-        synchronized (lock) {
-            logger.warn("Executing rollback()");
-            final Database database = databaseManager.database;
-            try (final Git git = Git.open(database.getURL().getParent().toFile())) {
-                final ResetCommand resetCommand = git.reset().setMode(ResetCommand.ResetType.HARD);
-                resetCommand.call();
-                final List<Table> tables = reader.readTablesFromDatabaseFile(database);
-                database.setTables(tables);
-            } catch (final GitAPIException | IOException e) {
-                throw new SQLException("There was an error executing rollback().\n" + e.getMessage());
-            }
+        logger.warn("Executing rollback()");
+        final Database database = databaseManager.database;
+        try (final Git git = Git.open(database.getURL().getParent().toFile())) {
+            final ResetCommand resetCommand = git.reset().setMode(ResetCommand.ResetType.HARD);
+            resetCommand.call();
+            final List<Table> tables = reader.readTablesFromDatabaseFile(database);
+            database.setTables(tables);
+        } catch (final GitAPIException | IOException e) {
+            throw new SQLException("There was an error executing rollback().\n" + e.getMessage());
         }
     }
 

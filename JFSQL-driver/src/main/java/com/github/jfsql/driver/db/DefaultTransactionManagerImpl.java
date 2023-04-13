@@ -1,6 +1,6 @@
 package com.github.jfsql.driver.db;
 
-import static com.github.jfsql.driver.services.StatementServiceManager.lock;
+import static com.github.jfsql.driver.db.SharedMapHandler.OBJECT_NAME_TO_THREAD_ID_MAP;
 
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
@@ -28,7 +28,7 @@ public class DefaultTransactionManagerImpl extends TransactionManager {
 
     @Override
     public void commit(final String... args) {
-        synchronized (lock) {
+        synchronized (OBJECT_NAME_TO_THREAD_ID_MAP) {
             try {
                 writeUncommittedObjects();
 
@@ -44,23 +44,21 @@ public class DefaultTransactionManagerImpl extends TransactionManager {
             } catch (final IOException e) {
                 throw new CommitFailedException("Commit failed.\n" + e.getMessage());
             }
-            removeCurrentThreadChangesFromMap();
+            SharedMapHandler.removeCurrentThreadChangesFromMap();
         }
     }
 
 
     @Override
     public void rollback() throws SQLException {
-        synchronized (lock) {
-            logger.warn("Executing rollback()");
-            final Database database = databaseManager.database;
-            final List<Table> tables;
-            try {
-                tables = reader.readTablesFromDatabaseFile(database);
-                database.setTables(tables);
-            } catch (final IOException e) {
-                throw new SQLException("There was an error executing rollback().\n" + e.getMessage());
-            }
+        logger.warn("Executing rollback()");
+        final Database database = databaseManager.database;
+        final List<Table> tables;
+        try {
+            tables = reader.readTablesFromDatabaseFile(database);
+            database.setTables(tables);
+        } catch (final IOException e) {
+            throw new SQLException("There was an error executing rollback().\n" + e.getMessage());
         }
     }
 

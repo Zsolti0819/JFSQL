@@ -1,6 +1,7 @@
 package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.db.DatabaseManager;
+import com.github.jfsql.driver.db.SharedMapHandler;
 import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
@@ -71,6 +72,9 @@ public class CreateTableService {
             .notNullColumns(notNulLColumns)
             .entries(new ArrayList<>())
             .build();
+
+        SharedMapHandler.addSchematoSharedMap(table);
+        SharedMapHandler.addTableToSharedMap(table);
 
         logger.debug("table created = {}", table);
 

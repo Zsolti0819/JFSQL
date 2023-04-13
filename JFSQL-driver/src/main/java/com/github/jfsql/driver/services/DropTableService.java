@@ -1,6 +1,7 @@
 package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.db.DatabaseManager;
+import com.github.jfsql.driver.db.SharedMapHandler;
 import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
@@ -46,10 +47,7 @@ public class DropTableService {
 
         // When autoCommit is true, it should be safe to read the entries from the file
         List<Entry> entries = table.getEntries();
-        if (entries == null || transactionManager.getAutoCommit()) {
-            logger.trace("Will read entries from table. Table's entries were loaded into memory = {}, autoCommit = {}",
-                entries != null,
-                transactionManager.getAutoCommit());
+        if (entries == null) {
             try {
                 entries = reader.readEntriesFromTable(table);
             } catch (final IOException e) {
@@ -68,6 +66,8 @@ public class DropTableService {
         tables.remove(table);
 
         logger.debug("table removed = {}", table);
+
+        SharedMapHandler.addDatabaseToSharedMap(database);
 
         transactionManager.executeOperation(database);
         return deleteCount;

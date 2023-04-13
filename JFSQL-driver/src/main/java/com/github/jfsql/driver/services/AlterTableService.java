@@ -1,6 +1,7 @@
 package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.db.DatabaseManager;
+import com.github.jfsql.driver.db.SharedMapHandler;
 import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
@@ -18,13 +19,10 @@ import java.util.Map;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 @RequiredArgsConstructor
 public class AlterTableService {
 
-    private static final Logger logger = LogManager.getLogger(AlterTableService.class);
     private final TableFinder tableFinder;
     private final DatabaseManager databaseManager;
     private final TransactionManager transactionManager;
@@ -57,15 +55,16 @@ public class AlterTableService {
             throw new SQLException("Table name cannot be the same as database name.");
         }
 
+        SharedMapHandler.addDatabaseToSharedMap(database);
+        SharedMapHandler.addSchematoSharedMap(table);
+        SharedMapHandler.addTableToSharedMap(table);
+
         final String newTableFile = fileNameCreator.createTableFileName(newTableName, database);
         final String newSchemaFile = fileNameCreator.createSchemaFileName(newTableName, database);
 
         // When autoCommit is true, it should be safe to read the entries from the file
         List<Entry> entries = table.getEntries();
-        if (entries == null || transactionManager.getAutoCommit()) {
-            logger.trace("Will read entries from table. Table's entries were loaded into memory = {}, autoCommit = {}",
-                entries != null,
-                transactionManager.getAutoCommit());
+        if (entries == null) {
             try {
                 entries = reader.readEntriesFromTable(table);
             } catch (final IOException e) {
@@ -90,12 +89,12 @@ public class AlterTableService {
             throw new SQLException("The column '" + newColumnName + "' already exists in '" + table.getName() + "'");
         }
 
+        SharedMapHandler.addSchematoSharedMap(table);
+        SharedMapHandler.addTableToSharedMap(table);
+
         // When autoCommit is true, it should be safe to read the entries from the file
         List<Entry> entries = table.getEntries();
-        if (entries == null || transactionManager.getAutoCommit()) {
-            logger.trace("Will read entries from table. Table's entries were loaded into memory = {}, autoCommit = {}",
-                entries != null,
-                transactionManager.getAutoCommit());
+        if (entries == null) {
             try {
                 entries = reader.readEntriesFromTable(table);
             } catch (final IOException e) {
@@ -164,12 +163,12 @@ public class AlterTableService {
             throw new SQLException("The column '" + columnNameToAdd + "' already exists in '" + table.getName() + "'.");
         }
 
+        SharedMapHandler.addSchematoSharedMap(table);
+        SharedMapHandler.addTableToSharedMap(table);
+
         // When autoCommit is true, it should be safe to read the entries from the file
         List<Entry> entries = table.getEntries();
-        if (entries == null || transactionManager.getAutoCommit()) {
-            logger.trace("Will read entries from table. Table's entries were loaded into memory = {}, autoCommit = {}",
-                entries != null,
-                transactionManager.getAutoCommit());
+        if (entries == null) {
             try {
                 entries = reader.readEntriesFromTable(table);
             } catch (final IOException e) {
@@ -217,6 +216,9 @@ public class AlterTableService {
             throw new SQLException("The column '" + columnNameToDrop + "' doesn't exist in '" + table.getName() + "'");
         }
 
+        SharedMapHandler.addSchematoSharedMap(table);
+        SharedMapHandler.addTableToSharedMap(table);
+
         final Map<String, String> columnsAndTypes = table.getColumnsAndTypes();
         columnsAndTypes.remove(columnNameToDrop);
         final Map<String, Boolean> notNullColumns = table.getNotNullColumns();
@@ -224,10 +226,7 @@ public class AlterTableService {
 
         // When autoCommit is true, it should be safe to read the entries from the file
         List<Entry> entries = table.getEntries();
-        if (entries == null || transactionManager.getAutoCommit()) {
-            logger.trace("Will read entries from table. Table's entries were loaded into memory = {}, autoCommit = {}",
-                entries != null,
-                transactionManager.getAutoCommit());
+        if (entries == null) {
             try {
                 entries = reader.readEntriesFromTable(table);
             } catch (final IOException e) {

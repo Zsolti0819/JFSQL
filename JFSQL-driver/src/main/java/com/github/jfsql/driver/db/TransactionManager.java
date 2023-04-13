@@ -1,11 +1,8 @@
 package com.github.jfsql.driver.db;
 
-import static com.github.jfsql.driver.services.StatementServiceManager.lock;
-
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.exceptions.CommitFailedException;
-import com.github.jfsql.driver.exceptions.PessimisticLockException;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
 import java.io.File;
@@ -15,9 +12,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -30,7 +25,6 @@ import org.apache.logging.log4j.Logger;
 public abstract class TransactionManager {
 
     private static final Logger logger = LogManager.getLogger(TransactionManager.class);
-    private static final Map<String, Long> OBJECT_NAME_TO_THREAD_ID_MAP = new HashMap<>();
     final ThreadLocal<Set<Table>> uncommittedTables = ThreadLocal.withInitial(HashSet::new);
     final ThreadLocal<Set<Table>> uncommittedSchemas = ThreadLocal.withInitial(HashSet::new);
     final ThreadLocal<Set<Database>> uncommittedDatabases = ThreadLocal.withInitial(HashSet::new);
@@ -59,37 +53,33 @@ public abstract class TransactionManager {
     }
 
     void writeUncommittedObjects() throws IOException {
-        synchronized (lock) {
-            for (final Database db : uncommittedDatabases.get()) {
-                writer.writeDatabaseFile(db);
-            }
-            for (final Table table : uncommittedSchemas.get()) {
-                writer.writeSchema(table);
-            }
-            for (final Table table : uncommittedTables.get()) {
-                writer.writeTable(table);
-            }
-            uncommittedDatabases.get().clear();
-            uncommittedSchemas.get().clear();
-            uncommittedTables.get().clear();
+        for (final Database db : uncommittedDatabases.get()) {
+            writer.writeDatabaseFile(db);
         }
+        for (final Table table : uncommittedSchemas.get()) {
+            writer.writeSchema(table);
+        }
+        for (final Table table : uncommittedTables.get()) {
+            writer.writeTable(table);
+        }
+        uncommittedDatabases.get().clear();
+        uncommittedSchemas.get().clear();
+        uncommittedTables.get().clear();
     }
 
     /**
      * Called when executing DROP TABLE -> then we only edit the database file
      */
     public void executeOperation(final Database database) throws SQLException {
-        synchronized (lock) {
-            if (!autoCommit) {
-                addDatabaseToUncommittedObjects(database);
-            } else {
-                try {
-                    writer.writeDatabaseFile(database);
-                    commit(String.valueOf(database.getURL().getFileName()));
-                } catch (final IOException | CommitFailedException e) {
-                    e.printStackTrace();
-                    rollback();
-                }
+        if (!autoCommit) {
+            uncommittedDatabases.get().add(database);
+        } else {
+            try {
+                writer.writeDatabaseFile(database);
+                commit(String.valueOf(database.getURL().getFileName()));
+            } catch (final IOException | CommitFailedException e) {
+                e.printStackTrace();
+                rollback();
             }
         }
     }
@@ -99,27 +89,25 @@ public abstract class TransactionManager {
      * and may edit the schema too
      */
     public void executeOperation(final Table table, final boolean writeSchema) throws SQLException {
-        synchronized (lock) {
-            if (!autoCommit) {
+        if (!autoCommit) {
+            if (writeSchema) {
+                uncommittedSchemas.get().add(table);
+            }
+            uncommittedTables.get().add(table);
+        } else {
+            try {
                 if (writeSchema) {
-                    addSchemaToUncommittedObjects(table);
-                }
-                addTableToUncommittedObjects(table);
-            } else {
-                try {
-                    if (writeSchema) {
-                        writer.writeSchema(table);
-                        writer.writeTable(table);
-                        commit(String.valueOf(Path.of(table.getSchemaFile()).getFileName()),
-                            String.valueOf(Path.of(table.getTableFile()).getFileName()));
-                        return;
-                    }
+                    writer.writeSchema(table);
                     writer.writeTable(table);
-                    commit(String.valueOf(Path.of(table.getTableFile()).getFileName()));
-                } catch (final IOException | CommitFailedException e) {
-                    e.printStackTrace();
-                    rollback();
+                    commit(String.valueOf(Path.of(table.getSchemaFile()).getFileName()),
+                        String.valueOf(Path.of(table.getTableFile()).getFileName()));
+                    return;
                 }
+                writer.writeTable(table);
+                commit(String.valueOf(Path.of(table.getTableFile()).getFileName()));
+            } catch (final IOException | CommitFailedException e) {
+                e.printStackTrace();
+                rollback();
             }
         }
     }
@@ -129,87 +117,21 @@ public abstract class TransactionManager {
      * file
      */
     public void executeOperation(final Database database, final Table table) throws SQLException {
-        synchronized (lock) {
-            if (!autoCommit) {
-                addDatabaseToUncommittedObjects(database);
-                addSchemaToUncommittedObjects(table);
-                addTableToUncommittedObjects(table);
-            } else {
-                try {
-                    writer.writeDatabaseFile(database);
-                    writer.writeSchema(table);
-                    writer.writeTable(table);
-                    commit(String.valueOf(database.getURL().getFileName()),
-                        String.valueOf(Path.of(table.getSchemaFile()).getFileName()),
-                        String.valueOf(Path.of(table.getTableFile()).getFileName()));
-                } catch (final IOException | CommitFailedException e) {
-                    e.printStackTrace();
-                    rollback();
-                }
-            }
-        }
-    }
-
-    private void addTableToUncommittedObjects(final Table table) {
-        synchronized (lock) {
-            if (OBJECT_NAME_TO_THREAD_ID_MAP.containsKey(table.getName())) {
-                if (!Objects.equals(OBJECT_NAME_TO_THREAD_ID_MAP.get(table.getName()),
-                    Thread.currentThread().getId())) {
-                    // remove all entries from the shared map, where the value was the thread's id
-                    removeCurrentThreadChangesFromMap();
-                    throw new PessimisticLockException(
-                        "The file '" + table.getTableFile() + "' is currently being modified by another thread.");
-                }
-            } else {
-                OBJECT_NAME_TO_THREAD_ID_MAP.put(table.getName(), Thread.currentThread().getId());
-            }
-            uncommittedTables.get().add(table);
-        }
-    }
-
-    private void addSchemaToUncommittedObjects(final Table table) {
-        synchronized (lock) {
-            if (OBJECT_NAME_TO_THREAD_ID_MAP.containsKey(table.getName())) {
-                if (!Objects.equals(OBJECT_NAME_TO_THREAD_ID_MAP.get(table.getName()),
-                    Thread.currentThread().getId())) {
-                    // remove all entries from the shared map, where the value was the thread's id
-                    removeCurrentThreadChangesFromMap();
-                    throw new PessimisticLockException(
-                        "The file '" + table.getSchemaFile() + "' is currently being modified by another thread.");
-                }
-            } else {
-                OBJECT_NAME_TO_THREAD_ID_MAP.put(table.getName(), Thread.currentThread().getId());
-            }
-            uncommittedSchemas.get().add(table);
-        }
-    }
-
-    private void addDatabaseToUncommittedObjects(final Database database) {
-        synchronized (lock) {
-            if (OBJECT_NAME_TO_THREAD_ID_MAP.containsKey(database.getName())) {
-                if (!Objects.equals(OBJECT_NAME_TO_THREAD_ID_MAP.get(database.getName()),
-                    Thread.currentThread().getId())) {
-                    // remove all entries from the shared map, where the value was the thread's id
-                    removeCurrentThreadChangesFromMap();
-                    throw new PessimisticLockException(
-                        "The file '" + database.getURL() + "' is currently being modified by another thread.");
-                }
-            } else {
-                OBJECT_NAME_TO_THREAD_ID_MAP.put(database.getName(), Thread.currentThread().getId());
-            }
+        if (!autoCommit) {
             uncommittedDatabases.get().add(database);
-        }
-    }
-
-    void removeCurrentThreadChangesFromMap() {
-        synchronized (lock) {
-            final Iterator<Map.Entry<String, Long>> iterator = OBJECT_NAME_TO_THREAD_ID_MAP.entrySet().iterator();
-            while (iterator.hasNext()) {
-                final Map.Entry<String, Long> entry = iterator.next();
-                final Long value = entry.getValue();
-                if (Objects.equals(value, Thread.currentThread().getId())) {
-                    iterator.remove();
-                }
+            uncommittedSchemas.get().add(table);
+            uncommittedTables.get().add(table);
+        } else {
+            try {
+                writer.writeDatabaseFile(database);
+                writer.writeSchema(table);
+                writer.writeTable(table);
+                commit(String.valueOf(database.getURL().getFileName()),
+                    String.valueOf(Path.of(table.getSchemaFile()).getFileName()),
+                    String.valueOf(Path.of(table.getTableFile()).getFileName()));
+            } catch (final IOException | CommitFailedException e) {
+                e.printStackTrace();
+                rollback();
             }
         }
     }
