@@ -52,13 +52,15 @@ public class SelectService {
                 throw new SQLException("Column '" + columnName + "' not found in table '" + tableName + "'.");
             }
         }
-        final List<Entry> entries;
-        try {
-            entries = reader.readEntriesFromTable(table);
-        } catch (final IOException e) {
-            throw new SQLException(e);
+        List<Entry> entries = table.getEntries();
+        if (entries == null) {
+            try {
+                entries = reader.readEntriesFromTable(table);
+            } catch (final IOException e) {
+                throw new SQLException(e);
+            }
+            table.setEntries(entries);
         }
-        table.setEntries(entries);
         return baseSelect(statement, table);
     }
 
@@ -356,13 +358,15 @@ public class SelectService {
 
         // Now we can load the entries into memory
         for (final Table table : tables) {
-            final List<Entry> entries;
-            try {
-                entries = reader.readEntriesFromTable(table);
-            } catch (final IOException e) {
-                throw new SQLException(e);
+            List<Entry> entries = table.getEntries();
+            if (entries == null) {
+                try {
+                    entries = reader.readEntriesFromTable(table);
+                } catch (final IOException e) {
+                    throw new SQLException(e);
+                }
+                table.setEntries(entries);
             }
-            table.setEntries(entries);
         }
 
         for (int i = 0; i < tables.size(); i++) {
