@@ -1,7 +1,5 @@
 package com.github.jfsql.driver.db;
 
-import static com.github.jfsql.driver.db.SharedMapHandler.OBJECT_NAME_TO_THREAD_ID_MAP;
-
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.exceptions.CommitFailedException;
@@ -76,17 +74,15 @@ public abstract class TransactionManager {
      * Called when executing DROP TABLE -> then we only edit the database file
      */
     public void executeOperation(final Database database) throws SQLException {
-        synchronized (OBJECT_NAME_TO_THREAD_ID_MAP) {
-            if (!autoCommit) {
-                uncommittedDatabases.add(database);
-            } else {
-                try {
-                    writer.writeDatabaseFile(database);
-                    commit(String.valueOf(database.getURL().getFileName()));
-                } catch (final IOException | CommitFailedException e) {
-                    e.printStackTrace();
-                    rollback();
-                }
+        if (!autoCommit) {
+            uncommittedDatabases.add(database);
+        } else {
+            try {
+                writer.writeDatabaseFile(database);
+                commit(String.valueOf(database.getURL().getFileName()));
+            } catch (final IOException | CommitFailedException e) {
+                e.printStackTrace();
+                rollback();
             }
         }
     }
@@ -96,27 +92,25 @@ public abstract class TransactionManager {
      * and may edit the schema too
      */
     public void executeOperation(final Table table, final boolean writeSchema) throws SQLException {
-        synchronized (OBJECT_NAME_TO_THREAD_ID_MAP) {
-            if (!autoCommit) {
+        if (!autoCommit) {
+            if (writeSchema) {
+                uncommittedSchemas.add(table);
+            }
+            uncommittedTables.add(table);
+        } else {
+            try {
                 if (writeSchema) {
-                    uncommittedSchemas.add(table);
-                }
-                uncommittedTables.add(table);
-            } else {
-                try {
-                    if (writeSchema) {
-                        writer.writeSchema(table);
-                        writer.writeTable(table);
-                        commit(String.valueOf(Path.of(table.getSchemaFile()).getFileName()),
-                            String.valueOf(Path.of(table.getTableFile()).getFileName()));
-                        return;
-                    }
+                    writer.writeSchema(table);
                     writer.writeTable(table);
-                    commit(String.valueOf(Path.of(table.getTableFile()).getFileName()));
-                } catch (final IOException | CommitFailedException e) {
-                    e.printStackTrace();
-                    rollback();
+                    commit(String.valueOf(Path.of(table.getSchemaFile()).getFileName()),
+                        String.valueOf(Path.of(table.getTableFile()).getFileName()));
+                    return;
                 }
+                writer.writeTable(table);
+                commit(String.valueOf(Path.of(table.getTableFile()).getFileName()));
+            } catch (final IOException | CommitFailedException e) {
+                e.printStackTrace();
+                rollback();
             }
         }
     }
@@ -126,23 +120,21 @@ public abstract class TransactionManager {
      * file
      */
     public void executeOperation(final Database database, final Table table) throws SQLException {
-        synchronized (OBJECT_NAME_TO_THREAD_ID_MAP) {
-            if (!autoCommit) {
-                uncommittedDatabases.add(database);
-                uncommittedSchemas.add(table);
-                uncommittedTables.add(table);
-            } else {
-                try {
-                    writer.writeDatabaseFile(database);
-                    writer.writeSchema(table);
-                    writer.writeTable(table);
-                    commit(String.valueOf(database.getURL().getFileName()),
-                        String.valueOf(Path.of(table.getSchemaFile()).getFileName()),
-                        String.valueOf(Path.of(table.getTableFile()).getFileName()));
-                } catch (final IOException | CommitFailedException e) {
-                    e.printStackTrace();
-                    rollback();
-                }
+        if (!autoCommit) {
+            uncommittedDatabases.add(database);
+            uncommittedSchemas.add(table);
+            uncommittedTables.add(table);
+        } else {
+            try {
+                writer.writeDatabaseFile(database);
+                writer.writeSchema(table);
+                writer.writeTable(table);
+                commit(String.valueOf(database.getURL().getFileName()),
+                    String.valueOf(Path.of(table.getSchemaFile()).getFileName()),
+                    String.valueOf(Path.of(table.getTableFile()).getFileName()));
+            } catch (final IOException | CommitFailedException e) {
+                e.printStackTrace();
+                rollback();
             }
         }
     }
