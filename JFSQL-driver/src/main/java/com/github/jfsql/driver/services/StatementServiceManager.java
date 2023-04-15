@@ -28,7 +28,6 @@ import lombok.Data;
 @Builder
 public class StatementServiceManager {
 
-
     private final Cache cache;
     private final Parser parser;
     private final PreparedStatementCreator preparedStatementCreator;
@@ -76,7 +75,6 @@ public class StatementServiceManager {
     }
 
     public int executeUpdate(final String sql, final boolean isPreparedStatement) throws SQLException {
-
         final BaseStatement statement = getFromCacheOrParseStatement(sql);
         final TypeOfStatement statementType = statement.getTypeOfStatement();
         switch (statementType) {
@@ -113,7 +111,6 @@ public class StatementServiceManager {
     }
 
     public boolean execute(final String sql, final boolean isPreparedStatement) throws SQLException {
-
         final BaseStatement statement = getFromCacheOrParseStatement(sql);
         final TypeOfStatement statementType = statement.getTypeOfStatement();
         switch (statementType) {
@@ -163,6 +160,5 @@ public class StatementServiceManager {
     public Object[] getParameters() {
         return preparedStatementCreator.getParameters();
     }
-
 
 }

@@ -1,7 +1,5 @@
 package com.github.jfsql.driver.db;
 
-import static com.github.jfsql.driver.db.SharedMapHandler.OBJECT_NAME_TO_THREAD_ID_MAP;
-
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.exceptions.CommitFailedException;
@@ -28,26 +26,23 @@ public class DefaultTransactionManagerImpl extends TransactionManager {
 
     @Override
     public void commit(final String... args) {
-        synchronized (OBJECT_NAME_TO_THREAD_ID_MAP) {
-            try {
-                writeUncommittedObjects();
+        try {
+            writeUncommittedObjects();
+            final Map<File, Boolean> filesToKeep = getFilesToKeep();
+            logger.trace("filesToKeep = {}", filesToKeep);
 
-                final Map<File, Boolean> filesToKeep = getFilesToKeep();
-                logger.trace("filesToKeep = {}", filesToKeep);
-
-                for (final Map.Entry<File, Boolean> entry : filesToKeep.entrySet()) {
-                    final File file = entry.getKey();
-                    if (Boolean.FALSE.equals(entry.getValue())) {
-                        Files.delete(Path.of(file.getAbsolutePath()));
-                    }
+            for (final Map.Entry<File, Boolean> entry : filesToKeep.entrySet()) {
+                final File file = entry.getKey();
+                if (Boolean.FALSE.equals(entry.getValue())) {
+                    Files.delete(Path.of(file.getAbsolutePath()));
                 }
-            } catch (final IOException e) {
-                throw new CommitFailedException("Commit failed.\n" + e.getMessage());
             }
+        } catch (final IOException e) {
+            throw new CommitFailedException("Commit failed.\n" + e.getMessage());
+        } finally {
             SharedMapHandler.removeCurrentThreadChangesFromMap();
         }
     }
-
 
     @Override
     public void rollback() throws SQLException {

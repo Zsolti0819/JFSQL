@@ -73,7 +73,8 @@ public class CreateTableService {
             .entries(new ArrayList<>())
             .build();
 
-        SharedMapHandler.addSchematoSharedMap(table);
+        SharedMapHandler.addDatabaseToSharedMap(database);
+        SharedMapHandler.addSchemaToSharedMap(table);
         SharedMapHandler.addTableToSharedMap(table);
 
         logger.debug("table created = {}", table);

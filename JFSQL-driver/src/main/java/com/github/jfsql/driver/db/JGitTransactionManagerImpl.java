@@ -34,7 +34,6 @@ public class JGitTransactionManagerImpl extends TransactionManager {
             final File databaseDirectoryPath = database.getURL().getParent().toFile();
             try (final Git git = Git.open(databaseDirectoryPath)) {
                 writeUncommittedObjects();
-
                 final Map<File, Boolean> filesToKeep = getFilesToKeep();
                 logger.trace("filesToKeep = {}", filesToKeep);
 
@@ -50,9 +49,9 @@ public class JGitTransactionManagerImpl extends TransactionManager {
                         git.rm().addFilepattern(prefix + fileName).call();
                     }
                 }
-
-                final String commitMessage =
-                    args.length == 0 ? "Explicit commit" : "Auto committing: " + Arrays.toString(args);
+                final String commitMessage = args.length == 0 ?
+                    "Explicit commit" :
+                    "Auto committing: " + Arrays.toString(args);
                 git.commit().setMessage(commitMessage).call();
 
             } catch (final GitAPIException | IOException e) {

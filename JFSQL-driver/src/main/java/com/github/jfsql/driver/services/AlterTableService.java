@@ -56,7 +56,7 @@ public class AlterTableService {
         }
 
         SharedMapHandler.addDatabaseToSharedMap(database);
-        SharedMapHandler.addSchematoSharedMap(table);
+        SharedMapHandler.addSchemaToSharedMap(table);
         SharedMapHandler.addTableToSharedMap(table);
 
         final String newTableFile = fileNameCreator.createTableFileName(newTableName, database);
@@ -89,7 +89,7 @@ public class AlterTableService {
             throw new SQLException("The column '" + newColumnName + "' already exists in '" + table.getName() + "'");
         }
 
-        SharedMapHandler.addSchematoSharedMap(table);
+        SharedMapHandler.addSchemaToSharedMap(table);
         SharedMapHandler.addTableToSharedMap(table);
 
         // When autoCommit is true, it should be safe to read the entries from the file
@@ -163,7 +163,7 @@ public class AlterTableService {
             throw new SQLException("The column '" + columnNameToAdd + "' already exists in '" + table.getName() + "'.");
         }
 
-        SharedMapHandler.addSchematoSharedMap(table);
+        SharedMapHandler.addSchemaToSharedMap(table);
         SharedMapHandler.addTableToSharedMap(table);
 
         // When autoCommit is true, it should be safe to read the entries from the file
@@ -216,7 +216,7 @@ public class AlterTableService {
             throw new SQLException("The column '" + columnNameToDrop + "' doesn't exist in '" + table.getName() + "'");
         }
 
-        SharedMapHandler.addSchematoSharedMap(table);
+        SharedMapHandler.addSchemaToSharedMap(table);
         SharedMapHandler.addTableToSharedMap(table);
 
         final Map<String, String> columnsAndTypes = table.getColumnsAndTypes();
