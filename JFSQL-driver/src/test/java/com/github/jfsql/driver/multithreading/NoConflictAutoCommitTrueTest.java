@@ -21,7 +21,7 @@ import org.junit.jupiter.api.TestInstance;
  * thread inserts to different tables, 10 threads - 10 tables
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class NoConflictAutoCommitTrueTest {
+class NoConflictAutoCommitTrueTest {
 
     private static final int NUM_THREADS = 2;
 
@@ -31,7 +31,7 @@ public class NoConflictAutoCommitTrueTest {
     }
 
     @RepeatedTest(100)
-    public void testParallelInsertsWithDifferentTables() throws Exception {
+    void testParallelInsertsWithDifferentTables() throws Exception {
         final Properties properties = new Properties();
         properties.setProperty("transaction.versioning", "default");
         final Connection[] connections = new Connection[NUM_THREADS];

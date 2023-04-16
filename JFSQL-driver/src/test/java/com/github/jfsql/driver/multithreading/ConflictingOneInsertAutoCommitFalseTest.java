@@ -24,7 +24,7 @@ import org.junit.jupiter.api.TestInstance;
  * committed.
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class ConflictingOneInsertAutoCommitFalseTest {
+class ConflictingOneInsertAutoCommitFalseTest {
 
     private static final int NUM_THREADS = 2;
 
@@ -34,7 +34,7 @@ public class ConflictingOneInsertAutoCommitFalseTest {
     }
 
     @RepeatedTest(100)
-    public void testConflictWhenInsertingOneToSameTable() throws Exception {
+    void testConflictWhenInsertingOneToSameTable() throws Exception {
         final AtomicInteger pessimisticLocksCaught = new AtomicInteger();
         final Properties properties = new Properties();
         properties.setProperty("transaction.versioning", "default");

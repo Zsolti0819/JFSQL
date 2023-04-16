@@ -20,7 +20,7 @@ import org.junit.jupiter.api.TestInstance;
  * get PessimisticLockException.
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class ConflictingDbFileAutoCommitFalseTest {
+class ConflictingDbFileAutoCommitFalseTest {
 
     private static final int NUM_THREADS = 2;
 
@@ -30,7 +30,7 @@ public class ConflictingDbFileAutoCommitFalseTest {
     }
 
     @RepeatedTest(100)
-    public void testConflictWhenCreatingTables() throws Exception {
+    void testConflictWhenCreatingTables() throws Exception {
         final AtomicInteger pessimisticLocksCaught = new AtomicInteger();
         final Properties properties = new Properties();
         properties.setProperty("transaction.versioning", "default");
