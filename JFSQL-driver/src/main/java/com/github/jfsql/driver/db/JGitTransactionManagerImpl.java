@@ -1,6 +1,6 @@
 package com.github.jfsql.driver.db;
 
-import static com.github.jfsql.driver.core.JfsqlDriver.OBJECT_NAME_TO_THREAD_ID_MAP;
+import static com.github.jfsql.driver.db.SharedMapHandler.OBJECT_NAME_TO_THREAD_ID_MAP;
 
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;

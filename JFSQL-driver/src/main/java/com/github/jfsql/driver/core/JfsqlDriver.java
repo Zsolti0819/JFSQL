@@ -34,8 +34,6 @@ import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
 import lombok.Getter;
@@ -44,7 +42,6 @@ import lombok.Getter;
 public class JfsqlDriver implements Driver {
 
     private static final Driver INSTANCE = new JfsqlDriver();
-    public static final Map<String, Long> OBJECT_NAME_TO_THREAD_ID_MAP = new HashMap<>();
 
     static {
         try {
