@@ -11,10 +11,6 @@ import com.google.gson.JsonParser;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
-import java.nio.channels.OverlappingFileLockException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,11 +47,7 @@ public class ReaderJsonImpl implements Reader {
             return entries;
         }
 
-        try (final RandomAccessFile file = new RandomAccessFile(tableFile, "rw");
-            final FileChannel channel = file.getChannel();
-            final FileLock lock = channel.lock(0L, Long.MAX_VALUE, true);
-            final FileReader fileReader = new FileReader(tableFile)) {
-
+        try (final FileReader fileReader = new FileReader(tableFile)) {
             final JsonElement json = JsonParser.parseReader(fileReader);
             final JsonObject jsonObject = json.getAsJsonObject();
             final JsonArray entryList = jsonObject.getAsJsonArray("Entry");
@@ -70,9 +62,6 @@ public class ReaderJsonImpl implements Reader {
                 }
                 entries.add(new Entry(columnsAndValues, new HashMap<>()));
             }
-        } catch (final OverlappingFileLockException e) {
-            logger.error("The table file '{}' is already locked by another process.", tableFile);
-            throw new IOException("File is already locked", e);
         }
         return entries;
     }

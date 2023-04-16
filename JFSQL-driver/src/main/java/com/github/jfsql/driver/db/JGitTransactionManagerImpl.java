@@ -1,5 +1,7 @@
 package com.github.jfsql.driver.db;
 
+import static com.github.jfsql.driver.core.JfsqlDriver.OBJECT_NAME_TO_THREAD_ID_MAP;
+
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.exceptions.CommitFailedException;
@@ -27,34 +29,36 @@ public class JGitTransactionManagerImpl extends TransactionManager {
 
     @Override
     public void commit(final String... args) {
-        final Database database = databaseManager.database;
-        final File databaseDirectoryPath = database.getURL().getParent().toFile();
-        try (final Git git = Git.open(databaseDirectoryPath)) {
-            writeUncommittedObjects();
-            final Map<File, Boolean> filesToKeep = getFilesToKeep();
-            logger.trace("filesToKeep = {}", filesToKeep);
+        synchronized (OBJECT_NAME_TO_THREAD_ID_MAP) {
+            final Database database = databaseManager.database;
+            final File databaseDirectoryPath = database.getURL().getParent().toFile();
+            try (final Git git = Git.open(databaseDirectoryPath)) {
+                writeUncommittedObjects();
+                final Map<File, Boolean> filesToKeep = getFilesToKeep();
+                logger.trace("filesToKeep = {}", filesToKeep);
 
-            for (final Map.Entry<File, Boolean> entry : filesToKeep.entrySet()) {
-                final File file = entry.getKey();
-                final String fileName = file.getName();
-                final String parentFolder = file.getParent();
-                final String prefix = parentFolder.endsWith("blob") ? "blob/" : "";
-                if (Boolean.TRUE.equals(entry.getValue())) {
-                    git.add().addFilepattern(prefix + fileName).call();
-                } else {
-                    // This removes the file even from the disk, IDK why
-                    git.rm().addFilepattern(prefix + fileName).call();
+                for (final Map.Entry<File, Boolean> entry : filesToKeep.entrySet()) {
+                    final File file = entry.getKey();
+                    final String fileName = file.getName();
+                    final String parentFolder = file.getParent();
+                    final String prefix = parentFolder.endsWith("blob") ? "blob/" : "";
+                    if (Boolean.TRUE.equals(entry.getValue())) {
+                        git.add().addFilepattern(prefix + fileName).call();
+                    } else {
+                        // This removes the file even from the disk, IDK why
+                        git.rm().addFilepattern(prefix + fileName).call();
+                    }
                 }
-            }
-            final String commitMessage = args.length == 0 ?
-                "Explicit commit" :
-                "Auto committing: " + Arrays.toString(args);
-            git.commit().setMessage(commitMessage).call();
+                final String commitMessage = args.length == 0 ?
+                    "Explicit commit" :
+                    "Auto committing: " + Arrays.toString(args);
+                git.commit().setMessage(commitMessage).call();
 
-        } catch (final GitAPIException | IOException e) {
-            throw new CommitFailedException("Commit failed.\n" + e.getMessage());
-        } finally {
-            SharedMapHandler.removeCurrentThreadChangesFromMap();
+            } catch (final GitAPIException | IOException e) {
+                throw new CommitFailedException("Commit failed.\n" + e.getMessage());
+            } finally {
+                SharedMapHandler.removeCurrentThreadChangesFromMap();
+            }
         }
     }
 
