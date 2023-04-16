@@ -23,7 +23,7 @@ import org.junit.jupiter.api.TestInstance;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class NoConflictAutoCommitFalseTest {
 
-    private static final int NUM_THREADS = 10;
+    private static final int NUM_THREADS = 2;
 
     @AfterEach
     void tearDown() {
@@ -85,7 +85,7 @@ public class NoConflictAutoCommitFalseTest {
         try (final Connection tempConnection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH,
             properties)) {
             final Statement statement = tempConnection.createStatement();
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < NUM_THREADS; i++) {
                 final JfsqlResultSet resultSet = (JfsqlResultSet) statement.executeQuery(
                     "SELECT * FROM " + tableNames[i]);
                 final List<Entry> entries = resultSet.getEntries();

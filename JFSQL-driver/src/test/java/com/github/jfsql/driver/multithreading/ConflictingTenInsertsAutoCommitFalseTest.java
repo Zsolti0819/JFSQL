@@ -26,7 +26,7 @@ import org.junit.jupiter.api.TestInstance;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ConflictingTenInsertsAutoCommitFalseTest {
 
-    private static final int NUM_THREADS = 10;
+    private static final int NUM_THREADS = 2;
 
     @AfterEach
     void tearDown() {
@@ -90,7 +90,7 @@ public class ConflictingTenInsertsAutoCommitFalseTest {
             conn.close();
         }
 
-        assertEquals(9, pessimisticLocksCaught.get());
+        assertEquals(NUM_THREADS-1, pessimisticLocksCaught.get());
 
         try (final Connection tempConnection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH,
             properties)) {

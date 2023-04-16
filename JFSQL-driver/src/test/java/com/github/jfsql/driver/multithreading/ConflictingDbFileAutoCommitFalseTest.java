@@ -89,7 +89,7 @@ public class ConflictingDbFileAutoCommitFalseTest {
             conn.close();
         }
 
-        assertEquals(1, pessimisticLocksCaught.get());
+        assertEquals(NUM_THREADS-1, pessimisticLocksCaught.get());
 
         try (final JfsqlConnection tempConnection = (JfsqlConnection) DriverManager.getConnection(
             "jdbc:jfsql:" + TestUtils.DATABASE_PATH,
