@@ -33,7 +33,7 @@ public class ConflictingTenInsertsAutoCommitTrueTest {
         TestUtils.deleteDatabaseDirectory();
     }
 
-    @RepeatedTest(10)
+    @RepeatedTest(100)
     public void testConflictWhenInsertingOneToSameTable() throws Exception {
         final AtomicInteger pessimisticLocksCaught = new AtomicInteger();
         final Properties properties = new Properties();

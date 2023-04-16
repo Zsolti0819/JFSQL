@@ -29,7 +29,7 @@ public class ConflictingDbFileAutoCommitFalseTest {
         TestUtils.deleteDatabaseDirectory();
     }
 
-    @RepeatedTest(10)
+    @RepeatedTest(100)
     public void testConflictWhenCreatingTables() throws Exception {
         final AtomicInteger pessimisticLocksCaught = new AtomicInteger();
         final Properties properties = new Properties();

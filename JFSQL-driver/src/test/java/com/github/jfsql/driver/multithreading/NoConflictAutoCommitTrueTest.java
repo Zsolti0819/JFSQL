@@ -30,7 +30,7 @@ public class NoConflictAutoCommitTrueTest {
         TestUtils.deleteDatabaseDirectory();
     }
 
-    @RepeatedTest(10)
+    @RepeatedTest(100)
     public void testParallelInsertsWithDifferentTables() throws Exception {
         final Properties properties = new Properties();
         properties.setProperty("transaction.versioning", "default");
