@@ -1,9 +1,10 @@
 package com.github.jfsql.driver.db;
 
+import static com.github.jfsql.driver.core.JfsqlDriver.OBJECT_NAME_TO_THREAD_ID_MAP;
+
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.exceptions.PessimisticLockException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -13,7 +14,6 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class SharedMapHandler {
 
-    public static final Map<String, Long> OBJECT_NAME_TO_THREAD_ID_MAP = new HashMap<>();
 
     public void addTableToSharedMap(final Table table) {
         synchronized (OBJECT_NAME_TO_THREAD_ID_MAP) {
