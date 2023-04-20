@@ -62,12 +62,12 @@ public class AlterTableService {
         final String newTableFile = fileNameCreator.createTableFileName(newTableName, database);
         final String newSchemaFile = fileNameCreator.createSchemaFileName(newTableName, database);
 
-        // When autoCommit is true, it should be safe to read the entries from the file
         List<Entry> entries = table.getEntries();
         if (entries == null) {
             try {
                 entries = reader.readEntriesFromTable(table);
             } catch (final IOException e) {
+                SharedMapHandler.removeCurrentThreadChangesFromMap();
                 throw new SQLException(e);
             }
             table.setEntries(entries);
@@ -92,12 +92,12 @@ public class AlterTableService {
         SharedMapHandler.addSchemaToSharedMap(table);
         SharedMapHandler.addTableToSharedMap(table);
 
-        // When autoCommit is true, it should be safe to read the entries from the file
         List<Entry> entries = table.getEntries();
         if (entries == null) {
             try {
                 entries = reader.readEntriesFromTable(table);
             } catch (final IOException e) {
+                SharedMapHandler.removeCurrentThreadChangesFromMap();
                 throw new SQLException(e);
             }
             table.setEntries(entries);
@@ -166,12 +166,12 @@ public class AlterTableService {
         SharedMapHandler.addSchemaToSharedMap(table);
         SharedMapHandler.addTableToSharedMap(table);
 
-        // When autoCommit is true, it should be safe to read the entries from the file
         List<Entry> entries = table.getEntries();
         if (entries == null) {
             try {
                 entries = reader.readEntriesFromTable(table);
             } catch (final IOException e) {
+                SharedMapHandler.removeCurrentThreadChangesFromMap();
                 throw new SQLException(e);
             }
             table.setEntries(entries);
@@ -224,12 +224,12 @@ public class AlterTableService {
         final Map<String, Boolean> notNullColumns = table.getNotNullColumns();
         notNullColumns.remove(columnNameToDrop);
 
-        // When autoCommit is true, it should be safe to read the entries from the file
         List<Entry> entries = table.getEntries();
         if (entries == null) {
             try {
                 entries = reader.readEntriesFromTable(table);
             } catch (final IOException e) {
+                SharedMapHandler.removeCurrentThreadChangesFromMap();
                 throw new SQLException(e);
             }
             table.setEntries(entries);

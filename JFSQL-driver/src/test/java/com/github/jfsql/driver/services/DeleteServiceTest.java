@@ -16,7 +16,6 @@ import com.github.jfsql.driver.util.WhereConditionSolver;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.DeleteWrapper;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -69,23 +68,10 @@ class DeleteServiceTest {
     }
 
     @Test
-    void testDelete_whereColumnIsEmpty() throws SQLException {
-        when(statement.getWhereColumns()).thenReturn(Collections.emptyList());
-        when(tableFinder.getTableByName(statement.getTableName())).thenReturn(table);
-        when(table.getEntries()).thenReturn(entries);
-
-        deleteService.deleteFromTable(statement);
-
-        verify(entries, times(1)).clear();
-        verify(transactionManager, times(1)).executeOperation(table, false);
-    }
-
-    @Test
     void testDelete_columnsNotExists() throws SQLException {
         when(tableFinder.getTableByName(statement.getTableName())).thenReturn(table);
         when(statement.getWhereColumns()).thenReturn(List.of("column1", "column2", "column3"));
         when(semanticValidator.allWhereColumnsExist(table, statement)).thenReturn(false);
-        when(table.getEntries()).thenReturn(entries);
 
         final SQLException thrown = assertThrows(SQLException.class,
             () -> deleteService.deleteFromTable(statement));

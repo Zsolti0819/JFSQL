@@ -59,12 +59,12 @@ public class InsertService {
 
         SharedMapHandler.addTableToSharedMap(table);
 
-        // When autoCommit is true, it should be safe to read the entries from the file
         List<Entry> entries = table.getEntries();
         if (entries == null) {
             try {
                 entries = reader.readEntriesFromTable(table);
             } catch (final IOException e) {
+                SharedMapHandler.removeCurrentThreadChangesFromMap();
                 throw new SQLException(e);
             }
             table.setEntries(entries);
@@ -96,6 +96,7 @@ public class InsertService {
                 value = values.get(index);
             }
             if (semanticValidator.nullInsertIntoNotNullColumn(column, value, table)) {
+                SharedMapHandler.removeCurrentThreadChangesFromMap();
                 throw new SQLException("Inserting null value into a NOT NULL column.");
             }
             columnsAndValues.put(column, value);

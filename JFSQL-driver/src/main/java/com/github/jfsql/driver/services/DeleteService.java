@@ -30,12 +30,20 @@ public class DeleteService {
         final List<String> whereColumns = statement.getWhereColumns();
         final Table table = tableFinder.getTableByName(statement.getTableName());
 
-        // When autoCommit is true, it should be safe to read the entries from the file
+        if (!whereColumns.isEmpty()) {
+            if (!semanticValidator.allWhereColumnsExist(table, statement)) {
+                throw new SQLException("Some columns entered doesn't exist in '" + table.getName() + "'.");
+            }
+        }
+
+        SharedMapHandler.addTableToSharedMap(table);
+
         List<Entry> entries = table.getEntries();
         if (entries == null) {
             try {
                 entries = reader.readEntriesFromTable(table);
             } catch (final IOException e) {
+                SharedMapHandler.removeCurrentThreadChangesFromMap();
                 throw new SQLException(e);
             }
             table.setEntries(entries);
@@ -43,25 +51,17 @@ public class DeleteService {
 
         final int deleteCount;
         final int entriesSizeBefore = entries.size();
-        if (whereColumns.isEmpty()) {
-            entries.clear();
-            deleteCount = entriesSizeBefore;
-        } else {
-            if (!semanticValidator.allWhereColumnsExist(table, statement)) {
-                throw new SQLException("Some columns entered doesn't exist in '" + table.getName() + "'.");
-            }
-            final List<Entry> whereEntries = whereConditionSolver.getWhereEntries(table, statement);
 
-            logger.debug("entries for removal = {}", whereEntries);
+        final List<Entry> whereEntries = whereConditionSolver.getWhereEntries(table, statement);
 
-            entries.removeAll(whereEntries);
-            final int entriesSizeAfter = entries.size();
-            deleteCount = entriesSizeBefore - entriesSizeAfter;
-        }
+        logger.debug("entries for removal = {}", whereEntries);
 
-        SharedMapHandler.addTableToSharedMap(table);
+        entries.removeAll(whereEntries);
+        final int entriesSizeAfter = entries.size();
+        deleteCount = entriesSizeBefore - entriesSizeAfter;
 
         transactionManager.executeOperation(table, false);
         return deleteCount;
     }
+
 }
