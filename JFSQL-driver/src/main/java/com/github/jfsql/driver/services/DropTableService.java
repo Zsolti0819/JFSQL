@@ -1,5 +1,6 @@
 package com.github.jfsql.driver.services;
 
+import com.github.jfsql.driver.cache.resultset.ResultSetCache;
 import com.github.jfsql.driver.db.DatabaseManager;
 import com.github.jfsql.driver.db.SharedMapHandler;
 import com.github.jfsql.driver.db.TransactionManager;
@@ -61,13 +62,14 @@ public class DropTableService {
                 "Cannot DROP " + statement.getTableName() + " because the table's file or schema doesn't exist.");
         }
 
+        SharedMapHandler.addDatabaseToSharedMap(database);
+        ResultSetCache.removeResultSetFromCache(table.getName());
+
         final int deleteCount = entries.size();
         final List<Table> tables = database.getTables();
         tables.remove(table);
 
         logger.debug("table removed = {}", table);
-
-        SharedMapHandler.addDatabaseToSharedMap(database);
 
         transactionManager.executeOperation(database);
         return deleteCount;

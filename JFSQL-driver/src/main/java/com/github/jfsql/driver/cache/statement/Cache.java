@@ -1,4 +1,4 @@
-package com.github.jfsql.driver.cache;
+package com.github.jfsql.driver.cache.statement;
 
 import com.github.jfsql.parser.dto.BaseStatement;
 import java.util.Map;

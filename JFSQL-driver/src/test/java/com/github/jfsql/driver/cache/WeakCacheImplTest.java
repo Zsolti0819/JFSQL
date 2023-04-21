@@ -2,6 +2,8 @@ package com.github.jfsql.driver.cache;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.github.jfsql.driver.cache.statement.Cache;
+import com.github.jfsql.driver.cache.statement.WeakCacheImpl;
 import com.github.jfsql.parser.core.Parser;
 import com.github.jfsql.parser.dto.DeleteStatement;
 import org.junit.jupiter.api.Test;

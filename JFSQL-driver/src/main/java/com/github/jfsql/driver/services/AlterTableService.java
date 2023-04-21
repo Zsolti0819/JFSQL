@@ -1,5 +1,6 @@
 package com.github.jfsql.driver.services;
 
+import com.github.jfsql.driver.cache.resultset.ResultSetCache;
 import com.github.jfsql.driver.db.DatabaseManager;
 import com.github.jfsql.driver.db.SharedMapHandler;
 import com.github.jfsql.driver.db.TransactionManager;
@@ -58,6 +59,7 @@ public class AlterTableService {
         SharedMapHandler.addDatabaseToSharedMap(database);
         SharedMapHandler.addSchemaToSharedMap(table);
         SharedMapHandler.addTableToSharedMap(table);
+        ResultSetCache.removeResultSetFromCache(table.getName());
 
         final String newTableFile = fileNameCreator.createTableFileName(newTableName, database);
         final String newSchemaFile = fileNameCreator.createSchemaFileName(newTableName, database);
@@ -91,6 +93,7 @@ public class AlterTableService {
 
         SharedMapHandler.addSchemaToSharedMap(table);
         SharedMapHandler.addTableToSharedMap(table);
+        ResultSetCache.removeResultSetFromCache(table.getName());
 
         List<Entry> entries = table.getEntries();
         if (entries == null) {
@@ -165,6 +168,7 @@ public class AlterTableService {
 
         SharedMapHandler.addSchemaToSharedMap(table);
         SharedMapHandler.addTableToSharedMap(table);
+        ResultSetCache.removeResultSetFromCache(table.getName());
 
         List<Entry> entries = table.getEntries();
         if (entries == null) {
@@ -218,6 +222,7 @@ public class AlterTableService {
 
         SharedMapHandler.addSchemaToSharedMap(table);
         SharedMapHandler.addTableToSharedMap(table);
+        ResultSetCache.removeResultSetFromCache(table.getName());
 
         final Map<String, String> columnsAndTypes = table.getColumnsAndTypes();
         columnsAndTypes.remove(columnNameToDrop);

@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.github.jfsql.driver.cache.statement.Cache;
+import com.github.jfsql.driver.cache.statement.NullCacheImpl;
 import com.github.jfsql.parser.core.Parser;
 import com.github.jfsql.parser.dto.DeleteStatement;
 import java.util.Collections;

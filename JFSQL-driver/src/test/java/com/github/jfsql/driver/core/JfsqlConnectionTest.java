@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.github.jfsql.driver.TestUtils;
-import com.github.jfsql.driver.cache.Cache;
+import com.github.jfsql.driver.cache.statement.Cache;
 import com.github.jfsql.driver.config.PropertiesReader;
 import com.github.jfsql.driver.db.DatabaseManager;
 import com.github.jfsql.driver.db.TransactionManager;

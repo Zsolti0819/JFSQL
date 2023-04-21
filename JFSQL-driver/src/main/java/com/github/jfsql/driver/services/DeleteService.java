@@ -1,5 +1,6 @@
 package com.github.jfsql.driver.services;
 
+import com.github.jfsql.driver.cache.resultset.ResultSetCache;
 import com.github.jfsql.driver.db.SharedMapHandler;
 import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.dto.Entry;
@@ -37,6 +38,7 @@ public class DeleteService {
         }
 
         SharedMapHandler.addTableToSharedMap(table);
+        ResultSetCache.removeResultSetFromCache(table.getName());
 
         List<Entry> entries = table.getEntries();
         if (entries == null) {

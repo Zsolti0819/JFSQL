@@ -1,6 +1,6 @@
 package com.github.jfsql.driver.services;
 
-import com.github.jfsql.driver.cache.Cache;
+import com.github.jfsql.driver.cache.statement.Cache;
 import com.github.jfsql.driver.util.ColumnToTypeMapper;
 import com.github.jfsql.driver.util.FileNameCreator;
 import com.github.jfsql.driver.util.IoOperationHandler;

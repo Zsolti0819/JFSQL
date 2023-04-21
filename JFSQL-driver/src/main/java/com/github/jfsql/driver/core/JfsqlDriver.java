@@ -1,6 +1,6 @@
 package com.github.jfsql.driver.core;
 
-import com.github.jfsql.driver.cache.Cache;
+import com.github.jfsql.driver.cache.statement.Cache;
 import com.github.jfsql.driver.config.PropertiesReader;
 import com.github.jfsql.driver.db.DatabaseManager;
 import com.github.jfsql.driver.db.TransactionManager;
@@ -35,7 +35,6 @@ import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
-import java.util.WeakHashMap;
 import java.util.logging.Logger;
 import lombok.Getter;
 
@@ -93,7 +92,7 @@ public class JfsqlDriver implements Driver {
         final InsertService insertService = new InsertService(tableFinder, transactionManager, semanticValidator,
             reader, preparedStatementCreator);
         final SelectService selectService = new SelectService(tableFinder, semanticValidator, columnToTypeMapper,
-            whereConditionSolver, reader, new WeakHashMap<>());
+            whereConditionSolver, reader);
         final UpdateService updateService = new UpdateService(tableFinder, transactionManager, semanticValidator,
             columnToTypeMapper, whereConditionSolver, reader, preparedStatementCreator);
         final DeleteService deleteService = new DeleteService(tableFinder, transactionManager, semanticValidator,

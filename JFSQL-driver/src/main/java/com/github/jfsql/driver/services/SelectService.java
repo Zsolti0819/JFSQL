@@ -1,10 +1,13 @@
 package com.github.jfsql.driver.services;
 
+import static com.github.jfsql.driver.cache.resultset.ResultSetCache.CACHED_RESULT_SETS;
+
 import com.github.jfsql.driver.core.JfsqlResultSet;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.util.ColumnToTypeMapper;
+import com.github.jfsql.driver.util.TableColumnSplitter;
 import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.driver.util.WhereConditionSolver;
 import com.github.jfsql.driver.validation.SemanticValidator;
@@ -34,11 +37,10 @@ public class SelectService {
     private final ColumnToTypeMapper columnToTypeMapper;
     private final WhereConditionSolver whereConditionSolver;
     private final Reader reader;
-    private final Map<SelectWrapper, ResultSet> cachedResultSets;
 
     ResultSet selectFromTable(final SelectWrapper statement) throws SQLException {
-        if (cachedResultSets.containsKey(statement)) {
-            return cachedResultSets.get(statement);
+        if (CACHED_RESULT_SETS.containsKey(statement)) {
+            return CACHED_RESULT_SETS.get(statement);
         }
         final List<JoinType> joinTypes = statement.getJoinTypes();
         if (joinTypes.isEmpty()) {
@@ -165,7 +167,7 @@ public class SelectService {
             .build();
 
         final ResultSet resultSet = new JfsqlResultSet(newTable, reader);
-        cachedResultSets.put(statement, resultSet);
+        CACHED_RESULT_SETS.put(statement, resultSet);
         return resultSet;
     }
 
@@ -280,7 +282,7 @@ public class SelectService {
 
         for (final List<String> joinColumns : listOfJoinColumns) {
             joinColumns.forEach(stringFromJoinClause -> {
-                final String tableName = getTableName(stringFromJoinClause);
+                final String tableName = TableColumnSplitter.getTableName(stringFromJoinClause);
                 tableNamesFromJoinClause.add(tableName);
             });
         }
@@ -298,8 +300,8 @@ public class SelectService {
         // Check if the columns in the join clause are present in the tables
         for (final List<String> joinColumns : listOfJoinColumns) {
             for (final String joinColumn : joinColumns) {
-                final String tableName = getTableName(joinColumn);
-                final String columnName = getColumnName(joinColumn);
+                final String tableName = TableColumnSplitter.getTableName(joinColumn);
+                final String columnName = TableColumnSplitter.getColumnName(joinColumn);
                 final Table table = tables.get(tableName);
                 if (!semanticValidator.columnIsPresentInTable(table, columnName)) {
                     throw new SQLException("Column '" + columnName + "' not found in table '" + tableName + "'.");
@@ -410,7 +412,7 @@ public class SelectService {
     private List<String> pairJoinColumns(final List<String> joinColumns, final List<Table> tables) {
         final List<String> pairedJoinColumns = new ArrayList<>();
         final Table table = tables.get(1);
-        if (Objects.equals(table.getName(), getTableName(joinColumns.get(0)))) {
+        if (Objects.equals(table.getName(), TableColumnSplitter.getTableName(joinColumns.get(0)))) {
             pairedJoinColumns.add(joinColumns.get(1));
             pairedJoinColumns.add(joinColumns.get(0));
         } else {
@@ -424,13 +426,13 @@ public class SelectService {
         final Map<String, String> t1ColumnsAndTypes = t1.getColumnsAndTypes();
         final Set<String> t1Columns = t1ColumnsAndTypes.keySet();
         if (t1Columns.stream().noneMatch(joinColumns.get(0)::equals)) {
-            joinColumns.set(0, getColumnName(joinColumns.get(0)));
+            joinColumns.set(0, TableColumnSplitter.getColumnName(joinColumns.get(0)));
         }
 
         final Map<String, String> t2ColumnsAndTypes = t2.getColumnsAndTypes();
         final Set<String> t2Columns = t2ColumnsAndTypes.keySet();
         if (t2Columns.stream().noneMatch(joinColumns.get(1)::equals)) {
-            joinColumns.set(1, getColumnName(joinColumns.get(1)));
+            joinColumns.set(1, TableColumnSplitter.getColumnName(joinColumns.get(1)));
         }
 
         return joinColumns;
@@ -446,16 +448,6 @@ public class SelectService {
             }
         }
         return commonColumns;
-    }
-
-    private String getTableName(final String columnNameWithPrefix) {
-        final int dotIndex = columnNameWithPrefix.indexOf(".");
-        return columnNameWithPrefix.substring(0, dotIndex);
-    }
-
-    private String getColumnName(final String columnNameWithPrefix) {
-        final int dotIndex = columnNameWithPrefix.indexOf(".");
-        return columnNameWithPrefix.substring(dotIndex + 1);
     }
 
 }
