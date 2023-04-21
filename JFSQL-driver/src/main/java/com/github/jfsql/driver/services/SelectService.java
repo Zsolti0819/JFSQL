@@ -2,6 +2,7 @@ package com.github.jfsql.driver.services;
 
 import static com.github.jfsql.driver.cache.resultset.ResultSetCache.CACHED_RESULT_SETS;
 
+import com.github.jfsql.driver.cache.resultset.ResultSetCache;
 import com.github.jfsql.driver.core.JfsqlResultSet;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
@@ -14,7 +15,6 @@ import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.JoinType;
 import com.github.jfsql.parser.dto.SelectWrapper;
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -40,9 +40,8 @@ public class SelectService {
     private final Reader reader;
 
     ResultSet selectFromTable(final SelectWrapper statement) throws SQLException {
-        final WeakReference<SelectWrapper> weakSelectWrapper = new WeakReference<>(statement);
-        if (CACHED_RESULT_SETS.containsKey(weakSelectWrapper)) {
-            return (ResultSet) CACHED_RESULT_SETS.get(weakSelectWrapper);
+        if (CACHED_RESULT_SETS.containsKey(statement)) {
+            return CACHED_RESULT_SETS.get(statement);
         }
         final List<JoinType> joinTypes = statement.getJoinTypes();
         if (joinTypes.isEmpty()) {
@@ -169,10 +168,7 @@ public class SelectService {
             .build();
 
         final ResultSet resultSet = new JfsqlResultSet(newTable, reader);
-        final WeakReference<SelectWrapper> weakSelectWrapper = new WeakReference<>(statement);
-        final WeakReference<ResultSet> weakResultSet = new WeakReference<>(resultSet);
-
-        CACHED_RESULT_SETS.put(weakSelectWrapper, weakResultSet);
+        ResultSetCache.addResultSetToCache(statement, resultSet);
         return resultSet;
     }
 
