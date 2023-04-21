@@ -14,6 +14,7 @@ import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.JoinType;
 import com.github.jfsql.parser.dto.SelectWrapper;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -39,8 +40,9 @@ public class SelectService {
     private final Reader reader;
 
     ResultSet selectFromTable(final SelectWrapper statement) throws SQLException {
-        if (CACHED_RESULT_SETS.containsKey(statement)) {
-            return CACHED_RESULT_SETS.get(statement);
+        final WeakReference<SelectWrapper> weakSelectWrapper = new WeakReference<>(statement);
+        if (CACHED_RESULT_SETS.containsKey(weakSelectWrapper)) {
+            return (ResultSet) CACHED_RESULT_SETS.get(weakSelectWrapper);
         }
         final List<JoinType> joinTypes = statement.getJoinTypes();
         if (joinTypes.isEmpty()) {
@@ -167,7 +169,10 @@ public class SelectService {
             .build();
 
         final ResultSet resultSet = new JfsqlResultSet(newTable, reader);
-        CACHED_RESULT_SETS.put(statement, resultSet);
+        final WeakReference<SelectWrapper> weakSelectWrapper = new WeakReference<>(statement);
+        final WeakReference<ResultSet> weakResultSet = new WeakReference<>(resultSet);
+
+        CACHED_RESULT_SETS.put(weakSelectWrapper, weakResultSet);
         return resultSet;
     }
 
