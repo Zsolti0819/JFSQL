@@ -34,8 +34,12 @@ public class SelectService {
     private final ColumnToTypeMapper columnToTypeMapper;
     private final WhereConditionSolver whereConditionSolver;
     private final Reader reader;
+    private final Map<SelectWrapper, ResultSet> cachedResultSets;
 
     ResultSet selectFromTable(final SelectWrapper statement) throws SQLException {
+        if (cachedResultSets.containsKey(statement)) {
+            return cachedResultSets.get(statement);
+        }
         final List<JoinType> joinTypes = statement.getJoinTypes();
         if (joinTypes.isEmpty()) {
             return simpleSelect(statement);
@@ -159,7 +163,10 @@ public class SelectService {
             .notNullColumns(notNullColumns)
             .entries(orderedEntries)
             .build();
-        return new JfsqlResultSet(newTable, reader);
+
+        final ResultSet resultSet = new JfsqlResultSet(newTable, reader);
+        cachedResultSets.put(statement, resultSet);
+        return resultSet;
     }
 
     private List<Entry> getEntriesWithSortedColumns(final List<String> selectedColumns, final List<Entry> entries) {

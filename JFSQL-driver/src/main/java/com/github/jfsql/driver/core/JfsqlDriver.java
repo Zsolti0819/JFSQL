@@ -35,6 +35,7 @@ import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
+import java.util.WeakHashMap;
 import java.util.logging.Logger;
 import lombok.Getter;
 
@@ -92,7 +93,7 @@ public class JfsqlDriver implements Driver {
         final InsertService insertService = new InsertService(tableFinder, transactionManager, semanticValidator,
             reader, preparedStatementCreator);
         final SelectService selectService = new SelectService(tableFinder, semanticValidator, columnToTypeMapper,
-            whereConditionSolver, reader);
+            whereConditionSolver, reader, new WeakHashMap<>());
         final UpdateService updateService = new UpdateService(tableFinder, transactionManager, semanticValidator,
             columnToTypeMapper, whereConditionSolver, reader, preparedStatementCreator);
         final DeleteService deleteService = new DeleteService(tableFinder, transactionManager, semanticValidator,
