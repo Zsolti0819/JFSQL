@@ -1,11 +1,8 @@
 # JFSQL
 
 ## Priority queue:
-- Documentation - Verification of solution - data correctness
-- Documentation - Verification of solution - JUnit tests, manual tests, multithreading tests, IT test
-- Documentation - Performance comparison - speed, size
-- Test UPDATE of BLOBs (should work)
+- Documentation
+- Rework transactions ???
 - Mockito tests for AlterTableService
-- More tests for transactions in the Driver-comparison repository
 - IT test
 - Improve overall test coverage
