@@ -9,10 +9,10 @@ import org.apache.logging.log4j.Logger;
 public class PropertiesReader {
 
     private static final Logger logger = LogManager.getLogger(PropertiesReader.class);
-    private String persistence = "json";
-    private String transactionVersioning = "jgit";
-    private boolean schemaValidation = true;
-    private boolean statementCaching = true;
+    private String persistence = DefaultConfig.persistence;
+    private String transactionVersioning = DefaultConfig.transactionVersioning;
+    private boolean schemaValidation = DefaultConfig.schemaValidation;
+    private boolean statementCaching = DefaultConfig.statementCaching;
 
     public PropertiesReader(final Properties properties) {
         if (properties == null) {
