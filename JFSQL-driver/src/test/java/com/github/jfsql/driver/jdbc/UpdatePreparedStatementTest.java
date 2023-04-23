@@ -31,7 +31,7 @@ class UpdatePreparedStatementTest {
         connection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
         final Statement statement = connection.createStatement();
         statement.execute("DROP TABLE IF EXISTS myTable");
-        statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
+        statement.executeUpdate("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER, file BLOB)");
         statement.executeUpdate(
             "INSERT INTO myTable (id, name, age) VALUES (1, 'Zsolti', 25), (2, 'Tomi', 24), (3, 'Ivan', 26), (4, 'Lukas', 34)");
 
@@ -61,13 +61,14 @@ class UpdatePreparedStatementTest {
 
     void testUpdate_oneEntryPreparedStatement_json() throws SQLException, IOException {
         final PreparedStatement preparedStatement = connection.prepareStatement(
-            "UPDATE myTable SET id = ?, name = ?, age = ? WHERE id = ? AND name = ? AND age = ?");
+            "UPDATE myTable SET id = ?, name = ?, age = ?, file = ? WHERE id = ? AND name = ? AND age = ?");
         preparedStatement.setInt(1, 5);
         preparedStatement.setString(2, "Marian");
         preparedStatement.setInt(3, 99);
-        preparedStatement.setInt(4, 4);
-        preparedStatement.setString(5, "Lukas");
-        preparedStatement.setInt(6, 34);
+        preparedStatement.setBinaryStream(4, null);
+        preparedStatement.setInt(5, 4);
+        preparedStatement.setString(6, "Lukas");
+        preparedStatement.setInt(7, 34);
         preparedStatement.executeUpdate();
 
         final String realFileContent = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
@@ -77,22 +78,26 @@ class UpdatePreparedStatementTest {
             "    {\n" +
             "      \"id\": 1,\n" +
             "      \"name\": \"Zsolti\",\n" +
-            "      \"age\": 25\n" +
+            "      \"age\": 25,\n" +
+            "      \"file\": null\n" +
             "    },\n" +
             "    {\n" +
             "      \"id\": 2,\n" +
             "      \"name\": \"Tomi\",\n" +
-            "      \"age\": 24\n" +
+            "      \"age\": 24,\n" +
+            "      \"file\": null\n" +
             "    },\n" +
             "    {\n" +
             "      \"id\": 3,\n" +
             "      \"name\": \"Ivan\",\n" +
-            "      \"age\": 26\n" +
+            "      \"age\": 26,\n" +
+            "      \"file\": null\n" +
             "    },\n" +
             "    {\n" +
             "      \"id\": 5,\n" +
             "      \"name\": \"Marian\",\n" +
-            "      \"age\": 99\n" +
+            "      \"age\": 99,\n" +
+            "      \"file\": null\n" +
             "    }\n" +
             "  ]\n" +
             "}";
