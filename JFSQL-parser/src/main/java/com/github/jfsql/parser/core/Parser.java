@@ -9,6 +9,7 @@ import com.github.jfsql.parser.dto.InsertStatement;
 import com.github.jfsql.parser.dto.JoinType;
 import com.github.jfsql.parser.dto.SelectStatement;
 import com.github.jfsql.parser.dto.UpdateStatement;
+import com.github.jfsql.parser.dto.WhereClause;
 import com.github.jfsql.parser.exception.ThrowingErrorListener;
 import com.github.jfsql.parser.generated.JFSQLBaseVisitor;
 import com.github.jfsql.parser.generated.JFSQLLexer;
@@ -16,7 +17,6 @@ import com.github.jfsql.parser.generated.JFSQLParser;
 import com.github.jfsql.parser.generated.JFSQLVisitor;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -88,10 +88,9 @@ public class Parser extends JFSQLBaseVisitor<BaseStatement> implements JFSQLVisi
 
     private DeleteStatement getDeleteStatement(final JFSQLParser.DeleteContext deleteContext) {
         final String tableName = deleteContext.tableName().getText();
-        final Map<String, List<String>> whereClause = extractWhereClause(deleteContext.expr());
-        final DeleteStatement deleteStatement = new DeleteStatement(tableName, whereClause.get("whereColumns"),
-            whereClause.get("whereValues"),
-            whereClause.get("symbols"), whereClause.get("binaryOperators"));
+        final WhereClause whereClause = extractWhereClause(deleteContext.expr());
+        final DeleteStatement deleteStatement = new DeleteStatement(tableName, whereClause.getWhereColumns(),
+            whereClause.getWhereValues(), whereClause.getSymbols(), whereClause.getBinaryOperators());
         logger.trace(deleteStatement);
         return deleteStatement;
     }
@@ -172,12 +171,11 @@ public class Parser extends JFSQLBaseVisitor<BaseStatement> implements JFSQLVisi
             }
         }
 
-        final Map<String, List<String>> whereClause = extractWhereClause(selectContext.expr());
+        final WhereClause whereClause = extractWhereClause(selectContext.expr());
         final SelectStatement selectStatement = new SelectStatement(selectTable, joinTables, joinTypes,
             Collections.unmodifiableList(selectColumns),
-            Collections.unmodifiableList(listOfJoinColumnsWithPrefixes), whereClause.get("whereColumns"),
-            whereClause.get("whereValues"),
-            whereClause.get("symbols"), whereClause.get("binaryOperators"), limit, offset);
+            Collections.unmodifiableList(listOfJoinColumnsWithPrefixes), whereClause.getWhereColumns(),
+            whereClause.getWhereValues(), whereClause.getSymbols(), whereClause.getBinaryOperators(), limit, offset);
         logger.trace(selectStatement);
         return selectStatement;
     }
@@ -195,16 +193,15 @@ public class Parser extends JFSQLBaseVisitor<BaseStatement> implements JFSQLVisi
             values.add(value);
         }
 
-        final Map<String, List<String>> whereClause = extractWhereClause(updateContext.expr());
+        final WhereClause whereClause = extractWhereClause(updateContext.expr());
         final UpdateStatement updateStatement = new UpdateStatement(tableName, Collections.unmodifiableList(columns),
-            Collections.unmodifiableList(values), whereClause.get("whereColumns"), whereClause.get("whereValues"),
-            whereClause.get("symbols"), whereClause.get("binaryOperators"));
+            Collections.unmodifiableList(values), whereClause.getWhereColumns(), whereClause.getWhereValues(),
+            whereClause.getSymbols(), whereClause.getBinaryOperators());
         logger.trace(updateStatement);
         return updateStatement;
     }
 
-    private Map<String, List<String>> extractWhereClause(final JFSQLParser.ExprContext expr) {
-        final Map<String, List<String>> whereClause = new HashMap<>();
+    private WhereClause extractWhereClause(final JFSQLParser.ExprContext expr) {
         final List<String> whereColumns = new ArrayList<>();
         final List<String> whereValues = new ArrayList<>();
         final List<String> symbols = new ArrayList<>();
@@ -224,12 +221,7 @@ public class Parser extends JFSQLBaseVisitor<BaseStatement> implements JFSQLVisi
             }
         }
 
-        whereClause.put("whereColumns", Collections.unmodifiableList(whereColumns));
-        whereClause.put("whereValues", Collections.unmodifiableList(whereValues));
-        whereClause.put("symbols", Collections.unmodifiableList(symbols));
-        whereClause.put("binaryOperators", Collections.unmodifiableList(binaryOperators));
-
-        return whereClause;
+        return new WhereClause(whereColumns, whereValues, symbols, binaryOperators);
     }
 
     @Override
