@@ -17,16 +17,16 @@ public class ResultSetCache {
         synchronized (lock) {
             CACHED_RESULT_SETS.entrySet().removeIf(entry -> {
                     final SelectWrapper statement = entry.getKey();
-                    return Objects.equals(statement.getTableName(), tableName) || statement.getJoinTableNames()
-                        .contains(tableName);
+                    return Objects.equals(statement.getTableName(), tableName) ||
+                        statement.getJoinTableNames().contains(tableName);
                 }
             );
         }
     }
 
-    public void addResultSetToCache(final SelectWrapper selectWrapper, final ResultSet resultSet) {
+    public void addResultSetToCache(final SelectWrapper statement, final ResultSet resultSet) {
         synchronized (lock) {
-            CACHED_RESULT_SETS.put(selectWrapper, resultSet);
+            CACHED_RESULT_SETS.put(statement, resultSet);
         }
     }
 
