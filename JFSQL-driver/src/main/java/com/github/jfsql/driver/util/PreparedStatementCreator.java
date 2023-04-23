@@ -103,7 +103,7 @@ public class PreparedStatementCreator {
     public UpdateWrapper getPreparedUpdateStatement(final UpdateWrapper statement) {
         final String tableName = statement.getTableName();
         final List<String> columns = statement.getColumns();
-        final List<String> values = replaceQuestionmarks(columns, statement.getWhereValues(), 0);
+        final List<String> values = replaceQuestionmarks(columns, statement.getValues(), 0);
         final List<String> whereColumns = statement.getWhereColumns();
         final List<String> whereValues = replaceQuestionmarks(whereColumns, statement.getWhereValues(), columns.size());
         final List<String> symbols = statement.getSymbols();
