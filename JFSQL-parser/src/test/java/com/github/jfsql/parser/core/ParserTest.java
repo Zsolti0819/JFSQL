@@ -86,15 +86,6 @@ class ParserTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
-        "create table myTable (a integer, b real, c text, d blob)",
-        "CREATE TABLE myTable (a INTEGER, b REAL, c TEXT, d BLOB);",
-    })
-    void testCreateTableStatements(final String query) {
-        assertEquals(Objects.requireNonNull(parser.parse(query)).getClass(), CreateTableStatement.class);
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {
         "ALTER TABLE myTable RENAME COLUMN myColumn TO newMyColumn;",
         "alter table myTable rename column myColumn to newMyColumn;",
         "ALTER TABLE myTable RENAME TO myNewTable;",
@@ -105,6 +96,15 @@ class ParserTest {
         assertEquals(Objects.requireNonNull(parser.parse(query)).getClass(), AlterTableStatement.class);
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "create table myTable (a integer, b real, c text, d blob)",
+        "CREATE TABLE myTable (a INTEGER, b REAL, c TEXT, d BLOB);",
+    })
+    void testCreateTableStatements(final String query) {
+        assertEquals(Objects.requireNonNull(parser.parse(query)).getClass(), CreateTableStatement.class);
+    }
+    
     @ParameterizedTest
     @ValueSource(strings = {
         "delete from myTable",
