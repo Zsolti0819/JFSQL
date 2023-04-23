@@ -71,7 +71,7 @@ public class JfsqlConnection implements Connection {
     }
 
     @Override
-    public void commit() throws SQLException {
+    public synchronized void commit() throws SQLException {
         transactionManager.commit();
     }
 
