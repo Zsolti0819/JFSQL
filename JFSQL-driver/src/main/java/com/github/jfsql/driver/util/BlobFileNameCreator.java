@@ -1,5 +1,6 @@
 package com.github.jfsql.driver.util;
 
+import com.github.jfsql.driver.config.Persistence;
 import com.github.jfsql.driver.config.PropertiesReader;
 import com.github.jfsql.driver.db.DatabaseManager;
 import java.io.File;
@@ -24,7 +25,7 @@ public class BlobFileNameCreator {
     public String getBlobURL() {
         final String URL = databaseManager.getURL();
         final Path pathURL = Path.of(URL);
-        final String fileExtension = propertiesReader.getPersistence();
+        final String fileExtension = propertiesReader.getPersistence().equals(Persistence.XML) ? "xml" : "json";
         final List<Integer> fileNumbers = new ArrayList<>();
         final Pattern pattern = Pattern.compile("blob" + "(\\d+)" + "\\." + fileExtension);
         final Collection<File> files = ioOperationHandler.listFiles(pathURL, fileExtension);

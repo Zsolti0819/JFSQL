@@ -9,8 +9,8 @@ import org.apache.logging.log4j.Logger;
 public class PropertiesReader {
 
     private static final Logger logger = LogManager.getLogger(PropertiesReader.class);
-    private String persistence = DefaultConfig.persistence;
-    private String transactionVersioning = DefaultConfig.transactionVersioning;
+    private Persistence persistence = DefaultConfig.persistence;
+    private TransactionVersioning transactionVersioning = DefaultConfig.transactionVersioning;
     private boolean schemaValidation = DefaultConfig.schemaValidation;
     private boolean statementCaching = DefaultConfig.statementCaching;
 
@@ -41,7 +41,7 @@ public class PropertiesReader {
         if (persistenceString != null) {
             persistenceString = persistenceString.trim();
             if (persistenceString.equalsIgnoreCase("xml") || persistenceString.equalsIgnoreCase("json")) {
-                persistence = persistenceString.toLowerCase();
+                persistence = Persistence.valueOf(persistenceString.toUpperCase());
                 logger.trace("Successfully parsed the value '{}' for the key 'persistence', will use '{}'",
                     persistenceString, persistence);
             } else {
@@ -61,7 +61,7 @@ public class PropertiesReader {
             transactionVersioningString = transactionVersioningString.trim();
             if (transactionVersioningString.equalsIgnoreCase("jgit") || transactionVersioningString.equalsIgnoreCase(
                 "default")) {
-                transactionVersioning = transactionVersioningString.toLowerCase();
+                transactionVersioning = TransactionVersioning.valueOf(transactionVersioningString.toUpperCase());
                 logger.trace("Successfully parsed the value '{}' for the key 'transaction.versioning', will use '{}'",
                     transactionVersioningString, transactionVersioning);
             } else {

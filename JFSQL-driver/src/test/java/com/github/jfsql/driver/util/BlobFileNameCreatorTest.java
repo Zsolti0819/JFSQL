@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.github.jfsql.driver.TestUtils;
+import com.github.jfsql.driver.config.Persistence;
 import com.github.jfsql.driver.config.PropertiesReader;
 import com.github.jfsql.driver.db.DatabaseManager;
 import java.io.File;
@@ -34,7 +35,7 @@ public class BlobFileNameCreatorTest {
     @Test
     public void getBlobURL() {
         when(databaseManager.getURL()).thenReturn(String.valueOf(TestUtils.XML_DATABASE_PATH));
-        when(propertiesReader.getPersistence()).thenReturn("xml");
+        when(propertiesReader.getPersistence()).thenReturn(Persistence.XML);
 
         final File mockFile1 = mock(java.io.File.class);
         when(mockFile1.getName()).thenReturn("blob1.xml");
