@@ -98,7 +98,7 @@ class ConflictingInsertsAutoCommitTrueTest {
             final Statement statement = tempConnection.createStatement();
             final JfsqlResultSet resultSet = (JfsqlResultSet) statement.executeQuery("SELECT * FROM myTable");
             final List<Entry> entries = resultSet.getEntries();
-            assertEquals(10, entries.size());
+            assertEquals(INSERT_COUNT, entries.size());
         }
     }
 }

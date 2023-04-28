@@ -93,7 +93,7 @@ class NoConflictAutoCommitTrueTest {
                 final JfsqlResultSet resultSet = (JfsqlResultSet) statement.executeQuery(
                     "SELECT * FROM " + tableNames[i]);
                 final List<Entry> entries = resultSet.getEntries();
-                assertEquals(10, entries.size());
+                assertEquals(INSERT_COUNT, entries.size());
             }
         }
     }
