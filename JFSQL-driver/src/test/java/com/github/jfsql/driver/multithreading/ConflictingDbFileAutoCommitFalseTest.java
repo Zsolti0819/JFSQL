@@ -20,7 +20,6 @@ import org.junit.jupiter.api.TestInstance;
  * Two threads try to modify the database file simultaneously. Only one thread's statement will succeed, the other will
  * get PessimisticLockException.
  */
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ConflictingDbFileAutoCommitFalseTest {
 
     private static final int NUM_THREADS = 2;

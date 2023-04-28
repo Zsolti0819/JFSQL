@@ -24,7 +24,6 @@ import org.junit.jupiter.api.TestInstance;
  * 10 threads will be stopped due PessimisticLockException, and only one thread's inserts will be persisted and
  * committed.
  */
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ConflictingTenInsertsAutoCommitTrueTest {
 
     private static final int NUM_THREADS = 10;

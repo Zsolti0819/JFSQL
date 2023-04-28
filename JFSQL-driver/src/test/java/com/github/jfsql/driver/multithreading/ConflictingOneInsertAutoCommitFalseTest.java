@@ -24,7 +24,6 @@ import org.junit.jupiter.api.TestInstance;
  * of 10 threads will be stopped due PessimisticLockException, and only one thread's insert will be persisted and
  * committed.
  */
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ConflictingOneInsertAutoCommitFalseTest {
 
 
@@ -89,9 +88,6 @@ class ConflictingOneInsertAutoCommitFalseTest {
         for (final Thread thread : threads) {
             thread.join();
         }
-
-        // Ensure all threads have completed the insert before continuing
-        latch.await();
 
         // Close the database connections
         for (final Connection conn : connections) {

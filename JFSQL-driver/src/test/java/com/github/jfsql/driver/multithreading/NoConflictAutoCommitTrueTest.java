@@ -21,7 +21,6 @@ import org.junit.jupiter.api.TestInstance;
  * Parallel inserts when there is no conflict between tables. autoCommit is true. No exceptions are expected. Each
  * thread inserts to different tables, 10 threads - 10 tables
  */
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class NoConflictAutoCommitTrueTest {
 
     private static final int NUM_THREADS = 10;
