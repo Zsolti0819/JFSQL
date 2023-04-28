@@ -39,8 +39,7 @@ class ConflictingTenInsertsAutoCommitTrueTest {
         final AtomicInteger pessimisticLocksCaught = new AtomicInteger();
         final Properties properties = new Properties();
         properties.setProperty("transaction.versioning", "default");
-        try (final Connection tempConnection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH,
-            properties)) {
+        try (final Connection tempConnection = DriverManager.getConnection(TestUtils.URL, properties)) {
             final Statement statement = tempConnection.createStatement();
             statement.execute("DROP TABLE IF EXISTS myTable");
             statement.execute("CREATE TABLE myTable (id TEXT, threadId TEXT)");
@@ -48,7 +47,7 @@ class ConflictingTenInsertsAutoCommitTrueTest {
 
         final Connection[] connections = new Connection[NUM_THREADS];
         for (int i = 0; i < NUM_THREADS; i++) {
-            connections[i] = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
+            connections[i] = DriverManager.getConnection(TestUtils.URL, properties);
         }
 
         // Create a CountDownLatch with a count of NUM_THREADS
@@ -75,7 +74,7 @@ class ConflictingTenInsertsAutoCommitTrueTest {
                 } catch (final PessimisticLockException pe) {
                     pessimisticLocksCaught.getAndIncrement();
                 } catch (final InterruptedException ie) {
-                    ie.printStackTrace();
+                    Thread.currentThread().interrupt();
                 }
             });
         }
@@ -97,8 +96,7 @@ class ConflictingTenInsertsAutoCommitTrueTest {
 
         assertEquals(NUM_THREADS - 1, pessimisticLocksCaught.get());
 
-        try (final Connection tempConnection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH,
-            properties)) {
+        try (final Connection tempConnection = DriverManager.getConnection(TestUtils.URL, properties)) {
             final Statement statement = tempConnection.createStatement();
             final JfsqlResultSet resultSet = (JfsqlResultSet) statement.executeQuery("SELECT * FROM myTable");
             final List<Entry> entries = resultSet.getEntries();

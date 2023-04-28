@@ -35,7 +35,7 @@ class ConflictingDbFileAutoCommitFalseTest {
         final AtomicInteger pessimisticLocksCaught = new AtomicInteger();
         final Properties properties = new Properties();
         properties.setProperty("transaction.versioning", "default");
-        try (final Connection tempConnection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties)) {
+        try (final Connection tempConnection = DriverManager.getConnection(TestUtils.URL, properties)) {
             final Statement statement = tempConnection.createStatement();
             statement.execute("DROP TABLE IF EXISTS myTable");
             statement.execute("DROP TABLE IF EXISTS myTable2");
@@ -43,7 +43,7 @@ class ConflictingDbFileAutoCommitFalseTest {
 
         final Connection[] connections = new Connection[NUM_THREADS];
         for (int i = 0; i < NUM_THREADS; i++) {
-            connections[i] = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
+            connections[i] = DriverManager.getConnection(TestUtils.URL, properties);
         }
 
         // Create a CountDownLatch with a count of NUM_THREADS
@@ -52,7 +52,7 @@ class ConflictingDbFileAutoCommitFalseTest {
         // Spawn multiple threads to execute database operations
         final Thread[] threads = new Thread[NUM_THREADS];
         for (int i = 0; i < NUM_THREADS; i++) {
-            int finalI = i;
+            final int finalI = i;
             threads[finalI] = new Thread(() -> {
                 try {
                     latch.countDown();
@@ -66,11 +66,10 @@ class ConflictingDbFileAutoCommitFalseTest {
                 } catch (final PessimisticLockException pe) {
                     pessimisticLocksCaught.getAndIncrement();
                 } catch (final InterruptedException ie) {
-                    ie.printStackTrace();
+                    Thread.currentThread().interrupt();
                 }
             });
         }
-
 
         // Wait for all threads to finish
         for (final Thread thread : threads) {
@@ -89,7 +88,8 @@ class ConflictingDbFileAutoCommitFalseTest {
 
         assertEquals(NUM_THREADS - 1, pessimisticLocksCaught.get());
 
-        try (final JfsqlConnection tempConnection = (JfsqlConnection) DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties)) {
+        try (final JfsqlConnection tempConnection = (JfsqlConnection) DriverManager.getConnection(TestUtils.URL,
+            properties)) {
             final int tableCount = tempConnection.getDatabaseManager().getDatabase().getTables().size();
             assertEquals(1, tableCount);
         }

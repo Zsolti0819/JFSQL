@@ -31,7 +31,7 @@ class SelectTest {
         properties.setProperty("transaction.versioning", transactionVersioning);
         properties.setProperty("statement.caching", "true");
         properties.setProperty("schema.validation", "true");
-        connection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
+        connection = DriverManager.getConnection(TestUtils.URL, properties);
         statement = connection.createStatement();
         statement.execute("DROP TABLE IF EXISTS myTable");
         statement.execute("DROP TABLE IF EXISTS myTable2");

@@ -34,14 +34,6 @@ public class TestUtils {
         DATABASE_PATH + File.separator + "blob" + File.separator + "blob1.json");
     public static final Path ENCODED_XML_BLOB_PATH = Path.of(
         DATABASE_PATH + File.separator + "blob" + File.separator + "blob1.xml");
-    public static final Path DATABASE2_PATH = Path.of(
-        BASE_PATH + File.separator + "src" + File.separator + "main" + File.separator + "resources" + File.separator
-            + "myDatabase2" + File.separator);
-    public static final Path XML_DATABASE2_PATH = Path.of(
-        DATABASE2_PATH + File.separator + DATABASE2_PATH.getFileName() + ".xml");
-    public static final Path JSON_DATABASE2_PATH = Path.of(
-        DATABASE2_PATH + File.separator + DATABASE2_PATH.getFileName() + ".json");
-    public static final Path NOT_DIRECTORY_PATH = Path.of(BASE_PATH + File.separator + "pom.xml");
     public static final Path META_INF_DRIVER_PATH = Path.of(
         BASE_PATH + File.separator + "src" + File.separator + "main" + File.separator + "resources" + File.separator
             + "META-INF" + File.separator + "services" + File.separator + "java.sql.Driver");
@@ -63,6 +55,7 @@ public class TestUtils {
         TEST_XML_DATABASE_PATH + File.separator + "myDatabase_XML.xml");
     public static final Path TEST_XML_TABLE_PATH = Path.of(TEST_XML_DATABASE_PATH + File.separator + "myTable.xml");
     public static final Path TEST_XSD_PATH = Path.of(TEST_XML_DATABASE_PATH + File.separator + "myTable.xsd");
+    public static final String URL = "jdbc:jfsql:" + TestUtils.DATABASE_PATH;
 
     public void deleteDatabaseDirectory() {
         final File folder = new File(TestUtils.DATABASE_PATH.toUri());

@@ -13,7 +13,6 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.TestInstance;
@@ -41,7 +40,7 @@ class NoConflictAutoCommitFalseTest {
         final String[] tableNames = new String[NUM_THREADS];
 
         for (int i = 0; i < NUM_THREADS; i++) {
-            connections[i] = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
+            connections[i] = DriverManager.getConnection(TestUtils.URL, properties);
             statements[i] = connections[i].createStatement();
             tableNames[i] = "myTable" + i;
             statements[i].execute("DROP TABLE IF EXISTS " + tableNames[i]);
@@ -72,7 +71,7 @@ class NoConflictAutoCommitFalseTest {
                 } catch (final SQLException e) {
                     e.printStackTrace();
                 } catch (final InterruptedException ie) {
-                    ie.printStackTrace();
+                    Thread.currentThread().interrupt();
                 }
             });
         }
@@ -92,8 +91,7 @@ class NoConflictAutoCommitFalseTest {
             conn.close();
         }
 
-        try (final Connection tempConnection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH,
-            properties)) {
+        try (final Connection tempConnection = DriverManager.getConnection(TestUtils.URL, properties)) {
             final Statement statement = tempConnection.createStatement();
             for (int i = 0; i < NUM_THREADS; i++) {
                 final JfsqlResultSet resultSet = (JfsqlResultSet) statement.executeQuery(

@@ -25,7 +25,7 @@ class DropTableTest {
         properties.setProperty("transaction.versioning", transactionVersioning);
         properties.setProperty("statement.caching", "true");
         properties.setProperty("schema.validation", "true");
-        final Connection connection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
+        final Connection connection = DriverManager.getConnection(TestUtils.URL, properties);
         statement = connection.createStatement();
         statement.execute("DROP TABLE IF EXISTS myTable");
         statement.execute("CREATE TABLE myTable (id INTEGER, name TEXT, age INTEGER)");
