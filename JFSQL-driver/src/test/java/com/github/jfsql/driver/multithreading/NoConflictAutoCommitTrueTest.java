@@ -15,7 +15,6 @@ import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.RepeatedTest;
-import org.junit.jupiter.api.TestInstance;
 
 /**
  * Parallel inserts when there is no conflict between tables. autoCommit is true. No exceptions are expected. Each
@@ -24,6 +23,7 @@ import org.junit.jupiter.api.TestInstance;
 class NoConflictAutoCommitTrueTest {
 
     private static final int NUM_THREADS = 10;
+    private static final int INSERT_COUNT = 10;
 
     @AfterEach
     void tearDown() {
@@ -55,12 +55,11 @@ class NoConflictAutoCommitTrueTest {
             final int threadIndex = i;
             threads[i] = new Thread(() -> {
                 try (final Connection connection = connections[threadIndex]) {
-                    // Count down the latch before executing the insert
                     latch.countDown();
-                    latch.await(); // Wait for all threads to count down the latch
+                    latch.await();
                     final String sql = "INSERT INTO " + tableNames[threadIndex] + "(id, threadId) VALUES (?, ?)";
                     final PreparedStatement preparedStatement = connection.prepareStatement(sql);
-                    for (int j = 1; j <= 10; j++) {
+                    for (int j = 0; j < INSERT_COUNT; j++) {
                         preparedStatement.setInt(1, j);
                         preparedStatement.setLong(2, Thread.currentThread().getId());
                         preparedStatement.executeUpdate();

@@ -17,16 +17,15 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.RepeatedTest;
-import org.junit.jupiter.api.TestInstance;
 
 /**
- * Parallel insert when there is conflict between tables. autoCommit is false. There are 10 insert per thread. 9 out of
- * 10 threads will be stopped due PessimisticLockException, and only one thread's inserts will be persisted and
- * committed.
+ * Parallel insert when there is conflict between tables. autoCommit is true. 9 out of 10 threads will be stopped due
+ * PessimisticLockException, and only one thread's inserts will be persisted and committed.
  */
-class ConflictingTenInsertsAutoCommitFalseTest {
+class ConflictingInsertsAutoCommitTrueTest {
 
     private static final int NUM_THREADS = 10;
+    private static final int INSERT_COUNT = 10;
 
     @AfterEach
     void tearDown() {
@@ -34,12 +33,11 @@ class ConflictingTenInsertsAutoCommitFalseTest {
     }
 
     @RepeatedTest(100)
-    void testConflictWhenInsertingTenToSameTable() throws Exception {
+    void testConflictWhenInsertingOneToSameTable() throws Exception {
         final AtomicInteger pessimisticLocksCaught = new AtomicInteger();
         final Properties properties = new Properties();
         properties.setProperty("transaction.versioning", "default");
-        try (final Connection tempConnection = DriverManager.getConnection(TestUtils.URL,
-            properties)) {
+        try (final Connection tempConnection = DriverManager.getConnection(TestUtils.URL, properties)) {
             final Statement statement = tempConnection.createStatement();
             statement.execute("DROP TABLE IF EXISTS myTable");
             statement.execute("CREATE TABLE myTable (id TEXT, threadId TEXT)");
@@ -58,21 +56,17 @@ class ConflictingTenInsertsAutoCommitFalseTest {
         for (int i = 0; i < NUM_THREADS; i++) {
             final int index = i;
             threads[i] = new Thread(() -> {
-                try {
-                    // Count down the latch before executing the insert
+                try (final Connection connection = connections[index]) {
                     latch.countDown();
-                    latch.await(); // Wait for all threads to count down the latch
-                    final Connection connection = connections[index];
-                    connection.setAutoCommit(false);
+                    latch.await();
                     final String sql = "INSERT INTO myTable (id, threadId) VALUES (?, ?)";
                     final PreparedStatement preparedStatement = connection.prepareStatement(sql);
-                    for (int j = 1; j <= 10; j++) {
+                    for (int j = 0; j < INSERT_COUNT; j++) {
                         preparedStatement.setInt(1, j);
                         preparedStatement.setLong(2, Thread.currentThread().getId());
                         preparedStatement.execute();
                         preparedStatement.close();
                     }
-                    connection.commit();
                 } catch (final SQLException e) {
                     e.printStackTrace();
                 } catch (final PessimisticLockException pe) {

@@ -17,17 +17,15 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.RepeatedTest;
-import org.junit.jupiter.api.TestInstance;
 
 /**
- * Parallel insert when there is conflict between tables. autoCommit is false. There is only 1 insert per thread. 9 out
- * of 10 threads will be stopped due PessimisticLockException, and only one thread's insert will be persisted and
- * committed.
+ * Parallel insert when there is conflict between tables. autoCommit is false. 9 out of 10 threads will be stopped due
+ * PessimisticLockException, and only one thread's insert will be persisted and committed.
  */
-class ConflictingOneInsertAutoCommitFalseTest {
-
+class ConflictingInsertsAutoCommitFalseTest {
 
     private static final int NUM_THREADS = 10;
+    private static final int INSERT_COUNT = 10;
 
     @AfterEach
     void tearDown() {
@@ -64,9 +62,11 @@ class ConflictingOneInsertAutoCommitFalseTest {
                     connections[index].setAutoCommit(false);
                     final String sql = "INSERT INTO myTable (id, threadId) VALUES (?, ?)";
                     final PreparedStatement preparedStatement = connections[index].prepareStatement(sql);
-                    preparedStatement.setInt(1, 1);
-                    preparedStatement.setLong(2, Thread.currentThread().getId());
-                    preparedStatement.execute();
+                    for (int j = 0; j < INSERT_COUNT; j++) {
+                        preparedStatement.setInt(1, 1);
+                        preparedStatement.setLong(2, Thread.currentThread().getId());
+                        preparedStatement.execute();
+                    }
                     connections[index].commit();
                     preparedStatement.close();
                 } catch (final SQLException e) {
@@ -100,7 +100,7 @@ class ConflictingOneInsertAutoCommitFalseTest {
             final Statement statement = tempConnection.createStatement();
             final JfsqlResultSet resultSet = (JfsqlResultSet) statement.executeQuery("SELECT * FROM myTable");
             final List<Entry> entries = resultSet.getEntries();
-            assertEquals(1, entries.size());
+            assertEquals(INSERT_COUNT, entries.size());
         }
     }
 }

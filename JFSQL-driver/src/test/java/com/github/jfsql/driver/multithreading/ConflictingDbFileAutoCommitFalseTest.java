@@ -14,15 +14,14 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.RepeatedTest;
-import org.junit.jupiter.api.TestInstance;
 
 /**
- * Two threads try to modify the database file simultaneously. Only one thread's statement will succeed, the other will
- * get PessimisticLockException.
+ * NUM_THREADS threads try to modify the database file simultaneously. Only one thread's statement will succeed, the
+ * other will get PessimisticLockException.
  */
 class ConflictingDbFileAutoCommitFalseTest {
 
-    private static final int NUM_THREADS = 2;
+    private static final int NUM_THREADS = 10;
 
     @AfterEach
     void tearDown() {
