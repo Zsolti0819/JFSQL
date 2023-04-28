@@ -23,7 +23,7 @@ import org.junit.jupiter.api.TestInstance;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class NoConflictAutoCommitTrueTest {
 
-    private static final int NUM_THREADS = 2;
+    private static final int NUM_THREADS = 10;
 
     @AfterEach
     void tearDown() {
