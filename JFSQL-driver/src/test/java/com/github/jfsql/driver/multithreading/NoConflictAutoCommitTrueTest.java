@@ -12,6 +12,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.TestInstance;
@@ -46,12 +48,18 @@ class NoConflictAutoCommitTrueTest {
             statements[i].execute("CREATE TABLE " + tableNames[i] + "(id TEXT, threadId TEXT)");
         }
 
+        // Create a CountDownLatch with a count of NUM_THREADS
+        final CountDownLatch latch = new CountDownLatch(NUM_THREADS);
+
         // Spawn multiple threads to execute database operations
         final Thread[] threads = new Thread[NUM_THREADS];
         for (int i = 0; i < NUM_THREADS; i++) {
             final int threadIndex = i;
             threads[i] = new Thread(() -> {
                 try (final Connection connection = connections[threadIndex]) {
+                    // Count down the latch before executing the insert
+                    latch.countDown();
+                    latch.await(); // Wait for all threads to count down the latch
                     final String sql = "INSERT INTO " + tableNames[threadIndex] + "(id, threadId) VALUES (?, ?)";
                     final PreparedStatement preparedStatement = connection.prepareStatement(sql);
                     for (int j = 1; j <= 10; j++) {
@@ -61,6 +69,8 @@ class NoConflictAutoCommitTrueTest {
                     }
                 } catch (final SQLException e) {
                     e.printStackTrace();
+                } catch (final InterruptedException ie) {
+                    ie.printStackTrace();
                 }
             });
         }

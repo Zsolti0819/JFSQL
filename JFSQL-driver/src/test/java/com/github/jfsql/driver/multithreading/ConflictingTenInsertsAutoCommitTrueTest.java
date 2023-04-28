@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.RepeatedTest;
@@ -50,13 +51,17 @@ class ConflictingTenInsertsAutoCommitTrueTest {
             connections[i] = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
         }
 
+        // Create a CountDownLatch with a count of NUM_THREADS
+        final CountDownLatch latch = new CountDownLatch(NUM_THREADS);
+
         // Spawn multiple threads to execute database operations
         final Thread[] threads = new Thread[NUM_THREADS];
         for (int i = 0; i < NUM_THREADS; i++) {
             final int index = i;
             threads[i] = new Thread(() -> {
-                try {
-                    final Connection connection = connections[index];
+                try (final Connection connection = connections[index]) {
+                    latch.countDown();
+                    latch.await();
                     final String sql = "INSERT INTO myTable (id, threadId) VALUES (?, ?)";
                     final PreparedStatement preparedStatement = connection.prepareStatement(sql);
                     for (int j = 1; j <= 10; j++) {
@@ -69,6 +74,8 @@ class ConflictingTenInsertsAutoCommitTrueTest {
                     e.printStackTrace();
                 } catch (final PessimisticLockException pe) {
                     pessimisticLocksCaught.getAndIncrement();
+                } catch (final InterruptedException ie) {
+                    ie.printStackTrace();
                 }
             });
         }

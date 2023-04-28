@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.RepeatedTest;
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.TestInstance;
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ConflictingOneInsertAutoCommitFalseTest {
+
 
     private static final int NUM_THREADS = 10;
 
@@ -50,37 +52,49 @@ class ConflictingOneInsertAutoCommitFalseTest {
             connections[i] = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
         }
 
+        // Create a CountDownLatch with a count of NUM_THREADS
+        final CountDownLatch latch = new CountDownLatch(NUM_THREADS);
+
         // Spawn multiple threads to execute database operations
         final Thread[] threads = new Thread[NUM_THREADS];
         for (int i = 0; i < NUM_THREADS; i++) {
             final int index = i;
             threads[i] = new Thread(() -> {
-                try (final Connection connection = connections[index]) {
-                    connection.setAutoCommit(false);
+                try {
+                    latch.countDown();
+                    latch.await();
+                    connections[index].setAutoCommit(false);
                     final String sql = "INSERT INTO myTable (id, threadId) VALUES (?, ?)";
-                    final PreparedStatement preparedStatement = connection.prepareStatement(sql);
+                    final PreparedStatement preparedStatement = connections[index].prepareStatement(sql);
                     preparedStatement.setInt(1, 1);
                     preparedStatement.setLong(2, Thread.currentThread().getId());
                     preparedStatement.execute();
-                    connection.commit();
+                    connections[index].commit();
                     preparedStatement.close();
                 } catch (final SQLException e) {
                     e.printStackTrace();
                 } catch (final PessimisticLockException pe) {
                     pessimisticLocksCaught.getAndIncrement();
+                } catch (final InterruptedException ie) {
+                    ie.printStackTrace();
                 }
             });
         }
 
-        // Wait for all threads to finish
+// Start all threads
         for (final Thread thread : threads) {
             thread.start();
         }
 
-        // Wait for all threads to finish
+// Wait for all threads to finish
         for (final Thread thread : threads) {
             thread.join();
         }
+
+// Ensure all threads have completed the insert before continuing
+        latch.await();
+
+
 
         // Close the database connections
         for (final Connection conn : connections) {

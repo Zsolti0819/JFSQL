@@ -10,6 +10,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.RepeatedTest;
@@ -34,8 +35,7 @@ class ConflictingDbFileAutoCommitFalseTest {
         final AtomicInteger pessimisticLocksCaught = new AtomicInteger();
         final Properties properties = new Properties();
         properties.setProperty("transaction.versioning", "default");
-        try (final Connection tempConnection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH,
-            properties)) {
+        try (final Connection tempConnection = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties)) {
             final Statement statement = tempConnection.createStatement();
             statement.execute("DROP TABLE IF EXISTS myTable");
             statement.execute("DROP TABLE IF EXISTS myTable2");
@@ -46,33 +46,31 @@ class ConflictingDbFileAutoCommitFalseTest {
             connections[i] = DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties);
         }
 
+        // Create a CountDownLatch with a count of NUM_THREADS
+        final CountDownLatch latch = new CountDownLatch(NUM_THREADS);
+
         // Spawn multiple threads to execute database operations
         final Thread[] threads = new Thread[NUM_THREADS];
-        threads[0] = new Thread(() -> {
-            try {
-                connections[0].setAutoCommit(false);
-                final Statement statement = connections[0].createStatement();
-                statement.execute("CREATE TABLE myTable (id INTEGER)");
-                connections[0].commit();
-            } catch (final SQLException e) {
-                e.printStackTrace();
-            } catch (final PessimisticLockException pe) {
-                pessimisticLocksCaught.getAndIncrement();
-            }
-        });
+        for (int i = 0; i < NUM_THREADS; i++) {
+            int finalI = i;
+            threads[finalI] = new Thread(() -> {
+                try {
+                    latch.countDown();
+                    latch.await();
+                    connections[finalI].setAutoCommit(false);
+                    final Statement statement = connections[finalI].createStatement();
+                    statement.execute("CREATE TABLE myTable" + finalI + " (id INTEGER)");
+                    connections[finalI].commit();
+                } catch (final SQLException e) {
+                    e.printStackTrace();
+                } catch (final PessimisticLockException pe) {
+                    pessimisticLocksCaught.getAndIncrement();
+                } catch (final InterruptedException ie) {
+                    ie.printStackTrace();
+                }
+            });
+        }
 
-        threads[1] = new Thread(() -> {
-            try {
-                connections[1].setAutoCommit(false);
-                final Statement statement = connections[1].createStatement();
-                statement.execute("CREATE TABLE myTable2 (id INTEGER)");
-                connections[1].commit();
-            } catch (final SQLException e) {
-                e.printStackTrace();
-            } catch (final PessimisticLockException pe) {
-                pessimisticLocksCaught.getAndIncrement();
-            }
-        });
 
         // Wait for all threads to finish
         for (final Thread thread : threads) {
@@ -91,9 +89,7 @@ class ConflictingDbFileAutoCommitFalseTest {
 
         assertEquals(NUM_THREADS - 1, pessimisticLocksCaught.get());
 
-        try (final JfsqlConnection tempConnection = (JfsqlConnection) DriverManager.getConnection(
-            "jdbc:jfsql:" + TestUtils.DATABASE_PATH,
-            properties)) {
+        try (final JfsqlConnection tempConnection = (JfsqlConnection) DriverManager.getConnection("jdbc:jfsql:" + TestUtils.DATABASE_PATH, properties)) {
             final int tableCount = tempConnection.getDatabaseManager().getDatabase().getTables().size();
             assertEquals(1, tableCount);
         }
