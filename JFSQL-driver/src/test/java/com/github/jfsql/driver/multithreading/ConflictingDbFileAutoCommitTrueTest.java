@@ -16,8 +16,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.RepeatedTest;
 
 /**
- * NUM_THREADS threads try to modify the database file simultaneously. Only one thread's statement will succeed, the other will
- * get PessimisticLockException.
+ * NUM_THREADS threads try to modify the database file simultaneously. Only one thread's statement will succeed, the
+ * other will get PessimisticLockException.
  */
 class ConflictingDbFileAutoCommitTrueTest {
 
