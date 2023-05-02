@@ -14,20 +14,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import lombok.Data;
 import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-@Data
 public abstract class TransactionManager {
 
-    private static final Logger logger = LogManager.getLogger(TransactionManager.class);
     final Set<Database> uncommittedDatabases;
     final Set<Table> uncommittedSchemas;
     final Set<Table> uncommittedTables;
+    final Map<String, Boolean> filesToKeep;
     final Reader reader;
     final Writer writer;
     final DatabaseManager databaseManager;
@@ -41,9 +35,10 @@ public abstract class TransactionManager {
         uncommittedDatabases = new HashSet<>();
         uncommittedSchemas = new HashSet<>();
         uncommittedTables = new HashSet<>();
+        filesToKeep = new HashMap<>();
     }
 
-    public abstract void commit(String... args) throws SQLException;
+    public abstract void commit() throws SQLException;
 
     public abstract void rollback() throws SQLException;
 
@@ -89,30 +84,36 @@ public abstract class TransactionManager {
         switch (operation) {
             case DROP_TABLE:
                 writer.writeDatabaseFile(database);
-                commit(String.valueOf(database.getURL().getFileName()));
+                filesToKeep.put(String.valueOf(database.getURL()), true);
+                filesToKeep.put(table.getTableFile(), false);
+                filesToKeep.put(table.getSchemaFile(), false);
+                commit();
                 break;
             case INSERT:
             case DELETE:
             case UPDATE:
                 writer.writeTable(table);
-                commit(String.valueOf(Path.of(table.getTableFile()).getFileName()));
+                filesToKeep.put(table.getTableFile(), true);
+                commit();
                 break;
             case ALTER_TABLE_ADD_COLUMN:
             case ALTER_TABLE_DROP_COLUMN:
             case ALTER_TABLE_RENAME_COLUMN:
                 writer.writeSchema(table);
                 writer.writeTable(table);
-                commit(String.valueOf(Path.of(table.getSchemaFile()).getFileName()),
-                    String.valueOf(Path.of(table.getTableFile()).getFileName()));
+                filesToKeep.put(table.getSchemaFile(), true);
+                filesToKeep.put(table.getTableFile(), true);
+                commit();
                 break;
             case ALTER_TABLE_RENAME_TABLE:
             case CREATE_TABLE:
                 writer.writeDatabaseFile(database);
                 writer.writeSchema(table);
                 writer.writeTable(table);
-                commit(String.valueOf(database.getURL().getFileName()),
-                    String.valueOf(Path.of(table.getSchemaFile()).getFileName()),
-                    String.valueOf(Path.of(table.getTableFile()).getFileName()));
+                filesToKeep.put(String.valueOf(database.getURL()), true);
+                filesToKeep.put(table.getSchemaFile(), true);
+                filesToKeep.put(table.getTableFile(), true);
+                commit();
                 break;
         }
     }
@@ -122,29 +123,38 @@ public abstract class TransactionManager {
         switch (operation) {
             case DROP_TABLE:
                 uncommittedDatabases.add(database);
+                filesToKeep.put(String.valueOf(database.getURL()), true);
+                filesToKeep.put(table.getTableFile(), false);
+                filesToKeep.put(table.getSchemaFile(), false);
                 break;
             case INSERT:
             case DELETE:
             case UPDATE:
                 uncommittedTables.add(table);
+                filesToKeep.put(table.getTableFile(), true);
                 break;
             case ALTER_TABLE_ADD_COLUMN:
             case ALTER_TABLE_DROP_COLUMN:
             case ALTER_TABLE_RENAME_COLUMN:
                 uncommittedSchemas.add(table);
                 uncommittedTables.add(table);
+                filesToKeep.put(table.getSchemaFile(), true);
+                filesToKeep.put(table.getTableFile(), true);
                 break;
             case ALTER_TABLE_RENAME_TABLE:
             case CREATE_TABLE:
                 uncommittedDatabases.add(database);
                 uncommittedSchemas.add(table);
                 uncommittedTables.add(table);
+                filesToKeep.put(String.valueOf(database.getURL()), true);
+                filesToKeep.put(table.getSchemaFile(), true);
+                filesToKeep.put(table.getTableFile(), true);
                 break;
         }
     }
 
-    Map<File, Boolean> getFilesToKeep() throws IOException {
-        final Map<File, Boolean> filesToKeep = new HashMap<>();
+    Map<String, Boolean> getBlobsToKeep() throws IOException {
+        final Map<String, Boolean> filesToKeep = new HashMap<>();
         final Database database = databaseManager.database;
         final Path databaseURL = database.getURL();
         final Path databaseFolder = databaseURL.getParent();
@@ -153,21 +163,13 @@ public abstract class TransactionManager {
         final String schemaExtension = reader.getSchemaFileExtension();
         final String[] extensions = new String[]{fileExtension, schemaExtension};
 
-        final Collection<File> mainFolderFiles = FileUtils.listFiles(databaseFolder.toFile(), extensions, false);
         final Collection<File> blobFolderFiles = FileUtils.listFiles(blobFolder.toFile(), extensions, false);
-        final Collection<File> allFiles = Stream.concat(mainFolderFiles.stream(), blobFolderFiles.stream())
-            .collect(Collectors.toList());
-
-        final Set<File> filesFromDatabaseFile = reader.getFilesFromDatabaseFile(database);
         final Set<File> blobsFromTables = reader.getBlobsFromTables(database);
 
-        allFiles.removeIf(filesFromDatabaseFile::contains);
-        allFiles.removeIf(blobsFromTables::contains);
-        allFiles.forEach(file -> filesToKeep.put(file, false));
-
-        Stream.concat(filesFromDatabaseFile.stream(), blobsFromTables.stream())
-            .forEach(file -> filesToKeep.put(file, true));
-        filesToKeep.put(databaseURL.toFile(), true);
+        for (final File file : blobFolderFiles) {
+            final boolean isInTables = blobsFromTables.contains(file);
+            filesToKeep.put(String.valueOf(file), isInTables);
+        }
         return filesToKeep;
     }
 

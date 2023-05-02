@@ -16,7 +16,8 @@ import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * Parallel insert when there is conflict between tables. autoCommit is true. 9 out of 10 threads will be stopped due
@@ -32,11 +33,12 @@ class ConflictingInsertsAutoCommitTrueTest {
         TestUtils.deleteDatabaseDirectory();
     }
 
-    @RepeatedTest(100)
-    void testConflictWhenInsertingOneToSameTable() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {"jgit", "default"})
+    void testConflictWhenInsertingOneToSameTable(final String transactionVersioning) throws Exception {
         final AtomicInteger pessimisticLocksCaught = new AtomicInteger();
         final Properties properties = new Properties();
-        properties.setProperty("transaction.versioning", "default");
+        properties.setProperty("transaction.versioning", transactionVersioning);
         try (final Connection tempConnection = DriverManager.getConnection(TestUtils.URL, properties)) {
             final Statement statement = tempConnection.createStatement();
             statement.execute("DROP TABLE IF EXISTS myTable");

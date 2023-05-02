@@ -9,10 +9,11 @@ import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.api.Git;
@@ -28,17 +29,19 @@ public class JGitTransactionManagerImpl extends TransactionManager {
     }
 
     @Override
-    public void commit(final String... args) {
+    public void commit() {
         synchronized (OBJECT_NAME_TO_THREAD_ID_MAP) {
             final Database database = databaseManager.database;
             final File databaseDirectoryPath = database.getURL().getParent().toFile();
             try (final Git git = Git.open(databaseDirectoryPath)) {
                 writeUncommittedObjects();
-                final Map<File, Boolean> filesToKeep = getFilesToKeep();
-                logger.trace("filesToKeep = {}", filesToKeep);
 
-                for (final Map.Entry<File, Boolean> entry : filesToKeep.entrySet()) {
-                    final File file = entry.getKey();
+                final Map<String, Boolean> blobsToKeep = getBlobsToKeep();
+                filesToKeep.putAll(blobsToKeep);
+                logger.trace("filesToKeep with blobsToKeep = {}", filesToKeep);
+
+                for (final Map.Entry<String, Boolean> entry : filesToKeep.entrySet()) {
+                    final File file = new File(entry.getKey());
                     final String fileName = file.getName();
                     final String parentFolder = file.getParent();
                     final String prefix = parentFolder.endsWith("blob") ? "blob/" : "";
@@ -49,14 +52,16 @@ public class JGitTransactionManagerImpl extends TransactionManager {
                         git.rm().addFilepattern(prefix + fileName).call();
                     }
                 }
-                final String commitMessage = args.length == 0 ?
-                    "Explicit commit" :
-                    "Auto committing: " + Arrays.toString(args);
+
+                final List<String> onlyFileNames = filesToKeep.keySet().stream()
+                    .map(s -> String.valueOf(Path.of(s).getFileName())).collect(Collectors.toList());
+                final String commitMessage = "Committing: " + onlyFileNames;
                 git.commit().setMessage(commitMessage).call();
 
             } catch (final GitAPIException | IOException e) {
                 throw new CommitFailedException("Commit failed.\n" + e.getMessage());
             } finally {
+                filesToKeep.clear();
                 SharedMapHandler.removeCurrentThreadChangesFromMap();
             }
         }

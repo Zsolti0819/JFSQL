@@ -14,7 +14,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * Parallel inserts when there is no conflict between tables. autoCommit is true. No exceptions are expected. Each
@@ -30,10 +31,11 @@ class NoConflictAutoCommitTrueTest {
         TestUtils.deleteDatabaseDirectory();
     }
 
-    @RepeatedTest(100)
-    void testParallelInsertsWithDifferentTables() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {"jgit", "default"})
+    void testParallelInsertsWithDifferentTables(final String transactionVersioning) throws Exception {
         final Properties properties = new Properties();
-        properties.setProperty("transaction.versioning", "default");
+        properties.setProperty("transaction.versioning", transactionVersioning);
         final Connection[] connections = new Connection[NUM_THREADS];
         final Statement[] statements = new Statement[NUM_THREADS];
         final String[] tableNames = new String[NUM_THREADS];

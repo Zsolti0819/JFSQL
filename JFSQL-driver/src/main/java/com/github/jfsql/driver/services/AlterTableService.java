@@ -76,11 +76,19 @@ public class AlterTableService {
             table.setEntries(entries);
         }
 
-        table.setName(newTableName);
-        table.setTableFile(newTableFile);
-        table.setSchemaFile(newSchemaFile);
+        final Table newTable = Table.builder()
+            .name(newTableName)
+            .tableFile(newTableFile)
+            .schemaFile(newSchemaFile)
+            .columnsAndTypes(table.getColumnsAndTypes())
+            .notNullColumns(table.getNotNullColumns())
+            .entries(table.getEntries())
+            .build();
 
-        transactionManager.execute(table, Operation.ALTER_TABLE_RENAME_TABLE);
+        database.getTables().add(newTable);
+        transactionManager.execute(newTable, Operation.ALTER_TABLE_RENAME_TABLE);
+        database.getTables().remove(table);
+        transactionManager.execute(table, Operation.DROP_TABLE);
     }
 
     void renameColumn(final AlterTableWrapper statement, final Table table)

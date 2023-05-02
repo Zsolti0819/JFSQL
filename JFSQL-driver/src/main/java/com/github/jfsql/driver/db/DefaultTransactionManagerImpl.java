@@ -25,14 +25,14 @@ public class DefaultTransactionManagerImpl extends TransactionManager {
     }
 
     @Override
-    public void commit(final String... args) {
+    public void commit() {
         try {
             writeUncommittedObjects();
-            final Map<File, Boolean> filesToKeep = getFilesToKeep();
+            filesToKeep.putAll(getBlobsToKeep());
             logger.trace("filesToKeep = {}", filesToKeep);
 
-            for (final Map.Entry<File, Boolean> entry : filesToKeep.entrySet()) {
-                final File file = entry.getKey();
+            for (final Map.Entry<String, Boolean> entry : filesToKeep.entrySet()) {
+                final File file = new File(entry.getKey());
                 if (Boolean.FALSE.equals(entry.getValue())) {
                     Files.delete(Path.of(file.getAbsolutePath()));
                 }
