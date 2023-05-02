@@ -3,6 +3,7 @@ package com.github.jfsql.driver.services;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -66,7 +67,7 @@ class DropTableServiceTest {
 
         dropTableService.dropTable(statement);
 
-        verify(transactionManager, times(1)).executeOperation(database);
+        verify(transactionManager, times(1)).execute(any(), any());
 
     }
 
@@ -80,7 +81,7 @@ class DropTableServiceTest {
             "Cannot DROP " + statement.getTableName() + " because the table's file or schema doesn't exist.",
             thrown.getMessage());
 
-        verify(transactionManager, never()).executeOperation(database);
+        verify(transactionManager, never()).execute(any(), any());
 
     }
 
@@ -91,7 +92,7 @@ class DropTableServiceTest {
         when(tableFinder.getTableByName(statement.getTableName())).thenThrow(SQLException.class);
 
         assertDoesNotThrow(() -> dropTableService.dropTable(statement));
-        verify(transactionManager, never()).executeOperation(database);
+        verify(transactionManager, never()).execute(any(), any());
     }
 
 }

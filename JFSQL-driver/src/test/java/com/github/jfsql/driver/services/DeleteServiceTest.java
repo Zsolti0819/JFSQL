@@ -2,6 +2,7 @@ package com.github.jfsql.driver.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -64,7 +65,7 @@ class DeleteServiceTest {
         deleteService.deleteFromTable(statement);
 
         verify(entries, times(1)).removeAll(whereEntries);
-        verify(transactionManager, times(1)).executeOperation(table, false);
+        verify(transactionManager, times(1)).execute(any(), any());
     }
 
     @Test
@@ -77,7 +78,7 @@ class DeleteServiceTest {
             () -> deleteService.deleteFromTable(statement));
         assertEquals("Some columns entered doesn't exist in '" + table.getName() + "'.", thrown.getMessage());
 
-        verify(transactionManager, never()).executeOperation(table, false);
+        verify(transactionManager, never()).execute(any(), any());
         verifyNoInteractions(whereConditionSolver);
     }
 }

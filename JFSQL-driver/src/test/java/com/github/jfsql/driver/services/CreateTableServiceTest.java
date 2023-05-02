@@ -58,7 +58,7 @@ class CreateTableServiceTest {
         verify(database, times(1)).getTables();
         verify(fileNameCreator, times(1)).createTableFileName(any(), any());
         verify(fileNameCreator, times(1)).createSchemaFileName(any(), any());
-        verify(transactionManager, times(1)).executeOperation(any(), any());
+        verify(transactionManager, times(1)).execute(any(), any());
 
     }
 
@@ -72,7 +72,7 @@ class CreateTableServiceTest {
         Assertions.assertEquals("Table name cannot be the same as database name.", thrown.getMessage());
         verify(fileNameCreator, never()).createTableFileName(any(), any());
         verify(fileNameCreator, never()).createSchemaFileName(any(), any());
-        verify(transactionManager, never()).executeOperation(any(), any());
+        verify(transactionManager, never()).execute(any(), any());
     }
 
     @Test
@@ -86,7 +86,7 @@ class CreateTableServiceTest {
         Assertions.assertEquals("Table '" + statement.getTableName() + "' already exists.", thrown.getMessage());
         verify(fileNameCreator, never()).createTableFileName(any(), any());
         verify(fileNameCreator, never()).createSchemaFileName(any(), any());
-        verify(transactionManager, never()).executeOperation(any(), any());
+        verify(transactionManager, never()).execute(any(), any());
     }
 
     @Test
@@ -98,7 +98,7 @@ class CreateTableServiceTest {
         assertDoesNotThrow(() -> createTableService.createTable(statement));
         verify(fileNameCreator, never()).createTableFileName(any(), any());
         verify(fileNameCreator, never()).createSchemaFileName(any(), any());
-        verify(transactionManager, never()).executeOperation(any(), any());
+        verify(transactionManager, never()).execute(any(), any());
     }
 
     @Test
@@ -113,7 +113,7 @@ class CreateTableServiceTest {
 
         verify(fileNameCreator, never()).createTableFileName(any(), any());
         verify(fileNameCreator, never()).createSchemaFileName(any(), any());
-        verify(transactionManager, never()).executeOperation(any(), any());
+        verify(transactionManager, never()).execute(any(), any());
     }
 
 }

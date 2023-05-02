@@ -1,6 +1,7 @@
 package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.cache.resultset.ResultSetCache;
+import com.github.jfsql.driver.db.Operation;
 import com.github.jfsql.driver.db.SharedMapHandler;
 import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.dto.Entry;
@@ -62,7 +63,7 @@ public class DeleteService {
         final int entriesSizeAfter = entries.size();
         deleteCount = entriesSizeBefore - entriesSizeAfter;
 
-        transactionManager.executeOperation(table, false);
+        transactionManager.execute(table, Operation.DELETE);
         return deleteCount;
     }
 

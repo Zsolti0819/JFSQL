@@ -2,6 +2,7 @@ package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.cache.resultset.ResultSetCache;
 import com.github.jfsql.driver.db.DatabaseManager;
+import com.github.jfsql.driver.db.Operation;
 import com.github.jfsql.driver.db.SharedMapHandler;
 import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.dto.Database;
@@ -79,7 +80,7 @@ public class AlterTableService {
         table.setTableFile(newTableFile);
         table.setSchemaFile(newSchemaFile);
 
-        transactionManager.executeOperation(database, table);
+        transactionManager.execute(table, Operation.ALTER_TABLE_RENAME_TABLE);
     }
 
     void renameColumn(final AlterTableWrapper statement, final Table table)
@@ -124,7 +125,7 @@ public class AlterTableService {
             }
             entry.setColumnsAndValues(modifiedColumnsAndValues);
         }
-        transactionManager.executeOperation(table, true);
+        transactionManager.execute(table, Operation.ALTER_TABLE_RENAME_COLUMN);
     }
 
     private Map<String, Boolean> getModifiedNotNullColumns(final AlterTableWrapper statement, final Table table) {
@@ -210,7 +211,7 @@ public class AlterTableService {
                 columnsAndValues.put(columnNameToAdd, null);
             }
         }
-        transactionManager.executeOperation(table, true);
+        transactionManager.execute(table, Operation.ALTER_TABLE_ADD_COLUMN);
     }
 
     void dropColumn(final AlterTableWrapper statement, final Table table) throws SQLException {
@@ -245,6 +246,6 @@ public class AlterTableService {
             final Map<String, String> columnsAndValues = entry.getColumnsAndValues();
             columnsAndValues.remove(columnNameToDrop);
         }
-        transactionManager.executeOperation(table, true);
+        transactionManager.execute(table, Operation.ALTER_TABLE_DROP_COLUMN);
     }
 }

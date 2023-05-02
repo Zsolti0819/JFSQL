@@ -1,6 +1,7 @@
 package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.db.DatabaseManager;
+import com.github.jfsql.driver.db.Operation;
 import com.github.jfsql.driver.db.SharedMapHandler;
 import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.dto.Database;
@@ -81,7 +82,7 @@ public class CreateTableService {
 
         final List<Table> tables = database.getTables();
         tables.add(table);
-        transactionManager.executeOperation(database, table);
+        transactionManager.execute(table, Operation.CREATE_TABLE);
         return 0;
     }
 }

@@ -2,6 +2,7 @@ package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.cache.resultset.ResultSetCache;
 import com.github.jfsql.driver.db.DatabaseManager;
+import com.github.jfsql.driver.db.Operation;
 import com.github.jfsql.driver.db.SharedMapHandler;
 import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.dto.Database;
@@ -71,7 +72,7 @@ public class DropTableService {
 
         logger.debug("table removed = {}", table);
 
-        transactionManager.executeOperation(database);
+        transactionManager.execute(table, Operation.DROP_TABLE);
         return deleteCount;
     }
 }

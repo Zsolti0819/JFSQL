@@ -1,6 +1,7 @@
 package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.cache.resultset.ResultSetCache;
+import com.github.jfsql.driver.db.Operation;
 import com.github.jfsql.driver.db.SharedMapHandler;
 import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.dto.Entry;
@@ -80,7 +81,7 @@ public class InsertService {
             entries.add(entryToInsert);
         }
 
-        transactionManager.executeOperation(table, false);
+        transactionManager.execute(table, Operation.INSERT);
 
         return valuesList.size();
     }

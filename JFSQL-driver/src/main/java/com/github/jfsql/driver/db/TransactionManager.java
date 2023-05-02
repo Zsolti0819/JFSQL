@@ -70,72 +70,76 @@ public abstract class TransactionManager {
         uncommittedTables.clear();
     }
 
-    /**
-     * Called when executing DROP TABLE -> then we only edit the database file
-     */
-    public void executeOperation(final Database database) throws SQLException {
-        if (!autoCommit) {
-            uncommittedDatabases.add(database);
-        } else {
-            try {
+    public void execute(final Table table, final Operation operation) throws SQLException {
+        try {
+            if (!autoCommit) {
+                executeAutoCommitFalse(table, operation);
+            } else {
+                executeAutoCommitTrue(table, operation);
+            }
+        } catch (final IOException | CommitFailedException e) {
+            e.printStackTrace();
+            rollback();
+        }
+    }
+
+    private void executeAutoCommitTrue(final Table table, final Operation operation)
+        throws IOException, SQLException {
+        final Database database = databaseManager.getDatabase();
+        switch (operation) {
+            case DROP_TABLE:
                 writer.writeDatabaseFile(database);
                 commit(String.valueOf(database.getURL().getFileName()));
-            } catch (final IOException | CommitFailedException e) {
-                e.printStackTrace();
-                rollback();
-            }
-        }
-    }
-
-    /**
-     * Called when executing INSERT, UPDATE, DELETE or ALTERING table (ADD/DROP/RENAME COLUMN) -> then we edit the table
-     * and may edit the schema too
-     */
-    public void executeOperation(final Table table, final boolean writeSchema) throws SQLException {
-        if (!autoCommit) {
-            if (writeSchema) {
-                uncommittedSchemas.add(table);
-            }
-            uncommittedTables.add(table);
-        } else {
-            try {
-                if (writeSchema) {
-                    writer.writeSchema(table);
-                    writer.writeTable(table);
-                    commit(String.valueOf(Path.of(table.getSchemaFile()).getFileName()),
-                        String.valueOf(Path.of(table.getTableFile()).getFileName()));
-                    return;
-                }
+                break;
+            case INSERT:
+            case DELETE:
+            case UPDATE:
                 writer.writeTable(table);
                 commit(String.valueOf(Path.of(table.getTableFile()).getFileName()));
-            } catch (final IOException | CommitFailedException e) {
-                e.printStackTrace();
-                rollback();
-            }
-        }
-    }
-
-    /**
-     * Called when executing CREATE TABLE, ALTER TABLE (RENAME TABLE) -> then we edit the table, schema and database
-     * file
-     */
-    public void executeOperation(final Database database, final Table table) throws SQLException {
-        if (!autoCommit) {
-            uncommittedDatabases.add(database);
-            uncommittedSchemas.add(table);
-            uncommittedTables.add(table);
-        } else {
-            try {
+                break;
+            case ALTER_TABLE_ADD_COLUMN:
+            case ALTER_TABLE_DROP_COLUMN:
+            case ALTER_TABLE_RENAME_COLUMN:
+                writer.writeSchema(table);
+                writer.writeTable(table);
+                commit(String.valueOf(Path.of(table.getSchemaFile()).getFileName()),
+                    String.valueOf(Path.of(table.getTableFile()).getFileName()));
+                break;
+            case ALTER_TABLE_RENAME_TABLE:
+            case CREATE_TABLE:
                 writer.writeDatabaseFile(database);
                 writer.writeSchema(table);
                 writer.writeTable(table);
                 commit(String.valueOf(database.getURL().getFileName()),
                     String.valueOf(Path.of(table.getSchemaFile()).getFileName()),
                     String.valueOf(Path.of(table.getTableFile()).getFileName()));
-            } catch (final IOException | CommitFailedException e) {
-                e.printStackTrace();
-                rollback();
-            }
+                break;
+        }
+    }
+
+    private void executeAutoCommitFalse(final Table table, final Operation operation) {
+        final Database database = databaseManager.getDatabase();
+        switch (operation) {
+            case DROP_TABLE:
+                uncommittedDatabases.add(database);
+                break;
+            case INSERT:
+            case DELETE:
+            case UPDATE:
+                uncommittedTables.add(table);
+                break;
+            case ALTER_TABLE_ADD_COLUMN:
+            case ALTER_TABLE_DROP_COLUMN:
+            case ALTER_TABLE_RENAME_COLUMN:
+                uncommittedSchemas.add(table);
+                uncommittedTables.add(table);
+                break;
+            case ALTER_TABLE_RENAME_TABLE:
+            case CREATE_TABLE:
+                uncommittedDatabases.add(database);
+                uncommittedSchemas.add(table);
+                uncommittedTables.add(table);
+                break;
         }
     }
 

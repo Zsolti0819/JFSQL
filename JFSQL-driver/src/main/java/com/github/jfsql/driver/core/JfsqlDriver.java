@@ -89,13 +89,15 @@ public class JfsqlDriver implements Driver {
             transactionManager, semanticValidator, fileNameCreator, reader);
         final CreateTableService createTableService = new CreateTableService(databaseManager, transactionManager,
             semanticValidator, fileNameCreator);
-        final InsertService insertService = new InsertService(tableFinder, transactionManager, semanticValidator,
+        final InsertService insertService = new InsertService(tableFinder, transactionManager,
+            semanticValidator,
             reader, preparedStatementCreator);
         final SelectService selectService = new SelectService(tableFinder, semanticValidator, columnToTypeMapper,
             whereConditionSolver, reader);
         final UpdateService updateService = new UpdateService(tableFinder, transactionManager, semanticValidator,
             columnToTypeMapper, whereConditionSolver, reader, preparedStatementCreator);
-        final DeleteService deleteService = new DeleteService(tableFinder, transactionManager, semanticValidator,
+        final DeleteService deleteService = new DeleteService(tableFinder, transactionManager,
+            semanticValidator,
             whereConditionSolver, reader);
         final DropTableService dropTableService = new DropTableService(tableFinder, databaseManager, transactionManager,
             semanticValidator, reader);
