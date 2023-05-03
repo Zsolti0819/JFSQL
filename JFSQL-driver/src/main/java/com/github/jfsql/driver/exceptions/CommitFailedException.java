@@ -1,18 +1,12 @@
 package com.github.jfsql.driver.exceptions;
 
-import com.github.jfsql.driver.db.TransactionManager;
-import com.github.jfsql.driver.dto.Database;
-import com.github.jfsql.driver.dto.Table;
-
 /**
- * Custom exception created in order to be able to catch failed commit in functions
- * {@link TransactionManager#executeOperation(Table, boolean)}, {@link TransactionManager#executeOperation(Database)}
- * {@link TransactionManager#executeOperation(Database, Table)},
+ * Custom exception created in order to be able to catch failed commit
  */
 public class CommitFailedException extends RuntimeException {
 
-    public CommitFailedException(final String message) {
-        super(message);
+    public CommitFailedException(final Throwable throwable) {
+        super(throwable);
     }
 
 }

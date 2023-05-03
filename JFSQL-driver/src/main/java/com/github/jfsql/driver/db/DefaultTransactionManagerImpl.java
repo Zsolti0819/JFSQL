@@ -38,8 +38,9 @@ public class DefaultTransactionManagerImpl extends TransactionManager {
                 }
             }
         } catch (final IOException e) {
-            throw new CommitFailedException("Commit failed.\n" + e.getMessage());
+            throw new CommitFailedException(e);
         } finally {
+            filesToKeep.clear();
             SharedMapHandler.removeCurrentThreadChangesFromMap();
         }
     }

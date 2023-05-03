@@ -59,7 +59,7 @@ public class JGitTransactionManagerImpl extends TransactionManager {
                 git.commit().setMessage(commitMessage).call();
 
             } catch (final GitAPIException | IOException e) {
-                throw new CommitFailedException("Commit failed.\n" + e.getMessage());
+                throw new CommitFailedException(e);
             } finally {
                 filesToKeep.clear();
                 SharedMapHandler.removeCurrentThreadChangesFromMap();
