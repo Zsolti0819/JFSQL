@@ -1,5 +1,5 @@
 module JFSQL.parser {
-    requires lombok;
+    requires static lombok;
     requires org.antlr.antlr4.runtime;
     requires org.apache.logging.log4j;
     exports com.github.jfsql.parser.dto;
