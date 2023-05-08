@@ -20,6 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -97,6 +98,15 @@ public class InsertService {
             if (columnsToUse.contains(column)) {
                 final int index = columnsToUse.indexOf(column);
                 value = values.get(index);
+                if ("INTEGER".equals(table.getColumnsAndTypes().get(column)) && "default".equals(value)) {
+                    final Optional<Integer> highestValue = table.getEntries().stream()
+                        .map(entry -> entry.getColumnsAndValues().get(column))
+                        .filter(Objects::nonNull)
+                        .map(Integer::valueOf)
+                        .max(Integer::compareTo);
+
+                    value = String.valueOf(highestValue.orElse(0));
+                }
             }
             if (semanticValidator.nullInsertIntoNotNullColumn(column, value, table)) {
                 SharedMapHandler.removeCurrentThreadChangesFromMap();
