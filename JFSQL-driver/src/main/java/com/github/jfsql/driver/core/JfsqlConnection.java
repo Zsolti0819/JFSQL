@@ -23,13 +23,13 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 
-@Data
 @Builder
 public class JfsqlConnection implements Connection {
 
     private final BlobFileNameCreator blobFileNameCreator;
+    @Getter
     private final DatabaseManager databaseManager;
     private final TransactionManager transactionManager;
     private final StatementServiceManager statementServiceManager;
