@@ -130,6 +130,7 @@ value
  : NUMERIC_LITERAL
  | STRING_LITERAL
  | QUESTION_MARK
+ | 'default'
  ;
 
 valuesInParentheses
