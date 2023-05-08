@@ -57,6 +57,7 @@ public class SemanticValidator {
 
     public boolean isValid(final String value, final String type) {
         return Objects.equals(type, "INTEGER") && NumberUtils.isCreatable(value)
+            || Objects.equals(type, "INTEGER") && "default".equals(value)
             || Objects.equals(type, "REAL") && NumberUtils.isCreatable(value)
             || Objects.equals(type, "TEXT") || Objects.equals(type, "BLOB");
     }
