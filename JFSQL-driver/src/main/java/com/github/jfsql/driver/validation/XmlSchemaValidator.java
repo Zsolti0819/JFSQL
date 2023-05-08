@@ -1,6 +1,7 @@
 package com.github.jfsql.driver.validation;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import javax.xml.XMLConstants;
 import javax.xml.transform.stream.StreamSource;
@@ -23,9 +24,15 @@ public enum XmlSchemaValidator implements SchemaValidator {
             final SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
             schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
             schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
-            final Schema schema = schemaFactory.newSchema(new File(schemaPath));
-            final Validator validator = schema.newValidator();
-            validator.validate(new StreamSource(new File(tablePath)));
+
+            final File schemaFile = new File(schemaPath);
+            final File tableFile = new File(tablePath);
+
+            try (final FileInputStream tableInputStream = new FileInputStream(tableFile)) {
+                final Schema schema = schemaFactory.newSchema(schemaFile);
+                final Validator validator = schema.newValidator();
+                validator.validate(new StreamSource(tableInputStream));
+            }
         } catch (final IOException | SAXException e) {
             logger.error(e.getMessage());
             return false;
