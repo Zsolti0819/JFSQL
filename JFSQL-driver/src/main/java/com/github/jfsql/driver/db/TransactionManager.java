@@ -2,7 +2,6 @@ package com.github.jfsql.driver.db;
 
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
-import com.github.jfsql.driver.exceptions.CommitFailedException;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
 import java.io.File;
@@ -66,20 +65,19 @@ public abstract class TransactionManager {
     }
 
     public void execute(final Table table, final Operation operation) throws SQLException {
-        try {
-            if (!autoCommit) {
-                executeAutoCommitFalse(table, operation);
-            } else {
+        if (!autoCommit) {
+            executeAutoCommitFalse(table, operation);
+        } else {
+            try {
                 executeAutoCommitTrue(table, operation);
+            } catch (final Exception e) {
+                e.printStackTrace();
+                rollback();
             }
-        } catch (final IOException | CommitFailedException e) {
-            e.printStackTrace();
-            rollback();
         }
     }
 
-    private void executeAutoCommitTrue(final Table table, final Operation operation)
-        throws IOException, SQLException {
+    private void executeAutoCommitTrue(final Table table, final Operation operation) throws IOException, SQLException {
         final Database database = databaseManager.getDatabase();
         switch (operation) {
             case DROP_TABLE:
@@ -87,14 +85,12 @@ public abstract class TransactionManager {
                 filesToKeep.put(String.valueOf(database.getURL()), true);
                 filesToKeep.put(table.getTableFile(), false);
                 filesToKeep.put(table.getSchemaFile(), false);
-                commit();
                 break;
             case INSERT:
             case DELETE:
             case UPDATE:
                 writer.writeTable(table);
                 filesToKeep.put(table.getTableFile(), true);
-                commit();
                 break;
             case ALTER_TABLE_ADD_COLUMN:
             case ALTER_TABLE_DROP_COLUMN:
@@ -103,7 +99,6 @@ public abstract class TransactionManager {
                 writer.writeTable(table);
                 filesToKeep.put(table.getSchemaFile(), true);
                 filesToKeep.put(table.getTableFile(), true);
-                commit();
                 break;
             case ALTER_TABLE_RENAME_TABLE:
             case CREATE_TABLE:
@@ -113,9 +108,9 @@ public abstract class TransactionManager {
                 filesToKeep.put(String.valueOf(database.getURL()), true);
                 filesToKeep.put(table.getSchemaFile(), true);
                 filesToKeep.put(table.getTableFile(), true);
-                commit();
                 break;
         }
+        commit();
     }
 
     private void executeAutoCommitFalse(final Table table, final Operation operation) {
