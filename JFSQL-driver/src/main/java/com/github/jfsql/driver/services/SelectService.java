@@ -41,7 +41,7 @@ public class SelectService {
 
     ResultSet selectFromTable(final SelectWrapper statement) throws SQLException {
         if (CACHED_RESULT_SETS.containsKey(statement)) {
-            return CACHED_RESULT_SETS.get(statement);
+            return ResultSetCache.getResultSetFromCache(statement);
         }
         final List<JoinType> joinTypes = statement.getJoinTypes();
         if (joinTypes.isEmpty()) {
