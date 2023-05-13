@@ -28,9 +28,8 @@ public class FileNameCreatorTest {
         final Reader jsonReader = mock(ReaderJsonImpl.class);
         when(jsonReader.getFileExtension()).thenCallRealMethod();
 
-        final FileNameCreator fileNameCreator = new FileNameCreator(jsonReader);
         final String expected = String.valueOf(TestUtils.JSON_TABLE_PATH);
-        final String actual = fileNameCreator.createTableFileName("myTable", database);
+        final String actual = FileNameCreator.createTableFileName("myTable", jsonReader, database);
         assertEquals(expected, actual);
     }
 
@@ -40,9 +39,8 @@ public class FileNameCreatorTest {
         final Reader xmlReader = mock(ReaderXmlImpl.class);
         when(xmlReader.getFileExtension()).thenCallRealMethod();
 
-        final FileNameCreator fileNameCreator = new FileNameCreator(xmlReader);
         final String expected = String.valueOf(TestUtils.XML_TABLE_PATH);
-        final String actual = fileNameCreator.createTableFileName("myTable", database);
+        final String actual = FileNameCreator.createTableFileName("myTable", xmlReader, database);
         assertEquals(expected, actual);
     }
 
@@ -53,9 +51,8 @@ public class FileNameCreatorTest {
         when(jsonReader.getFileExtension()).thenCallRealMethod();
         when(jsonReader.getSchemaFileExtension()).thenCallRealMethod();
 
-        final FileNameCreator fileNameCreator = new FileNameCreator(jsonReader);
         final String expected = String.valueOf(TestUtils.JSON_SCHEMA_PATH);
-        final String actual = fileNameCreator.createSchemaFileName("myTable", database);
+        final String actual = FileNameCreator.createSchemaFileName("myTable", jsonReader, database);
         assertEquals(expected, actual);
     }
 
@@ -65,9 +62,8 @@ public class FileNameCreatorTest {
         final Reader xmlReader = mock(ReaderXmlImpl.class);
         when(xmlReader.getSchemaFileExtension()).thenCallRealMethod();
 
-        final FileNameCreator fileNameCreator = new FileNameCreator(xmlReader);
         final String expected = String.valueOf(TestUtils.XSD_PATH);
-        final String actual = fileNameCreator.createSchemaFileName("myTable", database);
+        final String actual = FileNameCreator.createSchemaFileName("myTable", xmlReader, database);
         assertEquals(expected, actual);
     }
 
@@ -75,10 +71,9 @@ public class FileNameCreatorTest {
     void testCreateDatabaseFileName_json() {
         final Reader jsonReader = mock(ReaderJsonImpl.class);
         when(jsonReader.getFileExtension()).thenCallRealMethod();
-        final FileNameCreator fileNameCreator = new FileNameCreator(jsonReader);
         final String expected =
             TestUtils.DATABASE_PATH + File.separator + TestUtils.DATABASE_PATH.getFileName() + ".json";
-        final Path actual = fileNameCreator.createDatabaseFileName(String.valueOf(TestUtils.DATABASE_PATH));
+        final Path actual = FileNameCreator.createDatabaseFileName(String.valueOf(TestUtils.DATABASE_PATH), jsonReader);
         assertEquals(expected, actual.toString());
     }
 
@@ -86,10 +81,9 @@ public class FileNameCreatorTest {
     void testCreateDatabaseFileName_xml() {
         final Reader xmlReader = mock(ReaderXmlImpl.class);
         when(xmlReader.getFileExtension()).thenCallRealMethod();
-        final FileNameCreator fileNameCreator = new FileNameCreator(xmlReader);
         final String expected =
             TestUtils.DATABASE_PATH + File.separator + TestUtils.DATABASE_PATH.getFileName() + ".xml";
-        final Path actual = fileNameCreator.createDatabaseFileName(String.valueOf(TestUtils.DATABASE_PATH));
+        final Path actual = FileNameCreator.createDatabaseFileName(String.valueOf(TestUtils.DATABASE_PATH), xmlReader);
         assertEquals(expected, actual.toString());
     }
 }

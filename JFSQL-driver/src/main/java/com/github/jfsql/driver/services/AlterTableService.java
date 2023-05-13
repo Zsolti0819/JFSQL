@@ -29,7 +29,6 @@ public class AlterTableService {
     private final DatabaseManager databaseManager;
     private final TransactionManager transactionManager;
     private final SemanticValidator semanticValidator;
-    private final FileNameCreator fileNameCreator;
     private final Reader reader;
 
     int alterTable(final AlterTableWrapper statement) throws SQLException {
@@ -62,8 +61,8 @@ public class AlterTableService {
         SharedMapHandler.addTableToSharedMap(table);
         ResultSetCache.removeResultSetFromCache(table.getName());
 
-        final String newTableFile = fileNameCreator.createTableFileName(newTableName, database);
-        final String newSchemaFile = fileNameCreator.createSchemaFileName(newTableName, database);
+        final String newTableFile = FileNameCreator.createTableFileName(newTableName, reader, database);
+        final String newSchemaFile = FileNameCreator.createSchemaFileName(newTableName, reader, database);
 
         List<Entry> entries = table.getEntries();
         if (entries == null) {

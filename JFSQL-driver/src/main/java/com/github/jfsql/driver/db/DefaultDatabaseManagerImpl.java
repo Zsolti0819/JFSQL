@@ -4,7 +4,6 @@ import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
-import com.github.jfsql.driver.util.FileNameCreator;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import java.io.File;
 import java.io.IOException;
@@ -16,9 +15,9 @@ import java.util.List;
 
 public class DefaultDatabaseManagerImpl extends DatabaseManager {
 
-    public DefaultDatabaseManagerImpl(final String URL, final SemanticValidator semanticValidator,
-        final FileNameCreator fileNameCreator, final Reader reader, final Writer writer) throws SQLException {
-        super(URL, semanticValidator, fileNameCreator, reader, writer);
+    public DefaultDatabaseManagerImpl(final String URL, final SemanticValidator semanticValidator, final Reader reader,
+        final Writer writer) throws SQLException {
+        super(URL, semanticValidator, reader, writer);
     }
 
     @Override

@@ -19,6 +19,7 @@ import com.github.jfsql.driver.util.FileNameCreator;
 import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.AlterTableWrapper;
+import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
@@ -70,6 +71,8 @@ class AlterTableServiceTest {
         when(statement.getTableName()).thenReturn("myTable");
         when(statement.getNewTableName()).thenReturn("myTableEdited");
         when(tableFinder.getTableByName("myTable")).thenReturn(table);
+        when(database.getURL()).thenReturn(Path.of("someUrl"));
+        when(reader.getFileExtension()).thenReturn("someExtension");
 
         final AlterTableService alterTableServiceSpy = spy(alterTableService);
         final int result = alterTableServiceSpy.alterTable(statement);

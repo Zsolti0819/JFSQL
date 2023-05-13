@@ -21,7 +21,6 @@ import com.github.jfsql.driver.services.StatementServiceManager;
 import com.github.jfsql.driver.services.UpdateService;
 import com.github.jfsql.driver.util.BlobFileNameCreator;
 import com.github.jfsql.driver.util.ColumnToTypeMapper;
-import com.github.jfsql.driver.util.FileNameCreator;
 import com.github.jfsql.driver.util.IoOperationHandler;
 import com.github.jfsql.driver.util.PreparedStatementCreator;
 import com.github.jfsql.driver.util.TableFinder;
@@ -70,9 +69,8 @@ public class JfsqlDriver implements Driver {
         final Cache cache = CacheFactory.createCache(propertiesReader);
         final Reader reader = ReaderFactory.createReader(propertiesReader);
         final Writer writer = WriterFactory.createWriter(propertiesReader);
-        final FileNameCreator fileNameCreator = new FileNameCreator(reader);
         final DatabaseManager databaseManager = DatabaseManagerFactory
-            .createDatabaseManager(propertiesReader, URL, semanticValidator, fileNameCreator, reader, writer);
+            .createDatabaseManager(propertiesReader, URL, semanticValidator, reader, writer);
         final TransactionManager transactionManager = TransactionManagerFactory
             .createTransactionManager(propertiesReader, databaseManager, reader, writer);
 
@@ -86,9 +84,9 @@ public class JfsqlDriver implements Driver {
 
         // Specific statement services
         final AlterTableService alterTableService = new AlterTableService(tableFinder, databaseManager,
-            transactionManager, semanticValidator, fileNameCreator, reader);
+            transactionManager, semanticValidator, reader);
         final CreateTableService createTableService = new CreateTableService(databaseManager, transactionManager,
-            semanticValidator, fileNameCreator);
+            semanticValidator, reader);
         final InsertService insertService = new InsertService(tableFinder, transactionManager,
             semanticValidator,
             reader, preparedStatementCreator);
@@ -114,7 +112,6 @@ public class JfsqlDriver implements Driver {
             .deleteService(deleteService)
             .dropTableService(dropTableService)
             .ioOperationHandler(ioOperationHandler)
-            .fileNameCreator(fileNameCreator)
             .tableFinder(tableFinder)
             .semanticValidator(semanticValidator)
             .columnToTypeMapper(columnToTypeMapper)

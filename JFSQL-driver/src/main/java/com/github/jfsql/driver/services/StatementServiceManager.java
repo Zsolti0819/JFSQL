@@ -2,7 +2,6 @@ package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.cache.statement.Cache;
 import com.github.jfsql.driver.util.ColumnToTypeMapper;
-import com.github.jfsql.driver.util.FileNameCreator;
 import com.github.jfsql.driver.util.IoOperationHandler;
 import com.github.jfsql.driver.util.PreparedStatementCreator;
 import com.github.jfsql.driver.util.TableFinder;
@@ -39,7 +38,6 @@ public class StatementServiceManager {
     private final DeleteService deleteService;
     private final DropTableService dropTableService;
     private final IoOperationHandler ioOperationHandler;
-    private final FileNameCreator fileNameCreator;
     private final TableFinder tableFinder;
     private final SemanticValidator semanticValidator;
     private final ColumnToTypeMapper columnToTypeMapper;

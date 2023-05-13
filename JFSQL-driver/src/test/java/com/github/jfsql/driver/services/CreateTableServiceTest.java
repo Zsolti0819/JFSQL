@@ -12,9 +12,10 @@ import static org.mockito.Mockito.when;
 import com.github.jfsql.driver.db.DatabaseManager;
 import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.dto.Database;
-import com.github.jfsql.driver.util.FileNameCreator;
+import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.CreateTableWrapper;
+import java.nio.file.Path;
 import java.sql.SQLException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -39,10 +40,10 @@ class CreateTableServiceTest {
     private Database database;
 
     @Mock
-    private FileNameCreator fileNameCreator;
+    private CreateTableWrapper statement;
 
     @Mock
-    private CreateTableWrapper statement;
+    private Reader reader;
 
     @InjectMocks
     private CreateTableService createTableService;
@@ -51,13 +52,14 @@ class CreateTableServiceTest {
     void testCreateTable_normally() throws SQLException {
         when(databaseManager.getDatabase()).thenReturn(database);
         when(semanticValidator.tableExists(statement, database)).thenReturn(false);
+        when(statement.getTableName()).thenReturn("myTable");
+        when(database.getURL()).thenReturn(Path.of("someUrl"));
+        when(reader.getFileExtension()).thenReturn("someExtension");
 
         createTableService.createTable(statement);
 
         verify(semanticValidator, times(1)).statementColumnsContainDuplicates(any());
         verify(database, times(1)).getTables();
-        verify(fileNameCreator, times(1)).createTableFileName(any(), any());
-        verify(fileNameCreator, times(1)).createSchemaFileName(any(), any());
         verify(transactionManager, times(1)).execute(any(), any());
 
     }
@@ -70,8 +72,6 @@ class CreateTableServiceTest {
         final SQLException thrown = assertThrows(SQLException.class,
             () -> createTableService.createTable(statement));
         Assertions.assertEquals("Table name cannot be the same as database name.", thrown.getMessage());
-        verify(fileNameCreator, never()).createTableFileName(any(), any());
-        verify(fileNameCreator, never()).createSchemaFileName(any(), any());
         verify(transactionManager, never()).execute(any(), any());
     }
 
@@ -84,8 +84,6 @@ class CreateTableServiceTest {
         final SQLException thrown = assertThrows(SQLException.class, () -> createTableService.createTable(
             statement));
         Assertions.assertEquals("Table '" + statement.getTableName() + "' already exists.", thrown.getMessage());
-        verify(fileNameCreator, never()).createTableFileName(any(), any());
-        verify(fileNameCreator, never()).createSchemaFileName(any(), any());
         verify(transactionManager, never()).execute(any(), any());
     }
 
@@ -96,8 +94,6 @@ class CreateTableServiceTest {
         when(semanticValidator.tableExists(statement, database)).thenReturn(true);
 
         assertDoesNotThrow(() -> createTableService.createTable(statement));
-        verify(fileNameCreator, never()).createTableFileName(any(), any());
-        verify(fileNameCreator, never()).createSchemaFileName(any(), any());
         verify(transactionManager, never()).execute(any(), any());
     }
 
@@ -111,8 +107,6 @@ class CreateTableServiceTest {
             statement));
         assertEquals("Duplicate columns were found in the statement.", thrown.getMessage());
 
-        verify(fileNameCreator, never()).createTableFileName(any(), any());
-        verify(fileNameCreator, never()).createSchemaFileName(any(), any());
         verify(transactionManager, never()).execute(any(), any());
     }
 

@@ -6,6 +6,7 @@ import com.github.jfsql.driver.db.SharedMapHandler;
 import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
+import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.util.FileNameCreator;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.CreateTableWrapper;
@@ -27,7 +28,7 @@ public class CreateTableService {
     private final DatabaseManager databaseManager;
     private final TransactionManager transactionManager;
     private final SemanticValidator semanticValidator;
-    private final FileNameCreator fileNameCreator;
+    private final Reader reader;
 
     int createTable(final CreateTableWrapper statement) throws SQLException {
         final Database database = databaseManager.getDatabase();
@@ -62,8 +63,8 @@ public class CreateTableService {
                 LinkedHashMap::new));
 
         final Map<String, Boolean> notNulLColumns = statement.getNotNullColumns();
-        final String tableFile = fileNameCreator.createTableFileName(tableName, database);
-        final String schemaFile = fileNameCreator.createSchemaFileName(tableName, database);
+        final String tableFile = FileNameCreator.createTableFileName(tableName, reader, database);
+        final String schemaFile = FileNameCreator.createSchemaFileName(tableName, reader, database);
 
         final Table table = Table.builder()
             .name(tableName)
