@@ -144,27 +144,6 @@ public class ReaderJsonImpl implements Reader {
     }
 
     @Override
-    public Set<File> getFilesFromDatabaseFile(final Database database) throws IOException {
-        final String jsonFilePath = String.valueOf(database.getURL());
-        try (final FileReader fileReader = new FileReader(jsonFilePath)) {
-            final JsonElement jsonElement = JsonParser.parseReader(fileReader);
-            final Set<File> files = new HashSet<>();
-            if (jsonElement.isJsonObject()) {
-                final JsonObject rootObject = jsonElement.getAsJsonObject();
-                final JsonArray tableArray = rootObject.getAsJsonArray("Table");
-                for (final JsonElement tableElement : tableArray) {
-                    final JsonObject tableObject = tableElement.getAsJsonObject();
-                    final String pathToTable = tableObject.get("pathToTable").getAsString();
-                    final String pathToSchema = tableObject.get("pathToSchema").getAsString();
-                    files.add(new File(pathToTable));
-                    files.add(new File(pathToSchema));
-                }
-            }
-            return files;
-        }
-    }
-
-    @Override
     public Set<File> getBlobsFromTables(final Database database) throws IOException {
         final Set<File> fileSet = new HashSet<>();
         for (final Table table : database.getTables()) {

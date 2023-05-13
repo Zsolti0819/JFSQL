@@ -179,35 +179,6 @@ public class ReaderXmlImpl implements Reader {
     }
 
     @Override
-    public Set<File> getFilesFromDatabaseFile(final Database database) throws IOException {
-        final String xmlFilePath = String.valueOf(database.getURL());
-        try {
-            final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-            final DocumentBuilder builder = factory.newDocumentBuilder();
-            final Document doc = builder.parse(xmlFilePath);
-
-            final Set<File> fileSet = new HashSet<>();
-
-            NodeList pathList = doc.getElementsByTagName("pathToTable");
-            for (int i = 0; i < pathList.getLength(); i++) {
-                final String path = pathList.item(i).getTextContent();
-                fileSet.add(new File(path));
-            }
-
-            pathList = doc.getElementsByTagName("pathToSchema");
-            for (int i = 0; i < pathList.getLength(); i++) {
-                final String path = pathList.item(i).getTextContent();
-                fileSet.add(new File(path));
-            }
-
-            return fileSet;
-        } catch (final ParserConfigurationException | SAXException e) {
-            throw new IOException(e);
-        }
-    }
-
-    @Override
     public Set<File> getBlobsFromTables(final Database database) throws IOException {
         final Set<File> fileSet = new HashSet<>();
         for (final Table table : database.getTables()) {

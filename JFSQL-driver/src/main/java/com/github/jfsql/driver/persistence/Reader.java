@@ -22,8 +22,6 @@ public interface Reader {
 
     String readBlob(final String pathToBlob) throws IOException;
 
-    Set<File> getFilesFromDatabaseFile(final Database database) throws IOException;
-
     Set<File> getBlobsFromTables(final Database database) throws IOException;
 
 }
