@@ -7,7 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import lombok.experimental.UtilityClass;
 
+@UtilityClass
 public class WhereConditionSolver {
 
     public List<Entry> getWhereEntries(final Table table, final StatementWithWhere statement) {

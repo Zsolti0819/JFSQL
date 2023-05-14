@@ -14,10 +14,10 @@ import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
-import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.DropTableWrapper;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,9 +27,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class DropTableServiceTest {
-
-    @Mock
-    private TableFinder tableFinder;
 
     @Mock
     private DatabaseManager databaseManager;
@@ -58,7 +55,11 @@ class DropTableServiceTest {
     @Test
     void testDropTable_normally() throws SQLException {
         when(databaseManager.getDatabase()).thenReturn(database);
-        when(tableFinder.getTableByName(statement.getTableName())).thenReturn(table);
+        final List<Table> tables = new ArrayList<>();
+        tables.add(table);
+        when(database.getTables()).thenReturn(tables);
+        when(table.getName()).thenReturn("myTable");
+        when(statement.getTableName()).thenReturn("myTable");
         when(statement.isIfExistsPresent()).thenReturn(false);
         when(semanticValidator.tableExists(statement, database)).thenReturn(true);
 
@@ -73,7 +74,8 @@ class DropTableServiceTest {
 
     @Test
     void testDropTable_tableFileNotExists() throws SQLException {
-        when(tableFinder.getTableByName(statement.getTableName())).thenReturn(table);
+        when(databaseManager.getDatabase()).thenReturn(database);
+        when(database.getTables()).thenReturn(List.of(table));
         when(statement.isIfExistsPresent()).thenReturn(false);
         final SQLException thrown = assertThrows(SQLException.class,
             () -> dropTableService.dropTable(statement));
@@ -87,9 +89,11 @@ class DropTableServiceTest {
 
     @Test
     void testDropTable_ifExists_doesNotThrowException() throws SQLException {
-        when(statement.isIfExistsPresent()).thenReturn(true);
+        when(databaseManager.getDatabase()).thenReturn(database);
+        final List<Table> tables = new ArrayList<>();
+        when(database.getTables()).thenReturn(tables);
         when(statement.getTableName()).thenReturn("myTable");
-        when(tableFinder.getTableByName(statement.getTableName())).thenThrow(SQLException.class);
+        when(statement.isIfExistsPresent()).thenReturn(true);
 
         assertDoesNotThrow(() -> dropTableService.dropTable(statement));
         verify(transactionManager, never()).execute(any(), any(), any());

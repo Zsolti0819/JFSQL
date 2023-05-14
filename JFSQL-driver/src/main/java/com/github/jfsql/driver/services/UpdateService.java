@@ -1,15 +1,16 @@
 package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.cache.resultset.ResultSetCache;
+import com.github.jfsql.driver.db.DatabaseManager;
 import com.github.jfsql.driver.db.Operation;
 import com.github.jfsql.driver.db.SharedMapHandler;
 import com.github.jfsql.driver.db.TransactionManager;
+import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.LargeObject;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.util.ColumnToTypeMapper;
-import com.github.jfsql.driver.util.PreparedStatementCreator;
 import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.driver.util.WhereConditionSolver;
 import com.github.jfsql.driver.validation.SemanticValidator;
@@ -29,17 +30,16 @@ import org.apache.logging.log4j.Logger;
 public class UpdateService {
 
     private static final Logger logger = LogManager.getLogger(UpdateService.class);
-    private final TableFinder tableFinder;
+    private final DatabaseManager databaseManager;
     private final TransactionManager transactionManager;
     private final SemanticValidator semanticValidator;
-    private final ColumnToTypeMapper columnToTypeMapper;
-    private final WhereConditionSolver whereConditionSolver;
     private final Reader reader;
     private final PreparedStatementCreator preparedStatementCreator;
 
     int updateTable(final UpdateWrapper statement) throws SQLException {
         final String tableName = statement.getTableName();
-        final Table table = tableFinder.getTableByName(tableName);
+        final Database database = databaseManager.getDatabase();
+        final Table table = TableFinder.getTableByName(tableName, database);
 
         if (!semanticValidator.allColumnsExist(table, statement)) {
             throw new SQLException("Some columns entered doesn't exist in '" + table.getName() + "'.");
@@ -63,12 +63,12 @@ public class UpdateService {
             table.setEntries(entries);
         }
 
-        final List<Entry> whereEntries = whereConditionSolver.getWhereEntries(table, statement);
+        final List<Entry> whereEntries = WhereConditionSolver.getWhereEntries(table, statement);
         logger.debug("entries to update = {}", whereEntries);
 
         final List<String> columns = statement.getColumns();
         final List<String> values = statement.getValues();
-        final Map<String, String> columnsMappedToTypes = columnToTypeMapper.mapColumnsToTypes(statement, table);
+        final Map<String, String> columnsMappedToTypes = ColumnToTypeMapper.mapColumnsToTypes(statement, table);
         final List<String> types = new ArrayList<>(columnsMappedToTypes.values());
 
         for (final Entry entry : whereEntries) {

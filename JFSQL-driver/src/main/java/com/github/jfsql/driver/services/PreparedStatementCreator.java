@@ -1,8 +1,11 @@
-package com.github.jfsql.driver.util;
+package com.github.jfsql.driver.services;
 
+import com.github.jfsql.driver.db.DatabaseManager;
+import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.LargeObject;
 import com.github.jfsql.driver.dto.Table;
+import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.parser.dto.BaseStatement;
 import com.github.jfsql.parser.dto.DeleteStatement;
 import com.github.jfsql.parser.dto.DeleteWrapper;
@@ -26,7 +29,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PreparedStatementCreator {
 
-    private final TableFinder tableFinder;
+    private final DatabaseManager databaseManager;
     private Object[] parameters;
 
     public void initParameterCount(final BaseStatement statement) throws SQLException {
@@ -72,7 +75,8 @@ public class PreparedStatementCreator {
         final List<List<String>> listOfValueLists = new ArrayList<>();
         final List<String> statementColumns = statement.getColumns();
         if (statementColumns.isEmpty()) {
-            final Table table = tableFinder.getTableByName(statement.getTableName());
+            final Database database = databaseManager.getDatabase();
+            final Table table = TableFinder.getTableByName(statement.getTableName(), database);
             columns = new ArrayList<>(table.getColumnsAndTypes().keySet());
         } else {
             columns = statementColumns;

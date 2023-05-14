@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.experimental.UtilityClass;
 
+@UtilityClass
 public class ColumnToTypeMapper {
 
     public Map<String, String> mapColumnsToTypes(final StatementWithColumns statement, final Table table) {

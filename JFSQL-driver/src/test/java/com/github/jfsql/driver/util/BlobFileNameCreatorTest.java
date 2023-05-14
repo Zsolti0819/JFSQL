@@ -6,15 +6,15 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.github.jfsql.driver.TestUtils;
-import com.github.jfsql.driver.config.Persistence;
-import com.github.jfsql.driver.config.PropertiesReader;
 import com.github.jfsql.driver.db.DatabaseManager;
+import com.github.jfsql.driver.persistence.Writer;
+import com.github.jfsql.driver.persistence.WriterXmlImpl;
 import java.io.File;
 import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -26,16 +26,13 @@ public class BlobFileNameCreatorTest {
     @Mock
     private IoOperationHandler ioOperationHandler;
 
-    @Mock
-    private PropertiesReader propertiesReader;
+    @Spy
+    private Writer writer = new WriterXmlImpl(false);
 
-    @InjectMocks
-    private BlobFileNameCreator blobFileNameCreator;
 
     @Test
     public void getBlobURL() {
         when(databaseManager.getURL()).thenReturn(String.valueOf(TestUtils.XML_DATABASE_PATH));
-        when(propertiesReader.getPersistence()).thenReturn(Persistence.XML);
 
         final File mockFile1 = mock(java.io.File.class);
         when(mockFile1.getName()).thenReturn("blob1.xml");
@@ -51,6 +48,6 @@ public class BlobFileNameCreatorTest {
         );
 
         final String nextBlobUrl = TestUtils.XML_DATABASE_PATH + File.separator + "blob" + File.separator + "blob5.xml";
-        assertEquals(nextBlobUrl, blobFileNameCreator.getBlobURL());
+        assertEquals(nextBlobUrl, BlobFileNameCreator.getBlobURL(databaseManager, ioOperationHandler, writer));
     }
 }

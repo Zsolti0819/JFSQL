@@ -4,6 +4,8 @@ import static com.github.jfsql.driver.cache.resultset.ResultSetCache.CACHED_RESU
 
 import com.github.jfsql.driver.cache.resultset.ResultSetCache;
 import com.github.jfsql.driver.core.JfsqlResultSet;
+import com.github.jfsql.driver.db.DatabaseManager;
+import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
@@ -33,10 +35,8 @@ import org.apache.logging.log4j.Logger;
 public class SelectService {
 
     private static final Logger logger = LogManager.getLogger(SelectService.class);
-    private final TableFinder tableFinder;
+    private final DatabaseManager databaseManager;
     private final SemanticValidator semanticValidator;
-    private final ColumnToTypeMapper columnToTypeMapper;
-    private final WhereConditionSolver whereConditionSolver;
     private final Reader reader;
 
     ResultSet selectFromTable(final SelectWrapper statement) throws SQLException {
@@ -52,7 +52,8 @@ public class SelectService {
 
     private ResultSet simpleSelect(final SelectWrapper statement) throws SQLException {
         final String tableName = statement.getTableName();
-        final Table table = tableFinder.getTableByName(tableName);
+        final Database database = databaseManager.getDatabase();
+        final Table table = TableFinder.getTableByName(tableName, database);
         final List<String> selectedColumns = statement.getColumns();
         for (final String columnName : selectedColumns) {
             if (!semanticValidator.columnIsPresentInTable(table, columnName)) {
@@ -143,14 +144,14 @@ public class SelectService {
             selectedColumns = new ArrayList<>(table.getColumnsAndTypes().keySet());
             columnsAndTypes = table.getColumnsAndTypes();
         } else {
-            columnsAndTypes = columnToTypeMapper.mapColumnsToTypes(statement, table);
+            columnsAndTypes = ColumnToTypeMapper.mapColumnsToTypes(statement, table);
         }
 
         final String tableName = statement.getTableName();
         final String tableFile = table.getTableFile();
         final String schemaFile = table.getSchemaFile();
         final Map<String, Boolean> notNullColumns = table.getNotNullColumns();
-        final List<Entry> whereEntries = whereConditionSolver.getWhereEntries(table, statement);
+        final List<Entry> whereEntries = WhereConditionSolver.getWhereEntries(table, statement);
         List<Entry> orderedEntries = getEntriesWithSortedColumns(selectedColumns, whereEntries);
 
         final String limit = statement.getLimit();
@@ -293,8 +294,9 @@ public class SelectService {
         }
 
         final Map<String, Table> tables = new LinkedHashMap<>();
+        final Database database = databaseManager.getDatabase();
         for (final String tableName : tableNames) {
-            final Table table = tableFinder.getTableByName(tableName);
+            final Table table = TableFinder.getTableByName(tableName, database);
             tables.put(tableName, table);
         }
 

@@ -8,11 +8,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.github.jfsql.driver.db.DatabaseManager;
 import com.github.jfsql.driver.db.TransactionManager;
+import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
-import com.github.jfsql.driver.util.PreparedStatementCreator;
-import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.InsertWrapper;
 import java.sql.SQLException;
@@ -31,7 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class InsertServiceTest {
 
     @Mock
-    private TableFinder tableFinder;
+    private DatabaseManager databaseManager;
 
     @Mock
     private TransactionManager transactionManager;
@@ -41,6 +41,9 @@ class InsertServiceTest {
 
     @Mock
     private PreparedStatementCreator preparedStatementCreator;
+
+    @Mock
+    private Database database;
 
     @Mock
     private Table table;
@@ -57,11 +60,12 @@ class InsertServiceTest {
     @Test
     void testInsert_noExplicitColumns() throws SQLException {
         when(semanticValidator.allInsertValuesAreEqualLength(statement)).thenReturn(true);
-        when(tableFinder.getTableByName(statement.getTableName())).thenReturn(table);
         when(semanticValidator.valueCountIsLteTableColumnCount(table, statement)).thenReturn(true);
         when(semanticValidator.allColumnsExist(table, statement)).thenReturn(true);
         when(semanticValidator.allInsertValuesAreValid(table, statement)).thenReturn(true);
         when(table.getEntries()).thenReturn(entries);
+        when(databaseManager.getDatabase()).thenReturn(database);
+        when(database.getTables()).thenReturn(List.of(table));
 
         insertService.insertIntoTable(statement);
 

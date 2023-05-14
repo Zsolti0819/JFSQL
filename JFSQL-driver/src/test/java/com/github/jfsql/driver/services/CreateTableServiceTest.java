@@ -40,10 +40,11 @@ class CreateTableServiceTest {
     private Database database;
 
     @Mock
-    private CreateTableWrapper statement;
+    private Reader reader;
 
     @Mock
-    private Reader reader;
+    private CreateTableWrapper statement;
+
 
     @InjectMocks
     private CreateTableService createTableService;

@@ -1,6 +1,7 @@
 package com.github.jfsql.driver.core;
 
 import com.github.jfsql.driver.dto.LargeObject;
+import com.github.jfsql.driver.persistence.Writer;
 import com.github.jfsql.driver.services.StatementServiceManager;
 import com.github.jfsql.driver.util.BlobFileNameCreator;
 import java.io.ByteArrayOutputStream;
@@ -36,15 +37,15 @@ import lombok.Data;
 public class JfsqlPreparedStatement implements PreparedStatement {
 
     private final StatementServiceManager statementServiceManager;
-    private final BlobFileNameCreator blobFileNameCreator;
+    private final Writer writer;
     private final String sql;
     private JfsqlConnection connection;
 
     JfsqlPreparedStatement(final JfsqlConnection connection, final StatementServiceManager statementServiceManager,
-        final BlobFileNameCreator blobFileNameCreator, final String sql) throws SQLException {
+        final Writer writer, final String sql) throws SQLException {
         this.connection = connection;
         this.statementServiceManager = statementServiceManager;
-        this.blobFileNameCreator = blobFileNameCreator;
+        this.writer = writer;
         this.sql = sql;
         statementServiceManager.initParameterCount(sql);
     }
@@ -194,7 +195,8 @@ public class JfsqlPreparedStatement implements PreparedStatement {
             x.close();
             byteArrayOutputStream.close();
             final String value = Base64.getEncoder().encodeToString(byteArray);
-            final String path = blobFileNameCreator.getBlobURL();
+            final String path = BlobFileNameCreator.getBlobURL(connection.getDatabaseManager(),
+                getStatementServiceManager().getIoOperationHandler(), writer);
             final LargeObject largeObject = new LargeObject(path, value);
             statementServiceManager.getParameters()[parameterIndex - 1] = largeObject;
         } catch (final IOException e) {

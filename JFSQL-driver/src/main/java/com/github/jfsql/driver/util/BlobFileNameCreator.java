@@ -1,8 +1,8 @@
 package com.github.jfsql.driver.util;
 
-import com.github.jfsql.driver.config.Persistence;
-import com.github.jfsql.driver.config.PropertiesReader;
 import com.github.jfsql.driver.db.DatabaseManager;
+import com.github.jfsql.driver.persistence.Writer;
+import com.github.jfsql.driver.persistence.WriterXmlImpl;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -10,22 +10,20 @@ import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import lombok.RequiredArgsConstructor;
+import lombok.experimental.UtilityClass;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@RequiredArgsConstructor
+@UtilityClass
 public class BlobFileNameCreator {
 
     private static final Logger logger = LogManager.getLogger(BlobFileNameCreator.class);
-    private final DatabaseManager databaseManager;
-    private final IoOperationHandler ioOperationHandler;
-    private final PropertiesReader propertiesReader;
 
-    public String getBlobURL() {
+    public String getBlobURL(final DatabaseManager databaseManager, final IoOperationHandler ioOperationHandler,
+        final Writer writer) {
         final String URL = databaseManager.getURL();
         final Path pathURL = Path.of(URL);
-        final String fileExtension = propertiesReader.getPersistence().equals(Persistence.XML) ? "xml" : "json";
+        final String fileExtension = writer instanceof WriterXmlImpl ? "xml" : "json";
         final List<Integer> fileNumbers = new ArrayList<>();
         final Pattern pattern = Pattern.compile("blob" + "(\\d+)" + "\\." + fileExtension);
         final Collection<File> files = ioOperationHandler.listFiles(pathURL, fileExtension);

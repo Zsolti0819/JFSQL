@@ -1,14 +1,15 @@
 package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.cache.resultset.ResultSetCache;
+import com.github.jfsql.driver.db.DatabaseManager;
 import com.github.jfsql.driver.db.Operation;
 import com.github.jfsql.driver.db.SharedMapHandler;
 import com.github.jfsql.driver.db.TransactionManager;
+import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.LargeObject;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
-import com.github.jfsql.driver.util.PreparedStatementCreator;
 import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.InsertWrapper;
@@ -29,7 +30,7 @@ import org.apache.logging.log4j.Logger;
 public class InsertService {
 
     private static final Logger logger = LogManager.getLogger(InsertService.class);
-    private final TableFinder tableFinder;
+    private final DatabaseManager databaseManager;
     private final TransactionManager transactionManager;
     private final SemanticValidator semanticValidator;
     private final Reader reader;
@@ -45,7 +46,8 @@ public class InsertService {
         }
 
         final String tableName = statement.getTableName();
-        final Table table = tableFinder.getTableByName(tableName);
+        final Database database = databaseManager.getDatabase();
+        final Table table = TableFinder.getTableByName(tableName, database);
 
         if (!semanticValidator.valueCountIsLteTableColumnCount(table, statement)) {
             throw new SQLException("The values in the parentheses were greater than the table's column count.");

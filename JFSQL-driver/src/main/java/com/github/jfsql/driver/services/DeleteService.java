@@ -1,9 +1,11 @@
 package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.cache.resultset.ResultSetCache;
+import com.github.jfsql.driver.db.DatabaseManager;
 import com.github.jfsql.driver.db.Operation;
 import com.github.jfsql.driver.db.SharedMapHandler;
 import com.github.jfsql.driver.db.TransactionManager;
+import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
@@ -25,20 +27,18 @@ import org.apache.logging.log4j.Logger;
 public class DeleteService {
 
     private static final Logger logger = LogManager.getLogger(DeleteService.class);
-    private final TableFinder tableFinder;
     private final TransactionManager transactionManager;
+    private final DatabaseManager databaseManager;
     private final SemanticValidator semanticValidator;
-    private final WhereConditionSolver whereConditionSolver;
     private final Reader reader;
 
     int deleteFromTable(final DeleteWrapper statement) throws SQLException {
         final List<String> whereColumns = statement.getWhereColumns();
-        final Table table = tableFinder.getTableByName(statement.getTableName());
+        final Database database = databaseManager.getDatabase();
+        final Table table = TableFinder.getTableByName(statement.getTableName(), database);
 
-        if (!whereColumns.isEmpty()) {
-            if (!semanticValidator.allWhereColumnsExist(table, statement)) {
-                throw new SQLException("Some columns entered doesn't exist in '" + table.getName() + "'.");
-            }
+        if (!whereColumns.isEmpty() && (!semanticValidator.allWhereColumnsExist(table, statement))) {
+            throw new SQLException("Some columns entered doesn't exist in '" + table.getName() + "'.");
         }
 
         SharedMapHandler.addTableToSharedMap(table);
@@ -58,7 +58,7 @@ public class DeleteService {
         final int deleteCount;
         final int entriesSizeBefore = entries.size();
 
-        final List<Entry> whereEntries = whereConditionSolver.getWhereEntries(table, statement);
+        final List<Entry> whereEntries = WhereConditionSolver.getWhereEntries(table, statement);
 
         logger.debug("entries for removal = {}", whereEntries);
 

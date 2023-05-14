@@ -1,11 +1,7 @@
 package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.cache.statement.Cache;
-import com.github.jfsql.driver.util.ColumnToTypeMapper;
 import com.github.jfsql.driver.util.IoOperationHandler;
-import com.github.jfsql.driver.util.PreparedStatementCreator;
-import com.github.jfsql.driver.util.TableFinder;
-import com.github.jfsql.driver.util.WhereConditionSolver;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.core.Parser;
 import com.github.jfsql.parser.dto.AlterTableWrapper;
@@ -38,10 +34,7 @@ public class StatementServiceManager {
     private final DeleteService deleteService;
     private final DropTableService dropTableService;
     private final IoOperationHandler ioOperationHandler;
-    private final TableFinder tableFinder;
     private final SemanticValidator semanticValidator;
-    private final ColumnToTypeMapper columnToTypeMapper;
-    private final WhereConditionSolver whereConditionSolver;
 
     private ResultSet resultSet;
     private int updateCount;

@@ -27,7 +27,6 @@ import org.apache.commons.lang3.StringUtils;
 @RequiredArgsConstructor
 public class AlterTableService {
 
-    private final TableFinder tableFinder;
     private final DatabaseManager databaseManager;
     private final TransactionManager transactionManager;
     private final SemanticValidator semanticValidator;
@@ -36,7 +35,7 @@ public class AlterTableService {
     int alterTable(final AlterTableWrapper statement) throws SQLException {
         final Database database = databaseManager.getDatabase();
         final String tableName = statement.getTableName();
-        final Table table = tableFinder.getTableByName(tableName);
+        final Table table = TableFinder.getTableByName(tableName, database);
         if (statement.getNewTableName() != null) {
             renameTable(statement, database, table);
         } else if (statement.getOldColumnName() != null) {

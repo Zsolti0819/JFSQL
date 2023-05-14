@@ -16,15 +16,11 @@ import com.github.jfsql.driver.services.CreateTableService;
 import com.github.jfsql.driver.services.DeleteService;
 import com.github.jfsql.driver.services.DropTableService;
 import com.github.jfsql.driver.services.InsertService;
+import com.github.jfsql.driver.services.PreparedStatementCreator;
 import com.github.jfsql.driver.services.SelectService;
 import com.github.jfsql.driver.services.StatementServiceManager;
 import com.github.jfsql.driver.services.UpdateService;
-import com.github.jfsql.driver.util.BlobFileNameCreator;
-import com.github.jfsql.driver.util.ColumnToTypeMapper;
 import com.github.jfsql.driver.util.IoOperationHandler;
-import com.github.jfsql.driver.util.PreparedStatementCreator;
-import com.github.jfsql.driver.util.TableFinder;
-import com.github.jfsql.driver.util.WhereConditionSolver;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.core.Parser;
 import java.sql.Connection;
@@ -77,27 +73,21 @@ public class JfsqlDriver implements Driver {
         // Classes used in statement services
         final Parser parser = new Parser();
         final IoOperationHandler ioOperationHandler = new IoOperationHandler();
-        final ColumnToTypeMapper columnToTypeMapper = new ColumnToTypeMapper();
-        final WhereConditionSolver whereConditionSolver = new WhereConditionSolver();
-        final TableFinder tableFinder = new TableFinder(databaseManager);
-        final PreparedStatementCreator preparedStatementCreator = new PreparedStatementCreator(tableFinder);
+        final PreparedStatementCreator preparedStatementCreator = new PreparedStatementCreator(databaseManager);
 
         // Specific statement services
-        final AlterTableService alterTableService = new AlterTableService(tableFinder, databaseManager,
-            transactionManager, semanticValidator, reader);
+        final AlterTableService alterTableService = new AlterTableService(databaseManager, transactionManager,
+            semanticValidator, reader);
         final CreateTableService createTableService = new CreateTableService(databaseManager, transactionManager,
             semanticValidator, reader);
-        final InsertService insertService = new InsertService(tableFinder, transactionManager,
-            semanticValidator,
+        final InsertService insertService = new InsertService(databaseManager, transactionManager, semanticValidator,
             reader, preparedStatementCreator);
-        final SelectService selectService = new SelectService(tableFinder, semanticValidator, columnToTypeMapper,
-            whereConditionSolver, reader);
-        final UpdateService updateService = new UpdateService(tableFinder, transactionManager, semanticValidator,
-            columnToTypeMapper, whereConditionSolver, reader, preparedStatementCreator);
-        final DeleteService deleteService = new DeleteService(tableFinder, transactionManager,
-            semanticValidator,
-            whereConditionSolver, reader);
-        final DropTableService dropTableService = new DropTableService(tableFinder, databaseManager, transactionManager,
+        final SelectService selectService = new SelectService(databaseManager, semanticValidator, reader);
+        final UpdateService updateService = new UpdateService(databaseManager, transactionManager, semanticValidator,
+            reader, preparedStatementCreator);
+        final DeleteService deleteService = new DeleteService(transactionManager, databaseManager, semanticValidator,
+            reader);
+        final DropTableService dropTableService = new DropTableService(databaseManager, transactionManager,
             semanticValidator, reader);
 
         final StatementServiceManager statementServiceManager = StatementServiceManager.builder()
@@ -112,18 +102,11 @@ public class JfsqlDriver implements Driver {
             .deleteService(deleteService)
             .dropTableService(dropTableService)
             .ioOperationHandler(ioOperationHandler)
-            .tableFinder(tableFinder)
             .semanticValidator(semanticValidator)
-            .columnToTypeMapper(columnToTypeMapper)
-            .whereConditionSolver(whereConditionSolver)
             .build();
 
-        // Only used in JfsqlPreparedStatement
-        final BlobFileNameCreator blobFileNameCreator = new BlobFileNameCreator(databaseManager, ioOperationHandler,
-            propertiesReader);
-
         return JfsqlConnection.builder()
-            .blobFileNameCreator(blobFileNameCreator)
+            .writer(writer)
             .databaseManager(databaseManager)
             .transactionManager(transactionManager)
             .statementServiceManager(statementServiceManager)

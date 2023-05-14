@@ -15,25 +15,20 @@ import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
-import com.github.jfsql.driver.util.FileNameCreator;
-import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.AlterTableWrapper;
 import java.nio.file.Path;
 import java.sql.SQLException;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-@SuppressWarnings("unused")
 @ExtendWith(MockitoExtension.class)
 class AlterTableServiceTest {
-
-    @Mock
-    private TableFinder tableFinder;
 
     @Mock
     private DatabaseManager databaseManager;
@@ -45,9 +40,6 @@ class AlterTableServiceTest {
     private SemanticValidator semanticValidator;
 
     @Mock
-    private FileNameCreator fileNameCreator;
-
-    @Mock
     private Reader reader;
 
     @Mock
@@ -55,9 +47,6 @@ class AlterTableServiceTest {
 
     @Mock
     private Table table;
-
-    @Mock
-    private Set<Table> uncommittedTables;
 
     @Mock
     private AlterTableWrapper statement;
@@ -68,16 +57,18 @@ class AlterTableServiceTest {
     @Test
     void testAlterTable_withNewTableName() throws SQLException {
         when(databaseManager.getDatabase()).thenReturn(database);
+        final List<Table> tables = new ArrayList<>();
+        tables.add(table);
+        when(database.getTables()).thenReturn(tables);
+        when(table.getName()).thenReturn("myTable");
         when(statement.getTableName()).thenReturn("myTable");
         when(statement.getNewTableName()).thenReturn("myTableEdited");
-        when(tableFinder.getTableByName("myTable")).thenReturn(table);
         when(database.getURL()).thenReturn(Path.of("someUrl"));
         when(reader.getFileExtension()).thenReturn("someExtension");
 
         final AlterTableService alterTableServiceSpy = spy(alterTableService);
         final int result = alterTableServiceSpy.alterTable(statement);
 
-        verify(tableFinder, times(1)).getTableByName("myTable");
         verify(alterTableServiceSpy, times(1)).renameTable(any(), any(), any());
         assertEquals(0, result);
     }
@@ -85,14 +76,16 @@ class AlterTableServiceTest {
     @Test
     void testAlterTable_withOldColumnName() throws SQLException {
         when(databaseManager.getDatabase()).thenReturn(database);
+        final List<Table> tables = new ArrayList<>();
+        tables.add(table);
+        when(database.getTables()).thenReturn(tables);
+        when(table.getName()).thenReturn("myTable");
         when(statement.getTableName()).thenReturn("myTable");
         when(statement.getOldColumnName()).thenReturn("col1");
-        when(tableFinder.getTableByName("myTable")).thenReturn(table);
 
         final AlterTableService alterTableServiceSpy = spy(alterTableService);
         final int result = alterTableServiceSpy.alterTable(statement);
 
-        verify(tableFinder, times(1)).getTableByName("myTable");
         verify(alterTableServiceSpy, times(1)).renameColumn(any(), any());
         assertEquals(0, result);
     }
@@ -100,14 +93,16 @@ class AlterTableServiceTest {
     @Test
     void testAlterTable_withColumnNameToAdd() throws SQLException {
         when(databaseManager.getDatabase()).thenReturn(database);
+        final List<Table> tables = new ArrayList<>();
+        tables.add(table);
+        when(database.getTables()).thenReturn(tables);
+        when(table.getName()).thenReturn("myTable");
         when(statement.getTableName()).thenReturn("myTable");
         when(statement.getColumnNameToAdd()).thenReturn("col1");
-        when(tableFinder.getTableByName("myTable")).thenReturn(table);
 
         final AlterTableService alterTableServiceSpy = spy(alterTableService);
         final int result = alterTableServiceSpy.alterTable(statement);
 
-        verify(tableFinder, times(1)).getTableByName("myTable");
         verify(alterTableServiceSpy, times(1)).addColumn(any(), any());
         assertEquals(0, result);
     }
@@ -115,15 +110,17 @@ class AlterTableServiceTest {
     @Test
     void testAlterTable_withColumnToDrop() throws SQLException {
         when(databaseManager.getDatabase()).thenReturn(database);
+        final List<Table> tables = new ArrayList<>();
+        tables.add(table);
+        when(database.getTables()).thenReturn(tables);
+        when(table.getName()).thenReturn("myTable");
         when(statement.getTableName()).thenReturn("myTable");
         when(statement.getColumnToDrop()).thenReturn("id");
-        when(tableFinder.getTableByName("myTable")).thenReturn(table);
         when(semanticValidator.columnIsPresentInTable(table, statement.getColumnToDrop())).thenReturn(true);
 
         final AlterTableService alterTableServiceSpy = spy(alterTableService);
         final int result = alterTableServiceSpy.alterTable(statement);
 
-        verify(tableFinder, times(1)).getTableByName("myTable");
         verify(alterTableServiceSpy, times(1)).dropColumn(any(), any());
         assertEquals(0, result);
     }

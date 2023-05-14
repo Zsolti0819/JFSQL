@@ -9,17 +9,18 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import com.github.jfsql.driver.db.DatabaseManager;
 import com.github.jfsql.driver.db.TransactionManager;
+import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.util.ColumnToTypeMapper;
-import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.driver.util.WhereConditionSolver;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.UpdateWrapper;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,10 +31,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class UpdateServiceTest {
 
     @Mock
-    private TableFinder tableFinder;
+    private TransactionManager transactionManager;
 
     @Mock
-    private TransactionManager transactionManager;
+    private DatabaseManager databaseManager;
 
     @Mock
     private SemanticValidator semanticValidator;
@@ -42,10 +43,10 @@ class UpdateServiceTest {
     private ColumnToTypeMapper columnToTypeMapper;
 
     @Mock
-    private WhereConditionSolver whereConditionSolver;
+    private Table table;
 
     @Mock
-    private Table table;
+    private Database database;
 
     @Mock
     private UpdateWrapper statement;
@@ -53,18 +54,19 @@ class UpdateServiceTest {
     @InjectMocks
     private UpdateService updateService;
 
-    UpdateServiceTest() {
-    }
-
     @Test
     void testUpdate_normally() throws SQLException {
+        when(databaseManager.getDatabase()).thenReturn(database);
+        final List<Table> tables = new ArrayList<>();
+        tables.add(table);
+        when(database.getTables()).thenReturn(tables);
+        when(table.getName()).thenReturn("myTable");
+        when(statement.getTableName()).thenReturn("myTable");
         when(statement.getColumns()).thenReturn(List.of("column1"));
         when(statement.getValues()).thenReturn(List.of("1"));
-        when(tableFinder.getTableByName(statement.getTableName())).thenReturn(table);
         when(semanticValidator.allColumnsExist(table, statement)).thenReturn(true);
         when(semanticValidator.allWhereColumnsExist(table, statement)).thenReturn(true);
-        when(columnToTypeMapper.mapColumnsToTypes(statement, table)).thenReturn(Map.of("column1", "INTEGER"));
-        when(whereConditionSolver.getWhereEntries(table, statement)).thenReturn(Collections.emptyList());
+        when(WhereConditionSolver.getWhereEntries(table, statement)).thenReturn(Collections.emptyList());
 
         updateService.updateTable(statement);
 
@@ -73,23 +75,30 @@ class UpdateServiceTest {
 
     @Test
     void testUpdate_columnsNotExists() throws SQLException {
+        when(databaseManager.getDatabase()).thenReturn(database);
+        final List<Table> tables = new ArrayList<>();
+        tables.add(table);
+        when(database.getTables()).thenReturn(tables);
         when(table.getName()).thenReturn("myTable");
-        when(tableFinder.getTableByName(statement.getTableName())).thenReturn(table);
+        when(statement.getTableName()).thenReturn("myTable");
         when(semanticValidator.allColumnsExist(table, statement)).thenReturn(false);
 
         final SQLException thrown = assertThrows(SQLException.class, () -> updateService.updateTable(
             statement));
         assertEquals("Some columns entered doesn't exist in '" + table.getName() + "'.", thrown.getMessage());
 
-        verifyNoInteractions(whereConditionSolver);
         verifyNoInteractions(columnToTypeMapper);
         verify(transactionManager, never()).execute(any(), any(), any());
     }
 
     @Test
     void testUpdate_whereColumnsNotExist() throws SQLException {
+        when(databaseManager.getDatabase()).thenReturn(database);
+        final List<Table> tables = new ArrayList<>();
+        tables.add(table);
+        when(database.getTables()).thenReturn(tables);
         when(table.getName()).thenReturn("myTable");
-        when(tableFinder.getTableByName(statement.getTableName())).thenReturn(table);
+        when(statement.getTableName()).thenReturn("myTable");
         when(semanticValidator.allColumnsExist(table, statement)).thenReturn(true);
         when(semanticValidator.allWhereColumnsExist(table, statement)).thenReturn(false);
 
@@ -97,7 +106,6 @@ class UpdateServiceTest {
             statement));
         assertEquals("Some columns entered doesn't exist in '" + table.getName() + "'.", thrown.getMessage());
 
-        verifyNoInteractions(whereConditionSolver);
         verifyNoInteractions(columnToTypeMapper);
         verify(transactionManager, never()).execute(any(), any(), any());
     }

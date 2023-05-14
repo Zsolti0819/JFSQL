@@ -9,15 +9,19 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import com.github.jfsql.driver.db.DatabaseManager;
 import com.github.jfsql.driver.db.TransactionManager;
+import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
-import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.driver.util.WhereConditionSolver;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.DeleteWrapper;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,10 +32,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class DeleteServiceTest {
 
     @Mock
-    private TableFinder tableFinder;
+    private TransactionManager transactionManager;
 
     @Mock
-    private TransactionManager transactionManager;
+    private DatabaseManager databaseManager;
 
     @Mock
     private SemanticValidator semanticValidator;
@@ -43,10 +47,7 @@ class DeleteServiceTest {
     private Table table;
 
     @Mock
-    private List<Entry> entries;
-
-    @Mock
-    private List<Entry> whereEntries;
+    private Database database;
 
     @Mock
     private DeleteWrapper statement;
@@ -56,21 +57,34 @@ class DeleteServiceTest {
 
     @Test
     void testDelete_normally() throws SQLException {
-        when(statement.getWhereColumns()).thenReturn(List.of("column1", "column2", "column3"));
-        when(tableFinder.getTableByName(statement.getTableName())).thenReturn(table);
+        when(databaseManager.getDatabase()).thenReturn(database);
+        final List<Table> tables = new ArrayList<>();
+        tables.add(table);
+        when(database.getTables()).thenReturn(tables);
+        when(table.getName()).thenReturn("myTable");
+        when(statement.getTableName()).thenReturn("myTable");
+        when(statement.getWhereColumns()).thenReturn(List.of("column1"));
+        when(statement.getWhereValues()).thenReturn(List.of("1"));
+        when(statement.getSymbols()).thenReturn(List.of("="));
+        when(table.getColumnsAndTypes()).thenReturn(Map.of("column1", "INTEGER"));
+        final List<Entry> entries = new ArrayList<>();
+        entries.add(new Entry(Map.of("column1", "1"), Collections.emptyMap()));
         when(table.getEntries()).thenReturn(entries);
         when(semanticValidator.allWhereColumnsExist(table, statement)).thenReturn(true);
-        when(whereConditionSolver.getWhereEntries(table, statement)).thenReturn(whereEntries);
 
         deleteService.deleteFromTable(statement);
 
-        verify(entries, times(1)).removeAll(whereEntries);
         verify(transactionManager, times(1)).execute(any(), any(), any());
     }
 
     @Test
     void testDelete_columnsNotExists() throws SQLException {
-        when(tableFinder.getTableByName(statement.getTableName())).thenReturn(table);
+        when(databaseManager.getDatabase()).thenReturn(database);
+        final List<Table> tables = new ArrayList<>();
+        tables.add(table);
+        when(database.getTables()).thenReturn(tables);
+        when(table.getName()).thenReturn("myTable");
+        when(statement.getTableName()).thenReturn("myTable");
         when(statement.getWhereColumns()).thenReturn(List.of("column1", "column2", "column3"));
         when(semanticValidator.allWhereColumnsExist(table, statement)).thenReturn(false);
 

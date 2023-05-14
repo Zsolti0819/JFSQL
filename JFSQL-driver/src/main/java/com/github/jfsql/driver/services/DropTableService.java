@@ -26,7 +26,6 @@ import org.apache.logging.log4j.Logger;
 public class DropTableService {
 
     private static final Logger logger = LogManager.getLogger(DropTableService.class);
-    private final TableFinder tableFinder;
     private final DatabaseManager databaseManager;
     private final TransactionManager transactionManager;
     private final SemanticValidator semanticValidator;
@@ -37,7 +36,7 @@ public class DropTableService {
         final boolean ifExistsIsPresent = statement.isIfExistsPresent();
 
         try {
-            tableFinder.getTableByName(statement.getTableName());
+            TableFinder.getTableByName(statement.getTableName(), database);
         } catch (final SQLException e) {
             final String tableName = statement.getTableName();
             if (ifExistsIsPresent) {
@@ -48,7 +47,7 @@ public class DropTableService {
             }
         }
 
-        final Table table = tableFinder.getTableByName(statement.getTableName());
+        final Table table = TableFinder.getTableByName(statement.getTableName(), database);
 
         List<Entry> entries = table.getEntries();
         if (entries == null) {
