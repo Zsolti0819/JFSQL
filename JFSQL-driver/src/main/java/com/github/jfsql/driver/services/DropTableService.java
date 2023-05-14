@@ -14,7 +14,10 @@ import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.DropTableWrapper;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -70,9 +73,31 @@ public class DropTableService {
         final List<Table> tables = database.getTables();
         tables.remove(table);
 
+        final Map<String, Boolean> blobsToKeep = getBlobsToKeep(table, entries);
+
         logger.debug("table removed = {}", table);
 
-        transactionManager.execute(table, Operation.DROP_TABLE);
+        transactionManager.execute(table, blobsToKeep, Operation.DROP_TABLE);
         return deleteCount;
+    }
+
+    private Map<String, Boolean> getBlobsToKeep(final Table table, final List<Entry> entries) {
+        final Map<String, Boolean> blobsToKeep = new HashMap<>();
+        final List<String> blobColumns = new ArrayList<>();
+
+        for (final Map.Entry<String, String> entry : table.getColumnsAndTypes().entrySet()) {
+            final String key = entry.getKey();
+            final String value = entry.getValue();
+            if ("BLOB".equals(value)) {
+                blobColumns.add(key);
+            }
+        }
+
+        blobColumns.forEach(s -> entries.forEach(entry -> {
+            if (entry.getColumnsAndValues().containsKey(s)) {
+                blobsToKeep.put(entry.getColumnsAndValues().get(s), false);
+            }
+        }));
+        return blobsToKeep;
     }
 }

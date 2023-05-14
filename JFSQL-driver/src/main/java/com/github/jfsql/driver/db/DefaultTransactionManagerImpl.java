@@ -28,7 +28,6 @@ public class DefaultTransactionManagerImpl extends TransactionManager {
     public void commit() {
         try {
             writeUncommittedObjects();
-            filesToKeep.putAll(getBlobsToKeep());
             logger.trace("filesToKeep = {}", filesToKeep);
 
             for (final Map.Entry<String, Boolean> entry : filesToKeep.entrySet()) {
@@ -49,9 +48,8 @@ public class DefaultTransactionManagerImpl extends TransactionManager {
     public void rollback() throws SQLException {
         logger.warn("Executing rollback()");
         final Database database = databaseManager.database;
-        final List<Table> tables;
         try {
-            tables = reader.readTablesFromDatabaseFile(database);
+            final List<Table> tables = reader.readTablesFromDatabaseFile(database);
             database.setTables(tables);
         } catch (final IOException e) {
             throw new SQLException("There was an error executing rollback().\n" + e.getMessage());

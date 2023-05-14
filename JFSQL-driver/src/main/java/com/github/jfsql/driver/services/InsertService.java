@@ -74,15 +74,19 @@ public class InsertService {
             table.setEntries(entries);
         }
 
+        final List<Entry> entriesToInsert = new ArrayList<>();
         final List<String> columns = statement.getColumns();
         final List<List<String>> valuesList = statement.getValues();
         for (final List<String> values : valuesList) {
             final Entry entryToInsert = getEntryToInsert(columns, values, table);
             logger.debug("entry to insert = {}", entryToInsert);
-            entries.add(entryToInsert);
+            entriesToInsert.add(entryToInsert);
         }
 
-        transactionManager.execute(table, Operation.INSERT);
+        final Map<String, Boolean> blobsToKeep = getBlobsToKeep(table, entriesToInsert);
+        entries.addAll(entriesToInsert);
+
+        transactionManager.execute(table, blobsToKeep, Operation.INSERT);
 
         return valuesList.size();
     }
@@ -134,6 +138,27 @@ public class InsertService {
                     columnsAndBlobs.put(column, largeObject);
                 }
             });
+    }
+
+    private Map<String, Boolean> getBlobsToKeep(final Table table, final List<Entry> entries) {
+        final Map<String, Boolean> blobsToKeep = new HashMap<>();
+        final List<String> blobColumns = new ArrayList<>();
+
+        for (final Map.Entry<String, String> entry : table.getColumnsAndTypes().entrySet()) {
+            final String key = entry.getKey();
+            final String value = entry.getValue();
+            if ("BLOB".equals(value)) {
+                blobColumns.add(key);
+            }
+        }
+
+        blobColumns.forEach(s -> entries.forEach(entry -> {
+            if (entry.getColumnsAndValues().containsKey(s) && !Objects.equals(entry.getColumnsAndValues().get(s),
+                null)) {
+                blobsToKeep.put(entry.getColumnsAndValues().get(s), true);
+            }
+        }));
+        return blobsToKeep;
     }
 
 }

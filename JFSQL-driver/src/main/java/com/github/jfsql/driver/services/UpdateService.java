@@ -17,6 +17,7 @@ import com.github.jfsql.parser.dto.UpdateWrapper;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -79,7 +80,9 @@ public class UpdateService {
             }
         }
 
-        transactionManager.execute(table, Operation.UPDATE);
+        final Map<String, Boolean> blobsToKeep = getBlobsToKeep(table, whereEntries);
+
+        transactionManager.execute(table, blobsToKeep, Operation.UPDATE);
         return whereEntries.size();
     }
 
@@ -101,5 +104,25 @@ public class UpdateService {
             }
         }
         logger.debug("entry after the update = {}", entry);
+    }
+
+    private Map<String, Boolean> getBlobsToKeep(final Table table, final List<Entry> entries) {
+        final Map<String, Boolean> blobsToKeep = new HashMap<>();
+        final List<String> blobColumns = new ArrayList<>();
+
+        for (final Map.Entry<String, String> entry : table.getColumnsAndTypes().entrySet()) {
+            final String key = entry.getKey();
+            final String value = entry.getValue();
+            if ("BLOB".equals(value)) {
+                blobColumns.add(key);
+            }
+        }
+
+        blobColumns.forEach(s -> entries.forEach(entry -> {
+            if (entry.getColumnsAndValues().containsKey(s)) {
+                blobsToKeep.put(entry.getColumnsAndValues().get(s), true);
+            }
+        }));
+        return blobsToKeep;
     }
 }

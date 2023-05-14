@@ -60,7 +60,7 @@ class CreateTableServiceTest {
 
         verify(semanticValidator, times(1)).statementColumnsContainDuplicates(any());
         verify(database, times(1)).getTables();
-        verify(transactionManager, times(1)).execute(any(), any());
+        verify(transactionManager, times(1)).execute(any(), any(), any());
 
     }
 
@@ -72,7 +72,7 @@ class CreateTableServiceTest {
         final SQLException thrown = assertThrows(SQLException.class,
             () -> createTableService.createTable(statement));
         Assertions.assertEquals("Table name cannot be the same as database name.", thrown.getMessage());
-        verify(transactionManager, never()).execute(any(), any());
+        verify(transactionManager, never()).execute(any(), any(), any());
     }
 
     @Test
@@ -84,7 +84,7 @@ class CreateTableServiceTest {
         final SQLException thrown = assertThrows(SQLException.class, () -> createTableService.createTable(
             statement));
         Assertions.assertEquals("Table '" + statement.getTableName() + "' already exists.", thrown.getMessage());
-        verify(transactionManager, never()).execute(any(), any());
+        verify(transactionManager, never()).execute(any(), any(), any());
     }
 
     @Test
@@ -94,7 +94,7 @@ class CreateTableServiceTest {
         when(semanticValidator.tableExists(statement, database)).thenReturn(true);
 
         assertDoesNotThrow(() -> createTableService.createTable(statement));
-        verify(transactionManager, never()).execute(any(), any());
+        verify(transactionManager, never()).execute(any(), any(), any());
     }
 
     @Test
@@ -107,7 +107,7 @@ class CreateTableServiceTest {
             statement));
         assertEquals("Duplicate columns were found in the statement.", thrown.getMessage());
 
-        verify(transactionManager, never()).execute(any(), any());
+        verify(transactionManager, never()).execute(any(), any(), any());
     }
 
 }

@@ -12,6 +12,7 @@ import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.CreateTableWrapper;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,7 +84,7 @@ public class CreateTableService {
 
         final List<Table> tables = database.getTables();
         tables.add(table);
-        transactionManager.execute(table, Operation.CREATE_TABLE);
+        transactionManager.execute(table, Collections.emptyMap(), Operation.CREATE_TABLE);
         return 0;
     }
 }

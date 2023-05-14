@@ -65,7 +65,7 @@ class DeleteServiceTest {
         deleteService.deleteFromTable(statement);
 
         verify(entries, times(1)).removeAll(whereEntries);
-        verify(transactionManager, times(1)).execute(any(), any());
+        verify(transactionManager, times(1)).execute(any(), any(), any());
     }
 
     @Test
@@ -78,7 +78,7 @@ class DeleteServiceTest {
             () -> deleteService.deleteFromTable(statement));
         assertEquals("Some columns entered doesn't exist in '" + table.getName() + "'.", thrown.getMessage());
 
-        verify(transactionManager, never()).execute(any(), any());
+        verify(transactionManager, never()).execute(any(), any(), any());
         verifyNoInteractions(whereConditionSolver);
     }
 }

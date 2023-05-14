@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,12 +37,14 @@ public class JGitTransactionManagerImpl extends TransactionManager {
             try (final Git git = Git.open(databaseDirectoryPath)) {
                 writeUncommittedObjects();
 
-                final Map<String, Boolean> blobsToKeep = getBlobsToKeep();
-                filesToKeep.putAll(blobsToKeep);
-                logger.trace("filesToKeep with blobsToKeep = {}", filesToKeep);
+                logger.trace("filesToKeep = {}", filesToKeep);
 
                 for (final Map.Entry<String, Boolean> entry : filesToKeep.entrySet()) {
-                    final File file = new File(entry.getKey());
+                    final String key = entry.getKey();
+                    if ("null".equals(key) || Objects.equals(null, key)) {
+                        continue;
+                    }
+                    final File file = new File(key);
                     final String fileName = file.getName();
                     final String parentFolder = file.getParent();
                     final String prefix = parentFolder.endsWith("blob") ? "blob/" : "";

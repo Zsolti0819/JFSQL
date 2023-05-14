@@ -4,16 +4,12 @@ import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.io.FileUtils;
 
 public abstract class TransactionManager {
 
@@ -64,12 +60,13 @@ public abstract class TransactionManager {
         uncommittedTables.clear();
     }
 
-    public void execute(final Table table, final Operation operation) throws SQLException {
+    public void execute(final Table table, final Map<String, Boolean> blobsToKeep, final Operation operation)
+        throws SQLException {
         if (!autoCommit) {
-            executeAutoCommitFalse(table, operation);
+            executeAutoCommitFalse(table, blobsToKeep, operation);
         } else {
             try {
-                executeAutoCommitTrue(table, operation);
+                executeAutoCommitTrue(table, blobsToKeep, operation);
             } catch (final Exception e) {
                 e.printStackTrace();
                 rollback();
@@ -77,7 +74,9 @@ public abstract class TransactionManager {
         }
     }
 
-    private void executeAutoCommitTrue(final Table table, final Operation operation) throws IOException, SQLException {
+    private void executeAutoCommitTrue(final Table table, final Map<String, Boolean> blobsToKeep,
+        final Operation operation)
+        throws IOException, SQLException {
         final Database database = databaseManager.getDatabase();
         switch (operation) {
             case DROP_TABLE:
@@ -85,12 +84,14 @@ public abstract class TransactionManager {
                 filesToKeep.put(String.valueOf(database.getURL()), true);
                 filesToKeep.put(table.getTableFile(), false);
                 filesToKeep.put(table.getSchemaFile(), false);
+                filesToKeep.putAll(blobsToKeep);
                 break;
             case INSERT:
             case DELETE:
             case UPDATE:
                 writer.writeTable(table);
                 filesToKeep.put(table.getTableFile(), true);
+                filesToKeep.putAll(blobsToKeep);
                 break;
             case ALTER_TABLE_ADD_COLUMN:
             case ALTER_TABLE_DROP_COLUMN:
@@ -99,6 +100,7 @@ public abstract class TransactionManager {
                 writer.writeTable(table);
                 filesToKeep.put(table.getSchemaFile(), true);
                 filesToKeep.put(table.getTableFile(), true);
+                filesToKeep.putAll(blobsToKeep);
                 break;
             case ALTER_TABLE_RENAME_TABLE:
             case CREATE_TABLE:
@@ -108,12 +110,14 @@ public abstract class TransactionManager {
                 filesToKeep.put(String.valueOf(database.getURL()), true);
                 filesToKeep.put(table.getSchemaFile(), true);
                 filesToKeep.put(table.getTableFile(), true);
+                filesToKeep.putAll(blobsToKeep);
                 break;
         }
         commit();
     }
 
-    private void executeAutoCommitFalse(final Table table, final Operation operation) {
+    private void executeAutoCommitFalse(final Table table, final Map<String, Boolean> blobsToKeep,
+        final Operation operation) {
         final Database database = databaseManager.getDatabase();
         switch (operation) {
             case DROP_TABLE:
@@ -121,12 +125,14 @@ public abstract class TransactionManager {
                 filesToKeep.put(String.valueOf(database.getURL()), true);
                 filesToKeep.put(table.getTableFile(), false);
                 filesToKeep.put(table.getSchemaFile(), false);
+                filesToKeep.putAll(blobsToKeep);
                 break;
             case INSERT:
             case DELETE:
             case UPDATE:
                 uncommittedTables.add(table);
                 filesToKeep.put(table.getTableFile(), true);
+                filesToKeep.putAll(blobsToKeep);
                 break;
             case ALTER_TABLE_ADD_COLUMN:
             case ALTER_TABLE_DROP_COLUMN:
@@ -135,6 +141,7 @@ public abstract class TransactionManager {
                 uncommittedTables.add(table);
                 filesToKeep.put(table.getSchemaFile(), true);
                 filesToKeep.put(table.getTableFile(), true);
+                filesToKeep.putAll(blobsToKeep);
                 break;
             case ALTER_TABLE_RENAME_TABLE:
             case CREATE_TABLE:
@@ -144,28 +151,9 @@ public abstract class TransactionManager {
                 filesToKeep.put(String.valueOf(database.getURL()), true);
                 filesToKeep.put(table.getSchemaFile(), true);
                 filesToKeep.put(table.getTableFile(), true);
+                filesToKeep.putAll(blobsToKeep);
                 break;
         }
-    }
-
-    Map<String, Boolean> getBlobsToKeep() throws IOException {
-        final Map<String, Boolean> filesToKeep = new HashMap<>();
-        final Database database = databaseManager.database;
-        final Path databaseURL = database.getURL();
-        final Path databaseFolder = databaseURL.getParent();
-        final Path blobFolder = Path.of(databaseFolder + File.separator + "blob");
-        final String fileExtension = reader.getFileExtension();
-        final String schemaExtension = reader.getSchemaFileExtension();
-        final String[] extensions = new String[]{fileExtension, schemaExtension};
-
-        final Collection<File> blobFolderFiles = FileUtils.listFiles(blobFolder.toFile(), extensions, false);
-        final Set<File> blobsFromTables = reader.getBlobsFromTables(database);
-
-        for (final File file : blobFolderFiles) {
-            final boolean isInTables = blobsFromTables.contains(file);
-            filesToKeep.put(String.valueOf(file), isInTables);
-        }
-        return filesToKeep;
     }
 
 }

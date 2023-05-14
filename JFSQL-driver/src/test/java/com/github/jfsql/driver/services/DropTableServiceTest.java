@@ -67,7 +67,7 @@ class DropTableServiceTest {
 
         dropTableService.dropTable(statement);
 
-        verify(transactionManager, times(1)).execute(any(), any());
+        verify(transactionManager, times(1)).execute(any(), any(), any());
 
     }
 
@@ -81,7 +81,7 @@ class DropTableServiceTest {
             "Cannot DROP " + statement.getTableName() + " because the table's file or schema doesn't exist.",
             thrown.getMessage());
 
-        verify(transactionManager, never()).execute(any(), any());
+        verify(transactionManager, never()).execute(any(), any(), any());
 
     }
 
@@ -92,7 +92,7 @@ class DropTableServiceTest {
         when(tableFinder.getTableByName(statement.getTableName())).thenThrow(SQLException.class);
 
         assertDoesNotThrow(() -> dropTableService.dropTable(statement));
-        verify(transactionManager, never()).execute(any(), any());
+        verify(transactionManager, never()).execute(any(), any(), any());
     }
 
 }

@@ -65,7 +65,7 @@ class InsertServiceTest {
 
         insertService.insertIntoTable(statement);
 
-        verify(transactionManager, times(1)).execute(any(), any());
+        verify(transactionManager, times(1)).execute(any(), any(), any());
     }
 
     @Test

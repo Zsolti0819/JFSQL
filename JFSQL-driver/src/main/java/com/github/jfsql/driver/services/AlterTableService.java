@@ -15,6 +15,8 @@ import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.AlterTableWrapper;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,9 +87,9 @@ public class AlterTableService {
             .build();
 
         database.getTables().add(newTable);
-        transactionManager.execute(newTable, Operation.ALTER_TABLE_RENAME_TABLE);
+        transactionManager.execute(newTable, Collections.emptyMap(), Operation.ALTER_TABLE_RENAME_TABLE);
         database.getTables().remove(table);
-        transactionManager.execute(table, Operation.DROP_TABLE);
+        transactionManager.execute(table, Collections.emptyMap(), Operation.DROP_TABLE);
     }
 
     void renameColumn(final AlterTableWrapper statement, final Table table)
@@ -132,7 +134,7 @@ public class AlterTableService {
             }
             entry.setColumnsAndValues(modifiedColumnsAndValues);
         }
-        transactionManager.execute(table, Operation.ALTER_TABLE_RENAME_COLUMN);
+        transactionManager.execute(table, Collections.emptyMap(), Operation.ALTER_TABLE_RENAME_COLUMN);
     }
 
     private Map<String, Boolean> getModifiedNotNullColumns(final AlterTableWrapper statement, final Table table) {
@@ -218,7 +220,7 @@ public class AlterTableService {
                 columnsAndValues.put(columnNameToAdd, null);
             }
         }
-        transactionManager.execute(table, Operation.ALTER_TABLE_ADD_COLUMN);
+        transactionManager.execute(table, Collections.emptyMap(), Operation.ALTER_TABLE_ADD_COLUMN);
     }
 
     void dropColumn(final AlterTableWrapper statement, final Table table) throws SQLException {
@@ -248,11 +250,15 @@ public class AlterTableService {
             table.setEntries(entries);
         }
 
+        final Map<String, Boolean> blobsToKeep = new HashMap<>();
         // Remove the columns from every entry in the table
         for (final Entry entry : table.getEntries()) {
             final Map<String, String> columnsAndValues = entry.getColumnsAndValues();
+            if ("BLOB".equals(table.getColumnsAndTypes().get(columnNameToDrop))) {
+                blobsToKeep.put(entry.getColumnsAndValues().get(columnNameToDrop), false);
+            }
             columnsAndValues.remove(columnNameToDrop);
         }
-        transactionManager.execute(table, Operation.ALTER_TABLE_DROP_COLUMN);
+        transactionManager.execute(table, blobsToKeep, Operation.ALTER_TABLE_DROP_COLUMN);
     }
 }

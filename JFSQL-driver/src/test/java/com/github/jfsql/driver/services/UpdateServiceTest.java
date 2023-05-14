@@ -68,7 +68,7 @@ class UpdateServiceTest {
 
         updateService.updateTable(statement);
 
-        verify(transactionManager, times(1)).execute(any(), any());
+        verify(transactionManager, times(1)).execute(any(), any(), any());
     }
 
     @Test
@@ -83,7 +83,7 @@ class UpdateServiceTest {
 
         verifyNoInteractions(whereConditionSolver);
         verifyNoInteractions(columnToTypeMapper);
-        verify(transactionManager, never()).execute(any(), any());
+        verify(transactionManager, never()).execute(any(), any(), any());
     }
 
     @Test
@@ -99,6 +99,6 @@ class UpdateServiceTest {
 
         verifyNoInteractions(whereConditionSolver);
         verifyNoInteractions(columnToTypeMapper);
-        verify(transactionManager, never()).execute(any(), any());
+        verify(transactionManager, never()).execute(any(), any(), any());
     }
 }

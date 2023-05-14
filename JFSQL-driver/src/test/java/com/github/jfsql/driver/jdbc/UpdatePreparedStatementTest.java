@@ -106,14 +106,16 @@ class UpdatePreparedStatementTest {
 
     void testUpdate_oneEntryPreparedStatement_xml() throws SQLException, IOException {
         final PreparedStatement preparedStatement = connection.prepareStatement(
-            "UPDATE myTable SET id = ?, name = ?, age = ? WHERE id = ? AND name = ? AND age = ?");
+            "UPDATE myTable SET id = ?, name = ?, age = ?, file = ? WHERE id = ? AND name = ? AND age = ?");
         preparedStatement.setInt(1, 5);
         preparedStatement.setString(2, "Marian");
         preparedStatement.setInt(3, 99);
-        preparedStatement.setInt(4, 4);
-        preparedStatement.setString(5, "Lukas");
-        preparedStatement.setInt(6, 34);
+        preparedStatement.setBinaryStream(4, null);
+        preparedStatement.setInt(5, 4);
+        preparedStatement.setString(6, "Lukas");
+        preparedStatement.setInt(7, 34);
         preparedStatement.executeUpdate();
+        
         final String realFileContent = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
