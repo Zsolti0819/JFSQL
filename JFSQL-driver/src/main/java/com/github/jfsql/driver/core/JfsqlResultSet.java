@@ -53,7 +53,8 @@ public class JfsqlResultSet implements ResultSet {
 
     private int getColumnIndex(final String columnName) throws SQLException {
         for (int i = 0; i < columnNames.size(); i++) {
-            if (Objects.equals(columnNames.get(i), columnName)) {
+            if (Objects.equals(columnNames.get(i), columnName) || (columnName.contains(".") && Objects.equals(
+                columnNames.get(i), columnName.substring(columnName.indexOf(".") + 1)))) {
                 return i;
             }
         }
