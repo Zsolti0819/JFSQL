@@ -83,10 +83,10 @@ public class InsertService {
             final Entry entryToInsert = getEntryToInsert(columns, values, table);
             logger.debug("entry to insert = {}", entryToInsert);
             entriesToInsert.add(entryToInsert);
+            entries.add(entryToInsert);
         }
 
         final Map<String, Boolean> blobsToKeep = getBlobsToKeep(table, entriesToInsert);
-        entries.addAll(entriesToInsert);
 
         transactionManager.execute(table, blobsToKeep, Operation.INSERT);
 
@@ -111,7 +111,7 @@ public class InsertService {
                         .map(Integer::valueOf)
                         .max(Integer::compareTo);
 
-                    value = String.valueOf(highestValue.orElse(0));
+                    value = String.valueOf(highestValue.map(val -> val + 1).orElse(0));
                 }
             }
             if (semanticValidator.nullInsertIntoNotNullColumn(column, value, table)) {
