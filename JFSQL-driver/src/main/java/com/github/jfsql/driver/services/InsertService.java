@@ -1,7 +1,6 @@
 package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.cache.resultset.ResultSetCache;
-import com.github.jfsql.driver.db.DatabaseManager;
 import com.github.jfsql.driver.db.Operation;
 import com.github.jfsql.driver.db.SharedMapHandler;
 import com.github.jfsql.driver.db.TransactionManager;
@@ -30,7 +29,7 @@ import org.apache.logging.log4j.Logger;
 public class InsertService {
 
     private static final Logger logger = LogManager.getLogger(InsertService.class);
-    private final DatabaseManager databaseManager;
+    private final Database database;
     private final TransactionManager transactionManager;
     private final SemanticValidator semanticValidator;
     private final Reader reader;
@@ -46,7 +45,6 @@ public class InsertService {
         }
 
         final String tableName = statement.getTableName();
-        final Database database = databaseManager.getDatabase();
         final Table table = TableFinder.getTableByName(tableName, database);
 
         if (!semanticValidator.valueCountIsLteTableColumnCount(table, statement)) {

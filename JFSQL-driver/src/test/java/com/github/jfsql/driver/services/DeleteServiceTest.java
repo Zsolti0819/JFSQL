@@ -35,9 +35,6 @@ class DeleteServiceTest {
     private TransactionManager transactionManager;
 
     @Mock
-    private DatabaseManager databaseManager;
-
-    @Mock
     private SemanticValidator semanticValidator;
 
     @Mock
@@ -57,7 +54,6 @@ class DeleteServiceTest {
 
     @Test
     void testDelete_normally() throws SQLException {
-        when(databaseManager.getDatabase()).thenReturn(database);
         final List<Table> tables = new ArrayList<>();
         tables.add(table);
         when(database.getTables()).thenReturn(tables);
@@ -79,7 +75,6 @@ class DeleteServiceTest {
 
     @Test
     void testDelete_columnsNotExists() throws SQLException {
-        when(databaseManager.getDatabase()).thenReturn(database);
         final List<Table> tables = new ArrayList<>();
         tables.add(table);
         when(database.getTables()).thenReturn(tables);

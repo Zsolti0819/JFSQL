@@ -4,6 +4,7 @@ import com.github.jfsql.driver.cache.statement.Cache;
 import com.github.jfsql.driver.config.PropertiesReader;
 import com.github.jfsql.driver.db.DatabaseManager;
 import com.github.jfsql.driver.db.TransactionManager;
+import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.factories.CacheFactory;
 import com.github.jfsql.driver.factories.DatabaseManagerFactory;
 import com.github.jfsql.driver.factories.ReaderFactory;
@@ -66,29 +67,29 @@ public class JfsqlDriver implements Driver {
         final Reader reader = ReaderFactory.createReader(propertiesReader);
         final Writer writer = WriterFactory.createWriter(propertiesReader);
         final DatabaseManager databaseManager = DatabaseManagerFactory
-            .createDatabaseManager(propertiesReader, URL, semanticValidator, reader, writer);
+            .createDatabaseManager(propertiesReader, URL, reader, writer);
+        final Database database = databaseManager.getDatabase();
         final TransactionManager transactionManager = TransactionManagerFactory
             .createTransactionManager(propertiesReader, databaseManager, reader, writer);
 
         // Classes used in statement services
         final Parser parser = new Parser();
         final IoOperationHandler ioOperationHandler = new IoOperationHandler();
-        final PreparedStatementCreator preparedStatementCreator = new PreparedStatementCreator(databaseManager);
+        final PreparedStatementCreator preparedStatementCreator = new PreparedStatementCreator(database);
 
         // Specific statement services
-        final AlterTableService alterTableService = new AlterTableService(databaseManager, transactionManager,
+        final AlterTableService alterTableService = new AlterTableService(database, transactionManager,
             semanticValidator, reader);
-        final CreateTableService createTableService = new CreateTableService(databaseManager, transactionManager,
+        final CreateTableService createTableService = new CreateTableService(database, transactionManager,
             semanticValidator, reader);
-        final InsertService insertService = new InsertService(databaseManager, transactionManager, semanticValidator,
-            reader, preparedStatementCreator);
-        final SelectService selectService = new SelectService(databaseManager, semanticValidator, reader);
-        final UpdateService updateService = new UpdateService(databaseManager, transactionManager, semanticValidator,
-            reader, preparedStatementCreator);
-        final DeleteService deleteService = new DeleteService(transactionManager, databaseManager, semanticValidator,
+        final InsertService insertService = new InsertService(database, transactionManager, semanticValidator, reader,
+            preparedStatementCreator);
+        final SelectService selectService = new SelectService(database, semanticValidator, reader);
+        final UpdateService updateService = new UpdateService(database, transactionManager, semanticValidator, reader,
+            preparedStatementCreator);
+        final DeleteService deleteService = new DeleteService(transactionManager, database, semanticValidator, reader);
+        final DropTableService dropTableService = new DropTableService(database, transactionManager, semanticValidator,
             reader);
-        final DropTableService dropTableService = new DropTableService(databaseManager, transactionManager,
-            semanticValidator, reader);
 
         final StatementServiceManager statementServiceManager = StatementServiceManager.builder()
             .cache(cache)

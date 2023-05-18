@@ -10,7 +10,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.github.jfsql.driver.db.DatabaseManager;
 import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
@@ -29,9 +28,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class AlterTableServiceTest {
-
-    @Mock
-    private DatabaseManager databaseManager;
 
     @Mock
     private TransactionManager transactionManager;
@@ -56,7 +52,6 @@ class AlterTableServiceTest {
 
     @Test
     void testAlterTable_withNewTableName() throws SQLException {
-        when(databaseManager.getDatabase()).thenReturn(database);
         final List<Table> tables = new ArrayList<>();
         tables.add(table);
         when(database.getTables()).thenReturn(tables);
@@ -75,7 +70,6 @@ class AlterTableServiceTest {
 
     @Test
     void testAlterTable_withOldColumnName() throws SQLException {
-        when(databaseManager.getDatabase()).thenReturn(database);
         final List<Table> tables = new ArrayList<>();
         tables.add(table);
         when(database.getTables()).thenReturn(tables);
@@ -92,7 +86,6 @@ class AlterTableServiceTest {
 
     @Test
     void testAlterTable_withColumnNameToAdd() throws SQLException {
-        when(databaseManager.getDatabase()).thenReturn(database);
         final List<Table> tables = new ArrayList<>();
         tables.add(table);
         when(database.getTables()).thenReturn(tables);
@@ -109,7 +102,6 @@ class AlterTableServiceTest {
 
     @Test
     void testAlterTable_withColumnToDrop() throws SQLException {
-        when(databaseManager.getDatabase()).thenReturn(database);
         final List<Table> tables = new ArrayList<>();
         tables.add(table);
         when(database.getTables()).thenReturn(tables);

@@ -1,7 +1,6 @@
 package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.cache.resultset.ResultSetCache;
-import com.github.jfsql.driver.db.DatabaseManager;
 import com.github.jfsql.driver.db.Operation;
 import com.github.jfsql.driver.db.SharedMapHandler;
 import com.github.jfsql.driver.db.TransactionManager;
@@ -28,13 +27,12 @@ public class DeleteService {
 
     private static final Logger logger = LogManager.getLogger(DeleteService.class);
     private final TransactionManager transactionManager;
-    private final DatabaseManager databaseManager;
+    private final Database database;
     private final SemanticValidator semanticValidator;
     private final Reader reader;
 
     int deleteFromTable(final DeleteWrapper statement) throws SQLException {
         final List<String> whereColumns = statement.getWhereColumns();
-        final Database database = databaseManager.getDatabase();
         final Table table = TableFinder.getTableByName(statement.getTableName(), database);
 
         if (!whereColumns.isEmpty() && (!semanticValidator.allWhereColumnsExist(table, statement))) {

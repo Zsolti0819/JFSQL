@@ -1,7 +1,6 @@
 package com.github.jfsql.driver.services;
 
 import com.github.jfsql.driver.cache.resultset.ResultSetCache;
-import com.github.jfsql.driver.db.DatabaseManager;
 import com.github.jfsql.driver.db.Operation;
 import com.github.jfsql.driver.db.SharedMapHandler;
 import com.github.jfsql.driver.db.TransactionManager;
@@ -27,13 +26,12 @@ import org.apache.commons.lang3.StringUtils;
 @RequiredArgsConstructor
 public class AlterTableService {
 
-    private final DatabaseManager databaseManager;
+    private final Database database;
     private final TransactionManager transactionManager;
     private final SemanticValidator semanticValidator;
     private final Reader reader;
 
     int alterTable(final AlterTableWrapper statement) throws SQLException {
-        final Database database = databaseManager.getDatabase();
         final String tableName = statement.getTableName();
         final Table table = TableFinder.getTableByName(tableName, database);
         if (statement.getNewTableName() != null) {

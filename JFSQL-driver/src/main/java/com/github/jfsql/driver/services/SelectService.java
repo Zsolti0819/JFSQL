@@ -4,7 +4,6 @@ import static com.github.jfsql.driver.cache.resultset.ResultSetCache.CACHED_RESU
 
 import com.github.jfsql.driver.cache.resultset.ResultSetCache;
 import com.github.jfsql.driver.core.JfsqlResultSet;
-import com.github.jfsql.driver.db.DatabaseManager;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
@@ -35,7 +34,7 @@ import org.apache.logging.log4j.Logger;
 public class SelectService {
 
     private static final Logger logger = LogManager.getLogger(SelectService.class);
-    private final DatabaseManager databaseManager;
+    private final Database database;
     private final SemanticValidator semanticValidator;
     private final Reader reader;
 
@@ -52,7 +51,6 @@ public class SelectService {
 
     private ResultSet simpleSelect(final SelectWrapper statement) throws SQLException {
         final String tableName = statement.getTableName();
-        final Database database = databaseManager.getDatabase();
         final Table table = TableFinder.getTableByName(tableName, database);
         final List<String> selectedColumns = statement.getColumns();
         for (final String columnName : selectedColumns) {
@@ -294,7 +292,6 @@ public class SelectService {
         }
 
         final Map<String, Table> tables = new LinkedHashMap<>();
-        final Database database = databaseManager.getDatabase();
         for (final String tableName : tableNames) {
             final Table table = TableFinder.getTableByName(tableName, database);
             tables.put(tableName, table);
@@ -320,19 +317,15 @@ public class SelectService {
         final List<Table> modifiedTables = new ArrayList<>();
         final Map<String, Boolean> commonColumnsMap = getCommonColumnsMap(tables);
 
-        // Modify column names in all tables
-        for (final Table table : tables) {
+        tables.forEach(table -> {
             final Map<String, String> modifiedColumnsAndTypes = new LinkedHashMap<>();
             final Map<String, Boolean> modifiedNotNullColumns = new LinkedHashMap<>();
 
-            // Modify column names in columnsAndTypes map
             final Map<String, String> columnsAndTypes = table.getColumnsAndTypes();
-            for (final Map.Entry<String, String> entry : columnsAndTypes.entrySet()) {
-                final String column = entry.getKey();
-                final String type = entry.getValue();
-                final boolean isCommonColumn = commonColumnsMap.get(column);
+            final Map<String, Boolean> notNullColumns = table.getNotNullColumns();
 
-                final Map<String, Boolean> notNullColumns = table.getNotNullColumns();
+            columnsAndTypes.forEach((column, type) -> {
+                final boolean isCommonColumn = commonColumnsMap.get(column);
                 if (isCommonColumn) {
                     final String modifiedColumnName = table.getName() + "." + column;
                     modifiedColumnsAndTypes.put(modifiedColumnName, type);
@@ -341,7 +334,7 @@ public class SelectService {
                     modifiedColumnsAndTypes.put(column, type);
                     modifiedNotNullColumns.put(column, notNullColumns.get(column));
                 }
-            }
+            });
 
             // Do not set the entries at this time
             final Table modifiedTable = Table.builder()
@@ -350,7 +343,7 @@ public class SelectService {
                 .notNullColumns(modifiedNotNullColumns)
                 .build();
             modifiedTables.add(modifiedTable);
-        }
+        });
 
         // Final check before loading the entries into the memory
         final Map<String, String> allColumnsAndTypes = new LinkedHashMap<>();
@@ -391,22 +384,20 @@ public class SelectService {
     }
 
     private List<Entry> createModifiedEntries(final Map<String, Boolean> commonColumnsMap, final Table table) {
-        // Modify column names in entries
         final List<Entry> modifiedEntries = new ArrayList<>();
         for (final Entry entry : table.getEntries()) {
             final Map<String, String> modifiedColumnsAndValues = new LinkedHashMap<>();
             final Map<String, String> columnsAndValues = entry.getColumnsAndValues();
-            for (final Map.Entry<String, String> columnAndValue : columnsAndValues.entrySet()) {
-                final String column = columnAndValue.getKey();
-                final boolean isCommonColumn = commonColumnsMap.get(column);
 
+            columnsAndValues.forEach((column, value) -> {
+                final boolean isCommonColumn = commonColumnsMap.get(column);
                 if (isCommonColumn) {
                     final String modifiedColumnName = table.getName() + "." + column;
-                    modifiedColumnsAndValues.put(modifiedColumnName, columnAndValue.getValue());
+                    modifiedColumnsAndValues.put(modifiedColumnName, value);
                 } else {
-                    modifiedColumnsAndValues.put(column, columnAndValue.getValue());
+                    modifiedColumnsAndValues.put(column, value);
                 }
-            }
+            });
             modifiedEntries.add(new Entry(modifiedColumnsAndValues, new HashMap<>()));
         }
         return modifiedEntries;

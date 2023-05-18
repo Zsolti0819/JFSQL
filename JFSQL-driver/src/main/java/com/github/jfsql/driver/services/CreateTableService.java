@@ -1,6 +1,5 @@
 package com.github.jfsql.driver.services;
 
-import com.github.jfsql.driver.db.DatabaseManager;
 import com.github.jfsql.driver.db.Operation;
 import com.github.jfsql.driver.db.SharedMapHandler;
 import com.github.jfsql.driver.db.TransactionManager;
@@ -26,13 +25,12 @@ import org.apache.logging.log4j.Logger;
 public class CreateTableService {
 
     private static final Logger logger = LogManager.getLogger(CreateTableService.class);
-    private final DatabaseManager databaseManager;
+    private final Database database;
     private final TransactionManager transactionManager;
     private final SemanticValidator semanticValidator;
     private final Reader reader;
 
     int createTable(final CreateTableWrapper statement) throws SQLException {
-        final Database database = databaseManager.getDatabase();
         final String tableName = statement.getTableName();
 
         if (semanticValidator.tableNameEqualsDatabaseName(statement.getTableName(), database)) {

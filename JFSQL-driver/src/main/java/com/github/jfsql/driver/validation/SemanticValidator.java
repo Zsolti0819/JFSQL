@@ -7,7 +7,6 @@ import com.github.jfsql.parser.dto.StatementWithColumns;
 import com.github.jfsql.parser.dto.StatementWithTableName;
 import com.github.jfsql.parser.dto.StatementWithWhere;
 import java.io.File;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -124,10 +123,11 @@ public class SemanticValidator {
     }
 
     public boolean columnIsPresentInTable(final Table table, final String columnName) {
-        if (Objects.equals("*", columnName)) {
+        final String tableName = table.getName();
+        if (Objects.equals("*", columnName) || Objects.equals(tableName + ".*", columnName)) {
             return true;
         }
-        final String tableName = table.getName();
+
         final Map<String, String> columnAndTypes = table.getColumnsAndTypes();
         return columnAndTypes.containsKey(columnName) || columnAndTypes.containsKey(tableName + "." + columnName);
     }
@@ -140,8 +140,5 @@ public class SemanticValidator {
         return false;
     }
 
-    public boolean URLIsNotDirectory(final String URL) {
-        return Path.of(URL).toFile().isFile();
-    }
 
 }

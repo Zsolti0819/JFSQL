@@ -9,7 +9,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.github.jfsql.driver.db.DatabaseManager;
 import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
@@ -29,16 +28,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class DropTableServiceTest {
 
     @Mock
-    private DatabaseManager databaseManager;
+    private Database database;
 
     @Mock
     private TransactionManager transactionManager;
 
     @Mock
     private SemanticValidator semanticValidator;
-
-    @Mock
-    private Database database;
 
     @Mock
     private Table table;
@@ -54,7 +50,6 @@ class DropTableServiceTest {
 
     @Test
     void testDropTable_normally() throws SQLException {
-        when(databaseManager.getDatabase()).thenReturn(database);
         final List<Table> tables = new ArrayList<>();
         tables.add(table);
         when(database.getTables()).thenReturn(tables);
@@ -74,7 +69,6 @@ class DropTableServiceTest {
 
     @Test
     void testDropTable_tableFileNotExists() throws SQLException {
-        when(databaseManager.getDatabase()).thenReturn(database);
         when(database.getTables()).thenReturn(List.of(table));
         when(statement.isIfExistsPresent()).thenReturn(false);
         final SQLException thrown = assertThrows(SQLException.class,
@@ -89,7 +83,6 @@ class DropTableServiceTest {
 
     @Test
     void testDropTable_ifExists_doesNotThrowException() throws SQLException {
-        when(databaseManager.getDatabase()).thenReturn(database);
         final List<Table> tables = new ArrayList<>();
         when(database.getTables()).thenReturn(tables);
         when(statement.getTableName()).thenReturn("myTable");

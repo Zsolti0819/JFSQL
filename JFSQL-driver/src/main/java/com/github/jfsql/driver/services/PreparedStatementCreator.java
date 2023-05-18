@@ -1,6 +1,5 @@
 package com.github.jfsql.driver.services;
 
-import com.github.jfsql.driver.db.DatabaseManager;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.LargeObject;
@@ -29,7 +28,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PreparedStatementCreator {
 
-    private final DatabaseManager databaseManager;
+    private final Database database;
     private Object[] parameters;
 
     public void initParameterCount(final BaseStatement statement) throws SQLException {
@@ -75,7 +74,6 @@ public class PreparedStatementCreator {
         final List<List<String>> listOfValueLists = new ArrayList<>();
         final List<String> statementColumns = statement.getColumns();
         if (statementColumns.isEmpty()) {
-            final Database database = databaseManager.getDatabase();
             final Table table = TableFinder.getTableByName(statement.getTableName(), database);
             columns = new ArrayList<>(table.getColumnsAndTypes().keySet());
         } else {

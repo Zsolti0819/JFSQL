@@ -8,7 +8,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.github.jfsql.driver.db.DatabaseManager;
 import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
@@ -29,9 +28,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @SuppressWarnings("unused")
 @ExtendWith(MockitoExtension.class)
 class InsertServiceTest {
-
-    @Mock
-    private DatabaseManager databaseManager;
 
     @Mock
     private TransactionManager transactionManager;
@@ -64,7 +60,6 @@ class InsertServiceTest {
         when(semanticValidator.allColumnsExist(table, statement)).thenReturn(true);
         when(semanticValidator.allInsertValuesAreValid(table, statement)).thenReturn(true);
         when(table.getEntries()).thenReturn(entries);
-        when(databaseManager.getDatabase()).thenReturn(database);
         when(database.getTables()).thenReturn(List.of(table));
 
         insertService.insertIntoTable(statement);

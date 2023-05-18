@@ -4,7 +4,6 @@ import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
 import com.github.jfsql.driver.util.FileNameCreator;
-import com.github.jfsql.driver.validation.SemanticValidator;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,15 +15,13 @@ public abstract class DatabaseManager {
 
     final Reader reader;
     final Writer writer;
-    private final SemanticValidator semanticValidator;
     @Getter
     protected Database database;
     @Getter
     private final String URL;
 
-    protected DatabaseManager(final String connectionString, final SemanticValidator semanticValidator,
-        final Reader reader, final Writer writer) throws SQLException {
-        this.semanticValidator = semanticValidator;
+    protected DatabaseManager(final String connectionString, final Reader reader, final Writer writer)
+        throws SQLException {
         this.reader = reader;
         this.writer = writer;
         URL = removePrefixFromUrl(connectionString);
@@ -43,7 +40,7 @@ public abstract class DatabaseManager {
         if (!modifiedURL.endsWith(File.separator)) {
             modifiedURL += File.separator;
         }
-        if (semanticValidator.URLIsNotDirectory(modifiedURL)) {
+        if (Path.of(modifiedURL).toFile().isFile()) {
             throw new SQLException("URL is not a directory.");
         }
         return modifiedURL;

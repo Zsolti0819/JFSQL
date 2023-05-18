@@ -9,7 +9,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.github.jfsql.driver.db.DatabaseManager;
 import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.persistence.Reader;
@@ -26,9 +25,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class CreateTableServiceTest {
-
-    @Mock
-    private DatabaseManager databaseManager;
 
     @Mock
     private TransactionManager transactionManager;
@@ -51,7 +47,6 @@ class CreateTableServiceTest {
 
     @Test
     void testCreateTable_normally() throws SQLException {
-        when(databaseManager.getDatabase()).thenReturn(database);
         when(semanticValidator.tableExists(statement, database)).thenReturn(false);
         when(statement.getTableName()).thenReturn("myTable");
         when(database.getURL()).thenReturn(Path.of("someUrl"));
@@ -67,7 +62,6 @@ class CreateTableServiceTest {
 
     @Test
     void testCreateTable_tableNameAndDatabaseNameAreEqual() throws SQLException {
-        when(databaseManager.getDatabase()).thenReturn(database);
         when(semanticValidator.tableNameEqualsDatabaseName(statement.getTableName(), database)).thenReturn(true);
 
         final SQLException thrown = assertThrows(SQLException.class,
@@ -78,7 +72,6 @@ class CreateTableServiceTest {
 
     @Test
     void testCreateTable_tableExists() throws SQLException {
-        when(databaseManager.getDatabase()).thenReturn(database);
         when(statement.isIfNotExistsPresent()).thenReturn(false);
         when(semanticValidator.tableExists(statement, database)).thenReturn(true);
 
@@ -90,7 +83,6 @@ class CreateTableServiceTest {
 
     @Test
     void testCreateTable_ifNotExists_doesNotThrowException() throws SQLException {
-        when(databaseManager.getDatabase()).thenReturn(database);
         when(statement.isIfNotExistsPresent()).thenReturn(true);
         when(semanticValidator.tableExists(statement, database)).thenReturn(true);
 
@@ -100,7 +92,6 @@ class CreateTableServiceTest {
 
     @Test
     void testCreateTable_identicalColumns() throws SQLException {
-        when(databaseManager.getDatabase()).thenReturn(database);
         when(semanticValidator.tableExists(statement, database)).thenReturn(false);
         when(semanticValidator.statementColumnsContainDuplicates(statement)).thenReturn(true);
 
