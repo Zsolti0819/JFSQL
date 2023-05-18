@@ -85,6 +85,7 @@ public class JfsqlResultSet implements ResultSet {
     @Override
     public void close() {
         table = null;
+        entries = null;
     }
 
     @Override
