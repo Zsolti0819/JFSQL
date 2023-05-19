@@ -14,7 +14,6 @@ import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.CreateTableWrapper;
-import java.nio.file.Path;
 import java.sql.SQLException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -49,7 +48,7 @@ class CreateTableServiceTest {
     void testCreateTable_normally() throws SQLException {
         when(semanticValidator.tableExists(statement, database)).thenReturn(false);
         when(statement.getTableName()).thenReturn("myTable");
-        when(database.getURL()).thenReturn(Path.of("someUrl"));
+        when(database.getURL()).thenReturn("someUrl");
         when(reader.getFileExtension()).thenReturn("someExtension");
 
         createTableService.createTable(statement);

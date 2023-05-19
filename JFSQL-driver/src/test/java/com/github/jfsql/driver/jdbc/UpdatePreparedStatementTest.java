@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.github.jfsql.driver.TestUtils;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
@@ -71,8 +72,7 @@ class UpdatePreparedStatementTest {
         preparedStatement.setInt(7, 34);
         preparedStatement.executeUpdate();
 
-        final String realFileContent = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
-            StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
         final String expectedFileContent = "{\n" +
             "  \"Entry\": [\n" +
             "    {\n" +
@@ -116,8 +116,7 @@ class UpdatePreparedStatementTest {
         preparedStatement.setInt(7, 34);
         preparedStatement.executeUpdate();
         
-        final String realFileContent = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
-            StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
         final String expectedFileContent = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<myTable>\n" +
             "    <Entry>\n" +

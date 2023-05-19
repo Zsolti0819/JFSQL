@@ -7,9 +7,11 @@ import com.github.jfsql.driver.TestUtils;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -27,7 +29,7 @@ class WriterJsonImplTest {
 
     @BeforeAll
     static void setUp() throws IOException {
-        Files.createDirectories(TestUtils.JSON_DATABASE_PATH.getParent());
+        Files.createDirectories(Path.of(TestUtils.JSON_DATABASE_PATH).getParent());
         final Map<String, String> returnColumnsAndTypes = new LinkedHashMap<>();
         returnColumnsAndTypes.put("id", "INTEGER");
         returnColumnsAndTypes.put("name", "TEXT");
@@ -77,20 +79,16 @@ class WriterJsonImplTest {
     @Test
     void testWriter_writeSchema() throws IOException {
         writer.writeSchema(table);
-        final String realFileContent = FileUtils.readFileToString(TestUtils.JSON_SCHEMA_PATH.toFile(),
-            StandardCharsets.UTF_8);
-        final String expectedContent = FileUtils.readFileToString(TestUtils.TEST_JSON_SCHEMA_PATH.toFile(),
-            StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_SCHEMA_PATH), StandardCharsets.UTF_8);
+        final String expectedContent = FileUtils.readFileToString(new File(TestUtils.TEST_JSON_SCHEMA_PATH), StandardCharsets.UTF_8);
         assertEquals(expectedContent, realFileContent);
     }
 
     @Test
     void testWriter_writeTable() throws IOException {
         writer.writeTable(table);
-        final String realFileContent = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
-            StandardCharsets.UTF_8);
-        final String expectedContent = FileUtils.readFileToString(TestUtils.TEST_JSON_TABLE_PATH.toFile(),
-            StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
+        final String expectedContent = FileUtils.readFileToString(new File(TestUtils.TEST_JSON_TABLE_PATH), StandardCharsets.UTF_8);
         assertEquals(expectedContent, realFileContent);
     }
 

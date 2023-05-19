@@ -7,6 +7,7 @@ import com.github.jfsql.parser.dto.StatementWithColumns;
 import com.github.jfsql.parser.dto.StatementWithTableName;
 import com.github.jfsql.parser.dto.StatementWithWhere;
 import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -21,7 +22,8 @@ import org.apache.commons.lang3.math.NumberUtils;
 public class SemanticValidator {
 
     public boolean tableNameEqualsDatabaseName(final String tableName, final Database database) {
-        final String databaseName = database.getURL().getFileName().toString().replace(".json", "").replace(".xml", "");
+        final String databaseName = Path.of(database.getURL()).getFileName().toString().replace(".json", "")
+            .replace(".xml", "");
         return Objects.equals(tableName, databaseName);
     }
 

@@ -7,9 +7,11 @@ import com.github.jfsql.driver.TestUtils;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -28,7 +30,7 @@ class WriterXmlImplTest {
 
     @BeforeAll
     static void setUp() throws IOException {
-        Files.createDirectories(TestUtils.XML_DATABASE_PATH.getParent());
+        Files.createDirectories(Path.of(TestUtils.XML_DATABASE_PATH).getParent());
         final Map<String, String> returnColumnsAndTypes = new LinkedHashMap<>();
         returnColumnsAndTypes.put("id", "INTEGER");
         returnColumnsAndTypes.put("name", "TEXT");
@@ -78,10 +80,8 @@ class WriterXmlImplTest {
     @Test
     void testWriter_writeSchema() throws IOException {
         writer.writeSchema(table);
-        final String realFileContent = FileUtils.readFileToString(TestUtils.XSD_PATH.toFile(),
-            StandardCharsets.UTF_8);
-        final String expectedFileContent = FileUtils.readFileToString(TestUtils.TEST_XSD_PATH.toFile(),
-            StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XSD_PATH), StandardCharsets.UTF_8);
+        final String expectedFileContent = FileUtils.readFileToString(new File(TestUtils.TEST_XSD_PATH), StandardCharsets.UTF_8);
         assertEquals(StringUtils.deleteWhitespace(expectedFileContent), StringUtils.deleteWhitespace(realFileContent));
 
     }
@@ -89,10 +89,8 @@ class WriterXmlImplTest {
     @Test
     void testWriter_writeTable() throws IOException {
         writer.writeTable(table);
-        final String realFileContent = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
-            StandardCharsets.UTF_8);
-        final String expectedFileContent = FileUtils.readFileToString(TestUtils.TEST_XML_TABLE_PATH.toFile(),
-            StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
+        final String expectedFileContent = FileUtils.readFileToString(new File(TestUtils.TEST_XML_TABLE_PATH), StandardCharsets.UTF_8);
         assertEquals(StringUtils.deleteWhitespace(expectedFileContent), StringUtils.deleteWhitespace(realFileContent));
     }
 

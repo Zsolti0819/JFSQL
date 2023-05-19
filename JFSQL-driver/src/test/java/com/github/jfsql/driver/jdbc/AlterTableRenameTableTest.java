@@ -6,8 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.github.jfsql.driver.TestUtils;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -62,14 +64,12 @@ class AlterTableRenameTableTest {
 
     void testAlterTable_renameTable_json() throws SQLException, IOException {
         statement.execute("ALTER TABLE myTable RENAME to myTableEdited;");
-        final String realDatabaseFileContentAfter = FileUtils.readFileToString(TestUtils.JSON_DATABASE_PATH.toFile(),
-            StandardCharsets.UTF_8);
+        final String realDatabaseFileContentAfter = FileUtils.readFileToString(new File(TestUtils.JSON_DATABASE_PATH), StandardCharsets.UTF_8);
         assertTrue(realDatabaseFileContentAfter.contains("myTableEdited.json"));
         assertTrue(realDatabaseFileContentAfter.contains("myTableEditedSchema.json"));
         assertFalse(realDatabaseFileContentAfter.contains("myTable.json"));
         assertFalse(realDatabaseFileContentAfter.contains("myTableSchema.json"));
-        final String realTableFileContentAfter = FileUtils.readFileToString(TestUtils.EDITED_JSON_TABLE_PATH.toFile(),
-            StandardCharsets.UTF_8);
+        final String realTableFileContentAfter = FileUtils.readFileToString(new File(TestUtils.EDITED_JSON_TABLE_PATH), StandardCharsets.UTF_8);
         final String expectedTableFileContentAfter = StringUtils.EMPTY +
             "{\n" +
             "  \"Entry\": [\n" +
@@ -96,20 +96,20 @@ class AlterTableRenameTableTest {
             "  ]\n" +
             "}";
         assertEquals(expectedTableFileContentAfter, realTableFileContentAfter);
-        assertFalse(TestUtils.JSON_SCHEMA_PATH.toFile().exists());
-        assertTrue(TestUtils.EDITED_JSON_SCHEMA_PATH.toFile().exists());
+        assertFalse(Path.of(TestUtils.JSON_SCHEMA_PATH).toFile().exists());
+        assertTrue(Path.of(TestUtils.EDITED_JSON_SCHEMA_PATH).toFile().exists());
     }
 
     void testAlterTable_renameTable_xml() throws SQLException, IOException {
         statement.execute("ALTER TABLE myTable RENAME to myTableEdited;");
-        final String realDatabaseFileContentAfter = FileUtils.readFileToString(TestUtils.XML_DATABASE_PATH.toFile(),
+        final String realDatabaseFileContentAfter = FileUtils.readFileToString(Path.of(TestUtils.XML_DATABASE_PATH).toFile(),
             StandardCharsets.UTF_8);
         assertTrue(realDatabaseFileContentAfter.contains("myTableEdited.xml"));
         assertTrue(realDatabaseFileContentAfter.contains("myTableEdited.xsd"));
         assertFalse(realDatabaseFileContentAfter.contains("myTable.xml"));
         assertFalse(realDatabaseFileContentAfter.contains("myTable.xsd"));
         final String realTableFileContentAfter = FileUtils.readFileToString(
-            TestUtils.EDITED_XML_TABLE_XML_PATH.toFile(), StandardCharsets.UTF_8);
+            Path.of(TestUtils.EDITED_XML_TABLE_XML_PATH).toFile(), StandardCharsets.UTF_8);
         final String expectedTableFileContentAfter = StringUtils.EMPTY +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<myTableEdited>\n" +
@@ -136,8 +136,8 @@ class AlterTableRenameTableTest {
             "</myTableEdited>\n";
         assertEquals(StringUtils.deleteWhitespace(expectedTableFileContentAfter),
             StringUtils.deleteWhitespace(realTableFileContentAfter));
-        assertFalse(TestUtils.XSD_PATH.toFile().exists());
-        assertTrue(TestUtils.EDITED_XSD_PATH.toFile().exists());
+        assertFalse(Path.of(TestUtils.XSD_PATH).toFile().exists());
+        assertTrue(Path.of(TestUtils.EDITED_XSD_PATH).toFile().exists());
     }
 
 }

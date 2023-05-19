@@ -6,8 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.github.jfsql.driver.TestUtils;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -63,8 +65,7 @@ public class CommitTest {
         statement.execute("INSERT INTO myTable VALUES (1, 'a', 25)");
 
         // Inserted, but not yet committed, so the table looks the same
-        final String firstCommitRealFileContent = FileUtils.readFileToString(
-            TestUtils.JSON_TABLE_PATH.toFile(), StandardCharsets.UTF_8);
+        final String firstCommitRealFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
         final String firstCommitExpectedFileContent = "{\n" +
             "  \"Entry\": []\n" +
             "}";
@@ -73,8 +74,7 @@ public class CommitTest {
         connection.commit();
 
         // After the commit, changes are written to the file
-        final String secondCommitRealFileContent = FileUtils.readFileToString(
-            TestUtils.JSON_TABLE_PATH.toFile(), StandardCharsets.UTF_8);
+        final String secondCommitRealFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
         final String secondCommitExpectedFileContent = "{\n" +
             "  \"Entry\": [\n" +
             "    {\n" +
@@ -93,8 +93,7 @@ public class CommitTest {
         statement.execute("INSERT INTO myTable VALUES (1, 'a', 25)");
 
         // Inserted, but not yet committed, so the table looks the same
-        final String realFileContent = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
-            StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
         final String expectedFileContent = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<myTable/>\n";
         assertEquals(StringUtils.deleteWhitespace(expectedFileContent),
@@ -103,8 +102,7 @@ public class CommitTest {
         connection.commit();
 
         // After the commit, changes are written to the file
-        final String realFileContent2 = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
-            StandardCharsets.UTF_8);
+        final String realFileContent2 = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
         final String expectedFileContent2 = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<myTable>\n" +
             "    <Entry>\n" +
@@ -139,20 +137,20 @@ public class CommitTest {
         connection.setAutoCommit(false);
 
         // Table's files were created
-        assertTrue(TestUtils.JSON_TABLE_PATH.toFile().exists());
-        assertTrue(TestUtils.JSON_SCHEMA_PATH.toFile().exists());
+        assertTrue(Path.of(TestUtils.JSON_TABLE_PATH).toFile().exists());
+        assertTrue(Path.of(TestUtils.JSON_SCHEMA_PATH).toFile().exists());
 
         statement.execute("DROP TABLE myTable;");
 
         // Everything exist, because it wasn't committed
-        assertTrue(TestUtils.JSON_TABLE_PATH.toFile().exists());
-        assertTrue(TestUtils.JSON_SCHEMA_PATH.toFile().exists());
+        assertTrue(Path.of(TestUtils.JSON_TABLE_PATH).toFile().exists());
+        assertTrue(Path.of(TestUtils.JSON_SCHEMA_PATH).toFile().exists());
 
         connection.commit();
 
         // After the commit the files don't exist
-        assertFalse(TestUtils.JSON_TABLE_PATH.toFile().exists());
-        assertFalse(TestUtils.JSON_SCHEMA_PATH.toFile().exists());
+        assertFalse(Path.of(TestUtils.JSON_TABLE_PATH).toFile().exists());
+        assertFalse(Path.of(TestUtils.JSON_SCHEMA_PATH).toFile().exists());
 
     }
 
@@ -160,20 +158,20 @@ public class CommitTest {
         connection.setAutoCommit(false);
 
         // Table's files were created
-        assertTrue(TestUtils.XML_TABLE_PATH.toFile().exists());
-        assertTrue(TestUtils.XSD_PATH.toFile().exists());
+        assertTrue(Path.of(TestUtils.XML_TABLE_PATH).toFile().exists());
+        assertTrue(Path.of(TestUtils.XSD_PATH).toFile().exists());
 
         statement.execute("DROP TABLE myTable;");
 
         // Everything exist, because it wasn't committed
-        assertTrue(TestUtils.XML_TABLE_PATH.toFile().exists());
-        assertTrue(TestUtils.XSD_PATH.toFile().exists());
+        assertTrue(Path.of(TestUtils.XML_TABLE_PATH).toFile().exists());
+        assertTrue(Path.of(TestUtils.XSD_PATH).toFile().exists());
 
         connection.commit();
 
         // After the commit the files don't exist
-        assertFalse(TestUtils.XML_TABLE_PATH.toFile().exists());
-        assertFalse(TestUtils.XSD_PATH.toFile().exists());
+        assertFalse(Path.of(TestUtils.XML_TABLE_PATH).toFile().exists());
+        assertFalse(Path.of(TestUtils.XSD_PATH).toFile().exists());
 
     }
 

@@ -9,7 +9,6 @@ import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.ReaderJsonImpl;
 import com.github.jfsql.driver.persistence.ReaderXmlImpl;
-import java.io.File;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +23,7 @@ public class FileNameCreatorTest {
 
     @Test
     void testCreateTableFileName_json() {
-        when(database.getURL()).thenReturn(TestUtils.JSON_DATABASE_PATH);
+        when(database.getURL()).thenReturn(String.valueOf(TestUtils.JSON_DATABASE_PATH));
         final Reader jsonReader = mock(ReaderJsonImpl.class);
         when(jsonReader.getFileExtension()).thenCallRealMethod();
 
@@ -35,7 +34,7 @@ public class FileNameCreatorTest {
 
     @Test
     void testCreateTableFileName_xml() {
-        when(database.getURL()).thenReturn(TestUtils.XML_DATABASE_PATH);
+        when(database.getURL()).thenReturn(String.valueOf(TestUtils.XML_DATABASE_PATH));
         final Reader xmlReader = mock(ReaderXmlImpl.class);
         when(xmlReader.getFileExtension()).thenCallRealMethod();
 
@@ -46,7 +45,7 @@ public class FileNameCreatorTest {
 
     @Test
     void testCreateSchemaFileName_json() {
-        when(database.getURL()).thenReturn(TestUtils.JSON_DATABASE_PATH);
+        when(database.getURL()).thenReturn(String.valueOf(TestUtils.JSON_DATABASE_PATH));
         final Reader jsonReader = mock(ReaderJsonImpl.class);
         when(jsonReader.getFileExtension()).thenCallRealMethod();
         when(jsonReader.getSchemaFileExtension()).thenCallRealMethod();
@@ -58,7 +57,7 @@ public class FileNameCreatorTest {
 
     @Test
     void testCreateSchemaFileName_xml() {
-        when(database.getURL()).thenReturn(TestUtils.XML_DATABASE_PATH);
+        when(database.getURL()).thenReturn(String.valueOf(TestUtils.XML_DATABASE_PATH));
         final Reader xmlReader = mock(ReaderXmlImpl.class);
         when(xmlReader.getSchemaFileExtension()).thenCallRealMethod();
 
@@ -71,19 +70,19 @@ public class FileNameCreatorTest {
     void testCreateDatabaseFileName_json() {
         final Reader jsonReader = mock(ReaderJsonImpl.class);
         when(jsonReader.getFileExtension()).thenCallRealMethod();
-        final String expected =
-            TestUtils.DATABASE_PATH + File.separator + TestUtils.DATABASE_PATH.getFileName() + ".json";
-        final Path actual = FileNameCreator.createDatabaseFileName(String.valueOf(TestUtils.DATABASE_PATH), jsonReader);
-        assertEquals(expected, actual.toString());
+        final String expected = String.valueOf(
+            Path.of(TestUtils.DATABASE_URL, Path.of(TestUtils.DATABASE_PATH).getFileName() + ".json"));
+        final String actual = FileNameCreator.createDatabaseFileName(TestUtils.DATABASE_PATH, jsonReader);
+        assertEquals(expected, actual);
     }
 
     @Test
     void testCreateDatabaseFileName_xml() {
         final Reader xmlReader = mock(ReaderXmlImpl.class);
         when(xmlReader.getFileExtension()).thenCallRealMethod();
-        final String expected =
-            TestUtils.DATABASE_PATH + File.separator + TestUtils.DATABASE_PATH.getFileName() + ".xml";
-        final Path actual = FileNameCreator.createDatabaseFileName(String.valueOf(TestUtils.DATABASE_PATH), xmlReader);
-        assertEquals(expected, actual.toString());
+        final String expected = String.valueOf(
+            Path.of(TestUtils.DATABASE_URL, Path.of(TestUtils.DATABASE_PATH).getFileName() + ".xml"));
+        final String actual = FileNameCreator.createDatabaseFileName(TestUtils.DATABASE_PATH, xmlReader);
+        assertEquals(expected, actual);
     }
 }

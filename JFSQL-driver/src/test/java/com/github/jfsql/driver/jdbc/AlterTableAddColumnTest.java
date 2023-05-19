@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.github.jfsql.driver.TestUtils;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
@@ -60,8 +61,7 @@ class AlterTableAddColumnTest {
 
     void testAlterTable_addColumn_json() throws SQLException, IOException {
         statement.execute("ALTER TABLE myTable ADD COLUMN salary REAL");
-        final String realTableFileContentAfter = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
-            StandardCharsets.UTF_8);
+        final String realTableFileContentAfter = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
         final String expectedTableFileContentAfter = StringUtils.EMPTY +
             "{\n" +
             "  \"Entry\": [\n" +
@@ -96,8 +96,7 @@ class AlterTableAddColumnTest {
 
     void testAlterTable_addColumn_xml() throws SQLException, IOException {
         statement.execute("ALTER TABLE myTable ADD COLUMN salary REAL");
-        final String realTableFileContentAfter = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
-            StandardCharsets.UTF_8);
+        final String realTableFileContentAfter = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
         final String expectedTableFileContentAfter = StringUtils.EMPTY +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<myTable>\n" +
@@ -145,8 +144,7 @@ class AlterTableAddColumnTest {
 
     void testAlterTable_addNotNullColumn_json() throws SQLException, IOException {
         statement.execute("ALTER TABLE myTable ADD COLUMN salary REAL NOT NULL;");
-        final String realTableFileContentAfter = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
-            StandardCharsets.UTF_8);
+        final String realTableFileContentAfter = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
         final String expectedTableFileContentAfter = StringUtils.EMPTY +
             "{\n" +
             "  \"Entry\": [\n" +
@@ -181,8 +179,7 @@ class AlterTableAddColumnTest {
 
     void testAlterTable_addNotNullColumn_xml() throws SQLException, IOException {
         statement.execute("ALTER TABLE myTable ADD COLUMN salary REAL NOT NULL;");
-        final String realTableFileContentAfter = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
-            StandardCharsets.UTF_8);
+        final String realTableFileContentAfter = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
         final String expectedTableFileContentAfter = StringUtils.EMPTY +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<myTable>\n" +

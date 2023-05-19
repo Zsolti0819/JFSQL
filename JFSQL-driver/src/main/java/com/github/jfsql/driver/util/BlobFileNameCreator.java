@@ -41,10 +41,9 @@ public class BlobFileNameCreator {
             .map(num -> num + 1)
             .orElse(1);
 
-        final String nextBlobName =
-            pathURL + File.separator + "blob" + File.separator + "blob" + nextFileNumber + "." + fileExtension;
-        logger.debug("nextBlobName = {}", nextBlobName);
-        return nextBlobName;
+        final Path nextBlobNamePath = Path.of(URL, "blob", "blob" + nextFileNumber + "." + fileExtension);
+        logger.debug("nextBlobName = {}", nextBlobNamePath);
+        return String.valueOf(nextBlobNamePath);
     }
 
 }

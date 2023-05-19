@@ -12,53 +12,50 @@ import org.apache.logging.log4j.Logger;
 public class TestUtils {
 
     private static final Logger logger = LogManager.getLogger(TestUtils.class);
-    private static final String BASE_PATH = System.getProperty("user.dir");
-    public static final Path DATABASE_PATH = Path.of(
-        BASE_PATH + File.separator + "src" + File.separator + "main" + File.separator + "resources" + File.separator
-            + "myDatabase" + File.separator);
-    public static final Path XML_DATABASE_PATH = Path.of(
-        DATABASE_PATH + File.separator + DATABASE_PATH.getFileName() + ".xml");
-    public static final Path JSON_DATABASE_PATH = Path.of(
-        DATABASE_PATH + File.separator + DATABASE_PATH.getFileName() + ".json");
-    public static final Path XML_TABLE_PATH = Path.of(DATABASE_PATH + File.separator + "myTable.xml");
-    public static final Path JSON_TABLE_PATH = Path.of(DATABASE_PATH + File.separator + "myTable.json");
-    public static final Path XSD_PATH = Path.of(DATABASE_PATH + File.separator + "myTable.xsd");
-    public static final Path JSON_SCHEMA_PATH = Path.of(DATABASE_PATH + File.separator + "myTableSchema.json");
-    public static final Path EDITED_XML_TABLE_XML_PATH = Path.of(DATABASE_PATH + File.separator + "myTableEdited.xml");
-    public static final Path EDITED_JSON_TABLE_PATH = Path.of(DATABASE_PATH + File.separator + "myTableEdited.json");
-    public static final Path EDITED_XSD_PATH = Path.of(DATABASE_PATH + File.separator + "myTableEdited.xsd");
-    public static final Path EDITED_JSON_SCHEMA_PATH = Path.of(
-        DATABASE_PATH + File.separator + "myTableEditedSchema.json");
-    public static final Path BLOB_COPY_PATH = Path.of(DATABASE_PATH + File.separator + "java.sql.Driver");
-    public static final Path ENCODED_JSON_BLOB_PATH = Path.of(
-        DATABASE_PATH + File.separator + "blob" + File.separator + "blob1.json");
-    public static final Path ENCODED_XML_BLOB_PATH = Path.of(
-        DATABASE_PATH + File.separator + "blob" + File.separator + "blob1.xml");
-    public static final Path META_INF_DRIVER_PATH = Path.of(
-        BASE_PATH + File.separator + "src" + File.separator + "main" + File.separator + "resources" + File.separator
-            + "META-INF" + File.separator + "services" + File.separator + "java.sql.Driver");
+    private static final String BASE_PATH = String.valueOf(Path.of("").toAbsolutePath());
+    public static final String DATABASE_PATH = String.valueOf(
+        Path.of(BASE_PATH, "src", "main", "resources", "myDatabase"));
+    public static final String DATABASE_URL = String.valueOf(DATABASE_PATH);
+    public static final String XML_DATABASE_PATH = String.valueOf(
+        Path.of(DATABASE_URL, Path.of(DATABASE_PATH).getFileName() + ".xml"));
+    public static final String JSON_DATABASE_PATH = String.valueOf(
+        Path.of(DATABASE_URL, Path.of(DATABASE_PATH).getFileName() + ".json"));
+    public static final String XML_TABLE_PATH = String.valueOf(Path.of(DATABASE_URL, "myTable.xml"));
+    public static final String JSON_TABLE_PATH = String.valueOf(Path.of(DATABASE_URL, "myTable.json"));
+    public static final String XSD_PATH = String.valueOf(Path.of(DATABASE_URL, "myTable.xsd"));
+    public static final String JSON_SCHEMA_PATH = String.valueOf(Path.of(DATABASE_URL, "myTableSchema.json"));
+    public static final String EDITED_XML_TABLE_XML_PATH = String.valueOf(Path.of(DATABASE_URL, "myTableEdited.xml"));
+    public static final String EDITED_JSON_TABLE_PATH = String.valueOf(Path.of(DATABASE_URL, "myTableEdited.json"));
+    public static final String EDITED_XSD_PATH = String.valueOf(Path.of(DATABASE_URL, "myTableEdited.xsd"));
+    public static final String EDITED_JSON_SCHEMA_PATH = String.valueOf(
+        Path.of(DATABASE_URL, "myTableEditedSchema.json"));
+    public static final String BLOB_COPY_PATH = String.valueOf(Path.of(DATABASE_URL, "java.sql.Driver"));
+    public static final String ENCODED_JSON_BLOB_PATH = String.valueOf(Path.of(DATABASE_URL, "blob", "blob1.json"));
+    public static final String ENCODED_XML_BLOB_PATH = String.valueOf(Path.of(DATABASE_URL, "blob", "blob1.xml"));
+    public static final String META_INF_DRIVER_PATH = String.valueOf(
+        Path.of(BASE_PATH, "src", "main", "resources", "META-INF",
+            "services", "java.sql.Driver"));
 
     // For testing the reader
-    public static final Path TEST_JSON_DATABASE_PATH = Path.of(
-        BASE_PATH + File.separator + "src" + File.separator + "test" + File.separator + "resources" + File.separator
-            + "myDatabase_JSON" + File.separator);
-    public static final Path TEST_JSON_DATABASE_FILE_PATH = Path.of(
-        TEST_JSON_DATABASE_PATH + File.separator + "myDatabase_JSON.json");
-    public static final Path TEST_JSON_TABLE_PATH = Path.of(TEST_JSON_DATABASE_PATH + File.separator + "myTable.json");
-    public static final Path TEST_JSON_SCHEMA_PATH = Path.of(
-        TEST_JSON_DATABASE_PATH + File.separator + "myTableSchema.json");
-
-    public static final Path TEST_XML_DATABASE_PATH = Path.of(
-        BASE_PATH + File.separator + "src" + File.separator + "test" + File.separator + "resources" + File.separator
-            + "myDatabase_XML" + File.separator);
-    public static final Path TEST_XML_DATABASE_FILE_PATH = Path.of(
-        TEST_XML_DATABASE_PATH + File.separator + "myDatabase_XML.xml");
-    public static final Path TEST_XML_TABLE_PATH = Path.of(TEST_XML_DATABASE_PATH + File.separator + "myTable.xml");
-    public static final Path TEST_XSD_PATH = Path.of(TEST_XML_DATABASE_PATH + File.separator + "myTable.xsd");
-    public static final String URL = "jdbc:jfsql:" + TestUtils.DATABASE_PATH;
+    public static final String TEST_JSON_DATABASE_PATH = String.valueOf(
+        Path.of(BASE_PATH, "src", "test", "resources", "myDatabase_JSON"));
+    public static final String TEST_JSON_DATABASE_FILE_PATH = String.valueOf(
+        Path.of(TEST_JSON_DATABASE_PATH, "myDatabase_JSON.json"));
+    public static final String TEST_JSON_TABLE_PATH = String.valueOf(Path.of(TEST_JSON_DATABASE_PATH, "myTable.json"));
+    public static final String TEST_JSON_SCHEMA_PATH = String.valueOf(Path.of(TEST_JSON_DATABASE_PATH,
+        "myTableSchema.json"));
+    public static final String TEST_XML_DATABASE_PATH = String.valueOf(Path.of(BASE_PATH, "src", "test", "resources",
+        "myDatabase_XML"));
+    public static final String TEST_XML_DATABASE_FILE_PATH = String.valueOf(Path.of(String.valueOf(TEST_XML_DATABASE_PATH),
+        "myDatabase_XML.xml"));
+    public static final String TEST_XML_TABLE_PATH = String.valueOf(
+        Path.of(String.valueOf(TEST_XML_DATABASE_PATH), "myTable.xml"));
+    public static final String TEST_XSD_PATH = String.valueOf(
+        Path.of(String.valueOf(TEST_XML_DATABASE_PATH), "myTable.xsd"));
+    public static final String URL = "jdbc:jfsql:" + TestUtils.DATABASE_URL;
 
     public void deleteDatabaseDirectory() {
-        final File folder = new File(TestUtils.DATABASE_PATH.toUri());
+        final File folder = new File(TestUtils.DATABASE_PATH);
         boolean isDeleted = false;
         while (!isDeleted) {
             try {

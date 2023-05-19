@@ -8,6 +8,7 @@ import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -38,7 +39,7 @@ class ReaderXmlImplTest {
 
     @AfterAll
     static void deleteDatabaseFolder() throws IOException {
-        Files.delete(TestUtils.TEST_XML_DATABASE_FILE_PATH);
+        Files.delete(Path.of(TestUtils.TEST_XML_DATABASE_FILE_PATH));
     }
 
     @Order(1)

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.github.jfsql.driver.TestUtils;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -56,19 +57,19 @@ class DropTableTest {
     }
 
     void testDropTable_normally_json() throws SQLException {
-        assertTrue(TestUtils.JSON_TABLE_PATH.toFile().exists());
-        assertTrue(TestUtils.JSON_SCHEMA_PATH.toFile().exists());
+        assertTrue(Path.of(TestUtils.JSON_TABLE_PATH).toFile().exists());
+        assertTrue(Path.of(TestUtils.JSON_SCHEMA_PATH).toFile().exists());
         assertEquals(4, statement.executeUpdate("DROP TABLE myTable"));
-        assertFalse(TestUtils.JSON_TABLE_PATH.toFile().exists());
-        assertFalse(TestUtils.JSON_SCHEMA_PATH.toFile().exists());
+        assertFalse(Path.of(TestUtils.JSON_TABLE_PATH).toFile().exists());
+        assertFalse(Path.of(TestUtils.JSON_SCHEMA_PATH).toFile().exists());
     }
 
     void testDropTable_normally_xml() throws SQLException {
-        assertTrue(TestUtils.XML_TABLE_PATH.toFile().exists());
-        assertTrue(TestUtils.XSD_PATH.toFile().exists());
+        assertTrue(Path.of(TestUtils.XML_TABLE_PATH).toFile().exists());
+        assertTrue(Path.of(TestUtils.XSD_PATH).toFile().exists());
         assertEquals(4, statement.executeUpdate("DROP TABLE myTable"));
-        assertFalse(TestUtils.XML_TABLE_PATH.toFile().exists());
-        assertFalse(TestUtils.XSD_PATH.toFile().exists());
+        assertFalse(Path.of(TestUtils.XML_TABLE_PATH).toFile().exists());
+        assertFalse(Path.of(TestUtils.XSD_PATH).toFile().exists());
     }
 
 }

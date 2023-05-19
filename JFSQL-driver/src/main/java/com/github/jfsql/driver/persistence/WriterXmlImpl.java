@@ -8,7 +8,6 @@ import com.github.jfsql.driver.exceptions.SchemaValidationException;
 import com.github.jfsql.driver.util.DatatypeConverter;
 import com.github.jfsql.driver.validation.XmlSchemaValidator;
 import java.io.BufferedOutputStream;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -173,7 +172,7 @@ public class WriterXmlImpl extends Writer {
 
     @Override
     public void writeDatabaseFile(final Database database) throws IOException {
-        final Path databaseFilePath = database.getURL();
+        final Path databaseFilePath = Path.of(database.getURL());
         final String databaseFileParentPath = String.valueOf(databaseFilePath.getParent());
         final Path databaseFolderName = Path.of(databaseFileParentPath);
         try (final FileOutputStream fileOutputStream = new FileOutputStream(databaseFilePath.toFile())) {
@@ -215,7 +214,7 @@ public class WriterXmlImpl extends Writer {
         final String blobValue = largeObject.getValue();
         logger.trace("blob value = {}", blobValue);
         final Path tableParent = Path.of(table.getTableFile()).getParent();
-        final Path blobParent = Path.of(tableParent + File.separator + "blob");
+        final Path blobParent = Path.of(String.valueOf(tableParent), "blob");
         Files.createDirectories(blobParent);
 
         try (final FileOutputStream fileOutputStream = new FileOutputStream(blobURL)) {

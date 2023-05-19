@@ -3,7 +3,6 @@ package com.github.jfsql.driver.util;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.ReaderJsonImpl;
-import java.io.File;
 import java.nio.file.Path;
 import lombok.experimental.UtilityClass;
 
@@ -11,21 +10,25 @@ import lombok.experimental.UtilityClass;
 public class FileNameCreator {
 
     public String createTableFileName(final String tableName, final Reader reader, final Database database) {
-        final String parentDirectory = String.valueOf(database.getURL().getParent());
-        return parentDirectory + File.separator + tableName + "." + reader.getFileExtension();
+        final String parentDirectory = String.valueOf(Path.of(database.getURL()).getParent());
+        final Path tableFileName = Path.of(parentDirectory, tableName + "." + reader.getFileExtension());
+        return String.valueOf(tableFileName);
     }
 
     public String createSchemaFileName(final String tableName, final Reader reader, final Database database) {
-        final String parentDirectory = String.valueOf(database.getURL().getParent());
-        return reader instanceof ReaderJsonImpl ? parentDirectory + File.separator + tableName + "Schema."
-            + reader.getSchemaFileExtension()
-            : parentDirectory + File.separator + tableName + "." + reader.getSchemaFileExtension();
+        final String parentDirectory = String.valueOf(Path.of(database.getURL()).getParent());
+        final String schemaName =
+            reader instanceof ReaderJsonImpl ?
+                tableName + "Schema." + reader.getSchemaFileExtension() :
+                tableName + "." + reader.getSchemaFileExtension();
+        final Path schemaFileName = Path.of(parentDirectory, schemaName);
+        return String.valueOf(schemaFileName);
     }
 
-    public Path createDatabaseFileName(final String URL, final Reader reader) {
+    public String createDatabaseFileName(final String URL, final Reader reader) {
         final Path pathURL = Path.of(URL);
-        final String fileName = File.separator + pathURL.getFileName() + "." + reader.getFileExtension();
-        return Path.of(pathURL + fileName);
+        final String fileName = pathURL.getFileName() + "." + reader.getFileExtension();
+        return String.valueOf(Path.of(URL, fileName));
     }
 
 }

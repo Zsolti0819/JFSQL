@@ -25,10 +25,11 @@ public abstract class DatabaseManager {
         this.reader = reader;
         this.writer = writer;
         URL = removePrefixFromUrl(connectionString);
-        final Path databaseFileURL = FileNameCreator.createDatabaseFileName(URL, reader);
-        final String databaseFileName = String.valueOf(databaseFileURL.getFileName());
+        final String databaseFileURL = FileNameCreator.createDatabaseFileName(URL, reader);
+        final Path databaseFilePath = Path.of(databaseFileURL);
+        final String databaseFileName = String.valueOf(databaseFilePath.getFileName());
         database = new Database(databaseFileName, databaseFileURL, new LinkedList<>());
-        if (Files.exists(databaseFileURL)) {
+        if (Files.exists(databaseFilePath)) {
             openDatabase();
         } else {
             initDatabase(database);

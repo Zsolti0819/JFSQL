@@ -16,7 +16,6 @@ import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.AlterTableWrapper;
-import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +57,7 @@ class AlterTableServiceTest {
         when(table.getName()).thenReturn("myTable");
         when(statement.getTableName()).thenReturn("myTable");
         when(statement.getNewTableName()).thenReturn("myTableEdited");
-        when(database.getURL()).thenReturn(Path.of("someUrl"));
+        when(database.getURL()).thenReturn("someUrl");
         when(reader.getFileExtension()).thenReturn("someExtension");
 
         final AlterTableService alterTableServiceSpy = spy(alterTableService);

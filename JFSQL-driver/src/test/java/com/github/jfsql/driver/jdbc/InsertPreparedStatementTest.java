@@ -6,10 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.github.jfsql.driver.TestUtils;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -71,7 +73,7 @@ public class InsertPreparedStatementTest {
         preparedStatement.setInt(3, 25);
         preparedStatement.setBinaryStream(4, null);
         assertEquals(1, preparedStatement.executeUpdate());
-        final String realFileContent = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(Path.of(TestUtils.JSON_TABLE_PATH).toFile(),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "{\n" +
             "  \"Entry\": [\n" +
@@ -94,7 +96,7 @@ public class InsertPreparedStatementTest {
         preparedStatement.setInt(3, 25);
         preparedStatement.setBinaryStream(4, null);
         assertEquals(1, preparedStatement.executeUpdate());
-        final String realFileContent = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(Path.of(TestUtils.XML_TABLE_PATH).toFile(),
             StandardCharsets.UTF_8);
         final String expectedFileContent = StringUtils.EMPTY +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
@@ -133,7 +135,7 @@ public class InsertPreparedStatementTest {
         preparedStatement.setInt(3, 25);
         preparedStatement.setBinaryStream(4, null);
         assertEquals(1, preparedStatement.executeUpdate());
-        final String realFileContent = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "{\n" +
             "  \"Entry\": [\n" +
@@ -156,7 +158,7 @@ public class InsertPreparedStatementTest {
         preparedStatement.setInt(3, 25);
         preparedStatement.setBinaryStream(4, null);
         assertEquals(1, preparedStatement.executeUpdate());
-        final String realFileContent = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH),
             StandardCharsets.UTF_8);
         final String expectedFileContent = StringUtils.EMPTY +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
@@ -195,11 +197,11 @@ public class InsertPreparedStatementTest {
         preparedStatement.setInt(1, 1);
         preparedStatement.setString(2, "Zsolti");
         preparedStatement.setInt(3, 25);
-        preparedStatement.setBinaryStream(4, new FileInputStream(TestUtils.META_INF_DRIVER_PATH.toFile()));
+        preparedStatement.setBinaryStream(4, new FileInputStream(TestUtils.META_INF_DRIVER_PATH));
         assertEquals(1, preparedStatement.executeUpdate());
-        assertTrue(TestUtils.ENCODED_JSON_BLOB_PATH.toFile().exists());
+        assertTrue(Path.of(TestUtils.ENCODED_JSON_BLOB_PATH).toFile().exists());
 
-        final String realFileContent = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "{\n" +
             "  \"Entry\": [\n" +
@@ -207,7 +209,7 @@ public class InsertPreparedStatementTest {
             "      \"id\": 1,\n" +
             "      \"name\": \"Zsolti\",\n" +
             "      \"age\": 25,\n" +
-            "      \"file\": \"" + String.valueOf(TestUtils.ENCODED_JSON_BLOB_PATH).replace("\\", "\\\\") + "\"\n" +
+            "      \"file\": \"" + TestUtils.ENCODED_JSON_BLOB_PATH.replace("\\", "\\\\") + "\"\n" +
             "    }\n" +
             "  ]\n" +
             "}";
@@ -218,12 +220,12 @@ public class InsertPreparedStatementTest {
         final ResultSet resultSet = selectPreparedStatement.executeQuery();
         while (resultSet.next()) {
             final byte[] bytes = resultSet.getBytes("file");
-            final FileOutputStream fileOutputStream = new FileOutputStream(TestUtils.BLOB_COPY_PATH.toFile());
+            final FileOutputStream fileOutputStream = new FileOutputStream(TestUtils.BLOB_COPY_PATH);
             fileOutputStream.write(bytes);
             fileOutputStream.close();
         }
 
-        assertTrue(TestUtils.BLOB_COPY_PATH.toFile().exists());
+        assertTrue(Path.of(TestUtils.BLOB_COPY_PATH).toFile().exists());
     }
 
     void testInsert_preparedStatement_blob_xml() throws SQLException, IOException {
@@ -234,11 +236,11 @@ public class InsertPreparedStatementTest {
         preparedStatement.setInt(1, 1);
         preparedStatement.setString(2, "Zsolti");
         preparedStatement.setInt(3, 25);
-        preparedStatement.setBinaryStream(4, new FileInputStream(TestUtils.META_INF_DRIVER_PATH.toFile()));
+        preparedStatement.setBinaryStream(4, new FileInputStream(TestUtils.META_INF_DRIVER_PATH));
         assertEquals(1, preparedStatement.executeUpdate());
-        assertTrue(TestUtils.ENCODED_XML_BLOB_PATH.toFile().exists());
+        assertTrue(Path.of(TestUtils.ENCODED_XML_BLOB_PATH).toFile().exists());
 
-        final String realFileContent = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH),
             StandardCharsets.UTF_8);
         final String expectedFileContent = StringUtils.EMPTY +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
@@ -258,12 +260,12 @@ public class InsertPreparedStatementTest {
         final ResultSet resultSet = selectPreparedStatement.executeQuery();
         while (resultSet.next()) {
             final byte[] bytes = resultSet.getBytes("file");
-            final FileOutputStream fileOutputStream = new FileOutputStream(TestUtils.BLOB_COPY_PATH.toFile());
+            final FileOutputStream fileOutputStream = new FileOutputStream(TestUtils.BLOB_COPY_PATH);
             fileOutputStream.write(bytes);
             fileOutputStream.close();
         }
 
-        assertTrue(TestUtils.BLOB_COPY_PATH.toFile().exists());
+        assertTrue(Path.of(TestUtils.BLOB_COPY_PATH).toFile().exists());
     }
 
     @ParameterizedTest
@@ -292,12 +294,12 @@ public class InsertPreparedStatementTest {
         preparedStatement.setInt(1, 1);
         preparedStatement.setString(2, "Zsolti");
         preparedStatement.setInt(3, 25);
-        preparedStatement.setBinaryStream(4, new FileInputStream(TestUtils.META_INF_DRIVER_PATH.toFile()));
+        preparedStatement.setBinaryStream(4, new FileInputStream(TestUtils.META_INF_DRIVER_PATH));
         assertEquals(1, preparedStatement.executeUpdate());
 
         connection.commit();
 
-        final String realFileContent = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH),
             StandardCharsets.UTF_8);
         final String expectedFileContent = "{\n" +
             "  \"Entry\": [\n" +
@@ -317,18 +319,18 @@ public class InsertPreparedStatementTest {
         final ResultSet resultSet = selectPreparedStatement.executeQuery();
         while (resultSet.next()) {
             final byte[] bytes = resultSet.getBytes("file");
-            final FileOutputStream fileOutputStream = new FileOutputStream(TestUtils.BLOB_COPY_PATH.toFile());
+            final FileOutputStream fileOutputStream = new FileOutputStream(TestUtils.BLOB_COPY_PATH);
             fileOutputStream.write(bytes);
             fileOutputStream.close();
         }
 
-        assertTrue(TestUtils.BLOB_COPY_PATH.toFile().exists());
+        assertTrue(Path.of(TestUtils.BLOB_COPY_PATH).toFile().exists());
 
         statement.execute("DELETE FROM myTable WHERE id = 1");
 
         connection.commit();
 
-        assertFalse(TestUtils.ENCODED_JSON_BLOB_PATH.toFile().exists());
+        assertFalse(Path.of(TestUtils.ENCODED_JSON_BLOB_PATH).toFile().exists());
     }
 
     void testInsert_preparedStatement_blob_transaction_xml() throws SQLException, IOException {
@@ -340,12 +342,12 @@ public class InsertPreparedStatementTest {
         preparedStatement.setInt(1, 1);
         preparedStatement.setString(2, "Zsolti");
         preparedStatement.setInt(3, 25);
-        preparedStatement.setBinaryStream(4, new FileInputStream(TestUtils.META_INF_DRIVER_PATH.toFile()));
+        preparedStatement.setBinaryStream(4, new FileInputStream(TestUtils.META_INF_DRIVER_PATH));
         assertEquals(1, preparedStatement.executeUpdate());
 
         connection.commit();
 
-        final String realFileContent = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH),
             StandardCharsets.UTF_8);
         final String expectedFileContent = StringUtils.EMPTY +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
@@ -366,18 +368,18 @@ public class InsertPreparedStatementTest {
         final ResultSet resultSet = selectPreparedStatement.executeQuery();
         while (resultSet.next()) {
             final byte[] bytes = resultSet.getBytes("file");
-            final FileOutputStream fileOutputStream = new FileOutputStream(TestUtils.BLOB_COPY_PATH.toFile());
+            final FileOutputStream fileOutputStream = new FileOutputStream(TestUtils.BLOB_COPY_PATH);
             fileOutputStream.write(bytes);
             fileOutputStream.close();
         }
 
-        assertTrue(TestUtils.BLOB_COPY_PATH.toFile().exists());
+        assertTrue(Path.of(TestUtils.BLOB_COPY_PATH).toFile().exists());
 
         statement.execute("DELETE FROM myTable WHERE id = 1");
 
         connection.commit();
 
-        assertFalse(TestUtils.ENCODED_XML_BLOB_PATH.toFile().exists());
+        assertFalse(Path.of(TestUtils.ENCODED_XML_BLOB_PATH).toFile().exists());
     }
 
 }

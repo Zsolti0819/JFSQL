@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.github.jfsql.driver.TestUtils;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -58,8 +59,7 @@ public class CommitAndRollbackTest {
 
     void testCommitAndRollback_json() throws SQLException, IOException {
         connection.setAutoCommit(false);
-        final String realFileContentBefore = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
-            StandardCharsets.UTF_8);
+        final String realFileContentBefore = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
         final String expectedFileContentBefore = StringUtils.EMPTY +
             "{\n" +
             "  \"Entry\": []\n" +
@@ -67,20 +67,17 @@ public class CommitAndRollbackTest {
         assertEquals(StringUtils.deleteWhitespace(expectedFileContentBefore),
             StringUtils.deleteWhitespace(realFileContentBefore));
 
-        final FileWriter fileWriter = new FileWriter(TestUtils.JSON_TABLE_PATH.toFile(), false);
+        final FileWriter fileWriter = new FileWriter(TestUtils.JSON_TABLE_PATH, false);
         fileWriter.write("test");
         fileWriter.close();
 
-        final String realFileContentAfterModification = FileUtils.readFileToString(
-            TestUtils.JSON_TABLE_PATH.toFile(),
-            StandardCharsets.UTF_8);
+        final String realFileContentAfterModification = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
         assertEquals(StringUtils.deleteWhitespace("test"),
             StringUtils.deleteWhitespace(realFileContentAfterModification));
 
         connection.rollback();
 
-        final String realFileContentAfterRollback = FileUtils.readFileToString(TestUtils.JSON_TABLE_PATH.toFile(),
-            StandardCharsets.UTF_8);
+        final String realFileContentAfterRollback = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
         assertEquals(StringUtils.deleteWhitespace(realFileContentBefore),
             StringUtils.deleteWhitespace(realFileContentAfterRollback));
 
@@ -88,28 +85,24 @@ public class CommitAndRollbackTest {
 
     void testCommitAndRollback_xml() throws SQLException, IOException {
         connection.setAutoCommit(false);
-        final String realFileContentBefore = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
-            StandardCharsets.UTF_8);
+        final String realFileContentBefore = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
         final String expectedFileContentBefore = StringUtils.EMPTY +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<myTable/>\n";
         assertEquals(StringUtils.deleteWhitespace(expectedFileContentBefore),
             StringUtils.deleteWhitespace(realFileContentBefore));
 
-        final FileWriter fileWriter = new FileWriter(TestUtils.XML_TABLE_PATH.toFile(), false);
+        final FileWriter fileWriter = new FileWriter(TestUtils.XML_TABLE_PATH, false);
         fileWriter.write("test");
         fileWriter.close();
 
-        final String realFileContentAfterModification = FileUtils.readFileToString(
-            TestUtils.XML_TABLE_PATH.toFile(),
-            StandardCharsets.UTF_8);
+        final String realFileContentAfterModification = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
         assertEquals(StringUtils.deleteWhitespace("test"),
             StringUtils.deleteWhitespace(realFileContentAfterModification));
 
         connection.rollback();
 
-        final String realFileContentAfterRollback = FileUtils.readFileToString(TestUtils.XML_TABLE_PATH.toFile(),
-            StandardCharsets.UTF_8);
+        final String realFileContentAfterRollback = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
         assertEquals(StringUtils.deleteWhitespace(realFileContentBefore),
             StringUtils.deleteWhitespace(realFileContentAfterRollback));
 

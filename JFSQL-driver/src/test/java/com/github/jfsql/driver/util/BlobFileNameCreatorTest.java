@@ -10,6 +10,7 @@ import com.github.jfsql.driver.db.DatabaseManager;
 import com.github.jfsql.driver.persistence.Writer;
 import com.github.jfsql.driver.persistence.WriterXmlImpl;
 import java.io.File;
+import java.nio.file.Path;
 import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,7 +48,8 @@ public class BlobFileNameCreatorTest {
             Arrays.asList(mockFile1, mockFile2, mockFile3, mockFile4)
         );
 
-        final String nextBlobUrl = TestUtils.XML_DATABASE_PATH + File.separator + "blob" + File.separator + "blob5.xml";
+        final String nextBlobUrl = String.valueOf(
+            Path.of(String.valueOf(TestUtils.XML_DATABASE_PATH), "blob", "blob5.xml"));
         assertEquals(nextBlobUrl, BlobFileNameCreator.getBlobURL(databaseManager, ioOperationHandler, writer));
     }
 }
