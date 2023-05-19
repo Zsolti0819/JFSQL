@@ -83,6 +83,18 @@ public interface JFSQLVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSelect(JFSQLParser.SelectContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link JFSQLParser#orderBy}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOrderBy(JFSQLParser.OrderByContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link JFSQLParser#ordering}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOrdering(JFSQLParser.OrderingContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link JFSQLParser#limit}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

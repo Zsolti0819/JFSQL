@@ -51,8 +51,16 @@ insert
  ;
 
 select
-  : SELECT columnName ( COL columnName )* FROM tableName ( joinOperation )* ( WHERE expr )? ( limit )?
+  : SELECT columnName ( COL columnName )* FROM tableName ( joinOperation )* ( orderBy )? ( WHERE expr )? ( limit )?
   ;
+
+orderBy
+ : ORDER BY columnName ( ordering )?
+ ;
+
+ordering
+ : ASC | DESC
+ ;
 
 limit
  : LIMIT numericValue
@@ -170,6 +178,10 @@ EXISTS : E X I S T S;
 LIKE : L I K E;
 LIMIT : L I M I T;
 OFFSET : O F F S E T;
+ORDER : O R D E R;
+BY : B Y;
+ASC : A S C;
+DESC : D E S C;
 AND : A N D;
 OR: O R;
 ADD : A D D;

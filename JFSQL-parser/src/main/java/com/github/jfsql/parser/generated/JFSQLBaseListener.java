@@ -234,6 +234,42 @@ public class JFSQLBaseListener implements JFSQLListener {
      * <p>The default implementation does nothing.</p>
      */
     @Override
+    public void enterOrderBy(final JFSQLParser.OrderByContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation does nothing.</p>
+     */
+    @Override
+    public void exitOrderBy(final JFSQLParser.OrderByContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation does nothing.</p>
+     */
+    @Override
+    public void enterOrdering(final JFSQLParser.OrderingContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation does nothing.</p>
+     */
+    @Override
+    public void exitOrdering(final JFSQLParser.OrderingContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation does nothing.</p>
+     */
+    @Override
     public void enterLimit(final JFSQLParser.LimitContext ctx) {
     }
 
