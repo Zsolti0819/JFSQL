@@ -129,8 +129,25 @@ public class SemanticValidator {
         }
 
         final Map<String, String> columnAndTypes = table.getColumnsAndTypes();
-        return columnAndTypes.containsKey(columnName) || columnAndTypes.containsKey(tableName + "." + columnName);
+
+        // Find columns that end with columnName
+        final List<String> matchingColumns = new ArrayList<>();
+        for (final String column : columnAndTypes.keySet()) {
+            if (column.endsWith(columnName)) {
+                matchingColumns.add(column);
+            }
+        }
+
+        if (matchingColumns.isEmpty()) {
+            return false; // No match found
+        } else if (matchingColumns.size() > 1) {
+            throw new IllegalStateException("Multiple columns match the given columnName: " + matchingColumns);
+        }
+
+        // Single match found
+        return true;
     }
+
 
     public boolean nullInsertIntoNotNullColumn(final String column, final String value, final Table table) {
         if (Objects.equals(value, null) || Objects.equals(value, "null")) {

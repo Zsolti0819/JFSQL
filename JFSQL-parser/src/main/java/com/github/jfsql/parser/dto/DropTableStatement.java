@@ -2,7 +2,6 @@ package com.github.jfsql.parser.dto;
 
 import lombok.Builder;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 
 @Data
 @Builder

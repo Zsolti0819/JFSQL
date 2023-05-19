@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -136,6 +137,8 @@ public class SelectService {
     }
 
     private ResultSet baseSelect(final SelectWrapper statement, final Table table) throws SQLException {
+        logger.debug("input table to baseSelect = {}", table);
+        logger.debug("input table entries to baseSelect = {}", table.getEntries());
         final Map<String, String> columnsAndTypes;
         List<String> selectedColumns = statement.getColumns();
         if (selectedColumns.size() == 1 && Objects.equals(selectedColumns.get(0), "*")) {
@@ -150,12 +153,10 @@ public class SelectService {
         final String schemaFile = table.getSchemaFile();
         final Map<String, Boolean> notNullColumns = table.getNotNullColumns();
         final List<Entry> whereEntries = WhereConditionSolver.getWhereEntries(table, statement);
-        List<Entry> orderedEntries = getEntriesWithSortedColumns(selectedColumns, whereEntries);
 
-        final String limit = statement.getLimit();
-        final String offset = statement.getOffset();
-
-        orderedEntries = applyLimitAndOffset(orderedEntries, limit, offset);
+        List<Entry> sortedEntries = sortByKey(whereEntries, columnsAndTypes, statement); // Solve order by
+        sortedEntries = keepOnlySelectedColumns(selectedColumns, sortedEntries); // Solve where condition
+        sortedEntries = applyLimitAndOffset(sortedEntries, statement); // Solve limit and offset
 
         final Table newTable = Table.builder()
             .name(tableName)
@@ -163,27 +164,87 @@ public class SelectService {
             .schemaFile(schemaFile)
             .columnsAndTypes(columnsAndTypes)
             .notNullColumns(notNullColumns)
-            .entries(orderedEntries)
+            .entries(sortedEntries)
             .build();
 
         final ResultSet resultSet = new JfsqlResultSet(newTable, reader);
         ResultSetCache.addResultSetToCache(statement, resultSet);
+
+        logger.debug("table to return = {}", newTable);
+        logger.debug("table entries to return = {}", newTable.getEntries());
         return resultSet;
     }
 
-    private List<Entry> getEntriesWithSortedColumns(final List<String> selectedColumns, final List<Entry> entries) {
+    public List<Entry> sortByKey(final List<Entry> entries, final Map<String, String> columnsAndTypes,
+        final SelectWrapper statement) {
+        final List<Entry> sortedList = new ArrayList<>(entries);
+        final String orderColumn = statement.getOrderColumn();
+        final String orderBy = statement.getOrderBy();
+
+        if (orderColumn == null) {
+            return sortedList;
+        }
+
+        sortedList.sort((entry1, entry2) -> {
+            final Map<String, String> columnsAndValues1 = entry1.getColumnsAndValues();
+            final Map<String, String> columnsAndValues2 = entry2.getColumnsAndValues();
+
+            if (!columnsAndValues1.containsKey(orderColumn) || !columnsAndValues2.containsKey(orderColumn)) {
+                throw new IllegalArgumentException(
+                    "Order column '" + orderColumn + "' not found in one or more entries");
+            }
+
+            final String valueType = columnsAndTypes.get(orderColumn);
+
+            if ("INTEGER".equalsIgnoreCase(valueType)) {
+                final Integer numericValue1 = Integer.parseInt(columnsAndValues1.get(orderColumn));
+                final Integer numericValue2 = Integer.parseInt(columnsAndValues2.get(orderColumn));
+                return numericValue1.compareTo(numericValue2);
+            } else if ("REAL".equalsIgnoreCase(valueType)) {
+                final Double doubleValue1 = Double.parseDouble(columnsAndValues1.get(orderColumn));
+                final Double doubleValue2 = Double.parseDouble(columnsAndValues2.get(orderColumn));
+                return doubleValue1.compareTo(doubleValue2);
+            } else {
+                final String value1 = columnsAndValues1.get(orderColumn);
+                final String value2 = columnsAndValues2.get(orderColumn);
+                return value1.compareTo(value2);
+            }
+        });
+
+        if ("DESC".equalsIgnoreCase(orderBy)) {
+            Collections.reverse(sortedList);
+        }
+
+        return sortedList;
+    }
+
+    private List<Entry> keepOnlySelectedColumns(final List<String> selectedColumns, final List<Entry> entries) {
         return entries.stream().map(entry -> {
             final Map<String, String> orderedMap = new LinkedHashMap<>();
             selectedColumns.forEach(column -> {
-                final String value = entry.getColumnsAndValues().get(column);
+                String value = entry.getColumnsAndValues().get(column);
+                if (value == null) {
+                    value = retrieveValueWithColumnEndsWith(column, entry.getColumnsAndValues());
+                }
                 orderedMap.put(column, value);
             });
             return new Entry(orderedMap, new HashMap<>());
         }).collect(Collectors.toList());
     }
 
-    private List<Entry> applyLimitAndOffset(List<Entry> orderedEntries, final String limit, final String offset)
+    private String retrieveValueWithColumnEndsWith(final String column, final Map<String, String> columnsAndValues) {
+        for (final String key : columnsAndValues.keySet()) {
+            if (key.endsWith(column)) {
+                return columnsAndValues.get(key);
+            }
+        }
+        return null;
+    }
+
+    private List<Entry> applyLimitAndOffset(List<Entry> orderedEntries, final SelectWrapper statement)
         throws SQLException {
+        final String offset = statement.getOffset();
+        final String limit = statement.getLimit();
         if (offset != null) {
             try {
                 final int offsetInteger = Integer.parseInt(offset);
@@ -315,7 +376,7 @@ public class SelectService {
     private List<Table> createModifiedTables(final SelectWrapper statement, final List<Table> tables)
         throws SQLException {
         final List<Table> modifiedTables = new ArrayList<>();
-        final Map<String, Boolean> commonColumnsMap = getCommonColumnsMap(tables);
+//        final Map<String, Boolean> commonColumnsMap = getCommonColumnsMap(tables);
 
         tables.forEach(table -> {
             final Map<String, String> modifiedColumnsAndTypes = new LinkedHashMap<>();
@@ -325,15 +386,9 @@ public class SelectService {
             final Map<String, Boolean> notNullColumns = table.getNotNullColumns();
 
             columnsAndTypes.forEach((column, type) -> {
-                final boolean isCommonColumn = commonColumnsMap.get(column);
-                if (isCommonColumn) {
-                    final String modifiedColumnName = table.getName() + "." + column;
-                    modifiedColumnsAndTypes.put(modifiedColumnName, type);
-                    modifiedNotNullColumns.put(modifiedColumnName, notNullColumns.get(column));
-                } else {
-                    modifiedColumnsAndTypes.put(column, type);
-                    modifiedNotNullColumns.put(column, notNullColumns.get(column));
-                }
+                final String modifiedColumnName = table.getName() + "." + column;
+                modifiedColumnsAndTypes.put(modifiedColumnName, type);
+                modifiedNotNullColumns.put(modifiedColumnName, notNullColumns.get(column));
             });
 
             // Do not set the entries at this time
@@ -375,7 +430,7 @@ public class SelectService {
         }
 
         for (int i = 0; i < tables.size(); i++) {
-            final List<Entry> modifiedEntries = createModifiedEntries(commonColumnsMap, tables.get(i));
+            final List<Entry> modifiedEntries = createModifiedEntries(tables.get(i));
             final Table modifiedTable = modifiedTables.get(i);
             modifiedTable.setEntries(modifiedEntries);
         }
@@ -383,20 +438,15 @@ public class SelectService {
         return modifiedTables;
     }
 
-    private List<Entry> createModifiedEntries(final Map<String, Boolean> commonColumnsMap, final Table table) {
+    private List<Entry> createModifiedEntries(final Table table) {
         final List<Entry> modifiedEntries = new ArrayList<>();
         for (final Entry entry : table.getEntries()) {
             final Map<String, String> modifiedColumnsAndValues = new LinkedHashMap<>();
             final Map<String, String> columnsAndValues = entry.getColumnsAndValues();
 
             columnsAndValues.forEach((column, value) -> {
-                final boolean isCommonColumn = commonColumnsMap.get(column);
-                if (isCommonColumn) {
-                    final String modifiedColumnName = table.getName() + "." + column;
-                    modifiedColumnsAndValues.put(modifiedColumnName, value);
-                } else {
-                    modifiedColumnsAndValues.put(column, value);
-                }
+                final String modifiedColumnName = table.getName() + "." + column;
+                modifiedColumnsAndValues.put(modifiedColumnName, value);
             });
             modifiedEntries.add(new Entry(modifiedColumnsAndValues, new HashMap<>()));
         }
@@ -430,18 +480,6 @@ public class SelectService {
         }
 
         return joinColumns;
-    }
-
-    private Map<String, Boolean> getCommonColumnsMap(final List<Table> tables) {
-        final Map<String, Boolean> commonColumns = new LinkedHashMap<>();
-        for (final Table table : tables) {
-            final Map<String, String> columnsAndTypes = table.getColumnsAndTypes();
-            for (final String column : columnsAndTypes.keySet()) {
-                final boolean presentInMultipleTables = commonColumns.containsKey(column);
-                commonColumns.put(column, presentInMultipleTables);
-            }
-        }
-        return commonColumns;
     }
 
 }

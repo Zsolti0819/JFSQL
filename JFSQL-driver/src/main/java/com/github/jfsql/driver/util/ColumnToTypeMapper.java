@@ -19,9 +19,23 @@ public class ColumnToTypeMapper {
         for (final String column : statementColumnNames) {
             if (columnsAndTypes.containsKey(column)) {
                 orderedColumnsAndTypes.put(column, columnsAndTypes.get(column));
+            } else {
+                final List<String> matchingColumns = new ArrayList<>();
+                for (final String tableColumn : columnsAndTypes.keySet()) {
+                    if (!column.contains(".") && tableColumn.endsWith(column)) {
+                        matchingColumns.add(tableColumn);
+                    }
+                }
+                if (matchingColumns.size() > 1) {
+                    throw new IllegalStateException(
+                        "Multiple columns match the given column names: " + matchingColumns);
+                } else if (!matchingColumns.isEmpty()) {
+                    orderedColumnsAndTypes.put(matchingColumns.get(0), columnsAndTypes.get(matchingColumns.get(0)));
+                }
             }
         }
 
         return orderedColumnsAndTypes;
     }
+
 }

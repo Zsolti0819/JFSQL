@@ -52,13 +52,36 @@ public class JfsqlResultSet implements ResultSet {
     }
 
     private int getColumnIndex(final String columnName) throws SQLException {
+        int matchingIndex = -1;
+        final List<String> matchingColumns = new ArrayList<>();
+
         for (int i = 0; i < columnNames.size(); i++) {
-            if (Objects.equals(columnNames.get(i), columnName) || (columnName.contains(".") && Objects.equals(
-                columnNames.get(i), columnName.substring(columnName.indexOf(".") + 1)))) {
-                return i;
+            if (Objects.equals(columnNames.get(i), columnName)) {
+                if (matchingIndex != -1) {
+                    throw new SQLException("Ambiguous column name: " + columnName);
+                }
+                matchingIndex = i;
+            } else if (columnName.contains(".") && Objects.equals(columnNames.get(i),
+                columnName.substring(columnName.indexOf(".") + 1))) {
+                if (matchingIndex != -1) {
+                    throw new SQLException("Ambiguous column name: " + columnName);
+                }
+                matchingIndex = i;
+            } else if (columnNames.get(i).endsWith("." + columnName)) {
+                matchingColumns.add(columnNames.get(i));
+                matchingIndex = i;
             }
         }
-        throw new SQLException("Column '" + columnName + "' doesn't exist in the ResultSet.");
+
+        if (matchingColumns.size() > 1) {
+            throw new SQLException("Multiple columns match the given columnName: " + matchingColumns);
+        }
+
+        if (matchingIndex == -1) {
+            throw new SQLException("Column '" + columnName + "' doesn't exist in the ResultSet.");
+        }
+
+        return matchingIndex;
     }
 
     private String getValue(final int row, final int column) {

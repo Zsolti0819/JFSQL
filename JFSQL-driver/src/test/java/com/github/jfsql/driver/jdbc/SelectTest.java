@@ -91,7 +91,7 @@ class SelectTest {
         statement.execute("INSERT INTO sales (salesId, orderId, salesTotal) VALUES(5, 55, 170.95)");
         statement.execute("INSERT INTO sales (salesId, orderId, salesTotal) VALUES(6, 57, 382.13)");
         statement.execute(
-            "SELECT customerName, customerCity, customerMail, salesTotal FROM onlineCustomers INNER JOIN orders ON onlineCustomers.customerId = orders.customerId INNER JOIN sales ON orders.orderId = sales.orderId");
+            "SELECT customerName, customerCity, customerMail, salesTotal FROM onlineCustomers INNER JOIN orders ON onlineCustomers.customerId = orders.customerId INNER JOIN sales ON orders.orderId = sales.orderId ORDER BY onlineCustomers.customerId ASC");
 
         final List<String> customerNames = new ArrayList<>();
         final List<String> customerCities = new ArrayList<>();
