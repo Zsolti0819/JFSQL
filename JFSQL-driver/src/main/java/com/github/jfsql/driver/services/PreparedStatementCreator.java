@@ -18,6 +18,7 @@ import com.github.jfsql.parser.dto.UpdateStatement;
 import com.github.jfsql.parser.dto.UpdateWrapper;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -65,7 +66,14 @@ public class PreparedStatementCreator {
         final List<String> whereValues = replaceQuestionmarks(whereColumns, statement.getWhereValues(), 0);
         final List<String> symbols = statement.getSymbols();
         final List<String> binaryOperators = statement.getBinaryOperators();
-        return new DeleteStatement(tableName, whereColumns, whereValues, symbols, binaryOperators);
+
+        return DeleteStatement.builder()
+            .tableName(tableName)
+            .whereColumns(whereColumns)
+            .whereValues(whereValues)
+            .symbols(symbols)
+            .binaryOperators(binaryOperators)
+            .build();
     }
 
     public InsertWrapper getPreparedInsertStatement(final InsertWrapper statement) throws SQLException {
@@ -83,7 +91,12 @@ public class PreparedStatementCreator {
             final List<String> values = replaceQuestionmarks(columns, new ArrayList<>(statement.getValues().get(i)), 0);
             listOfValueLists.add(values);
         }
-        return new InsertStatement(tableName, columns, listOfValueLists);
+
+        return InsertStatement.builder()
+            .tableName(tableName)
+            .columns(columns)
+            .values(listOfValueLists)
+            .build();
     }
 
     public SelectWrapper getPreparedSelectStatement(final SelectWrapper statement) {
@@ -96,10 +109,25 @@ public class PreparedStatementCreator {
         final List<String> whereValues = replaceQuestionmarks(whereColumns, statement.getWhereValues(), 0);
         final List<String> symbols = statement.getSymbols();
         final List<String> binaryOperators = statement.getBinaryOperators();
+        final String orderColumn = statement.getOrderColumn();
+        final String orderBy = statement.getOrderBy();
         final String limit = statement.getLimit();
         final String offset = statement.getOffset();
-        return new SelectStatement(tableName, joinTableNames, joinTypes, columns, listOfJoinColumns, whereColumns,
-            whereValues, symbols, binaryOperators, limit, offset);
+        return SelectStatement.builder()
+            .tableName(tableName)
+            .joinTableNames(joinTableNames)
+            .joinTypes(joinTypes)
+            .columns(Collections.unmodifiableList(columns))
+            .listOfJoinColumns(Collections.unmodifiableList(listOfJoinColumns))
+            .whereColumns(whereColumns)
+            .whereValues(whereValues)
+            .symbols(symbols)
+            .binaryOperators(binaryOperators)
+            .orderColumn(orderColumn)
+            .orderBy(orderBy)
+            .limit(limit)
+            .offset(offset)
+            .build();
     }
 
     public UpdateWrapper getPreparedUpdateStatement(final UpdateWrapper statement) {
@@ -110,7 +138,16 @@ public class PreparedStatementCreator {
         final List<String> whereValues = replaceQuestionmarks(whereColumns, statement.getWhereValues(), columns.size());
         final List<String> symbols = statement.getSymbols();
         final List<String> binaryOperators = statement.getBinaryOperators();
-        return new UpdateStatement(tableName, columns, values, whereColumns, whereValues, symbols, binaryOperators);
+
+        return UpdateStatement.builder()
+            .tableName(tableName)
+            .columns(columns)
+            .values(values)
+            .whereColumns(whereColumns)
+            .whereValues(whereValues)
+            .symbols(symbols)
+            .binaryOperators(binaryOperators)
+            .build();
     }
 
     private List<String> replaceQuestionmarks(final List<String> columns, final List<String> values, final int offset) {

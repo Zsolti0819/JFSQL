@@ -9,6 +9,8 @@ public interface SelectWrapper extends BaseStatement, StatementWithTableName, St
     List<JoinType> getJoinTypes();
 
     List<List<String>> getListOfJoinColumns();
+    String getOrderColumn();
+    String getOrderBy();
 
     String getLimit();
 

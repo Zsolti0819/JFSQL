@@ -1,11 +1,12 @@
 package com.github.jfsql.parser.dto;
 
 import java.util.List;
+import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 @Data
-@RequiredArgsConstructor
+@Builder
 public class SelectStatement implements SelectWrapper {
 
     private final String tableName;
@@ -17,6 +18,8 @@ public class SelectStatement implements SelectWrapper {
     private final List<String> whereValues;
     private final List<String> symbols;
     private final List<String> binaryOperators;
+    private final String orderColumn;
+    private final String orderBy;
     private final String limit;
     private final String offset;
 

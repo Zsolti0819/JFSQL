@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.parser.dto.StatementWithColumns;
 import com.github.jfsql.parser.dto.UpdateStatement;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,9 +15,11 @@ class ColumnToTypeMapperTest {
 
     @Test
     void mapColumnsToTypes() {
-        final StatementWithColumns statement = new UpdateStatement("myTable", List.of("age", "id", "name"),
-            List.of("25", "1", "Zsolti"),
-            Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
+        final StatementWithColumns statement = UpdateStatement.builder()
+            .tableName("myTable")
+            .columns(List.of("age", "id", "name"))
+            .values(List.of("25", "1", "Zsolti"))
+            .build();
 
         final Table table = Table.builder()
             .columnsAndTypes(Map.of("id", "INTEGER", "name", "TEXT", "age", "INTEGER"))

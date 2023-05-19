@@ -1,10 +1,11 @@
 package com.github.jfsql.parser.dto;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 @Data
-@RequiredArgsConstructor
+@Builder
 public class AlterTableStatement implements AlterTableWrapper {
 
     private final String tableName;

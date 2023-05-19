@@ -1,11 +1,12 @@
 package com.github.jfsql.parser.dto;
 
 import java.util.List;
+import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 @Data
-@RequiredArgsConstructor
+@Builder
 public class InsertStatement implements InsertWrapper {
 
     private final String tableName;
