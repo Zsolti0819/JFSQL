@@ -9,7 +9,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import com.github.jfsql.driver.db.DatabaseManager;
 import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
@@ -21,6 +20,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -57,6 +57,7 @@ class UpdateServiceTest {
         tables.add(table);
         when(database.getTables()).thenReturn(tables);
         when(table.getName()).thenReturn("myTable");
+        when(table.getColumnsAndTypes()).thenReturn(Map.of("column1", "INTEGER"));
         when(statement.getTableName()).thenReturn("myTable");
         when(statement.getColumns()).thenReturn(List.of("column1"));
         when(statement.getValues()).thenReturn(List.of("1"));
