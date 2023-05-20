@@ -70,7 +70,7 @@ public class JfsqlDriver implements Driver {
             .createDatabaseManager(propertiesReader, URL, reader, writer);
         final Database database = databaseManager.getDatabase();
         final TransactionManager transactionManager = TransactionManagerFactory
-            .createTransactionManager(propertiesReader, databaseManager, reader, writer);
+            .createTransactionManager(propertiesReader, database, reader, writer);
 
         // Classes used in statement services
         final Parser parser = new Parser();

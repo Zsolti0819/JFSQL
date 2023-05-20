@@ -19,9 +19,9 @@ public class DefaultTransactionManagerImpl extends TransactionManager {
 
     private static final Logger logger = LogManager.getLogger(DefaultTransactionManagerImpl.class);
 
-    public DefaultTransactionManagerImpl(final DatabaseManager databaseManager, final Reader reader,
+    public DefaultTransactionManagerImpl(final Database database, final Reader reader,
         final Writer writer) {
-        super(databaseManager, reader, writer);
+        super(database, reader, writer);
     }
 
     @Override
@@ -47,7 +47,6 @@ public class DefaultTransactionManagerImpl extends TransactionManager {
     @Override
     public void rollback() throws SQLException {
         logger.warn("Executing rollback()");
-        final Database database = databaseManager.database;
         try {
             final List<Table> tables = reader.readTablesFromDatabaseFile(database);
             database.setTables(tables);

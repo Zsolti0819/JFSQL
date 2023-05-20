@@ -19,12 +19,12 @@ public abstract class TransactionManager {
     final Map<String, Boolean> filesToKeep;
     final Reader reader;
     final Writer writer;
-    final DatabaseManager databaseManager;
+    final Database database;
     boolean autoCommit;
 
-    protected TransactionManager(final DatabaseManager databaseManager, final Reader reader, final Writer writer) {
+    protected TransactionManager(final Database database, final Reader reader, final Writer writer) {
         autoCommit = true;
-        this.databaseManager = databaseManager;
+        this.database = database;
         this.reader = reader;
         this.writer = writer;
         uncommittedDatabases = new HashSet<>();
@@ -77,7 +77,6 @@ public abstract class TransactionManager {
     private void executeAutoCommitTrue(final Table table, final Map<String, Boolean> blobsToKeep,
         final Operation operation)
         throws IOException, SQLException {
-        final Database database = databaseManager.getDatabase();
         switch (operation) {
             case DROP_TABLE:
                 writer.writeDatabaseFile(database);
@@ -118,7 +117,6 @@ public abstract class TransactionManager {
 
     private void executeAutoCommitFalse(final Table table, final Map<String, Boolean> blobsToKeep,
         final Operation operation) {
-        final Database database = databaseManager.getDatabase();
         switch (operation) {
             case DROP_TABLE:
                 uncommittedDatabases.add(database);

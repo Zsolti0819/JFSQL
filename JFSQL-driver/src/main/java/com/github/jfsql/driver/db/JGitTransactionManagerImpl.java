@@ -25,14 +25,13 @@ public class JGitTransactionManagerImpl extends TransactionManager {
 
     private static final Logger logger = LogManager.getLogger(JGitTransactionManagerImpl.class);
 
-    public JGitTransactionManagerImpl(final DatabaseManager databaseManager, final Reader reader, final Writer writer) {
-        super(databaseManager, reader, writer);
+    public JGitTransactionManagerImpl(final Database database, final Reader reader, final Writer writer) {
+        super(database, reader, writer);
     }
 
     @Override
     public void commit() {
         synchronized (OBJECT_NAME_TO_THREAD_ID_MAP) {
-            final Database database = databaseManager.database;
             final File databaseDirectoryPath = Path.of(database.getURL()).getParent().toFile();
             try (final Git git = Git.open(databaseDirectoryPath)) {
                 writeUncommittedObjects();
@@ -73,7 +72,6 @@ public class JGitTransactionManagerImpl extends TransactionManager {
     @Override
     public void rollback() throws SQLException {
         logger.warn("Executing rollback()");
-        final Database database = databaseManager.database;
         try (final Git git = Git.open(Path.of(database.getURL()).getParent().toFile())) {
             final ResetCommand resetCommand = git.reset().setMode(ResetCommand.ResetType.HARD);
             resetCommand.call();
