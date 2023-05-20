@@ -4,7 +4,6 @@ import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
 import com.github.jfsql.driver.util.FileNameCreator;
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
@@ -37,10 +36,7 @@ public abstract class DatabaseManager {
     }
 
     private String removePrefixFromUrl(final String connectionString) throws SQLException {
-        String modifiedURL = connectionString.replace("jdbc:jfsql:", "");
-        if (!modifiedURL.endsWith(File.separator)) {
-            modifiedURL += File.separator;
-        }
+        final String modifiedURL = connectionString.replace("jdbc:jfsql:", "");
         if (Path.of(modifiedURL).toFile().isFile()) {
             throw new SQLException("URL is not a directory.");
         }
