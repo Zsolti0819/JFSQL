@@ -11,6 +11,7 @@ import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.driver.validation.SemanticValidator;
+import com.github.jfsql.parser.dto.InsertStatement;
 import com.github.jfsql.parser.dto.InsertWrapper;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -35,7 +36,7 @@ public class InsertService {
     private final Reader reader;
     private final PreparedStatementCreator preparedStatementCreator;
 
-    int insertIntoTable(final InsertWrapper statement) throws SQLException {
+    int insertIntoTable(final InsertStatement statement) throws SQLException {
         if (!semanticValidator.allInsertValuesAreEqualLength(statement)) {
             throw new SQLException("The values in some parentheses were not equal.");
         }

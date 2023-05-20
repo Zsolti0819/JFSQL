@@ -13,7 +13,7 @@ import com.github.jfsql.driver.util.ColumnToTypeMapper;
 import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.driver.util.WhereConditionSolver;
 import com.github.jfsql.driver.validation.SemanticValidator;
-import com.github.jfsql.parser.dto.UpdateWrapper;
+import com.github.jfsql.parser.dto.UpdateStatement;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ public class UpdateService {
     private final Reader reader;
     private final PreparedStatementCreator preparedStatementCreator;
 
-    int updateTable(final UpdateWrapper statement) throws SQLException {
+    int updateTable(final UpdateStatement statement) throws SQLException {
         final String tableName = statement.getTableName();
         final Table table = TableFinder.getTableByName(tableName, database);
 

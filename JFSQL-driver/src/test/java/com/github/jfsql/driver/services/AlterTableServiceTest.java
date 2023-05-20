@@ -15,7 +15,7 @@ import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.validation.SemanticValidator;
-import com.github.jfsql.parser.dto.AlterTableWrapper;
+import com.github.jfsql.parser.dto.AlterTableStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +44,7 @@ class AlterTableServiceTest {
     private Table table;
 
     @Mock
-    private AlterTableWrapper statement;
+    private AlterTableStatement statement;
 
     @InjectMocks
     private AlterTableService alterTableService;

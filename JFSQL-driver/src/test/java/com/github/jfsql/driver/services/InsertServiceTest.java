@@ -13,6 +13,7 @@ import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.validation.SemanticValidator;
+import com.github.jfsql.parser.dto.InsertStatement;
 import com.github.jfsql.parser.dto.InsertWrapper;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -48,7 +49,7 @@ class InsertServiceTest {
     private List<Entry> entries;
 
     @Mock
-    private InsertWrapper statement;
+    private InsertStatement statement;
 
     @InjectMocks
     private InsertService insertService;

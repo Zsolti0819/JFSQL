@@ -15,7 +15,7 @@ import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.util.ColumnToTypeMapper;
 import com.github.jfsql.driver.util.WhereConditionSolver;
 import com.github.jfsql.driver.validation.SemanticValidator;
-import com.github.jfsql.parser.dto.UpdateWrapper;
+import com.github.jfsql.parser.dto.UpdateStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,7 +46,7 @@ class UpdateServiceTest {
     private Database database;
 
     @Mock
-    private UpdateWrapper statement;
+    private UpdateStatement statement;
 
     @InjectMocks
     private UpdateService updateService;

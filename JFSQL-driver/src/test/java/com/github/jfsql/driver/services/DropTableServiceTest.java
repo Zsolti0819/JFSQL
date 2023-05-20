@@ -14,6 +14,7 @@ import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.validation.SemanticValidator;
+import com.github.jfsql.parser.dto.DropTableStatement;
 import com.github.jfsql.parser.dto.DropTableWrapper;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -43,7 +44,7 @@ class DropTableServiceTest {
     private List<Entry> entries;
 
     @Mock
-    private DropTableWrapper statement;
+    private DropTableStatement statement;
 
     @InjectMocks
     private DropTableService dropTableService;

@@ -7,16 +7,12 @@ import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.parser.dto.BaseStatement;
 import com.github.jfsql.parser.dto.DeleteStatement;
-import com.github.jfsql.parser.dto.DeleteWrapper;
 import com.github.jfsql.parser.dto.InsertStatement;
-import com.github.jfsql.parser.dto.InsertWrapper;
 import com.github.jfsql.parser.dto.JoinType;
 import com.github.jfsql.parser.dto.OrderBy;
 import com.github.jfsql.parser.dto.SelectStatement;
-import com.github.jfsql.parser.dto.SelectWrapper;
 import com.github.jfsql.parser.dto.TypeOfStatement;
 import com.github.jfsql.parser.dto.UpdateStatement;
-import com.github.jfsql.parser.dto.UpdateWrapper;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,17 +39,17 @@ public class PreparedStatementCreator {
                 parameterCount = 0;
                 break;
             case DELETE:
-                parameterCount = ((DeleteWrapper) statement).getWhereValues().size();
+                parameterCount = ((DeleteStatement) statement).getWhereValues().size();
                 break;
             case INSERT:
-                parameterCount = ((InsertWrapper) statement).getValues().get(0).size();
+                parameterCount = ((InsertStatement) statement).getValues().get(0).size();
                 break;
             case SELECT:
-                parameterCount = ((SelectWrapper) statement).getWhereValues().size();
+                parameterCount = ((SelectStatement) statement).getWhereValues().size();
                 break;
             case UPDATE:
-                parameterCount = ((UpdateWrapper) statement).getValues().size()
-                    + ((UpdateWrapper) statement).getWhereValues().size();
+                parameterCount = ((UpdateStatement) statement).getValues().size()
+                    + ((UpdateStatement) statement).getWhereValues().size();
                 break;
             default:
                 throw new SQLException("Cannot determine the type of the statement.");
@@ -61,7 +57,7 @@ public class PreparedStatementCreator {
         parameters = new Object[parameterCount];
     }
 
-    public DeleteWrapper getPreparedDeleteStatement(final DeleteWrapper statement) {
+    public DeleteStatement getPreparedDeleteStatement(final DeleteStatement statement) {
         final String tableName = statement.getTableName();
         final List<String> whereColumns = statement.getWhereColumns();
         final List<String> whereValues = replaceQuestionmarks(whereColumns, statement.getWhereValues(), 0);
@@ -77,7 +73,7 @@ public class PreparedStatementCreator {
             .build();
     }
 
-    public InsertWrapper getPreparedInsertStatement(final InsertWrapper statement) throws SQLException {
+    public InsertStatement getPreparedInsertStatement(final InsertStatement statement) throws SQLException {
         final String tableName = statement.getTableName();
         final List<String> columns;
         final List<List<String>> listOfValueLists = new ArrayList<>();
@@ -100,7 +96,7 @@ public class PreparedStatementCreator {
             .build();
     }
 
-    public SelectWrapper getPreparedSelectStatement(final SelectWrapper statement) {
+    public SelectStatement getPreparedSelectStatement(final SelectStatement statement) {
         final String tableName = statement.getTableName();
         final List<String> joinTableNames = statement.getJoinTableNames();
         final List<JoinType> joinTypes = statement.getJoinTypes();
@@ -131,7 +127,7 @@ public class PreparedStatementCreator {
             .build();
     }
 
-    public UpdateWrapper getPreparedUpdateStatement(final UpdateWrapper statement) {
+    public UpdateStatement getPreparedUpdateStatement(final UpdateStatement statement) {
         final String tableName = statement.getTableName();
         final List<String> columns = statement.getColumns();
         final List<String> values = replaceQuestionmarks(columns, statement.getValues(), 0);

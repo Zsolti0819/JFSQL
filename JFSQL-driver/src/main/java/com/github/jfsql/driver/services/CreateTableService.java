@@ -8,6 +8,7 @@ import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.util.FileNameCreator;
 import com.github.jfsql.driver.validation.SemanticValidator;
+import com.github.jfsql.parser.dto.CreateTableStatement;
 import com.github.jfsql.parser.dto.CreateTableWrapper;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -30,7 +31,7 @@ public class CreateTableService {
     private final SemanticValidator semanticValidator;
     private final Reader reader;
 
-    int createTable(final CreateTableWrapper statement) throws SQLException {
+    int createTable(final CreateTableStatement statement) throws SQLException {
         final String tableName = statement.getTableName();
 
         if (semanticValidator.tableNameEqualsDatabaseName(statement.getTableName(), database)) {

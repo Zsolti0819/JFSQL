@@ -13,7 +13,7 @@ import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.validation.SemanticValidator;
-import com.github.jfsql.parser.dto.CreateTableWrapper;
+import com.github.jfsql.parser.dto.CreateTableStatement;
 import java.sql.SQLException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -38,7 +38,7 @@ class CreateTableServiceTest {
     private Reader reader;
 
     @Mock
-    private CreateTableWrapper statement;
+    private CreateTableStatement statement;
 
 
     @InjectMocks

@@ -15,7 +15,7 @@ import com.github.jfsql.driver.util.WhereConditionSolver;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.JoinType;
 import com.github.jfsql.parser.dto.OrderBy;
-import com.github.jfsql.parser.dto.SelectWrapper;
+import com.github.jfsql.parser.dto.SelectStatement;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -40,7 +40,7 @@ public class SelectService {
     private final SemanticValidator semanticValidator;
     private final Reader reader;
 
-    ResultSet selectFromTable(final SelectWrapper statement) throws SQLException {
+    ResultSet selectFromTable(final SelectStatement statement) throws SQLException {
         if (CACHED_RESULT_SETS.containsKey(statement)) {
             return ResultSetCache.getResultSetFromCache(statement);
         }
@@ -51,7 +51,7 @@ public class SelectService {
         return selectWithJoins(statement);
     }
 
-    private ResultSet simpleSelect(final SelectWrapper statement) throws SQLException {
+    private ResultSet simpleSelect(final SelectStatement statement) throws SQLException {
         final String tableName = statement.getTableName();
         final Table table = TableFinder.getTableByName(tableName, database);
         final List<String> selectedColumns = statement.getColumns();
@@ -72,7 +72,7 @@ public class SelectService {
         return baseSelect(statement, table);
     }
 
-    private ResultSet selectWithJoins(final SelectWrapper statement) throws SQLException {
+    private ResultSet selectWithJoins(final SelectStatement statement) throws SQLException {
         final List<JoinType> joinTypes = statement.getJoinTypes();
 
         final List<Table> extractedTables = extractTables(statement);
@@ -137,7 +137,7 @@ public class SelectService {
         return baseSelect(statement, joinTable);
     }
 
-    private ResultSet baseSelect(final SelectWrapper statement, final Table table) throws SQLException {
+    private ResultSet baseSelect(final SelectStatement statement, final Table table) throws SQLException {
         logger.debug("input table to baseSelect = {}", table);
         logger.debug("input table entries to baseSelect = {}", table.getEntries());
         final Map<String, String> columnsAndTypes;
@@ -177,7 +177,7 @@ public class SelectService {
     }
 
     public List<Entry> sortByKey(final List<Entry> entries, final Map<String, String> columnsAndTypes,
-        final SelectWrapper statement) {
+        final SelectStatement statement) {
         final List<Entry> sortedList = new ArrayList<>(entries);
         final String orderColumn = statement.getOrderColumn();
         final OrderBy orderBy = statement.getOrderBy();
@@ -242,7 +242,7 @@ public class SelectService {
         return null;
     }
 
-    private List<Entry> applyLimitAndOffset(List<Entry> orderedEntries, final SelectWrapper statement)
+    private List<Entry> applyLimitAndOffset(List<Entry> orderedEntries, final SelectStatement statement)
         throws SQLException {
         final String offset = statement.getOffset();
         final String limit = statement.getLimit();
@@ -334,7 +334,7 @@ public class SelectService {
         return joinedEntries;
     }
 
-    private List<Table> extractTables(final SelectWrapper statement) throws SQLException {
+    private List<Table> extractTables(final SelectStatement statement) throws SQLException {
         final List<String> tableNames = new ArrayList<>();
         tableNames.add(statement.getTableName());
         tableNames.addAll(statement.getJoinTableNames());
@@ -374,7 +374,7 @@ public class SelectService {
         return new ArrayList<>(tables.values());
     }
 
-    private List<Table> createModifiedTables(final SelectWrapper statement, final List<Table> tables)
+    private List<Table> createModifiedTables(final SelectStatement statement, final List<Table> tables)
         throws SQLException {
         final List<Table> modifiedTables = new ArrayList<>();
 //        final Map<String, Boolean> commonColumnsMap = getCommonColumnsMap(tables);

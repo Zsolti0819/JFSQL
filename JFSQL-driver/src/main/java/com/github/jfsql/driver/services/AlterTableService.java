@@ -11,6 +11,7 @@ import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.util.FileNameCreator;
 import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.driver.validation.SemanticValidator;
+import com.github.jfsql.parser.dto.AlterTableStatement;
 import com.github.jfsql.parser.dto.AlterTableWrapper;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -31,7 +32,7 @@ public class AlterTableService {
     private final SemanticValidator semanticValidator;
     private final Reader reader;
 
-    int alterTable(final AlterTableWrapper statement) throws SQLException {
+    int alterTable(final AlterTableStatement statement) throws SQLException {
         final String tableName = statement.getTableName();
         final Table table = TableFinder.getTableByName(tableName, database);
         if (statement.getNewTableName() != null) {

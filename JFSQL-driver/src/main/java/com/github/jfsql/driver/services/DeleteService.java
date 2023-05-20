@@ -11,6 +11,7 @@ import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.driver.util.WhereConditionSolver;
 import com.github.jfsql.driver.validation.SemanticValidator;
+import com.github.jfsql.parser.dto.DeleteStatement;
 import com.github.jfsql.parser.dto.DeleteWrapper;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -31,7 +32,7 @@ public class DeleteService {
     private final SemanticValidator semanticValidator;
     private final Reader reader;
 
-    int deleteFromTable(final DeleteWrapper statement) throws SQLException {
+    int deleteFromTable(final DeleteStatement statement) throws SQLException {
         final List<String> whereColumns = statement.getWhereColumns();
         final Table table = TableFinder.getTableByName(statement.getTableName(), database);
 

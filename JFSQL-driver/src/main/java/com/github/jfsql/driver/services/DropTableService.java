@@ -10,6 +10,7 @@ import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.driver.validation.SemanticValidator;
+import com.github.jfsql.parser.dto.DropTableStatement;
 import com.github.jfsql.parser.dto.DropTableWrapper;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -30,7 +31,7 @@ public class DropTableService {
     private final SemanticValidator semanticValidator;
     private final Reader reader;
 
-    int dropTable(final DropTableWrapper statement) throws SQLException {
+    int dropTable(final DropTableStatement statement) throws SQLException {
         final boolean ifExistsIsPresent = statement.isIfExistsPresent();
 
         try {

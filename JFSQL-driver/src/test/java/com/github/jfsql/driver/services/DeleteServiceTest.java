@@ -16,6 +16,7 @@ import com.github.jfsql.driver.dto.Entry;
 import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.util.WhereConditionSolver;
 import com.github.jfsql.driver.validation.SemanticValidator;
+import com.github.jfsql.parser.dto.DeleteStatement;
 import com.github.jfsql.parser.dto.DeleteWrapper;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -47,7 +48,7 @@ class DeleteServiceTest {
     private Database database;
 
     @Mock
-    private DeleteWrapper statement;
+    private DeleteStatement statement;
 
     @InjectMocks
     private DeleteService deleteService;
