@@ -11,7 +11,6 @@ import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.DropTableStatement;
-import com.github.jfsql.parser.dto.DropTableWrapper;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;

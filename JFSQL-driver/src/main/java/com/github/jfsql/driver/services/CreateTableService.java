@@ -9,7 +9,6 @@ import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.util.FileNameCreator;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.CreateTableStatement;
-import com.github.jfsql.parser.dto.CreateTableWrapper;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
