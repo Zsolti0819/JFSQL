@@ -48,7 +48,8 @@ public class JfsqlConnection implements Connection {
 
     @Override
     public PreparedStatement prepareStatement(final String sql) throws SQLException {
-        preparedStatement = new JfsqlPreparedStatement(this, statementServiceManager, writer, ioOperationHandler, sql);
+        preparedStatement = new JfsqlPreparedStatement(this, databaseManager, statementServiceManager, writer,
+            ioOperationHandler, sql);
         return preparedStatement;
     }
 
