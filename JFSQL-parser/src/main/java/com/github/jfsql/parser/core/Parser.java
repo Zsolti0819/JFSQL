@@ -7,6 +7,7 @@ import com.github.jfsql.parser.dto.DeleteStatement;
 import com.github.jfsql.parser.dto.DropTableStatement;
 import com.github.jfsql.parser.dto.InsertStatement;
 import com.github.jfsql.parser.dto.JoinType;
+import com.github.jfsql.parser.dto.OrderBy;
 import com.github.jfsql.parser.dto.SelectStatement;
 import com.github.jfsql.parser.dto.UpdateStatement;
 import com.github.jfsql.parser.dto.WhereClause;
@@ -190,11 +191,15 @@ public class Parser extends JFSQLBaseVisitor<BaseStatement> implements JFSQLVisi
         }
 
         String orderColumn = null;
-        String orderBy = null;
+        OrderBy orderBy = null;
         if (selectContext.orderBy() != null) {
             orderColumn = selectContext.orderBy().columnName().getText();
-            orderBy = selectContext.orderBy().ordering() == null ? "ASC"
-                : selectContext.orderBy().ordering().getText();
+            if (selectContext.orderBy().ordering() == null) {
+                orderBy = OrderBy.ASC;
+            } else {
+                orderBy =
+                    selectContext.orderBy().ordering().getText().equalsIgnoreCase("ASC") ? OrderBy.ASC : OrderBy.DESC;
+            }
         }
 
         String limit = null;

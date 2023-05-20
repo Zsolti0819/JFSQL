@@ -14,6 +14,7 @@ import com.github.jfsql.driver.util.TableFinder;
 import com.github.jfsql.driver.util.WhereConditionSolver;
 import com.github.jfsql.driver.validation.SemanticValidator;
 import com.github.jfsql.parser.dto.JoinType;
+import com.github.jfsql.parser.dto.OrderBy;
 import com.github.jfsql.parser.dto.SelectWrapper;
 import java.io.IOException;
 import java.sql.ResultSet;
@@ -179,7 +180,7 @@ public class SelectService {
         final SelectWrapper statement) {
         final List<Entry> sortedList = new ArrayList<>(entries);
         final String orderColumn = statement.getOrderColumn();
-        final String orderBy = statement.getOrderBy();
+        final OrderBy orderBy = statement.getOrderBy();
 
         if (orderColumn == null) {
             return sortedList;
@@ -211,7 +212,7 @@ public class SelectService {
             }
         });
 
-        if ("DESC".equalsIgnoreCase(orderBy)) {
+        if (Objects.equals(orderBy, OrderBy.DESC)) {
             Collections.reverse(sortedList);
         }
 

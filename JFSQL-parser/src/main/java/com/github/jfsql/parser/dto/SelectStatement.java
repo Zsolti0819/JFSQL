@@ -18,7 +18,7 @@ public class SelectStatement implements SelectWrapper {
     private final List<String> symbols;
     private final List<String> binaryOperators;
     private final String orderColumn;
-    private final String orderBy;
+    private final OrderBy orderBy;
     private final String limit;
     private final String offset;
 

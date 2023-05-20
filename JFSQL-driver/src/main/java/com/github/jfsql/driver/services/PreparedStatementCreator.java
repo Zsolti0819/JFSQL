@@ -11,6 +11,7 @@ import com.github.jfsql.parser.dto.DeleteWrapper;
 import com.github.jfsql.parser.dto.InsertStatement;
 import com.github.jfsql.parser.dto.InsertWrapper;
 import com.github.jfsql.parser.dto.JoinType;
+import com.github.jfsql.parser.dto.OrderBy;
 import com.github.jfsql.parser.dto.SelectStatement;
 import com.github.jfsql.parser.dto.SelectWrapper;
 import com.github.jfsql.parser.dto.TypeOfStatement;
@@ -110,7 +111,7 @@ public class PreparedStatementCreator {
         final List<String> symbols = statement.getSymbols();
         final List<String> binaryOperators = statement.getBinaryOperators();
         final String orderColumn = statement.getOrderColumn();
-        final String orderBy = statement.getOrderBy();
+        final OrderBy orderBy = statement.getOrderBy();
         final String limit = statement.getLimit();
         final String offset = statement.getOffset();
         return SelectStatement.builder()
