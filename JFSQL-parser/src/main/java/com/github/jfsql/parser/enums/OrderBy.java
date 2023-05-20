@@ -1,4 +1,4 @@
-package com.github.jfsql.parser.dto;
+package com.github.jfsql.parser.enums;
 
 public enum OrderBy {
     ASC, DESC

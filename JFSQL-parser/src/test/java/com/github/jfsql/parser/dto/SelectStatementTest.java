@@ -3,6 +3,7 @@ package com.github.jfsql.parser.dto;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.github.jfsql.parser.core.Parser;
+import com.github.jfsql.parser.enums.JoinType;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

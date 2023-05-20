@@ -5,4 +5,5 @@ module JFSQL.parser {
     exports com.github.jfsql.parser.dto;
     exports com.github.jfsql.parser.core;
     exports com.github.jfsql.parser.generated;
+    exports com.github.jfsql.parser.enums;
 }

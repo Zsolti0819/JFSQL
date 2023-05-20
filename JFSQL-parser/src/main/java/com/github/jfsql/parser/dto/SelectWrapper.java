@@ -1,5 +1,8 @@
 package com.github.jfsql.parser.dto;
 
+import com.github.jfsql.parser.enums.JoinType;
+import com.github.jfsql.parser.enums.OrderBy;
+import com.github.jfsql.parser.enums.TypeOfStatement;
 import java.util.List;
 
 public interface SelectWrapper extends BaseStatement, StatementWithTableName, StatementWithWhere, StatementWithColumns {

@@ -1,5 +1,7 @@
 package com.github.jfsql.parser.dto;
 
+import com.github.jfsql.parser.enums.JoinType;
+import com.github.jfsql.parser.enums.OrderBy;
 import java.util.List;
 import lombok.Builder;
 import lombok.Data;

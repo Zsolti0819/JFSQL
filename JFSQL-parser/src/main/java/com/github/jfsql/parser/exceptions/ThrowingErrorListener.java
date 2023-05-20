@@ -1,4 +1,4 @@
-package com.github.jfsql.parser.exception;
+package com.github.jfsql.parser.exceptions;
 
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
