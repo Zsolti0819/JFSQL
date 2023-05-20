@@ -36,7 +36,6 @@ public class TestUtils {
         Path.of(BASE_PATH, "src", "main", "resources", "META-INF",
             "services", "java.sql.Driver"));
 
-    // For testing the reader
     public static final String TEST_JSON_DATABASE_PATH = String.valueOf(
         Path.of(BASE_PATH, "src", "test", "resources", "myDatabase_JSON"));
     public static final String TEST_JSON_DATABASE_FILE_PATH = String.valueOf(
@@ -46,8 +45,8 @@ public class TestUtils {
         "myTableSchema.json"));
     public static final String TEST_XML_DATABASE_PATH = String.valueOf(Path.of(BASE_PATH, "src", "test", "resources",
         "myDatabase_XML"));
-    public static final String TEST_XML_DATABASE_FILE_PATH = String.valueOf(Path.of(String.valueOf(TEST_XML_DATABASE_PATH),
-        "myDatabase_XML.xml"));
+    public static final String TEST_XML_DATABASE_FILE_PATH = String.valueOf(
+        Path.of(String.valueOf(TEST_XML_DATABASE_PATH), "myDatabase_XML.xml"));
     public static final String TEST_XML_TABLE_PATH = String.valueOf(
         Path.of(String.valueOf(TEST_XML_DATABASE_PATH), "myTable.xml"));
     public static final String TEST_XSD_PATH = String.valueOf(

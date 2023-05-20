@@ -19,9 +19,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 
-@Data
 @Builder
 public class StatementServiceManager {
 
@@ -38,7 +37,9 @@ public class StatementServiceManager {
     private final IoOperationHandler ioOperationHandler;
     private final SemanticValidator semanticValidator;
 
+    @Getter
     private ResultSet resultSet;
+    @Getter
     private int updateCount;
 
     private BaseStatement getFromCacheOrParseStatement(final String sql) {

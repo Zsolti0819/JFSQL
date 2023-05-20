@@ -132,7 +132,6 @@ public class SemanticValidator {
 
         final Map<String, String> columnAndTypes = table.getColumnsAndTypes();
 
-        // Find columns that end with columnName
         final List<String> matchingColumns = new ArrayList<>();
         for (final String column : columnAndTypes.keySet()) {
             if (column.endsWith(columnName)) {
@@ -141,12 +140,11 @@ public class SemanticValidator {
         }
 
         if (matchingColumns.isEmpty()) {
-            return false; // No match found
+            return false;
         } else if (matchingColumns.size() > 1) {
             throw new IllegalStateException("Multiple columns match the given columnName: " + matchingColumns);
         }
 
-        // Single match found
         return true;
     }
 

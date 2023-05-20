@@ -1,4 +1,3 @@
-// Generated from C:/Users/destr/IdeaProjects/JFSQL/JFSQL-parser/src/main/antlr4/com/github/jfsql/parser\JFSQL.g4 by ANTLR 4.12.0
 package com.github.jfsql.parser.generated;
 
 import java.util.List;
@@ -171,25 +170,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterRoot(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterRoot(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitRoot(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitRoot(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitRoot(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitRoot(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 
@@ -267,25 +266,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterStatement(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterStatement(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitStatement(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitStatement(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitStatement(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitStatement(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 
@@ -400,25 +399,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterAlterTable(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterAlterTable(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitAlterTable(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitAlterTable(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitAlterTable(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitAlterTable(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 
@@ -495,25 +494,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterRenameTable(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterRenameTable(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitRenameTable(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitRenameTable(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitRenameTable(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitRenameTable(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 
@@ -574,25 +573,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterRenameColumn(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterRenameColumn(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitRenameColumn(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitRenameColumn(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitRenameColumn(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitRenameColumn(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 
@@ -649,25 +648,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterAddColumn(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterAddColumn(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitAddColumn(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitAddColumn(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitAddColumn(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitAddColumn(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 
@@ -720,25 +719,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterDropColumn(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterDropColumn(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitDropColumn(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitDropColumn(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitDropColumn(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitDropColumn(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 
@@ -819,25 +818,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterCreateTable(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterCreateTable(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitCreateTable(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitCreateTable(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitCreateTable(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitCreateTable(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 
@@ -931,25 +930,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterDelete(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterDelete(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitDelete(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitDelete(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitDelete(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitDelete(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 
@@ -1019,25 +1018,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterDropTable(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterDropTable(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitDropTable(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitDropTable(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitDropTable(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitDropTable(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 
@@ -1137,25 +1136,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterInsert(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterInsert(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitInsert(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitInsert(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitInsert(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitInsert(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 
@@ -1299,25 +1298,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterSelect(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterSelect(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitSelect(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitSelect(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitSelect(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitSelect(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 
@@ -1439,25 +1438,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterOrderBy(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterOrderBy(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitOrderBy(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitOrderBy(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitOrderBy(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitOrderBy(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 
@@ -1517,25 +1516,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterOrdering(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterOrdering(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitOrdering(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitOrdering(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitOrdering(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitOrdering(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 
@@ -1551,9 +1550,9 @@ public class JFSQLParser extends Parser {
                 if (!(_la == ASC || _la == DESC)) {
                     _errHandler.recoverInline(this);
                 } else {
-									if (_input.LA(1) == Token.EOF) {
-										matchedEOF = true;
-									}
+                    if (_input.LA(1) == Token.EOF) {
+                        matchedEOF = true;
+                    }
                     _errHandler.reportMatch(this);
                     consume();
                 }
@@ -1594,25 +1593,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterLimit(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterLimit(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitLimit(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitLimit(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitLimit(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitLimit(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 
@@ -1676,25 +1675,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterOffset(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterOffset(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitOffset(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitOffset(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitOffset(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitOffset(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 
@@ -1737,25 +1736,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterNumericValue(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterNumericValue(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitNumericValue(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitNumericValue(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitNumericValue(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitNumericValue(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 
@@ -1800,25 +1799,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterJoinOperation(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterJoinOperation(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitJoinOperation(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitJoinOperation(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitJoinOperation(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitJoinOperation(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 
@@ -1899,25 +1898,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterInnerJoin(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterInnerJoin(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitInnerJoin(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitInnerJoin(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitInnerJoin(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitInnerJoin(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 
@@ -2007,25 +2006,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterLeftJoin(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterLeftJoin(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitLeftJoin(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitLeftJoin(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitLeftJoin(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitLeftJoin(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 
@@ -2137,25 +2136,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterUpdate(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterUpdate(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitUpdate(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitUpdate(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitUpdate(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitUpdate(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 
@@ -2247,25 +2246,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterColumnDefinition(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterColumnDefinition(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitColumnDefinition(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitColumnDefinition(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitColumnDefinition(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitColumnDefinition(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 
@@ -2323,25 +2322,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterNotNull(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterNotNull(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitNotNull(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitNotNull(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitNotNull(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitNotNull(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 
@@ -2388,25 +2387,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterIfExists(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterIfExists(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitIfExists(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitIfExists(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitIfExists(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitIfExists(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 
@@ -2457,25 +2456,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterIfNotExists(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterIfNotExists(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitIfNotExists(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitIfNotExists(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitIfNotExists(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitIfNotExists(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 
@@ -2532,25 +2531,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterColumnType(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterColumnType(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitColumnType(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitColumnType(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitColumnType(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitColumnType(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 
@@ -2566,9 +2565,9 @@ public class JFSQLParser extends Parser {
                 if (!((((_la) & ~0x3f) == 0 && ((1L << _la) & 16888498602639360L) != 0))) {
                     _errHandler.recoverInline(this);
                 } else {
-									if (_input.LA(1) == Token.EOF) {
-										matchedEOF = true;
-									}
+                    if (_input.LA(1) == Token.EOF) {
+                        matchedEOF = true;
+                    }
                     _errHandler.reportMatch(this);
                     consume();
                 }
@@ -2629,25 +2628,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterExpr(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterExpr(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitExpr(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitExpr(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitExpr(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitExpr(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 
@@ -2734,25 +2733,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterBinaryOperator(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterBinaryOperator(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitBinaryOperator(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitBinaryOperator(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitBinaryOperator(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitBinaryOperator(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 
@@ -2768,9 +2767,9 @@ public class JFSQLParser extends Parser {
                 if (!(_la == AND || _la == OR)) {
                     _errHandler.recoverInline(this);
                 } else {
-									if (_input.LA(1) == Token.EOF) {
-										matchedEOF = true;
-									}
+                    if (_input.LA(1) == Token.EOF) {
+                        matchedEOF = true;
+                    }
                     _errHandler.reportMatch(this);
                     consume();
                 }
@@ -2827,25 +2826,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterSymbol(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterSymbol(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitSymbol(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitSymbol(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitSymbol(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitSymbol(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 
@@ -2861,9 +2860,9 @@ public class JFSQLParser extends Parser {
                 if (!((((_la) & ~0x3f) == 0 && ((1L << _la) & 270208L) != 0))) {
                     _errHandler.recoverInline(this);
                 } else {
-									if (_input.LA(1) == Token.EOF) {
-										matchedEOF = true;
-									}
+                    if (_input.LA(1) == Token.EOF) {
+                        matchedEOF = true;
+                    }
                     _errHandler.reportMatch(this);
                     consume();
                 }
@@ -2904,25 +2903,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterValue(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterValue(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitValue(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitValue(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitValue(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitValue(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 
@@ -2938,9 +2937,9 @@ public class JFSQLParser extends Parser {
                 if (!((((_la) & ~0x3f) == 0 && ((1L << _la) & 108086391056900098L) != 0))) {
                     _errHandler.recoverInline(this);
                 } else {
-									if (_input.LA(1) == Token.EOF) {
-										matchedEOF = true;
-									}
+                    if (_input.LA(1) == Token.EOF) {
+                        matchedEOF = true;
+                    }
                     _errHandler.reportMatch(this);
                     consume();
                 }
@@ -2993,25 +2992,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterValuesInParentheses(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterValuesInParentheses(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitValuesInParentheses(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitValuesInParentheses(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitValuesInParentheses(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitValuesInParentheses(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 
@@ -3073,25 +3072,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterTableName(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterTableName(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitTableName(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitTableName(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitTableName(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitTableName(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 
@@ -3140,25 +3139,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterTableDotColumnName(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterTableDotColumnName(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitTableDotColumnName(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitTableDotColumnName(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitTableDotColumnName(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitTableDotColumnName(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 
@@ -3211,25 +3210,25 @@ public class JFSQLParser extends Parser {
 
         @Override
         public void enterRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).enterColumnName(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).enterColumnName(this);
+            }
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
-					if (listener instanceof JFSQLListener) {
-						((JFSQLListener) listener).exitColumnName(this);
-					}
+            if (listener instanceof JFSQLListener) {
+                ((JFSQLListener) listener).exitColumnName(this);
+            }
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-					if (visitor instanceof JFSQLVisitor) {
-						return ((JFSQLVisitor<? extends T>) visitor).visitColumnName(this);
-					} else {
-						return visitor.visitChildren(this);
-					}
+            if (visitor instanceof JFSQLVisitor) {
+                return ((JFSQLVisitor<? extends T>) visitor).visitColumnName(this);
+            } else {
+                return visitor.visitChildren(this);
+            }
         }
     }
 

@@ -107,6 +107,7 @@ public class JfsqlDriver implements Driver {
             .build();
 
         return JfsqlConnection.builder()
+            .ioOperationHandler(ioOperationHandler)
             .writer(writer)
             .databaseManager(databaseManager)
             .transactionManager(transactionManager)

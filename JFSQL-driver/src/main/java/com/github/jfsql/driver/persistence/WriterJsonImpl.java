@@ -64,7 +64,6 @@ public class WriterJsonImpl extends Writer {
 
             final String jsonString = beautify(root);
 
-            // Use a BufferedWriter to improve performance
             try (final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(fileOutputStream))) {
                 bufferedWriter.write(jsonString);
             }
@@ -159,7 +158,6 @@ public class WriterJsonImpl extends Writer {
 
             final String jsonString = beautify(root);
 
-            // Use a BufferedWriter to improve performance
             try (final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(fileOutputStream))) {
                 bufferedWriter.write(jsonString);
             }
@@ -189,7 +187,6 @@ public class WriterJsonImpl extends Writer {
 
             final String jsonString = beautify(root);
 
-            // Use a BufferedWriter to improve performance
             try (final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(fileOutputStream))) {
                 bufferedWriter.write(jsonString);
             }
@@ -213,7 +210,6 @@ public class WriterJsonImpl extends Writer {
             root.addProperty("blob", blobValue);
             final String jsonString = beautify(root);
 
-            // Use a BufferedWriter to improve performance
             try (final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(fileOutputStream))) {
                 bufferedWriter.write(jsonString);
             }

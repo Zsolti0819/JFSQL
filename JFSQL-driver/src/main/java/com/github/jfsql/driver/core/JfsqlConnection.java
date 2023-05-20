@@ -5,6 +5,7 @@ import com.github.jfsql.driver.db.TransactionManager;
 import com.github.jfsql.driver.persistence.Writer;
 import com.github.jfsql.driver.services.StatementServiceManager;
 import com.github.jfsql.driver.util.BlobFileNameCreator;
+import com.github.jfsql.driver.util.IoOperationHandler;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.CallableStatement;
@@ -34,6 +35,7 @@ public class JfsqlConnection implements Connection {
     private final DatabaseManager databaseManager;
     private final TransactionManager transactionManager;
     private final StatementServiceManager statementServiceManager;
+    private final IoOperationHandler ioOperationHandler;
     private final Writer writer;
     private JfsqlStatement statement;
     private JfsqlPreparedStatement preparedStatement;
@@ -46,8 +48,7 @@ public class JfsqlConnection implements Connection {
 
     @Override
     public PreparedStatement prepareStatement(final String sql) throws SQLException {
-        preparedStatement = new JfsqlPreparedStatement(this, statementServiceManager,
-            writer, sql);
+        preparedStatement = new JfsqlPreparedStatement(this, statementServiceManager, writer, ioOperationHandler, sql);
         return preparedStatement;
     }
 

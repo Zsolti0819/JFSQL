@@ -377,7 +377,6 @@ public class SelectService {
     private List<Table> createModifiedTables(final SelectStatement statement, final List<Table> tables)
         throws SQLException {
         final List<Table> modifiedTables = new ArrayList<>();
-//        final Map<String, Boolean> commonColumnsMap = getCommonColumnsMap(tables);
 
         tables.forEach(table -> {
             final Map<String, String> modifiedColumnsAndTypes = new LinkedHashMap<>();
