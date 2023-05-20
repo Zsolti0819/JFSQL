@@ -51,7 +51,7 @@ insert
  ;
 
 select
-  : SELECT columnName ( COL columnName )* FROM tableName ( joinOperation )* ( orderBy )? ( WHERE expr )? ( limit )?
+  : SELECT columnName ( COL columnName )* FROM tableName ( joinOperation )*  ( WHERE expr )? ( orderBy )? ( limit )?
   ;
 
 orderBy
