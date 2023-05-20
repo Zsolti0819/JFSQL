@@ -1,10 +1,10 @@
 package com.github.jfsql.driver.factories;
 
 import com.github.jfsql.driver.config.PropertiesReader;
-import com.github.jfsql.driver.config.TransactionVersioning;
 import com.github.jfsql.driver.db.DatabaseManager;
 import com.github.jfsql.driver.db.DefaultDatabaseManagerImpl;
 import com.github.jfsql.driver.db.JGitDatabaseManagerImpl;
+import com.github.jfsql.driver.enums.TransactionVersioning;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
 import java.sql.SQLException;

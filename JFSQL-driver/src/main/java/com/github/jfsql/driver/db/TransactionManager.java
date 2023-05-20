@@ -2,6 +2,7 @@ package com.github.jfsql.driver.db;
 
 import com.github.jfsql.driver.dto.Database;
 import com.github.jfsql.driver.dto.Table;
+import com.github.jfsql.driver.enums.Operation;
 import com.github.jfsql.driver.persistence.Reader;
 import com.github.jfsql.driver.persistence.Writer;
 import java.io.IOException;

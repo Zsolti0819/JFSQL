@@ -1,7 +1,7 @@
 package com.github.jfsql.driver.factories;
 
-import com.github.jfsql.driver.config.Persistence;
 import com.github.jfsql.driver.config.PropertiesReader;
+import com.github.jfsql.driver.enums.Persistence;
 import com.github.jfsql.driver.persistence.Writer;
 import com.github.jfsql.driver.persistence.WriterJsonImpl;
 import com.github.jfsql.driver.persistence.WriterXmlImpl;

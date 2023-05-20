@@ -1,5 +1,8 @@
 package com.github.jfsql.driver.config;
 
+import com.github.jfsql.driver.enums.Persistence;
+import com.github.jfsql.driver.enums.TransactionVersioning;
+
 public class DefaultConfig {
 
     static Persistence persistence = Persistence.JSON;

@@ -1,5 +1,7 @@
 package com.github.jfsql.driver.config;
 
+import com.github.jfsql.driver.enums.Persistence;
+import com.github.jfsql.driver.enums.TransactionVersioning;
 import java.util.Properties;
 import lombok.Getter;
 import org.apache.logging.log4j.LogManager;

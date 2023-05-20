@@ -1,4 +1,4 @@
-package com.github.jfsql.driver.db;
+package com.github.jfsql.driver.enums;
 
 public enum Operation {
     DROP_TABLE, INSERT, UPDATE, DELETE, ALTER_TABLE_ADD_COLUMN, ALTER_TABLE_DROP_COLUMN, ALTER_TABLE_RENAME_COLUMN, ALTER_TABLE_RENAME_TABLE, CREATE_TABLE
