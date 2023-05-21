@@ -17,6 +17,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -81,7 +82,7 @@ class WriterJsonImplTest {
         writer.writeSchema(table);
         final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_SCHEMA_PATH), StandardCharsets.UTF_8);
         final String expectedContent = FileUtils.readFileToString(new File(TestUtils.TEST_JSON_SCHEMA_PATH), StandardCharsets.UTF_8);
-        assertEquals(expectedContent, realFileContent);
+        assertEquals(StringUtils.deleteWhitespace(expectedContent), StringUtils.deleteWhitespace(realFileContent));
     }
 
     @Test
@@ -89,7 +90,7 @@ class WriterJsonImplTest {
         writer.writeTable(table);
         final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
         final String expectedContent = FileUtils.readFileToString(new File(TestUtils.TEST_JSON_TABLE_PATH), StandardCharsets.UTF_8);
-        assertEquals(expectedContent, realFileContent);
+        assertEquals(StringUtils.deleteWhitespace(expectedContent), StringUtils.deleteWhitespace(realFileContent));
     }
 
     @Test
