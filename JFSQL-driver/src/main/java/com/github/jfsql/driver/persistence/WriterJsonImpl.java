@@ -167,11 +167,9 @@ public class WriterJsonImpl extends Writer {
     @Override
     public void writeDatabaseFile(final Database database) throws IOException {
         final Path databaseFilePath = Path.of(database.getURL());
-        final String databaseFileParentPath = String.valueOf(databaseFilePath.getParent());
-        final Path databaseFolderName = Path.of(databaseFileParentPath);
-        try (final FileOutputStream fileOutputStream = new FileOutputStream(String.valueOf(databaseFilePath))) {
+        try (final FileOutputStream fileOutputStream = new FileOutputStream(databaseFilePath.toFile())) {
             final JsonObject root = new JsonObject();
-            root.addProperty("Database", String.valueOf(databaseFolderName.getFileName()));
+            root.addProperty("Database", String.valueOf(databaseFilePath.getParent().getFileName()));
             final List<Table> tables = database.getTables();
 
             final Gson gson = new Gson();

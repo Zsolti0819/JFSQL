@@ -61,7 +61,6 @@ public class WriterXmlImpl extends Writer {
         }
     }
 
-
     @Override
     public void writeTable(final Table table) throws IOException, SchemaValidationException {
         final String tableFile = table.getTableFile();
@@ -173,12 +172,10 @@ public class WriterXmlImpl extends Writer {
     @Override
     public void writeDatabaseFile(final Database database) throws IOException {
         final Path databaseFilePath = Path.of(database.getURL());
-        final String databaseFileParentPath = String.valueOf(databaseFilePath.getParent());
-        final Path databaseFolderName = Path.of(databaseFileParentPath);
         try (final FileOutputStream fileOutputStream = new FileOutputStream(databaseFilePath.toFile())) {
             final Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
             final Element root = document.createElement("Database");
-            root.setAttribute("name", String.valueOf(databaseFolderName.getFileName()));
+            root.setAttribute("name", String.valueOf(databaseFilePath.getParent().getFileName()));
             document.appendChild(root);
 
             final List<Table> tables = database.getTables();
