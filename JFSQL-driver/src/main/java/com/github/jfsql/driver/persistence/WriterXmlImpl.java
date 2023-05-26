@@ -7,15 +7,14 @@ import com.github.jfsql.driver.dto.Table;
 import com.github.jfsql.driver.exceptions.SchemaValidationException;
 import com.github.jfsql.driver.util.DatatypeConverter;
 import com.github.jfsql.driver.validation.XmlSchemaValidator;
-import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -24,6 +23,7 @@ import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -38,52 +38,53 @@ public class WriterXmlImpl extends Writer {
 
     private static final Logger logger = LogManager.getLogger(WriterXmlImpl.class);
     private static final XmlSchemaValidator XML_SCHEMA_VALIDATOR = XmlSchemaValidator.INSTANCE;
+    private final Transformer transformer;
+    private final DocumentBuilder documentBuilder;
 
     public WriterXmlImpl(final boolean useSchemaValidation) {
         super(useSchemaValidation);
-    }
-
-    private void beautifyAndWrite(final FileOutputStream fileOutputStream, final Document document) throws IOException {
+        final TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
         try {
-            final TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-            transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
-            final Transformer transformer = transformerFactory.newTransformer();
+            documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            transformer = transformerFactory.newTransformer();
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            final Source source = new DOMSource(document);
-
-            try (final BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream)) {
-                final Result result = new StreamResult(bufferedOutputStream);
-                transformer.transform(source, result);
-            }
-        } catch (final TransformerException e) {
-            throw new IOException(e);
+        } catch (final TransformerConfigurationException | ParserConfigurationException e) {
+            throw new IllegalStateException(e);
         }
     }
 
     @Override
     public void writeTable(final Table table) throws IOException, SchemaValidationException {
         final String tableFile = table.getTableFile();
-        try (final FileOutputStream fileOutputStream = new FileOutputStream(tableFile)) {
-            final String tableName = table.getName();
-            final List<Entry> entries = table.getEntries();
+        final FileOutputStream fileOutputStream = new FileOutputStream(tableFile);
+        final FileChannel fileChannel = fileOutputStream.getChannel();
+        final FileLock fileLock = fileChannel.lock();
 
-            final DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            final Document document = documentBuilder.newDocument();
-            final Element root = document.createElement(tableName);
+        final String tableName = table.getName();
+        final List<Entry> entries = table.getEntries();
+        final Document document = documentBuilder.newDocument();
+        final Element root = document.createElement(tableName);
 
-            for (final Entry entry : entries) {
-                final Map<String, String> columnsAndValues = entry.getColumnsAndValues();
-                final Element entryElement = document.createElement("Entry");
-                for (final String column : columnsAndValues.keySet()) {
-                    checkTypeAndValueThenAddProperty(table, entry, column, document, entryElement);
-                }
-                root.appendChild(entryElement);
+        for (final Entry entry : entries) {
+            final Map<String, String> columnsAndValues = entry.getColumnsAndValues();
+            final Element entryElement = document.createElement("Entry");
+            for (final String column : columnsAndValues.keySet()) {
+                checkTypeAndValueThenAddProperty(table, entry, column, document, entryElement);
             }
-            document.appendChild(root);
-            beautifyAndWrite(fileOutputStream, document);
-        } catch (final ParserConfigurationException e) {
+            root.appendChild(entryElement);
+        }
+        document.appendChild(root);
+        final Source source = new DOMSource(document);
+        final Result result = new StreamResult(fileOutputStream);
+        try {
+            transformer.transform(source, result);
+        } catch (final TransformerException e) {
             throw new IOException(e);
+        } finally {
+            fileLock.release();
+            fileOutputStream.close();
         }
 
         if (useSchemaValidation) {
@@ -99,11 +100,11 @@ public class WriterXmlImpl extends Writer {
         final Document document, final Element element) throws IOException {
         final String value = entry.getColumnsAndValues().get(column);
         final String type = table.getColumnsAndTypes().get(column);
-        if (value == null || Objects.equals(value, "null")) {
+        if (value == null || "null".equals(value)) {
             return;
         }
         final Element row;
-        if (Objects.equals(type, "BLOB")) {
+        if ("BLOB".equals(type)) {
             row = document.createElement(column);
             row.setTextContent(writeBlob(table, entry, column));
         } else {
@@ -114,116 +115,132 @@ public class WriterXmlImpl extends Writer {
     }
 
     @Override
-    public void writeSchema(final Table schema) throws IOException {
-        final String tableName = String.valueOf(Path.of(schema.getSchemaFile()).getFileName()).replace(".xsd", "");
-        final String schemaFile = schema.getSchemaFile();
-        try (final FileOutputStream fileOutputStream = new FileOutputStream(schemaFile)) {
-            final List<String> columnNames = new ArrayList<>(schema.getColumnsAndTypes().keySet());
-            final List<String> columnTypes = new ArrayList<>(schema.getColumnsAndTypes().values());
-            final DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            final Document document = documentBuilder.newDocument();
+    public void writeSchema(final Table table) throws IOException {
+        final String schemaFile = table.getSchemaFile();
+        final String tableName = Path.of(schemaFile).getFileName().toString().replace(".xsd", "");
+        final FileOutputStream fileOutputStream = new FileOutputStream(schemaFile);
+        final FileChannel fileChannel = fileOutputStream.getChannel();
+        final FileLock fileLock = fileChannel.lock();
 
-            final Element root = document.createElement("xs:schema");
-            root.setAttribute("elementFormDefault", "qualified");
-            root.setAttribute("xmlns:xs", "http://www.w3.org/2001/XMLSchema");
-            document.appendChild(root);
+        final Document document = documentBuilder.newDocument();
 
-            final Element tableElement = document.createElement("xs:element");
-            tableElement.setAttribute("name", tableName);
-            root.appendChild(tableElement);
+        final Element root = document.createElement("xs:schema");
+        root.setAttribute("elementFormDefault", "qualified");
+        root.setAttribute("xmlns:xs", "http://www.w3.org/2001/XMLSchema");
+        document.appendChild(root);
 
-            final Element complexTypeElement = document.createElement("xs:complexType");
-            tableElement.appendChild(complexTypeElement);
+        final Element tableElement = document.createElement("xs:element");
+        tableElement.setAttribute("name", tableName);
+        root.appendChild(tableElement);
 
-            final Element sequenceElement = document.createElement("xs:sequence");
-            complexTypeElement.appendChild(sequenceElement);
+        final Element complexTypeElement = document.createElement("xs:complexType");
+        tableElement.appendChild(complexTypeElement);
 
-            final Element entryElement = document.createElement("xs:element");
-            entryElement.setAttribute("name", "Entry");
-            entryElement.setAttribute("maxOccurs", "unbounded");
-            entryElement.setAttribute("minOccurs", "0");
-            sequenceElement.appendChild(entryElement);
+        final Element sequenceElement = document.createElement("xs:sequence");
+        complexTypeElement.appendChild(sequenceElement);
 
-            final Element complexTypeElement2 = document.createElement("xs:complexType");
-            entryElement.appendChild(complexTypeElement2);
+        final Element entryElement = document.createElement("xs:element");
+        entryElement.setAttribute("name", "Entry");
+        entryElement.setAttribute("maxOccurs", "unbounded");
+        entryElement.setAttribute("minOccurs", "0");
+        sequenceElement.appendChild(entryElement);
 
-            final Element sequenceElement2 = document.createElement("xs:sequence");
-            complexTypeElement2.appendChild(sequenceElement2);
+        final Element complexTypeElement2 = document.createElement("xs:complexType");
+        entryElement.appendChild(complexTypeElement2);
 
-            for (int i = 0; i < columnTypes.size(); i++) {
-                final Element column = document.createElement("xs:element");
-                final Attr columnType = document.createAttribute("type");
-                columnType.setValue(DatatypeConverter.convertFromSqlToXs(columnTypes.get(i)));
-                final Attr columnName = document.createAttribute("name");
-                if (Boolean.FALSE.equals(schema.getNotNullColumns().get(columnNames.get(i)))) {
-                    column.setAttribute("minOccurs", "0");
-                }
-                columnName.setValue(columnNames.get(i));
-                column.setAttributeNode(columnType);
-                column.setAttributeNode(columnName);
-                sequenceElement2.appendChild(column);
+        final Element sequenceElement2 = document.createElement("xs:sequence");
+        complexTypeElement2.appendChild(sequenceElement2);
+
+        for (final String column : table.getColumnsAndTypes().keySet()) {
+            final Element columnElement = document.createElement("xs:element");
+            final Attr columnTypeAttribute = document.createAttribute("type");
+            columnTypeAttribute.setValue(DatatypeConverter.convertFromSqlToXs(table.getColumnsAndTypes().get(column)));
+            final Attr columnName = document.createAttribute("name");
+            if (Boolean.FALSE.equals(table.getNotNullColumns().get(column))) {
+                columnElement.setAttribute("minOccurs", "0");
             }
-            beautifyAndWrite(fileOutputStream, document);
-        } catch (final ParserConfigurationException e) {
-            throw new IOException("Failed to configure the parser.");
+            columnName.setValue(column);
+            columnElement.setAttributeNode(columnTypeAttribute);
+            columnElement.setAttributeNode(columnName);
+            sequenceElement2.appendChild(columnElement);
+        }
+        final Source source = new DOMSource(document);
+        final Result result = new StreamResult(fileOutputStream);
+        try {
+            transformer.transform(source, result);
+        } catch (final TransformerException e) {
+            throw new IOException(e);
+        } finally {
+            fileLock.release();
+            fileOutputStream.close();
         }
     }
 
     @Override
     public void writeDatabaseFile(final Database database) throws IOException {
-        final Path databaseFilePath = Path.of(database.getURL());
-        try (final FileOutputStream fileOutputStream = new FileOutputStream(databaseFilePath.toFile())) {
-            final Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
-            final Element root = document.createElement("Database");
-            root.setAttribute("name", String.valueOf(databaseFilePath.getParent().getFileName()));
-            document.appendChild(root);
+        final String databaseURL = database.getURL();
+        final FileOutputStream fileOutputStream = new FileOutputStream(databaseURL);
+        final FileChannel fileChannel = fileOutputStream.getChannel();
+        final FileLock fileLock = fileChannel.lock();
 
-            final List<Table> tables = database.getTables();
-            for (final Table table : tables) {
-                final Element tableElement = document.createElement("Table");
-                tableElement.setAttribute("name", table.getName());
+        final Document document = documentBuilder.newDocument();
+        final Element root = document.createElement("Database");
+        root.setAttribute("name", String.valueOf(Path.of(database.getURL()).getParent().getFileName()));
+        document.appendChild(root);
 
-                final Element tableFile = document.createElement("pathToTable");
-                final String xmlPath = table.getTableFile();
-                tableFile.setTextContent(xmlPath);
-                tableElement.appendChild(tableFile);
-
-                final Element schemaFile = document.createElement("pathToSchema");
-                final String xsdPath = table.getSchemaFile();
-                schemaFile.setTextContent(xsdPath);
-                tableElement.appendChild(schemaFile);
-
-                root.appendChild(tableElement);
-            }
-
-            beautifyAndWrite(fileOutputStream, document);
-        } catch (final ParserConfigurationException e) {
-            throw new IOException("Failed to configure the parser.");
+        final List<Table> tables = database.getTables();
+        for (final Table table : tables) {
+            final Element tableElement = document.createElement("Table");
+            tableElement.setAttribute("name", table.getName());
+            final Element tableFile = document.createElement("pathToTable");
+            final String xmlPath = table.getTableFile();
+            tableFile.setTextContent(xmlPath);
+            tableElement.appendChild(tableFile);
+            final Element schemaFile = document.createElement("pathToSchema");
+            final String xsdPath = table.getSchemaFile();
+            schemaFile.setTextContent(xsdPath);
+            tableElement.appendChild(schemaFile);
+            root.appendChild(tableElement);
+        }
+        final Source source = new DOMSource(document);
+        final Result result = new StreamResult(fileOutputStream);
+        try {
+            transformer.transform(source, result);
+        } catch (final TransformerException e) {
+            throw new IOException(e);
+        } finally {
+            fileLock.release();
+            fileOutputStream.close();
         }
     }
 
     @Override
     public String writeBlob(final Table table, final Entry entry, final String column) throws IOException {
-        final Map<String, LargeObject> columnsAndBlobs = entry.getColumnsAndBlobs();
-        final LargeObject largeObject = columnsAndBlobs.get(column);
+        final LargeObject largeObject = entry.getColumnsAndBlobs().get(column);
         final String blobURL = largeObject.getURL();
-        logger.trace("blobURL = {}", blobURL);
+        logger.trace("BLOB URL = {}", blobURL);
         final String blobValue = largeObject.getValue();
-        logger.trace("blob value = {}", blobValue);
+        logger.trace("BLOB value = {}", blobValue);
         final Path tableParent = Path.of(table.getTableFile()).getParent();
-        final Path blobParent = Path.of(String.valueOf(tableParent), "blob");
+        final Path blobParent = tableParent.resolve("blob");
         Files.createDirectories(blobParent);
+        final FileOutputStream fileOutputStream = new FileOutputStream(blobURL);
+        final FileChannel fileChannel = fileOutputStream.getChannel();
+        final FileLock fileLock = fileChannel.lock();
 
-        try (final FileOutputStream fileOutputStream = new FileOutputStream(blobURL)) {
-            final DocumentBuilder documentBuilder;
-            documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            final Document document = documentBuilder.newDocument();
-            final Element root = document.createElement("blob");
-            root.setTextContent(blobValue);
-            document.appendChild(root);
-            beautifyAndWrite(fileOutputStream, document);
-        } catch (final ParserConfigurationException e) {
-            throw new IOException("Failed to configure the parser.");
+        final Document document = documentBuilder.newDocument();
+        final Element root = document.createElement("blob");
+        root.setTextContent(blobValue);
+        document.appendChild(root);
+        final Source source = new DOMSource(document);
+        final Result result = new StreamResult(fileOutputStream);
+        try {
+            transformer.transform(source, result);
+        } catch (final TransformerException e) {
+            throw new IOException(e);
+        } finally {
+            fileLock.release();
+            fileOutputStream.close();
         }
         return blobURL;
     }
