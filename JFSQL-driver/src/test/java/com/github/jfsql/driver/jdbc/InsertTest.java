@@ -60,7 +60,8 @@ class InsertTest {
     void testInsert_simple_json() throws SQLException, IOException {
         assertEquals(1, statement.executeUpdate(
             "INSERT INTO myTable (id, name, age) VALUES (1, 'Zsolti', 25)"));
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent = "{\n" +
             "  \"Entry\": [\n" +
             "    {\n" +
@@ -76,7 +77,8 @@ class InsertTest {
     void testInsert_simple_xml() throws SQLException, IOException {
         assertEquals(1, statement.executeUpdate(
             "INSERT INTO myTable (id, name, age) VALUES (1, 'Zsolti', 25)"));
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<myTable>\n" +
             "    <Entry>\n" +
@@ -85,7 +87,7 @@ class InsertTest {
             "        <age>25</age>\n" +
             "    </Entry>\n" +
             "</myTable>\n";
-        assertEquals(StringUtils.deleteWhitespace(expectedFileContent), StringUtils.deleteWhitespace(realFileContent));
+        assertEquals(expectedFileContent.replace("\n", System.lineSeparator()), realFileContent);
     }
 
     @ParameterizedTest
@@ -108,7 +110,8 @@ class InsertTest {
     void testInsert_differentColumnOrder_json() throws SQLException, IOException {
         assertEquals(1, statement.executeUpdate(
             "INSERT INTO myTable (name, id, age) VALUES ('Zsolti', 1, 25)"));
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent = "{\n" +
             "  \"Entry\": [\n" +
             "    {\n" +
@@ -124,7 +127,8 @@ class InsertTest {
     void testInsert_differentColumnOrder_xml() throws SQLException, IOException {
         assertEquals(1, statement.executeUpdate(
             "INSERT INTO myTable (name, id, age) VALUES ('Zsolti', 1, 25)"));
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<myTable>\n" +
             "    <Entry>\n" +
@@ -133,7 +137,7 @@ class InsertTest {
             "        <age>25</age>\n" +
             "    </Entry>\n" +
             "</myTable>\n";
-        assertEquals(StringUtils.deleteWhitespace(expectedFileContent), StringUtils.deleteWhitespace(realFileContent));
+        assertEquals(expectedFileContent.replace("\n", System.lineSeparator()), realFileContent);
     }
 
     @ParameterizedTest
@@ -156,7 +160,8 @@ class InsertTest {
     void testInsert_multiRow_json() throws SQLException, IOException {
         assertEquals(4, statement.executeUpdate(
             "INSERT INTO myTable (id, name, age) VALUES (1, 'Zsolti', 25), (2, 'Tomi', 24), (3, 'Ivan', 26), (4, 'Lukas', 34)"));
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent = "{\n" +
             "  \"Entry\": [\n" +
             "    {\n" +
@@ -187,7 +192,8 @@ class InsertTest {
     void testInsert_multiRow_xml() throws SQLException, IOException {
         assertEquals(4, statement.executeUpdate(
             "INSERT INTO myTable (id, name, age) VALUES (1, 'Zsolti', 25), (2, 'Tomi', 24), (3, 'Ivan', 26), (4, 'Lukas', 34)"));
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<myTable>\n" +
             "    <Entry>\n" +
@@ -211,7 +217,7 @@ class InsertTest {
             "        <age>34</age>\n" +
             "    </Entry>\n" +
             "</myTable>\n";
-        assertEquals(StringUtils.deleteWhitespace(expectedFileContent), StringUtils.deleteWhitespace(realFileContent));
+        assertEquals(expectedFileContent.replace("\n", System.lineSeparator()), realFileContent);
     }
 
     @ParameterizedTest
@@ -234,7 +240,8 @@ class InsertTest {
     void testInsert_noExplicitColumns_json() throws SQLException, IOException {
         assertEquals(4, statement.executeUpdate(
             "INSERT INTO myTable VALUES (1, 'Zsolti', 25), (2, 'Tomi', 24), (3, 'Ivan', 26), (4, 'Lukas', 34)"));
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent = "{\n" +
             "  \"Entry\": [\n" +
             "    {\n" +
@@ -265,7 +272,8 @@ class InsertTest {
     void testInsert_noExplicitColumns_xml() throws SQLException, IOException {
         assertEquals(4, statement.executeUpdate(
             "INSERT INTO myTable VALUES (1, 'Zsolti', 25), (2, 'Tomi', 24), (3, 'Ivan', 26), (4, 'Lukas', 34)"));
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent = StringUtils.EMPTY +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<myTable>\n" +
@@ -290,7 +298,7 @@ class InsertTest {
             "        <age>34</age>\n" +
             "    </Entry>\n" +
             "</myTable>\n";
-        assertEquals(StringUtils.deleteWhitespace(expectedFileContent), StringUtils.deleteWhitespace(realFileContent));
+        assertEquals(expectedFileContent.replace("\n", System.lineSeparator()), realFileContent);
     }
 
 }

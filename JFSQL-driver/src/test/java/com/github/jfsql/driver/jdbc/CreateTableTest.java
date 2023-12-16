@@ -13,7 +13,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -57,12 +56,14 @@ class CreateTableTest {
     void testCreateTable_normally_json() throws SQLException, IOException {
         assertEquals(0, statement.executeUpdate(
             "CREATE TABLE myTable (id INTEGER NOT NULL, name TEXT NOT NULL, age INTEGER NOT NULL)"));
-        final String realTableFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realTableFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedTableFileContent = "{\n" +
             "  \"Entry\": []\n" +
             "}";
         assertEquals(expectedTableFileContent, realTableFileContent);
-        final String realSchemaFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_SCHEMA_PATH), StandardCharsets.UTF_8);
+        final String realSchemaFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_SCHEMA_PATH),
+            StandardCharsets.UTF_8);
         final String expectedSchemaFileContent = "{\n" +
             "  \"$schema\": \"http://json-schema.org/draft-06/schema#\",\n" +
             "  \"type\": \"object\",\n" +
@@ -106,12 +107,13 @@ class CreateTableTest {
     void testCreateTable_normally_xml() throws SQLException, IOException {
         assertEquals(0, statement.executeUpdate(
             "CREATE TABLE myTable (id INTEGER NOT NULL, name TEXT NOT NULL, age INTEGER NOT NULL)"));
-        final String realTableFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realTableFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedTableFileContent = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<myTable/>\n";
-        assertEquals(StringUtils.deleteWhitespace(expectedTableFileContent),
-            StringUtils.deleteWhitespace(realTableFileContent));
-        final String realSchemaFileContent = FileUtils.readFileToString(new File(TestUtils.XSD_PATH), StandardCharsets.UTF_8);
+        assertEquals(expectedTableFileContent.replace("\n", System.lineSeparator()), realTableFileContent);
+        final String realSchemaFileContent = FileUtils.readFileToString(new File(TestUtils.XSD_PATH),
+            StandardCharsets.UTF_8);
         final String expectedSchemaFileContent = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\">\n" +
             "    <xs:element name=\"myTable\">\n" +
@@ -130,8 +132,7 @@ class CreateTableTest {
             "        </xs:complexType>\n" +
             "    </xs:element>\n" +
             "</xs:schema>\n";
-        assertEquals(StringUtils.deleteWhitespace(expectedSchemaFileContent),
-            StringUtils.deleteWhitespace(realSchemaFileContent));
+        assertEquals(expectedSchemaFileContent.replace("\n", System.lineSeparator()), realSchemaFileContent);
 
     }
 

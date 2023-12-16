@@ -61,7 +61,8 @@ class AlterTableAddColumnTest {
 
     void testAlterTable_addColumn_json() throws SQLException, IOException {
         statement.execute("ALTER TABLE myTable ADD COLUMN salary REAL");
-        final String realTableFileContentAfter = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realTableFileContentAfter = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedTableFileContentAfter = StringUtils.EMPTY +
             "{\n" +
             "  \"Entry\": [\n" +
@@ -96,7 +97,8 @@ class AlterTableAddColumnTest {
 
     void testAlterTable_addColumn_xml() throws SQLException, IOException {
         statement.execute("ALTER TABLE myTable ADD COLUMN salary REAL");
-        final String realTableFileContentAfter = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realTableFileContentAfter = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedTableFileContentAfter = StringUtils.EMPTY +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<myTable>\n" +
@@ -121,8 +123,7 @@ class AlterTableAddColumnTest {
             "        <age>34</age>\n" +
             "    </Entry>\n" +
             "</myTable>\n";
-        assertEquals(StringUtils.deleteWhitespace(expectedTableFileContentAfter),
-            StringUtils.deleteWhitespace(realTableFileContentAfter));
+        assertEquals(expectedTableFileContentAfter.replace("\n", System.lineSeparator()), realTableFileContentAfter);
     }
 
     @ParameterizedTest
@@ -144,7 +145,8 @@ class AlterTableAddColumnTest {
 
     void testAlterTable_addNotNullColumn_json() throws SQLException, IOException {
         statement.execute("ALTER TABLE myTable ADD COLUMN salary REAL NOT NULL;");
-        final String realTableFileContentAfter = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realTableFileContentAfter = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedTableFileContentAfter = StringUtils.EMPTY +
             "{\n" +
             "  \"Entry\": [\n" +
@@ -179,7 +181,8 @@ class AlterTableAddColumnTest {
 
     void testAlterTable_addNotNullColumn_xml() throws SQLException, IOException {
         statement.execute("ALTER TABLE myTable ADD COLUMN salary REAL NOT NULL;");
-        final String realTableFileContentAfter = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realTableFileContentAfter = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedTableFileContentAfter = StringUtils.EMPTY +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<myTable>\n" +
@@ -208,7 +211,6 @@ class AlterTableAddColumnTest {
             "        <salary>0</salary>\n" +
             "    </Entry>\n" +
             "</myTable>\n";
-        assertEquals(StringUtils.deleteWhitespace(expectedTableFileContentAfter),
-            StringUtils.deleteWhitespace(realTableFileContentAfter));
+        assertEquals(expectedTableFileContentAfter.replace("\n", System.lineSeparator()), realTableFileContentAfter);
     }
 }

@@ -61,7 +61,8 @@ public class UpdateTest {
 
     void testUpdate_oneEntry_json() throws SQLException, IOException {
         assertEquals(1, statement.executeUpdate("UPDATE myTable SET name = 'TomiEdited' WHERE age <= 24"));
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent = StringUtils.EMPTY +
             "{\n" +
             "  \"Entry\": [\n" +
@@ -92,7 +93,8 @@ public class UpdateTest {
 
     void testUpdate_oneEntry_xml() throws SQLException, IOException {
         assertEquals(1, statement.executeUpdate("UPDATE myTable SET name = 'TomiEdited' WHERE age <= 24"));
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent = StringUtils.EMPTY +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<myTable>\n" +
@@ -117,7 +119,7 @@ public class UpdateTest {
             "        <age>34</age>\n" +
             "    </Entry>\n" +
             "</myTable>\n";
-        assertEquals(StringUtils.deleteWhitespace(expectedFileContent), StringUtils.deleteWhitespace(realFileContent));
+        assertEquals(expectedFileContent.replace("\n", System.lineSeparator()), realFileContent);
     }
 
     @ParameterizedTest
@@ -140,7 +142,8 @@ public class UpdateTest {
     void testUpdate_oneEntryMultipleCriteria_json() throws SQLException, IOException {
         assertEquals(1, statement.executeUpdate(
             "UPDATE myTable SET id = 5, name = 'Marian', age=99 WHERE id = 4 AND name = 'Lukas' AND age = 34"));
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent = StringUtils.EMPTY +
             "{\n" +
             "  \"Entry\": [\n" +
@@ -172,7 +175,8 @@ public class UpdateTest {
     void testUpdate_oneEntryMultipleCriteria_xml() throws SQLException, IOException {
         assertEquals(1, statement.executeUpdate(
             "UPDATE myTable SET id = 5, name = 'Marian', age=99 WHERE id = 4 AND name = 'Lukas' AND age = 34"));
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent = StringUtils.EMPTY +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<myTable>\n" +
@@ -197,7 +201,7 @@ public class UpdateTest {
             "        <age>99</age>\n" +
             "    </Entry>\n" +
             "</myTable>\n";
-        assertEquals(StringUtils.deleteWhitespace(expectedFileContent), StringUtils.deleteWhitespace(realFileContent));
+        assertEquals(expectedFileContent.replace("\n", System.lineSeparator()), realFileContent);
     }
 
     @ParameterizedTest
@@ -220,7 +224,8 @@ public class UpdateTest {
 
     void testUpdate_noWhereClauseUpdatesAll_json() throws SQLException, IOException {
         assertEquals(4, statement.executeUpdate("UPDATE myTable SET name='Zsolti'"));
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent = StringUtils.EMPTY +
             "{\n"
             + "  \"Entry\": [\n"
@@ -252,7 +257,8 @@ public class UpdateTest {
 
     void testUpdate_noWhereClauseUpdatesAll_xml() throws SQLException, IOException {
         assertEquals(4, statement.executeUpdate("UPDATE myTable SET name='Zsolti'"));
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent = StringUtils.EMPTY +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
             + "<myTable>\n"
@@ -277,7 +283,7 @@ public class UpdateTest {
             + "        <age>34</age>\n"
             + "    </Entry>\n"
             + "</myTable>\n";
-        assertEquals(StringUtils.deleteWhitespace(expectedFileContent), StringUtils.deleteWhitespace(realFileContent));
+        assertEquals(expectedFileContent.replace("\n", System.lineSeparator()), realFileContent);
     }
 
     @ParameterizedTest
@@ -299,7 +305,8 @@ public class UpdateTest {
 
     void testUpdate_notExistingEntry_json() throws SQLException, IOException {
         assertEquals(0, statement.executeUpdate("UPDATE myTable SET name='Zsolti' WHERE id=5"));
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent = StringUtils.EMPTY +
             "{\n"
             + "  \"Entry\": [\n"
@@ -330,7 +337,8 @@ public class UpdateTest {
 
     void testUpdate_notExistingEntry_xml() throws SQLException, IOException {
         assertEquals(0, statement.executeUpdate("UPDATE myTable SET name='Zsolti' WHERE id=5"));
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent = StringUtils.EMPTY +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
             + "<myTable>\n"
@@ -355,7 +363,7 @@ public class UpdateTest {
             + "        <age>34</age>\n"
             + "    </Entry>\n"
             + "</myTable>\n";
-        assertEquals(StringUtils.deleteWhitespace(expectedFileContent), StringUtils.deleteWhitespace(realFileContent));
+        assertEquals(expectedFileContent.replace("\n", System.lineSeparator()), realFileContent);
     }
 
     @ParameterizedTest
@@ -377,7 +385,8 @@ public class UpdateTest {
 
     void testUpdate_moreEntries_json() throws SQLException, IOException {
         assertEquals(3, statement.executeUpdate("UPDATE myTable SET name='Zsolti' WHERE name < 'Zsolti'"));
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent = StringUtils.EMPTY +
             "{\n"
             + "  \"Entry\": [\n"
@@ -408,7 +417,8 @@ public class UpdateTest {
 
     void testUpdate_moreEntries_xml() throws SQLException, IOException {
         assertEquals(3, statement.executeUpdate("UPDATE myTable SET name='Zsolti' WHERE name < 'Zsolti'"));
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent = StringUtils.EMPTY +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
             + "<myTable>\n"
@@ -433,7 +443,7 @@ public class UpdateTest {
             + "        <age>34</age>\n"
             + "    </Entry>\n"
             + "</myTable>\n";
-        assertEquals(StringUtils.deleteWhitespace(expectedFileContent), StringUtils.deleteWhitespace(realFileContent));
+        assertEquals(expectedFileContent.replace("\n", System.lineSeparator()), realFileContent);
     }
 
 }

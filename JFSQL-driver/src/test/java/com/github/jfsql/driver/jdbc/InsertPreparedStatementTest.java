@@ -107,7 +107,7 @@ public class InsertPreparedStatementTest {
             "        <age>25</age>\n" +
             "    </Entry>\n" +
             "</myTable>\n";
-        assertEquals(StringUtils.deleteWhitespace(expectedFileContent), StringUtils.deleteWhitespace(realFileContent));
+        assertEquals(expectedFileContent.replace("\n", System.lineSeparator()), realFileContent);
     }
 
     @ParameterizedTest
@@ -169,7 +169,7 @@ public class InsertPreparedStatementTest {
             "        <age>25</age>\n" +
             "    </Entry>\n" +
             "</myTable>\n";
-        assertEquals(StringUtils.deleteWhitespace(expectedFileContent), StringUtils.deleteWhitespace(realFileContent));
+        assertEquals(expectedFileContent.replace("\n", System.lineSeparator()), realFileContent);
     }
 
     @ParameterizedTest
@@ -252,8 +252,7 @@ public class InsertPreparedStatementTest {
             "        <file>" + TestUtils.ENCODED_XML_BLOB_PATH + "</file>\n" +
             "    </Entry>\n" +
             "</myTable>\n";
-        assertEquals(StringUtils.deleteWhitespace(expectedFileContent),
-            StringUtils.deleteWhitespace(realFileContent));
+        assertEquals(expectedFileContent.replace("\n", System.lineSeparator()), realFileContent);
 
         final PreparedStatement selectPreparedStatement = connection.prepareStatement(
             "SELECT file FROM myTable WHERE id = 1");
@@ -360,8 +359,7 @@ public class InsertPreparedStatementTest {
             "    </Entry>\n" +
             "</myTable>\n";
 
-        assertEquals(StringUtils.deleteWhitespace(expectedFileContent),
-            StringUtils.deleteWhitespace(realFileContent));
+        assertEquals(expectedFileContent.replace("\n", System.lineSeparator()), realFileContent);
 
         final PreparedStatement selectPreparedStatement = connection.prepareStatement(
             "SELECT file FROM myTable WHERE id = 1");

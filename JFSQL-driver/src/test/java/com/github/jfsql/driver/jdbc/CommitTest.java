@@ -16,7 +16,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -65,7 +64,8 @@ public class CommitTest {
         statement.execute("INSERT INTO myTable VALUES (1, 'a', 25)");
 
         // Inserted, but not yet committed, so the table looks the same
-        final String firstCommitRealFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
+        final String firstCommitRealFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String firstCommitExpectedFileContent = "{\n" +
             "  \"Entry\": []\n" +
             "}";
@@ -74,7 +74,8 @@ public class CommitTest {
         connection.commit();
 
         // After the commit, changes are written to the file
-        final String secondCommitRealFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
+        final String secondCommitRealFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String secondCommitExpectedFileContent = "{\n" +
             "  \"Entry\": [\n" +
             "    {\n" +
@@ -93,16 +94,17 @@ public class CommitTest {
         statement.execute("INSERT INTO myTable VALUES (1, 'a', 25)");
 
         // Inserted, but not yet committed, so the table looks the same
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<myTable/>\n";
-        assertEquals(StringUtils.deleteWhitespace(expectedFileContent),
-            StringUtils.deleteWhitespace(realFileContent));
+        assertEquals(expectedFileContent.replace("\n", System.lineSeparator()), realFileContent);
 
         connection.commit();
 
         // After the commit, changes are written to the file
-        final String realFileContent2 = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContent2 = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent2 = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<myTable>\n" +
             "    <Entry>\n" +
@@ -111,8 +113,7 @@ public class CommitTest {
             "        <age>25</age>\n" +
             "    </Entry>\n" +
             "</myTable>\n";
-        assertEquals(StringUtils.deleteWhitespace(expectedFileContent2),
-            StringUtils.deleteWhitespace(realFileContent2));
+        assertEquals(expectedFileContent2.replace("\n", System.lineSeparator()), realFileContent2);
 
     }
 

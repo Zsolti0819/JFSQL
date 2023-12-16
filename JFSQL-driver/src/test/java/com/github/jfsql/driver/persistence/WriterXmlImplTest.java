@@ -17,7 +17,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -81,17 +80,20 @@ class WriterXmlImplTest {
     void testWriter_writeSchema() throws IOException {
         writer.writeSchema(table);
         final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XSD_PATH), StandardCharsets.UTF_8);
-        final String expectedFileContent = FileUtils.readFileToString(new File(TestUtils.TEST_XSD_PATH), StandardCharsets.UTF_8);
-        assertEquals(StringUtils.deleteWhitespace(expectedFileContent), StringUtils.deleteWhitespace(realFileContent));
+        final String expectedFileContent = FileUtils.readFileToString(new File(TestUtils.TEST_XSD_PATH),
+            StandardCharsets.UTF_8);
+        assertEquals(expectedFileContent, realFileContent);
 
     }
 
     @Test
     void testWriter_writeTable() throws IOException {
         writer.writeTable(table);
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
-        final String expectedFileContent = FileUtils.readFileToString(new File(TestUtils.TEST_XML_TABLE_PATH), StandardCharsets.UTF_8);
-        assertEquals(StringUtils.deleteWhitespace(expectedFileContent), StringUtils.deleteWhitespace(realFileContent));
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH),
+            StandardCharsets.UTF_8);
+        final String expectedFileContent = FileUtils.readFileToString(new File(TestUtils.TEST_XML_TABLE_PATH),
+            StandardCharsets.UTF_8);
+        assertEquals(expectedFileContent, realFileContent);
     }
 
     @Test

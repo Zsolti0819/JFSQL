@@ -64,12 +64,14 @@ class AlterTableRenameTableTest {
 
     void testAlterTable_renameTable_json() throws SQLException, IOException {
         statement.execute("ALTER TABLE myTable RENAME to myTableEdited;");
-        final String realDatabaseFileContentAfter = FileUtils.readFileToString(new File(TestUtils.JSON_DATABASE_PATH), StandardCharsets.UTF_8);
+        final String realDatabaseFileContentAfter = FileUtils.readFileToString(new File(TestUtils.JSON_DATABASE_PATH),
+            StandardCharsets.UTF_8);
         assertTrue(realDatabaseFileContentAfter.contains("myTableEdited.json"));
         assertTrue(realDatabaseFileContentAfter.contains("myTableEditedSchema.json"));
         assertFalse(realDatabaseFileContentAfter.contains("myTable.json"));
         assertFalse(realDatabaseFileContentAfter.contains("myTableSchema.json"));
-        final String realTableFileContentAfter = FileUtils.readFileToString(new File(TestUtils.EDITED_JSON_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realTableFileContentAfter = FileUtils.readFileToString(new File(TestUtils.EDITED_JSON_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedTableFileContentAfter = StringUtils.EMPTY +
             "{\n" +
             "  \"Entry\": [\n" +
@@ -102,7 +104,8 @@ class AlterTableRenameTableTest {
 
     void testAlterTable_renameTable_xml() throws SQLException, IOException {
         statement.execute("ALTER TABLE myTable RENAME to myTableEdited;");
-        final String realDatabaseFileContentAfter = FileUtils.readFileToString(Path.of(TestUtils.XML_DATABASE_PATH).toFile(),
+        final String realDatabaseFileContentAfter = FileUtils.readFileToString(
+            Path.of(TestUtils.XML_DATABASE_PATH).toFile(),
             StandardCharsets.UTF_8);
         assertTrue(realDatabaseFileContentAfter.contains("myTableEdited.xml"));
         assertTrue(realDatabaseFileContentAfter.contains("myTableEdited.xsd"));
@@ -134,8 +137,7 @@ class AlterTableRenameTableTest {
             "        <age>34</age>\n" +
             "    </Entry>\n" +
             "</myTableEdited>\n";
-        assertEquals(StringUtils.deleteWhitespace(expectedTableFileContentAfter),
-            StringUtils.deleteWhitespace(realTableFileContentAfter));
+        assertEquals(expectedTableFileContentAfter.replace("\n", System.lineSeparator()), realTableFileContentAfter);
         assertFalse(Path.of(TestUtils.XSD_PATH).toFile().exists());
         assertTrue(Path.of(TestUtils.EDITED_XSD_PATH).toFile().exists());
     }

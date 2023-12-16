@@ -68,7 +68,8 @@ class DeleteTest {
 
     void testDelete_withoutWhereDeletesAll_json() throws SQLException, IOException {
         assertEquals(4, statement.executeUpdate("DELETE FROM myTable"));
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent = StringUtils.EMPTY +
             "{\n" +
             "  \"Entry\": []\n" +
@@ -78,10 +79,11 @@ class DeleteTest {
 
     void testDelete_withoutWhereDeletesAll_xml() throws SQLException, IOException {
         assertEquals(4, statement.executeUpdate("DELETE FROM myTable"));
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<myTable/>\n";
-        assertEquals(StringUtils.deleteWhitespace(expectedFileContent), StringUtils.deleteWhitespace(realFileContent));
+        assertEquals(expectedFileContent.replace("\n", System.lineSeparator()), realFileContent);
     }
 
     @ParameterizedTest
@@ -103,7 +105,8 @@ class DeleteTest {
 
     void testDelete_equals_json() throws SQLException, IOException {
         assertEquals(1, statement.executeUpdate("DELETE FROM myTable WHERE name = 'Tomi'"));
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent = StringUtils.EMPTY +
             "{\n" +
             "  \"Entry\": [\n" +
@@ -129,7 +132,8 @@ class DeleteTest {
 
     void testDelete_equals_xml() throws SQLException, IOException {
         assertEquals(1, statement.executeUpdate("DELETE FROM myTable WHERE name = 'Tomi'"));
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<myTable>\n" +
             "    <Entry>\n" +
@@ -148,7 +152,7 @@ class DeleteTest {
             "        <age>34</age>\n" +
             "    </Entry>\n" +
             "</myTable>\n";
-        assertEquals(StringUtils.deleteWhitespace(expectedFileContent), StringUtils.deleteWhitespace(realFileContent));
+        assertEquals(expectedFileContent.replace("\n", System.lineSeparator()), realFileContent);
     }
 
     @ParameterizedTest
@@ -171,7 +175,8 @@ class DeleteTest {
     void testDelete_multipleBinaryOperators_json() throws SQLException, IOException {
         assertEquals(2, statement.executeUpdate(
             "DELETE FROM myTable WHERE id > 3 AND age > 25 AND name = 'Lukas' OR name = 'Zsolti'"));
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent = StringUtils.EMPTY +
             "{\n" +
             "  \"Entry\": [\n" +
@@ -193,7 +198,8 @@ class DeleteTest {
     void testDelete_multipleBinaryOperators_xml() throws SQLException, IOException {
         assertEquals(2, statement.executeUpdate(
             "DELETE FROM myTable WHERE id > 3 AND age > 25 AND name = 'Lukas' OR name = 'Zsolti'"));
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<myTable>\n" +
             "    <Entry>\n" +
@@ -207,7 +213,7 @@ class DeleteTest {
             "        <age>26</age>\n" +
             "    </Entry>\n" +
             "</myTable>\n";
-        assertEquals(StringUtils.deleteWhitespace(expectedFileContent), StringUtils.deleteWhitespace(realFileContent));
+        assertEquals(expectedFileContent.replace("\n", System.lineSeparator()), realFileContent);
     }
 
     @ParameterizedTest
@@ -229,7 +235,8 @@ class DeleteTest {
 
     void testDelete_multipleANDsSameEntry_json() throws SQLException, IOException {
         assertEquals(1, statement.executeUpdate("DELETE FROM myTable WHERE id = 1 AND name = 'Zsolti' and age = 25"));
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent = StringUtils.EMPTY +
             "{\n" +
             "  \"Entry\": [\n" +
@@ -255,7 +262,8 @@ class DeleteTest {
 
     void testDelete_multipleANDsSameEntry_xml() throws SQLException, IOException {
         assertEquals(1, statement.executeUpdate("DELETE FROM myTable WHERE id = 1 AND name = 'Zsolti' and age = 25"));
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<myTable>\n" +
             "    <Entry>\n" +
@@ -274,7 +282,7 @@ class DeleteTest {
             "        <age>34</age>\n" +
             "    </Entry>\n" +
             "</myTable>\n";
-        assertEquals(StringUtils.deleteWhitespace(expectedFileContent), StringUtils.deleteWhitespace(realFileContent));
+        assertEquals(expectedFileContent.replace("\n", System.lineSeparator()), realFileContent);
     }
 
     @ParameterizedTest
@@ -296,7 +304,8 @@ class DeleteTest {
 
     void testDelete_multipleORs_json() throws SQLException, IOException {
         assertEquals(3, statement.executeUpdate("DELETE FROM myTable WHERE name = 'Zsolti' OR age = 24 OR id = 3"));
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent = StringUtils.EMPTY +
             "{\n"
             + "  \"Entry\": [\n"
@@ -312,7 +321,8 @@ class DeleteTest {
 
     void testDelete_multipleORs_xml() throws SQLException, IOException {
         assertEquals(3, statement.executeUpdate("DELETE FROM myTable WHERE name = 'Zsolti' OR age = 24 OR id = 3"));
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<myTable>\n" +
             "    <Entry>\n" +
@@ -321,7 +331,7 @@ class DeleteTest {
             "        <age>34</age>\n" +
             "    </Entry>\n" +
             "</myTable>\n";
-        assertEquals(StringUtils.deleteWhitespace(expectedFileContent), StringUtils.deleteWhitespace(realFileContent));
+        assertEquals(expectedFileContent.replace("\n", System.lineSeparator()), realFileContent);
     }
 
     @ParameterizedTest
@@ -343,7 +353,8 @@ class DeleteTest {
 
     void testDelete_multipleANDs_json() throws SQLException, IOException {
         assertEquals(1, statement.executeUpdate("DELETE FROM myTable WHERE id > 3 AND age > 25 AND name = 'Lukas'"));
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent = StringUtils.EMPTY +
             "{\n" +
             "  \"Entry\": [\n" +
@@ -369,7 +380,8 @@ class DeleteTest {
 
     void testDelete_multipleANDs_xml() throws SQLException, IOException {
         assertEquals(1, statement.executeUpdate("DELETE FROM myTable WHERE id > 3 AND age > 25 AND name = 'Lukas'"));
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<myTable>\n" +
             "    <Entry>\n" +
@@ -388,7 +400,7 @@ class DeleteTest {
             "        <age>26</age>\n" +
             "    </Entry>\n" +
             "</myTable>\n";
-        assertEquals(StringUtils.deleteWhitespace(expectedFileContent), StringUtils.deleteWhitespace(realFileContent));
+        assertEquals(expectedFileContent.replace("\n", System.lineSeparator()), realFileContent);
     }
 
     @ParameterizedTest

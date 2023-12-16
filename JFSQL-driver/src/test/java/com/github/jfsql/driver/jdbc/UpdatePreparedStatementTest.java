@@ -14,7 +14,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -72,7 +71,8 @@ class UpdatePreparedStatementTest {
         preparedStatement.setInt(7, 34);
         preparedStatement.executeUpdate();
 
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent = "{\n" +
             "  \"Entry\": [\n" +
             "    {\n" +
@@ -115,8 +115,9 @@ class UpdatePreparedStatementTest {
         preparedStatement.setString(6, "Lukas");
         preparedStatement.setInt(7, 34);
         preparedStatement.executeUpdate();
-        
-        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
+
+        final String realFileContent = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContent = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<myTable>\n" +
             "    <Entry>\n" +
@@ -140,7 +141,7 @@ class UpdatePreparedStatementTest {
             "        <age>99</age>\n" +
             "    </Entry>\n" +
             "</myTable>\n";
-        assertEquals(StringUtils.deleteWhitespace(expectedFileContent), StringUtils.deleteWhitespace(realFileContent));
+        assertEquals(expectedFileContent.replace("\n", System.lineSeparator()), realFileContent);
     }
 
 }

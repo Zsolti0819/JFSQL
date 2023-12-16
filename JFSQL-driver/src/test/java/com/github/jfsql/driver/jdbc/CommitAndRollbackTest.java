@@ -59,52 +59,52 @@ public class CommitAndRollbackTest {
 
     void testCommitAndRollback_json() throws SQLException, IOException {
         connection.setAutoCommit(false);
-        final String realFileContentBefore = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContentBefore = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContentBefore = StringUtils.EMPTY +
             "{\n" +
             "  \"Entry\": []\n" +
             "}";
-        assertEquals(StringUtils.deleteWhitespace(expectedFileContentBefore),
-            StringUtils.deleteWhitespace(realFileContentBefore));
+        assertEquals(expectedFileContentBefore, realFileContentBefore);
 
         final FileWriter fileWriter = new FileWriter(TestUtils.JSON_TABLE_PATH, false);
         fileWriter.write("test");
         fileWriter.close();
 
-        final String realFileContentAfterModification = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
-        assertEquals(StringUtils.deleteWhitespace("test"),
-            StringUtils.deleteWhitespace(realFileContentAfterModification));
+        final String realFileContentAfterModification = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH),
+            StandardCharsets.UTF_8);
+        assertEquals("test", realFileContentAfterModification);
 
         connection.rollback();
 
-        final String realFileContentAfterRollback = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
-        assertEquals(StringUtils.deleteWhitespace(realFileContentBefore),
-            StringUtils.deleteWhitespace(realFileContentAfterRollback));
+        final String realFileContentAfterRollback = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH),
+            StandardCharsets.UTF_8);
+        assertEquals(realFileContentBefore.replace("\n", System.lineSeparator()), realFileContentAfterRollback);
 
     }
 
     void testCommitAndRollback_xml() throws SQLException, IOException {
         connection.setAutoCommit(false);
-        final String realFileContentBefore = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realFileContentBefore = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedFileContentBefore = StringUtils.EMPTY +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<myTable/>\n";
-        assertEquals(StringUtils.deleteWhitespace(expectedFileContentBefore),
-            StringUtils.deleteWhitespace(realFileContentBefore));
+        assertEquals(expectedFileContentBefore.replace("\n", System.lineSeparator()), realFileContentBefore);
 
         final FileWriter fileWriter = new FileWriter(TestUtils.XML_TABLE_PATH, false);
         fileWriter.write("test");
         fileWriter.close();
 
-        final String realFileContentAfterModification = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
-        assertEquals(StringUtils.deleteWhitespace("test"),
-            StringUtils.deleteWhitespace(realFileContentAfterModification));
+        final String realFileContentAfterModification = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH),
+            StandardCharsets.UTF_8);
+        assertEquals("test", realFileContentAfterModification);
 
         connection.rollback();
 
-        final String realFileContentAfterRollback = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
-        assertEquals(StringUtils.deleteWhitespace(realFileContentBefore),
-            StringUtils.deleteWhitespace(realFileContentAfterRollback));
+        final String realFileContentAfterRollback = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH),
+            StandardCharsets.UTF_8);
+        assertEquals(realFileContentBefore, realFileContentAfterRollback);
 
     }
 

@@ -61,7 +61,8 @@ class AlterTableDropColumnTest {
 
     void testAlterTable_dropColumn_json() throws SQLException, IOException {
         statement.execute("ALTER TABLE myTable DROP COLUMN age;");
-        final String realTableFileContentAfter = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realTableFileContentAfter = FileUtils.readFileToString(new File(TestUtils.JSON_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedTableFileContentAfter = StringUtils.EMPTY +
             "{\n" +
             "  \"Entry\": [\n" +
@@ -88,7 +89,8 @@ class AlterTableDropColumnTest {
 
     void testAlterTable_dropColumn_xml() throws SQLException, IOException {
         statement.execute("ALTER TABLE myTable DROP COLUMN age;");
-        final String realTableFileContentAfter = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH), StandardCharsets.UTF_8);
+        final String realTableFileContentAfter = FileUtils.readFileToString(new File(TestUtils.XML_TABLE_PATH),
+            StandardCharsets.UTF_8);
         final String expectedTableFileContentAfter = StringUtils.EMPTY +
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<myTable>\n" +
@@ -109,7 +111,6 @@ class AlterTableDropColumnTest {
             "        <name>Lukas</name>\n" +
             "    </Entry>\n" +
             "</myTable>\n";
-        assertEquals(StringUtils.deleteWhitespace(expectedTableFileContentAfter),
-            StringUtils.deleteWhitespace(realTableFileContentAfter));
+        assertEquals(expectedTableFileContentAfter.replace("\n", System.lineSeparator()), realTableFileContentAfter);
     }
 }
